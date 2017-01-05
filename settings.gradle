@@ -1,3 +1,4 @@
 include ':SyncAndroidApp'
 include ':SyncAndroidCommonLogic'
 include ':SyncCommonLogic'
+include ':SyncDataModel'
