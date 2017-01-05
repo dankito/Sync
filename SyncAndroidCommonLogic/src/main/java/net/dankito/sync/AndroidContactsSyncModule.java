@@ -11,6 +11,7 @@ import android.provider.ContactsContract;
 
 public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
+
   public AndroidContactsSyncModule(Context context) {
     super(context);
   }
@@ -69,6 +70,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
     if(emails.moveToFirst()) {
       entity.setEmailAddress(readString(emails, ContactsContract.CommonDataKinds.Email.DATA));
+      int emailType = readInteger(emails, ContactsContract.CommonDataKinds.Email.TYPE); // ContactsContract.CommonDataKinds.Email.TYPE_HOME etc.
 
       while (emails.moveToNext()) { // TODO: store additional email addresses
         // This would allow you get several email addresses
@@ -91,7 +93,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         ContactsContract.CommonDataKinds.Note.NOTE));
 
     entity.setWebsiteUrl(readContactDetailString(entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
-        ContactsContract.CommonDataKinds.Website.URL));
+        ContactsContract.CommonDataKinds.Website.URL)); // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
   }
 
   protected void readContactNameDetails(ContactEntity entity) {
