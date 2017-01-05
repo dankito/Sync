@@ -67,6 +67,8 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
         result.add(entity);
       } while (cursor.moveToNext());
     }
+
+    cursor.close();
   }
 
 
