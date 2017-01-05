@@ -38,7 +38,7 @@ public class AndroidImageSyncModule extends AndroidSyncModuleBase implements ISy
     entity.setWidth(readInteger(cursor, MediaStore.Images.Media.WIDTH));
     entity.setLatitude(readDouble(cursor, MediaStore.Images.Media.LATITUDE));
     entity.setLongitude(readDouble(cursor, MediaStore.Images.Media.LONGITUDE));
-    entity.setImageTaken(readDate(cursor, MediaStore.Images.Media.DATE_TAKEN));
+    entity.setImageTakenOn(readDate(cursor, MediaStore.Images.Media.DATE_TAKEN));
     entity.setOrientation(readInteger(cursor, MediaStore.Images.Media.ORIENTATION)); //  Only degrees 0, 90, 180, 270 will work.
 
 //    Object bucketDisplayName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));

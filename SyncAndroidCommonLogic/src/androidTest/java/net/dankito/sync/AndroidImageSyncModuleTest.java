@@ -25,7 +25,7 @@ public class AndroidImageSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertNotNull(entity.getFilePath());
     Assert.assertNotNull(entity.getName());
     Assert.assertNotNull(entity.getMimeType());
-    Assert.assertNotNull(entity.getImageTaken());
+    Assert.assertNotNull(entity.getImageTakenOn());
   }
 
 }

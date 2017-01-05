@@ -16,7 +16,7 @@ public class ImageFileEntity extends FileEntity {
 
   protected double longitude;
 
-  protected Date imageTaken;
+  protected Date imageTakenOn;
 
   protected int orientation;
 
@@ -53,12 +53,12 @@ public class ImageFileEntity extends FileEntity {
     this.longitude = longitude;
   }
 
-  public Date getImageTaken() {
-    return imageTaken;
+  public Date getImageTakenOn() {
+    return imageTakenOn;
   }
 
-  public void setImageTaken(Date imageTaken) {
-    this.imageTaken = imageTaken;
+  public void setImageTakenOn(Date imageTakenOn) {
+    this.imageTakenOn = imageTakenOn;
   }
 
   public int getOrientation() {
