@@ -6,9 +6,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.CallLog;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by ganymed on 05/01/17.
  */
@@ -29,13 +26,6 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   @Override
   protected Entity deserializeDatabaseEntry(Cursor cursor) {
     CallLogEntity entity = new CallLogEntity();
-
-    Map<String, String> values = new HashMap<>();
-    String[] columnNames = cursor.getColumnNames();
-
-    for(String columnName : columnNames) {
-      values.put(columnName, readString(cursor, columnName));
-    }
 
     entity.setIdOnSourceDevice(readString(cursor, CallLog.Calls._ID));
     entity.setCreatedOn(readDate(cursor, CallLog.Calls.DATE));
