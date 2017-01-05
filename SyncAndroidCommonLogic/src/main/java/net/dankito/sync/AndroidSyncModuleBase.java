@@ -88,6 +88,10 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     return cursor.getDouble(getColumnIndex(cursor, columnName));
   }
 
+  protected boolean readBoolean(Cursor cursor, String columnName) {
+    return readInteger(cursor, columnName) > 0;
+  }
+
   protected Date readDate(Cursor cursor, String columnName) {
     Long secondsOrMillisecondsSince1Jan1970 = readLong(cursor, columnName);
 
