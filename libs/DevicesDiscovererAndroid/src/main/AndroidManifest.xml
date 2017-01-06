@@ -1,7 +1,8 @@
-<manifest package="net.dankito.devicesdiscovery"
+<manifest package="net.dankito.devicediscovery"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+
     <application android:allowBackup="true"
                  android:label="@string/app_name"
                  android:supportsRtl="true"
