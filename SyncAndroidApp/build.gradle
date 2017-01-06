@@ -28,3 +28,22 @@ dependencies {
     compile 'com.android.support:design:25.0.1'
     testCompile 'junit:junit:4.12'
 }
+
+
+
+apply plugin: 'pmd'
+
+task pmd (type: Pmd) {
+    description 'Run pmd'
+    group 'reporting'
+
+    ignoreFailures = true
+
+    ruleSets = ["java-basic", "java-braces", "java-clone", "java-coupling",
+                "java-design", "java-naming", "java-strings"]
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}

@@ -9,3 +9,14 @@ dependencies {
 
     compile 'org.slf4j:slf4j-android:1.7.22'
 }
+
+
+apply plugin: 'pmd'
+
+tasks.withType(Pmd) {
+    group = "Reporting"
+    ignoreFailures = true
+
+    ruleSets = ["java-basic", "java-braces", "java-clone", "java-coupling",
+                "java-design", "java-naming", "java-strings"]
+}
