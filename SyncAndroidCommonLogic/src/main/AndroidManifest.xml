@@ -1,4 +1,4 @@
-<manifest package="net.dankito.sync"
+<manifest package="net.dankito.sync.android.common"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
 
