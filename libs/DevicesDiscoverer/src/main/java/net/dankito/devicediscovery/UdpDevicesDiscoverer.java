@@ -137,7 +137,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
       public void run() {
         startListener(config);
       }
-    });
+    }, "UdpDevicesDiscoverer_Listener");
 
     listenerThread.start();
   }
@@ -296,7 +296,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
         public void run() {
           startBroadcastForBroadcastAddress(broadcastAddress, config);
         }
-      });
+      }, "UdpDevicesDiscoverer_BroadcastTo_" + broadcastAddress.getHostAddress());
 
       broadcastThreads.put(broadcastAddress.getHostAddress(), broadcastThread);
 
