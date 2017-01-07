@@ -8,6 +8,8 @@ dependencies {
     compile project(':SyncDataModel')
 
     compile 'org.slf4j:slf4j-android:1.7.22'
+
+    compile 'javax.inject:javax.inject:1'
 }
 
 
