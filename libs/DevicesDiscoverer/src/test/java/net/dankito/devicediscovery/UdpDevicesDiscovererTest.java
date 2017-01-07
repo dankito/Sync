@@ -182,6 +182,54 @@ public class UdpDevicesDiscovererTest {
     Assert.assertEquals(0, foundDevicesForSecondDevice.size());
   }
 
+  @Test
+  public void startElevenInstances_FiveGetDisconnected() {
+    final Map<IDevicesDiscoverer, List<String>> discoveredDevices = new ConcurrentHashMap<>();
+    final List<IDevicesDiscoverer> createdDiscoverers = new CopyOnWriteArrayList<>();
+
+    for(int i = 0; i < 11; i++) {
+      final IDevicesDiscoverer discoverer = new UdpDevicesDiscoverer(threadPool);
+      createdDiscoverers.add(discoverer);
+      discoveredDevices.put(discoverer, new CopyOnWriteArrayList<String>());
+
+      startDiscoverer(discoverer, "" + (i + 1), new IDevicesDiscovererListener() {
+        @Override
+        public void deviceFound(String deviceInfo, String address) {
+          List<String> discoveredDevicesForDevice = discoveredDevices.get(discoverer);
+          discoveredDevicesForDevice.add(deviceInfo);
+        }
+
+        @Override
+        public void deviceDisconnected(String deviceInfo) {
+          List<String> discoveredDevicesForDevice = discoveredDevices.get(discoverer);
+          if(discoveredDevicesForDevice != null) {
+            discoveredDevicesForDevice.remove(deviceInfo);
+          }
+        }
+      });
+    }
+
+    try { Thread.sleep(500); } catch(Exception ignored) { }
+
+    for(int i = 0; i < 5; i++) {
+      IDevicesDiscoverer discoverer = createdDiscoverers.get(i);
+      discoveredDevices.remove(discoverer);
+
+      discoverer.stop();
+    }
+
+    try { Thread.sleep(5000); } catch(Exception ignored) { }
+
+    for(IDevicesDiscoverer discoverer : discoveredDevices.keySet()) {
+      List<String> discoveredDevicesForDevice = discoveredDevices.get(discoverer);
+      Assert.assertEquals(5, discoveredDevicesForDevice.size());
+    }
+
+    for(IDevicesDiscoverer discoverer : createdDiscoverers) {
+      discoverer.stop();
+    }
+  }
+
 
   protected void startFirstDiscoverer(IDevicesDiscovererListener listener) {
     startDiscoverer(firstDiscoverer, FIRST_DISCOVERER_ID, listener);
