@@ -36,6 +36,8 @@ public class UdpDevicesDiscovererTest {
 
   protected IThreadPool threadPool;
 
+  protected List<IDevicesDiscoverer> startedDiscoverers = new CopyOnWriteArrayList<>();
+
 
   @Before
   public void setUp() {
@@ -47,8 +49,15 @@ public class UdpDevicesDiscovererTest {
 
   @After
   public void tearDown() {
-    firstDiscoverer.stop();
-    secondDiscoverer.stop();
+    closeStartedDiscoverers();
+  }
+
+  protected void closeStartedDiscoverers() {
+    for(IDevicesDiscoverer discoverer : startedDiscoverers) {
+      discoverer.stop();
+    }
+
+    startedDiscoverers.clear();
   }
 
 
@@ -128,10 +137,6 @@ public class UdpDevicesDiscovererTest {
       List<String> discoveredDevicesForDevice = discoveredDevices.get(deviceId);
       Assert.assertEquals(10, discoveredDevicesForDevice.size());
       Assert.assertFalse(discoveredDevicesForDevice.contains(deviceId));
-    }
-
-    for(IDevicesDiscoverer discoverer : createdDiscoverers) {
-      discoverer.stop();
     }
   }
 
@@ -224,10 +229,6 @@ public class UdpDevicesDiscovererTest {
       List<String> discoveredDevicesForDevice = discoveredDevices.get(discoverer);
       Assert.assertEquals(5, discoveredDevicesForDevice.size());
     }
-
-    for(IDevicesDiscoverer discoverer : createdDiscoverers) {
-      discoverer.stop();
-    }
   }
 
 
@@ -240,6 +241,8 @@ public class UdpDevicesDiscovererTest {
   }
 
   protected void startDiscoverer(IDevicesDiscoverer discoverer, String deviceId, IDevicesDiscovererListener listener) {
+    startedDiscoverers.add(discoverer);
+
     DevicesDiscovererConfig config = new DevicesDiscovererConfig(deviceId, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, listener);
 
     discoverer.startAsync(config);
