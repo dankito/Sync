@@ -66,7 +66,8 @@ public class UdpDevicesDiscovererTest {
 
       @Override
       public void deviceDisconnected(String deviceInfo) {
-
+        foundDevicesForFirstDevice.remove(deviceInfo);
+        countDownLatch.countDown();
       }
     });
 
@@ -80,7 +81,8 @@ public class UdpDevicesDiscovererTest {
 
       @Override
       public void deviceDisconnected(String deviceInfo) {
-
+        foundDevicesForSecondDevice.add(deviceInfo);
+        countDownLatch.countDown();
       }
     });
 
@@ -131,6 +133,53 @@ public class UdpDevicesDiscovererTest {
     for(IDevicesDiscoverer discoverer : createdDiscoverers) {
       discoverer.stop();
     }
+  }
+
+
+  @Test
+  public void startTwoInstances_DisconnectOne() {
+    final CountDownLatch countDownLatch = new CountDownLatch(3);
+
+    final List<String> foundDevicesForFirstDevice = new CopyOnWriteArrayList<>();
+    startFirstDiscoverer(new IDevicesDiscovererListener() {
+      @Override
+      public void deviceFound(String deviceInfo, String address) {
+        foundDevicesForFirstDevice.add(deviceInfo);
+        countDownLatch.countDown();
+      }
+
+      @Override
+      public void deviceDisconnected(String deviceInfo) {
+        foundDevicesForFirstDevice.remove(deviceInfo);
+        countDownLatch.countDown();
+      }
+    });
+
+    final List<String> foundDevicesForSecondDevice = new CopyOnWriteArrayList<>();
+    startSecondDiscoverer(new IDevicesDiscovererListener() {
+      @Override
+      public void deviceFound(String deviceInfo, String address) {
+        foundDevicesForSecondDevice.add(deviceInfo);
+        countDownLatch.countDown();
+      }
+
+      @Override
+      public void deviceDisconnected(String deviceInfo) {
+        foundDevicesForSecondDevice.remove(deviceInfo);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { Thread.sleep(300); } catch(Exception ignored) { }
+
+    firstDiscoverer.stop();
+
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+    Assert.assertEquals(1, foundDevicesForFirstDevice.size());
+    Assert.assertEquals(SECOND_DISCOVERER_ID, foundDevicesForFirstDevice.get(0));
+
+    Assert.assertEquals(0, foundDevicesForSecondDevice.size());
   }
 
 
