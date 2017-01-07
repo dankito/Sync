@@ -6,7 +6,7 @@ import java.util.Date;
  * Created by ganymed on 05/01/17.
  */
 
-public class ImageFileEntity extends FileEntity {
+public class ImageFileSyncEntity extends FileSyncEntity {
 
   protected int height;
 

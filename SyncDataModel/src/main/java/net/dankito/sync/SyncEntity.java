@@ -1,6 +1,6 @@
 package net.dankito.sync;
 
-public abstract class Entity extends BaseEntity {
+public abstract class SyncEntity extends BaseEntity {
 
   protected String sourceDeviceId;
 

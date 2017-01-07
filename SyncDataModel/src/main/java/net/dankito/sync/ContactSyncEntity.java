@@ -4,7 +4,7 @@ package net.dankito.sync;
  * Created by ganymed on 05/01/17.
  */
 
-public class ContactEntity extends Entity {
+public class ContactSyncEntity extends SyncEntity {
 
   protected String displayName;
 
