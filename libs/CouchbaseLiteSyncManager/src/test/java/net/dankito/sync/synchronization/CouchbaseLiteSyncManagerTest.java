@@ -80,6 +80,9 @@ public class CouchbaseLiteSyncManagerTest {
 
   @After
   public void tearDown() throws CouchbaseLiteException {
+    syncManager1.stopSynchronizationWithDevice(device2);
+    syncManager2.stopSynchronizationWithDevice(device1);
+
     syncManager1.stop();
     syncManager2.stop();
 
