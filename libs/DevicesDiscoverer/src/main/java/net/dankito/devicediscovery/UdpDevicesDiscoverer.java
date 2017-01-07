@@ -78,7 +78,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
   @Override
   public void startAsync(DevicesDiscovererConfig config) {
-    log.info("Starting UdpDevicesDiscoverer ...");
+    log.info("Starting UdpDevicesDiscoverer " + config.getLocalDeviceInfo() + " ...");
 
     // * 3.5 = from 3 messages one must be received to be still valued as 'connected'
     this.connectionsAliveWatcher = new ConnectionsAliveWatcher((int)(config.getCheckForDevicesIntervalMillis() * 10.5));
@@ -249,6 +249,8 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   }
 
   protected void deviceFound(String removeDeviceInfo, String remoteDeviceAddress, IDevicesDiscovererListener listener) {
+    log.info("Found Device " + removeDeviceInfo + " on " + remoteDeviceAddress);
+
     if(foundDevices.size() == 1) {
       startConnectionsAliveWatcher(listener);
     }
