@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,10 +34,12 @@ public class UdpDevicesDiscovererTest {
 
   protected UdpDevicesDiscoverer secondDiscoverer;
 
+  protected IThreadPool threadPool;
+
 
   @Before
   public void setUp() {
-    IThreadPool threadPool = new ThreadPool();
+    threadPool = new ThreadPool();
 
     firstDiscoverer = new UdpDevicesDiscoverer(threadPool);
     secondDiscoverer = new UdpDevicesDiscoverer(threadPool);
@@ -80,7 +84,7 @@ public class UdpDevicesDiscovererTest {
       }
     });
 
-    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertEquals(1, foundDevicesForFirstDevice.size());
     Assert.assertEquals(SECOND_DISCOVERER_ID, foundDevicesForFirstDevice.get(0));
@@ -89,17 +93,59 @@ public class UdpDevicesDiscovererTest {
     Assert.assertEquals(FIRST_DISCOVERER_ID, foundDevicesForSecondDevice.get(0));
   }
 
+  @Test
+  public void startElevenInstances_AllGetDiscovered() {
+    final Map<String, List<String>> discoveredDevices = new ConcurrentHashMap<>();
+    final List<IDevicesDiscoverer> createdDiscoverers = new CopyOnWriteArrayList<>();
+
+    for(int i = 0; i < 11; i++) {
+      IDevicesDiscoverer discoverer = new UdpDevicesDiscoverer(threadPool);
+      createdDiscoverers.add(discoverer);
+
+      final String deviceId = "" + (i + 1);
+      discoveredDevices.put(deviceId, new CopyOnWriteArrayList<String>());
+
+      startDiscoverer(discoverer, deviceId, new IDevicesDiscovererListener() {
+        @Override
+        public void deviceFound(String deviceInfo, String address) {
+          List<String> discoveredDevicesForDevice = discoveredDevices.get(deviceId);
+          discoveredDevicesForDevice.add(deviceInfo);
+        }
+
+        @Override
+        public void deviceDisconnected(String deviceInfo) {
+          List<String> discoveredDevicesForDevice = discoveredDevices.get(deviceId);
+          discoveredDevicesForDevice.remove(deviceInfo);
+        }
+      });
+    }
+
+    try { Thread.sleep(3000); } catch(Exception ignored) { }
+
+    for(String deviceId : discoveredDevices.keySet()) {
+      List<String> discoveredDevicesForDevice = discoveredDevices.get(deviceId);
+      Assert.assertEquals(10, discoveredDevicesForDevice.size());
+      Assert.assertFalse(discoveredDevicesForDevice.contains(deviceId));
+    }
+
+    for(IDevicesDiscoverer discoverer : createdDiscoverers) {
+      discoverer.stop();
+    }
+  }
+
 
   protected void startFirstDiscoverer(IDevicesDiscovererListener listener) {
-    DevicesDiscovererConfig config = new DevicesDiscovererConfig(FIRST_DISCOVERER_ID, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, listener);
-
-    firstDiscoverer.startAsync(config);
+    startDiscoverer(firstDiscoverer, FIRST_DISCOVERER_ID, listener);
   }
 
   protected void startSecondDiscoverer(IDevicesDiscovererListener listener) {
-    DevicesDiscovererConfig config = new DevicesDiscovererConfig(SECOND_DISCOVERER_ID, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, listener);
+    startDiscoverer(secondDiscoverer, SECOND_DISCOVERER_ID, listener);
+  }
 
-    secondDiscoverer.startAsync(config);
+  protected void startDiscoverer(IDevicesDiscoverer discoverer, String deviceId, IDevicesDiscovererListener listener) {
+    DevicesDiscovererConfig config = new DevicesDiscovererConfig(deviceId, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, listener);
+
+    discoverer.startAsync(config);
   }
 
 }
