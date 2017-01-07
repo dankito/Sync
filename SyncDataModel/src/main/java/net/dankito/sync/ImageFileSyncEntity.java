@@ -7,6 +7,8 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 
 @Entity(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_TABLE_NAME)
@@ -25,6 +27,7 @@ public class ImageFileSyncEntity extends FileSyncEntity {
   @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_LONGITUDE_COLUMN_NAME)
   protected double longitude;
 
+  @Temporal(TemporalType.TIMESTAMP)
   @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_IMAGE_TAKEN_ON_COLUMN_NAME)
   protected Date imageTakenOn;
 
