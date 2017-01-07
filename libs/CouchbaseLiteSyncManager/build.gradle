@@ -6,4 +6,9 @@ targetCompatibility = "1.7"
 
 dependencies {
     compile project(':SyncCommonLogic')
+    compile project(':CouchbaseLiteEntityManagerBase')
+
+    compile project(':couchbase-lite-java-core')
+
+    compile project(':couchbase-lite-java-listener')
 }
