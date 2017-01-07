@@ -13,3 +13,9 @@
 [submodule "libs/persistence/couchbase-lite-java-listener"]
 	path = libs/persistence/couchbase-lite-java-listener
 	url = https://github.com/dankito/couchbase-lite-java-listener.git
+[submodule "libs/persistence/JpaAnnotationReader"]
+	path = libs/persistence/JpaAnnotationReader
+	url = https://github.com/dankito/JpaAnnotationReader.git
+[submodule "libs/persistence/couchbase-lite-jpa"]
+	path = libs/persistence/couchbase-lite-jpa
+	url = https://github.com/dankito/couchbase-lite-jpa.git

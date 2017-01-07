@@ -10,6 +10,8 @@ include ':JavaUtils'
 include ':CouchbaseLiteEntityManagerBase', ':CouchbaseLiteEntityManagerJava', ':CouchbaseLiteEntityManagerAndroid'
 include ':couchbase-lite-java-core', ':couchbase-lite-java', ':couchbase-lite-android'
 include ':couchbase-lite-java-listener'
+include ':couchbase-lite-jpa'
+include ':JpaAnnotationReader'
 
 
 project(':DevicesDiscovererAndroid').projectDir = new File('libs/DevicesDiscovererAndroid')
@@ -24,3 +26,5 @@ project(':couchbase-lite-java-core').projectDir = new File('libs/persistence/cou
 project(':couchbase-lite-java').projectDir = new File('libs/persistence/couchbase-lite-java')
 project(':couchbase-lite-android').projectDir = new File('libs/persistence/couchbase-lite-android')
 project(':couchbase-lite-java-listener').projectDir = new File('libs/persistence/couchbase-lite-java-listener')
+project(':couchbase-lite-jpa').projectDir = new File('libs/persistence/couchbase-lite-jpa')
+project(':JpaAnnotationReader').projectDir = new File('libs/persistence/JpaAnnotationReader')
