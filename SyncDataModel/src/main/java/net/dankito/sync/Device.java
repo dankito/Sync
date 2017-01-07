@@ -1,28 +1,44 @@
 package net.dankito.sync;
 
-/**
- * Created by ganymed on 07/01/17.
- */
+import net.dankito.sync.config.DatabaseTableConfig;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
+
+@Entity(name = DatabaseTableConfig.DEVICE_TABLE_NAME)
 public class Device extends BaseEntity {
 
+  @Column(name = DatabaseTableConfig.DEVICE_UNIQUE_DEVICE_ID_COLUMN_NAME)
   protected String uniqueDeviceId;
 
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = DatabaseTableConfig.DEVICE_OS_TYPE_COLUMN_NAME)
   protected OsType osType;
 
+  @Column(name = DatabaseTableConfig.DEVICE_OS_NAME_TYPE_COLUMN_NAME)
   protected String osName;
 
+  @Column(name = DatabaseTableConfig.DEVICE_OS_VERSION_TYPE_COLUMN_NAME)
   protected String osVersion;
 
+  @Column(name = DatabaseTableConfig.DEVICE_DESCRIPTION_COLUMN_NAME)
   protected String description;
+
+
+  protected Device() { // for reflection
+
+  }
+
+  public Device(String uniqueDeviceId) {
+    this.uniqueDeviceId = uniqueDeviceId;
+  }
 
 
   public String getUniqueDeviceId() {
     return uniqueDeviceId;
-  }
-
-  public void setUniqueDeviceId(String uniqueDeviceId) {
-    this.uniqueDeviceId = uniqueDeviceId;
   }
 
   public OsType getOsType() {

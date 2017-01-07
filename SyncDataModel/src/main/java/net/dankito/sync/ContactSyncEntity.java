@@ -1,35 +1,57 @@
 package net.dankito.sync;
 
-/**
- * Created by ganymed on 05/01/17.
- */
 
+import net.dankito.sync.config.DatabaseTableConfig;
+
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+
+@Entity(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_TABLE_NAME)
+@DiscriminatorValue(value = DatabaseTableConfig.CONTACT_SYNC_ENTITY_DISCRIMINATOR_VALUE)
 public class ContactSyncEntity extends SyncEntity {
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_DISPLAY_NAME_COLUMN_NAME)
   protected String displayName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_NICKNAME_COLUMN_NAME)
   protected String nickname;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_GIVEN_NAME_COLUMN_NAME)
   protected String givenName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_MIDDLE_NAME_COLUMN_NAME)
   protected String middleName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_FAMILY_NAME_COLUMN_NAME)
   protected String familyName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_PHONETIC_GIVEN_NAME_COLUMN_NAME)
   protected String phoneticGivenName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_PHONETIC_MIDDLE_NAME_COLUMN_NAME)
   protected String phoneticMiddleName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_PHONETIC_FAMILY_NAME_COLUMN_NAME)
   protected String phoneticFamilyName;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_PHONE_NUMBER_COLUMN_NAME)
   protected String phoneNumber;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_EMAIL_ADDRESS_COLUMN_NAME)
   protected String emailAddress;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_WEBSITE_URL_COLUMN_NAME)
   protected String websiteUrl;
 
+  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_NOTE_COLUMN_NAME)
   protected String note;
 
+
+  protected ContactSyncEntity() { // for reflection
+
+  }
 
   public ContactSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
     super(syncModuleConfiguration);

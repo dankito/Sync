@@ -1,25 +1,46 @@
 package net.dankito.sync;
 
+import net.dankito.sync.config.DatabaseTableConfig;
+
 import java.util.Date;
 
-/**
- * Created by ganymed on 05/01/17.
- */
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+
+@Entity(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_TABLE_NAME)
+@DiscriminatorValue(value = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_DISCRIMINATOR_VALUE)
 public class CallLogSyncEntity extends SyncEntity {
 
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_NUMBER_COLUMN_NAME)
   protected String number;
 
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_NORMALIZED_NUMBER_COLUMN_NAME)
   protected String normalizedNumber;
 
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_ASSOCIATED_CONTACT_NAME_COLUMN_NAME)
   protected String associatedContactName;
 
+  @Temporal(value = TemporalType.TIMESTAMP)
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_DATE_COLUMN_NAME)
   protected Date date;
 
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_DURATION_IN_SECONDS_COLUMN_NAME)
   protected int durationInSeconds;
 
+  @Enumerated(value = EnumType.ORDINAL)
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_TYPE_COLUMN_NAME)
   protected CallType type;
 
+
+  protected CallLogSyncEntity() { // for reflection
+
+  }
 
   public CallLogSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
     super(syncModuleConfiguration);

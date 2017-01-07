@@ -1,24 +1,39 @@
 package net.dankito.sync;
 
-/**
- * Created by ganymed on 07/01/17.
- */
+import net.dankito.sync.config.DatabaseTableConfig;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
+
+@Entity(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_TABLE_NAME)
 public class SyncModuleConfiguration extends BaseEntity {
 
-  protected Class syncModule;
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_SYNC_MODULE_CLASS_NAME_COLUMN_NAME)
+  protected String syncModuleClassName;
 
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_IS_BI_DIRECTIONAL_COLUMN_NAME)
   protected boolean isBiDirectional;
 
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_DESTINATION_PATH_COLUMN_NAME)
   protected String destinationPath; // for FileSyncEntities
 
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "syncModuleConfiguration", cascade = CascadeType.PERSIST)
+  protected Set<SyncEntity> syncEntities = new HashSet<>();
 
-  public Class getSyncModule() {
-    return syncModule;
+
+  public String getSyncModuleClassName() {
+    return syncModuleClassName;
   }
 
-  public void setSyncModule(Class syncModule) {
-    this.syncModule = syncModule;
+  public void setSyncModuleClassName(String syncModuleClassName) {
+    this.syncModuleClassName = syncModuleClassName;
   }
 
   public boolean isBiDirectional() {

@@ -1,25 +1,40 @@
 package net.dankito.sync;
 
+import net.dankito.sync.config.DatabaseTableConfig;
+
 import java.util.Date;
 
-/**
- * Created by ganymed on 05/01/17.
- */
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
+
+@Entity(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_TABLE_NAME)
+@DiscriminatorValue(value = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_DISCRIMINATOR_VALUE)
 public class ImageFileSyncEntity extends FileSyncEntity {
 
+  @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_HEIGHT_COLUMN_NAME)
   protected int height;
 
+  @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_WIDTH_COLUMN_NAME)
   protected int width;
 
+  @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_LATITUDE_COLUMN_NAME)
   protected double latitude;
 
+  @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_LONGITUDE_COLUMN_NAME)
   protected double longitude;
 
+  @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_IMAGE_TAKEN_ON_COLUMN_NAME)
   protected Date imageTakenOn;
 
+  @Column(name = DatabaseTableConfig.IMAGE_FILE_SYNC_ENTITY_ORIENTATION_COLUMN_NAME)
   protected int orientation;
-  
+
+
+  protected ImageFileSyncEntity() { // for reflection
+
+  }
 
   public ImageFileSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
     super(syncModuleConfiguration);

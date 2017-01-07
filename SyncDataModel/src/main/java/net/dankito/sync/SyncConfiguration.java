@@ -1,20 +1,34 @@
 package net.dankito.sync;
 
+import net.dankito.sync.config.DatabaseTableConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by ganymed on 07/01/17.
- */
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
+
+@Entity(name = DatabaseTableConfig.SYNC_CONFIGURATION_TABLE_NAME)
 public class SyncConfiguration extends BaseEntity {
 
+  @ManyToOne
+  @JoinColumn(name = DatabaseTableConfig.SYNC_CONFIGURATION_SOURCE_DEVICE_JOIN_COLUMN_NAME)
   protected Device sourceDevice;
 
+  @ManyToOne
+  @JoinColumn(name = DatabaseTableConfig.SYNC_CONFIGURATION_DESTINATION_DEVICE_JOIN_COLUMN_NAME)
   protected Device destinationDevice;
 
+  @OneToMany
   protected List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<>();
 
+
+  protected SyncConfiguration() { // for reflection
+
+  }
 
   public SyncConfiguration(Device sourceDevice, Device destinationDevice) {
     this.sourceDevice = sourceDevice;
