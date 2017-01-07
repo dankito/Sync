@@ -1,3 +1,15 @@
 [submodule "libs/AndroidUtils"]
 	path = libs/AndroidUtils
 	url = https://github.com/dankito/AndroidUtils
+[submodule "libs/persistence/couchbase-lite-java-core"]
+	path = libs/persistence/couchbase-lite-java-core
+	url = https://github.com/dankito/couchbase-lite-java-core.git
+[submodule "libs/persistence/couchbase-lite-java"]
+	path = libs/persistence/couchbase-lite-java
+	url = https://github.com/dankito/couchbase-lite-java.git
+[submodule "libs/persistence/couchbase-lite-android"]
+	path = libs/persistence/couchbase-lite-android
+	url = https://github.com/dankito/couchbase-lite-android.git
+[submodule "libs/persistence/couchbase-lite-java-listener"]
+	path = libs/persistence/couchbase-lite-java-listener
+	url = https://github.com/dankito/couchbase-lite-java-listener.git

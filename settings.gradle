@@ -7,7 +7,20 @@ include ':DevicesDiscoverer'
 include ':AndroidUtils'
 include ':JavaUtils'
 
+include ':CouchbaseLiteEntityManagerBase', ':CouchbaseLiteEntityManagerJava', ':CouchbaseLiteEntityManagerAndroid'
+include ':couchbase-lite-java-core', ':couchbase-lite-java', ':couchbase-lite-android'
+include ':couchbase-lite-java-listener'
+
+
 project(':DevicesDiscovererAndroid').projectDir = new File('libs/DevicesDiscovererAndroid')
 project(':DevicesDiscoverer').projectDir = new File('libs/DevicesDiscoverer')
 project(':AndroidUtils').projectDir = new File('libs/AndroidUtils/AndroidUtilsLib')
 project(':JavaUtils').projectDir = new File('libs/AndroidUtils/JavaUtils')
+
+project(':CouchbaseLiteEntityManagerBase').projectDir = new File('libs/persistence/CouchbaseLiteEntityManagerBase')
+project(':CouchbaseLiteEntityManagerJava').projectDir = new File('libs/persistence/CouchbaseLiteEntityManagerJava')
+project(':CouchbaseLiteEntityManagerAndroid').projectDir = new File('libs/persistence/CouchbaseLiteEntityManagerAndroid')
+project(':couchbase-lite-java-core').projectDir = new File('libs/persistence/couchbase-lite-java-core')
+project(':couchbase-lite-java').projectDir = new File('libs/persistence/couchbase-lite-java')
+project(':couchbase-lite-android').projectDir = new File('libs/persistence/couchbase-lite-android')
+project(':couchbase-lite-java-listener').projectDir = new File('libs/persistence/couchbase-lite-java-listener')
