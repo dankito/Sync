@@ -216,8 +216,6 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
       if(isSelfSentPacket(remoteDeviceInfo, localDeviceInfo) == false) {
         if(hasDeviceAlreadyBeenFound(remoteDeviceInfo) == false) {
-          foundDevices.add(remoteDeviceInfo);
-
           deviceFound(remoteDeviceInfo, senderAddress, listener);
         }
         else {
@@ -248,14 +246,18 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     return false;
   }
 
-  protected void deviceFound(String removeDeviceInfo, String remoteDeviceAddress, IDevicesDiscovererListener listener) {
-    log.info("Found Device " + removeDeviceInfo + " on " + remoteDeviceAddress);
+  protected void deviceFound(String remoteDeviceInfo, String remoteDeviceAddress, IDevicesDiscovererListener listener) {
+    log.info("Found Device " + remoteDeviceInfo + " on " + remoteDeviceAddress);
 
-    if(foundDevices.size() == 1) {
-      startConnectionsAliveWatcher(listener);
+    synchronized(this) {
+      foundDevices.add(remoteDeviceInfo);
+
+      if(foundDevices.size() == 1) {
+        startConnectionsAliveWatcher(listener);
+      }
     }
 
-    listener.deviceFound(removeDeviceInfo, remoteDeviceAddress);
+    listener.deviceFound(remoteDeviceInfo, remoteDeviceAddress);
   }
 
   protected void startConnectionsAliveWatcher(final IDevicesDiscovererListener listener) {
