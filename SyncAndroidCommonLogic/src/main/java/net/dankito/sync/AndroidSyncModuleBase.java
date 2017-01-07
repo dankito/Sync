@@ -38,10 +38,10 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     return null;
   }
 
-  protected abstract Entity deserializeDatabaseEntry(Cursor cursor);
+  protected abstract SyncEntity deserializeDatabaseEntry(Cursor cursor);
 
   public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
-    List<Entity> result = new ArrayList<>();
+    List<SyncEntity> result = new ArrayList<>();
 
     for(Uri contentUri : getContentUris()) {
       readEntitiesFromDatabase(result, contentUri);
@@ -50,7 +50,7 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     callback.done(result);
   }
 
-  protected void readEntitiesFromDatabase(List<Entity> result, Uri contentUri) {
+  protected void readEntitiesFromDatabase(List<SyncEntity> result, Uri contentUri) {
     Cursor cursor = context.getContentResolver().query(
         contentUri,
         getColumnNamesToRetrieve(), // Which columns to return
@@ -63,7 +63,7 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
     if(cursor.moveToFirst()) {
       do {
-        Entity entity = deserializeDatabaseEntry(cursor);
+        SyncEntity entity = deserializeDatabaseEntry(cursor);
         result.add(entity);
       } while (cursor.moveToNext());
     }

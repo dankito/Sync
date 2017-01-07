@@ -22,8 +22,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @Override
-  protected Entity deserializeDatabaseEntry(Cursor cursor) {
-    ContactEntity entity = new ContactEntity();
+  protected SyncEntity deserializeDatabaseEntry(Cursor cursor) {
+    ContactSyncEntity entity = new ContactSyncEntity();
 
     entity.setIdOnSourceDevice(readString(cursor, "raw_contact_id"));
     entity.setCreatedOn(null); // TODO
@@ -43,7 +43,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     return entity;
   }
 
-  protected void readPhoneNumbers(ContactEntity entity) {
+  protected void readPhoneNumbers(ContactSyncEntity entity) {
     Cursor phones = context.getContentResolver().query(
         ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
         ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + entity.getIdOnSourceDevice(),
@@ -62,7 +62,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     phones.close();
   }
 
-  protected void readEmailAddresses(ContactEntity entity) {
+  protected void readEmailAddresses(ContactSyncEntity entity) {
     Cursor emails = context.getContentResolver().query(
         ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
         ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + entity.getIdOnSourceDevice(),
@@ -83,7 +83,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     emails.close();
   }
 
-  protected void readContactDetails(ContactEntity entity) {
+  protected void readContactDetails(ContactSyncEntity entity) {
     readContactNameDetails(entity);
 
     entity.setNickname(readContactDetailString(entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
@@ -96,7 +96,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         ContactsContract.CommonDataKinds.Website.URL)); // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
   }
 
-  protected void readContactNameDetails(ContactEntity entity) {
+  protected void readContactNameDetails(ContactSyncEntity entity) {
     String where = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
     String[] whereParameters = new String[] { entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE };
 

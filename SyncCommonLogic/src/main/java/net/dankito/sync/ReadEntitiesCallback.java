@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ReadEntitiesCallback {
 
-  void done(List<Entity> entities);
+  void done(List<SyncEntity> entities);
 
 }

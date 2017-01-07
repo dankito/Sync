@@ -19,10 +19,10 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
   @Override
-  protected void testEntity(Entity entityToTest) {
-    Assert.assertTrue(entityToTest instanceof ContactEntity);
+  protected void testEntity(SyncEntity entityToTest) {
+    Assert.assertTrue(entityToTest instanceof ContactSyncEntity);
 
-    ContactEntity entity = (ContactEntity)entityToTest;
+    ContactSyncEntity entity = (ContactSyncEntity)entityToTest;
 
     Assert.assertNotNull(entity.getDisplayName());
     Assert.assertNotNull(entity.getPhoneNumber());

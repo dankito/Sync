@@ -38,12 +38,12 @@ public abstract class AndroidSyncModuleTestBase {
 
   @Test
   public void readAllEntitiesAsync() {
-    final List<Entity> result = new ArrayList<>();
+    final List<SyncEntity> result = new ArrayList<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     underTest.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<Entity> entities) {
+      public void done(List<SyncEntity> entities) {
         result.addAll(entities);
         countDownLatch.countDown();
       }
@@ -53,7 +53,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     Assert.assertNotEquals(0, result.size());
 
-    for(Entity entity : result) {
+    for(SyncEntity entity : result) {
       Assert.assertNotNull(entity.getIdOnSourceDevice());
       Assert.assertNotNull(entity.getCreatedOn());
       Assert.assertNotNull(entity.getModifiedOn());
@@ -62,7 +62,7 @@ public abstract class AndroidSyncModuleTestBase {
     }
   }
 
-  protected abstract void testEntity(Entity entityToTest);
+  protected abstract void testEntity(SyncEntity entityToTest);
 
 
 }

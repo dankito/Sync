@@ -17,10 +17,10 @@ public class AndroidImageSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
   @Override
-  protected void testEntity(Entity entityToTest) {
-    Assert.assertTrue(entityToTest instanceof ImageFileEntity);
+  protected void testEntity(SyncEntity entityToTest) {
+    Assert.assertTrue(entityToTest instanceof ImageFileSyncEntity);
 
-    ImageFileEntity entity = (ImageFileEntity)entityToTest;
+    ImageFileSyncEntity entity = (ImageFileSyncEntity)entityToTest;
 
     Assert.assertNotNull(entity.getFilePath());
     Assert.assertNotNull(entity.getName());

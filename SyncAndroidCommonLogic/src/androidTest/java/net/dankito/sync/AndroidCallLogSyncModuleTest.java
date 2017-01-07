@@ -17,10 +17,10 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
   @Override
-  protected void testEntity(Entity entityToTest) {
-    Assert.assertTrue(entityToTest instanceof CallLogEntity);
+  protected void testEntity(SyncEntity entityToTest) {
+    Assert.assertTrue(entityToTest instanceof CallLogSyncEntity);
 
-    CallLogEntity entity = (CallLogEntity)entityToTest;
+    CallLogSyncEntity entity = (CallLogSyncEntity)entityToTest;
 
     Assert.assertNotNull(entity.getNumber());
     Assert.assertTrue(entity.getNormalizedNumber() != null || entity.getNumber().length() == 0); // for incoming unknown numbers getNumber() is an empty String and getNormalizedNumber() is null
