@@ -107,6 +107,12 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     synchronized(broadcastThreads) {
       areBroadcastSocketsOpened = false;
 
+      for(DatagramSocket clientSocket : openedBroadcastSockets) {
+        clientSocket.close();
+      }
+
+      openedBroadcastSockets.clear();
+
       for(String broadcastAddress : new ArrayList<>(broadcastThreads.keySet())) {
         Thread broadcastThread = broadcastThreads.get(broadcastAddress);
         try { broadcastThread.join(100); } catch(Exception ignored) { }
@@ -114,12 +120,6 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
         broadcastThreads.remove(broadcastAddress);
         log.info("Stopped broadcasting for Address " + broadcastAddress);
       }
-
-      for(DatagramSocket clientSocket : openedBroadcastSockets) {
-        clientSocket.close();
-      }
-
-      openedBroadcastSockets.clear();
     }
   }
 
