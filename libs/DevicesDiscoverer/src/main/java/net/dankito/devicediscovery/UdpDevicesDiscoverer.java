@@ -198,7 +198,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   }
 
 
-  protected void listenerReceivedPacket(byte[] buffer, DatagramPacket packet, String localDeviceInfo, IDevicesDiscovererListener listener) {
+  protected void listenerReceivedPacket(byte[] buffer, DatagramPacket packet, String localDeviceInfo, DevicesDiscovererListener listener) {
     receivedPacketsQueue.add(new ReceivedUdpDevicesDiscovererPacket(Arrays.copyOf(buffer, packet.getLength()), packet, packet.getAddress().getHostAddress(), localDeviceInfo, listener));
   }
 
@@ -210,7 +210,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     }
   };
 
-  protected void handleReceivedPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, IDevicesDiscovererListener listener) {
+  protected void handleReceivedPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, DevicesDiscovererListener listener) {
     if(isSearchingForDevicesMessage(receivedData, receivedData.length)) {
       String remoteDeviceInfo = getDeviceInfoFromMessage(receivedData, senderAddress);
 
@@ -246,7 +246,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     return false;
   }
 
-  protected void deviceFound(String remoteDeviceInfo, String remoteDeviceAddress, IDevicesDiscovererListener listener) {
+  protected void deviceFound(String remoteDeviceInfo, String remoteDeviceAddress, DevicesDiscovererListener listener) {
     log.info("Found Device " + remoteDeviceInfo + " on " + remoteDeviceAddress);
 
     synchronized(this) {
@@ -260,7 +260,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     listener.deviceFound(remoteDeviceInfo, remoteDeviceAddress);
   }
 
-  protected void startConnectionsAliveWatcher(final IDevicesDiscovererListener listener) {
+  protected void startConnectionsAliveWatcher(final DevicesDiscovererListener listener) {
     connectionsAliveWatcher.startWatchingAsync(foundDevices, new ConnectionsAliveWatcherListener() {
       @Override
       public void deviceDisconnected(String deviceInfo) {
@@ -269,7 +269,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     });
   }
 
-  protected void deviceDisconnected(String deviceInfo, IDevicesDiscovererListener listener) {
+  protected void deviceDisconnected(String deviceInfo, DevicesDiscovererListener listener) {
     removeDeviceFromFoundDevices(deviceInfo);
 
     if(listener != null) {

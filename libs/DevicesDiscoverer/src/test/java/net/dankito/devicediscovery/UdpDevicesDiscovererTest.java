@@ -66,7 +66,7 @@ public class UdpDevicesDiscovererTest {
     final CountDownLatch countDownLatch = new CountDownLatch(2);
 
     final List<String> foundDevicesForFirstDevice = new CopyOnWriteArrayList<>();
-    startFirstDiscoverer(new IDevicesDiscovererListener() {
+    startFirstDiscoverer(new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
         foundDevicesForFirstDevice.add(deviceInfo);
@@ -81,7 +81,7 @@ public class UdpDevicesDiscovererTest {
     });
 
     final List<String> foundDevicesForSecondDevice = new CopyOnWriteArrayList<>();
-    startSecondDiscoverer(new IDevicesDiscovererListener() {
+    startSecondDiscoverer(new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
         foundDevicesForSecondDevice.add(deviceInfo);
@@ -116,7 +116,7 @@ public class UdpDevicesDiscovererTest {
       final String deviceId = "" + (i + 1);
       discoveredDevices.put(deviceId, new CopyOnWriteArrayList<String>());
 
-      startDiscoverer(discoverer, deviceId, new IDevicesDiscovererListener() {
+      startDiscoverer(discoverer, deviceId, new DevicesDiscovererListener() {
         @Override
         public void deviceFound(String deviceInfo, String address) {
           List<String> discoveredDevicesForDevice = discoveredDevices.get(deviceId);
@@ -146,7 +146,7 @@ public class UdpDevicesDiscovererTest {
     final CountDownLatch countDownLatch = new CountDownLatch(3);
 
     final List<String> foundDevicesForFirstDevice = new CopyOnWriteArrayList<>();
-    startFirstDiscoverer(new IDevicesDiscovererListener() {
+    startFirstDiscoverer(new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
         foundDevicesForFirstDevice.add(deviceInfo);
@@ -161,7 +161,7 @@ public class UdpDevicesDiscovererTest {
     });
 
     final List<String> foundDevicesForSecondDevice = new CopyOnWriteArrayList<>();
-    startSecondDiscoverer(new IDevicesDiscovererListener() {
+    startSecondDiscoverer(new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
         foundDevicesForSecondDevice.add(deviceInfo);
@@ -197,7 +197,7 @@ public class UdpDevicesDiscovererTest {
       createdDiscoverers.add(discoverer);
       discoveredDevices.put(discoverer, new CopyOnWriteArrayList<String>());
 
-      startDiscoverer(discoverer, "" + (i + 1), new IDevicesDiscovererListener() {
+      startDiscoverer(discoverer, "" + (i + 1), new DevicesDiscovererListener() {
         @Override
         public void deviceFound(String deviceInfo, String address) {
           List<String> discoveredDevicesForDevice = discoveredDevices.get(discoverer);
@@ -232,15 +232,15 @@ public class UdpDevicesDiscovererTest {
   }
 
 
-  protected void startFirstDiscoverer(IDevicesDiscovererListener listener) {
+  protected void startFirstDiscoverer(DevicesDiscovererListener listener) {
     startDiscoverer(firstDiscoverer, FIRST_DISCOVERER_ID, listener);
   }
 
-  protected void startSecondDiscoverer(IDevicesDiscovererListener listener) {
+  protected void startSecondDiscoverer(DevicesDiscovererListener listener) {
     startDiscoverer(secondDiscoverer, SECOND_DISCOVERER_ID, listener);
   }
 
-  protected void startDiscoverer(IDevicesDiscoverer discoverer, String deviceId, IDevicesDiscovererListener listener) {
+  protected void startDiscoverer(IDevicesDiscoverer discoverer, String deviceId, DevicesDiscovererListener listener) {
     startedDiscoverers.add(discoverer);
 
     DevicesDiscovererConfig config = new DevicesDiscovererConfig(deviceId, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, listener);

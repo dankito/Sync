@@ -12,14 +12,14 @@ public class DevicesDiscovererConfig {
 
   protected int checkForDevicesIntervalMillis;
 
-  protected IDevicesDiscovererListener listener;
+  protected DevicesDiscovererListener listener;
 
 
   public DevicesDiscovererConfig() {
 
   }
 
-  public DevicesDiscovererConfig(String localDeviceInfo, int discoverDevicesPort, int checkForDevicesIntervalMillis, IDevicesDiscovererListener listener) {
+  public DevicesDiscovererConfig(String localDeviceInfo, int discoverDevicesPort, int checkForDevicesIntervalMillis, DevicesDiscovererListener listener) {
     this.localDeviceInfo = localDeviceInfo;
     this.discoverDevicesPort = discoverDevicesPort;
     this.checkForDevicesIntervalMillis = checkForDevicesIntervalMillis;
@@ -51,11 +51,11 @@ public class DevicesDiscovererConfig {
     this.checkForDevicesIntervalMillis = checkForDevicesIntervalMillis;
   }
 
-  public IDevicesDiscovererListener getListener() {
+  public DevicesDiscovererListener getListener() {
     return listener;
   }
 
-  public void setListener(IDevicesDiscovererListener listener) {
+  public void setListener(DevicesDiscovererListener listener) {
     this.listener = listener;
   }
 
