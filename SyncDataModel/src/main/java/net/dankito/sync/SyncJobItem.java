@@ -8,6 +8,8 @@ import java.util.Date;
 
 public class SyncJobItem extends BaseEntity {
 
+  protected SyncModuleConfiguration syncModuleConfiguration;
+
   protected SyncEntity entity;
 
   protected SyncState state;
@@ -17,11 +19,16 @@ public class SyncJobItem extends BaseEntity {
   protected Date finishTime;
 
 
-  public SyncJobItem(SyncEntity entity) {
+  public SyncJobItem(SyncModuleConfiguration config, SyncEntity entity) {
+    this.syncModuleConfiguration = config;
     this.entity = entity;
     this.state = SyncState.INITIALIZED;
   }
 
+
+  public SyncModuleConfiguration getSyncModuleConfiguration() {
+    return syncModuleConfiguration;
+  }
 
   public SyncEntity getEntity() {
     return entity;
