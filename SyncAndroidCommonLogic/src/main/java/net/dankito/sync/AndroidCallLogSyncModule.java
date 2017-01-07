@@ -24,8 +24,8 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   }
 
   @Override
-  protected SyncEntity deserializeDatabaseEntry(Cursor cursor) {
-    CallLogSyncEntity entity = new CallLogSyncEntity();
+  protected SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+    CallLogSyncEntity entity = new CallLogSyncEntity(syncModuleConfiguration);
 
     entity.setIdOnSourceDevice(readString(cursor, CallLog.Calls._ID));
     entity.setCreatedOn(readDate(cursor, CallLog.Calls.DATE));

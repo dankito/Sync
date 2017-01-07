@@ -23,8 +23,8 @@ public class AndroidImageSyncModule extends AndroidSyncModuleBase implements ISy
   }
 
   @Override
-  protected SyncEntity deserializeDatabaseEntry(Cursor cursor) {
-    ImageFileSyncEntity entity = new ImageFileSyncEntity();
+  protected SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+    ImageFileSyncEntity entity = new ImageFileSyncEntity(syncModuleConfiguration);
 
     entity.setIdOnSourceDevice(readString(cursor, MediaStore.Images.Media._ID));
     entity.setCreatedOn(readDate(cursor, MediaStore.Images.Media.DATE_ADDED));

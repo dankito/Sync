@@ -6,6 +6,6 @@ package net.dankito.sync;
 
 public interface ISyncModule {
 
-  void readAllEntitiesAsync(ReadEntitiesCallback callback);
+  void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback);
 
 }

@@ -22,8 +22,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @Override
-  protected SyncEntity deserializeDatabaseEntry(Cursor cursor) {
-    ContactSyncEntity entity = new ContactSyncEntity();
+  protected SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+    ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
 
     entity.setIdOnSourceDevice(readString(cursor, "raw_contact_id"));
     entity.setCreatedOn(null); // TODO
