@@ -65,7 +65,9 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
   public UdpDevicesDiscoverer(IThreadPool threadPool) {
     this.threadPool = threadPool;
+
     this.networkHelper = new NetworkHelper();
+    receivedPacketsQueue = new AsyncProducerConsumerQueue(3, receivedPacketsHandler);
   }
 
 
@@ -80,8 +82,6 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
     // * 3.5 = from 3 messages one must be received to be still valued as 'connected'
     this.connectionsAliveWatcher = new ConnectionsAliveWatcher((int)(config.getCheckForDevicesIntervalMillis() * 10.5));
-
-    receivedPacketsQueue = new AsyncProducerConsumerQueue(3, receivedPacketsHandler);
 
     startListenerAsync(config);
 
