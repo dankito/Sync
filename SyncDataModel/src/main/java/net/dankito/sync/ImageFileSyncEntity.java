@@ -19,6 +19,11 @@ public class ImageFileSyncEntity extends FileSyncEntity {
   protected Date imageTakenOn;
 
   protected int orientation;
+  
+
+  public ImageFileSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
+    super(syncModuleConfiguration);
+  }
 
 
   public int getHeight() {

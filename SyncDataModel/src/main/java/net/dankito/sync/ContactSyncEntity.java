@@ -31,6 +31,11 @@ public class ContactSyncEntity extends SyncEntity {
   protected String note;
 
 
+  public ContactSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
+    super(syncModuleConfiguration);
+  }
+
+
   public String getDisplayName() {
     return displayName;
   }

@@ -17,6 +17,11 @@ public class FileSyncEntity extends SyncEntity {
   protected String mimeType;
 
 
+  public FileSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
+    super(syncModuleConfiguration);
+  }
+
+
   public String getName() {
     return name;
   }

@@ -21,6 +21,11 @@ public class CallLogSyncEntity extends SyncEntity {
   protected CallType type;
 
 
+  public CallLogSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
+    super(syncModuleConfiguration);
+  }
+
+
   public String getNumber() {
     return number;
   }
