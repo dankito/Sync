@@ -9,6 +9,10 @@ public class DiscoveredDevice {
 
   protected String address;
 
+  protected int messagesPort;
+
+  protected int synchronizationPort;
+
 
   public DiscoveredDevice(Device device, String address) {
     this.device = device;
@@ -30,6 +34,22 @@ public class DiscoveredDevice {
 
   public void setAddress(String address) {
     this.address = address;
+  }
+
+  public int getMessagesPort() {
+    return messagesPort;
+  }
+
+  public void setMessagesPort(int messagesPort) {
+    this.messagesPort = messagesPort;
+  }
+
+  public int getSynchronizationPort() {
+    return synchronizationPort;
+  }
+
+  public void setSynchronizationPort(int synchronizationPort) {
+    this.synchronizationPort = synchronizationPort;
   }
 
 
