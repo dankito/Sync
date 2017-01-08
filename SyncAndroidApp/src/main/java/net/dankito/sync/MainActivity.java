@@ -12,15 +12,23 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 
+import net.dankito.sync.adapter.UnknownDiscoveredDevicesAdapter;
+import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.di.AndroidDiComponent;
 import net.dankito.sync.di.AndroidDiContainer;
 import net.dankito.sync.di.DaggerAndroidDiComponent;
+
+import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 
   protected AndroidDiComponent component;
+
+  @Inject
+  protected IDevicesManager devicesManager;
 
 
   @Override
@@ -30,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     setupDependencyInjection();
 
     setupUi();
+
+    setupLogic();
   }
 
   protected void setupDependencyInjection() {
@@ -62,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
     navigationView.setNavigationItemSelectedListener(this);
+
+    ListView lstvwUnknownDiscoveredDevices = (ListView)findViewById(R.id.lstvwUnknownDiscoveredDevices);
+    lstvwUnknownDiscoveredDevices.setAdapter(new UnknownDiscoveredDevicesAdapter(this, devicesManager));
   }
 
   @Override
@@ -120,4 +133,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     drawer.closeDrawer(GravityCompat.START);
     return true;
   }
+
+
+  protected void setupLogic() {
+    devicesManager.start();
+  }
+
 }
