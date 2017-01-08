@@ -14,10 +14,10 @@ import net.dankito.sync.SyncModuleConfiguration;
  * Created by ganymed on 05/01/17.
  */
 
-public class AndroidImageSyncModule extends AndroidSyncModuleBase implements ISyncModule {
+public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
 
-  public AndroidImageSyncModule(Context context) {
+  public AndroidPhotosSyncModule(Context context) {
     super(context);
   }
 

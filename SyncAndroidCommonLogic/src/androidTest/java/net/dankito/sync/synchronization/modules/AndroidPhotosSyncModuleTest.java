@@ -11,12 +11,12 @@ import org.junit.Assert;
  * Created by ganymed on 05/01/17.
  */
 
-public class AndroidImageSyncModuleTest extends AndroidSyncModuleTestBase {
+public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Override
   protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext) {
-    return new AndroidImageSyncModule(appContext);
+    return new AndroidPhotosSyncModule(appContext);
   }
 
   @Override
