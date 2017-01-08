@@ -20,6 +20,22 @@ public class DatabaseTableConfig {
   public static final String LOCAL_CONFIG_LOCAL_DEVICE_ID_JOIN_COLUMN_NAME = "local_device_id";
 
 
+  /*          LocalConfig_SynchronizedDevices JoinTable Column Names        */
+
+  public static final String LOCAL_CONFIG_SYNCHRONIZED_DEVICES_JOIN_TABLE_NAME = "LocalConfig_SynchronizedDevices";
+
+  public static final String LOCAL_CONFIG_SYNCHRONIZED_DEVICES_LOCAL_CONFIG_ID_COLUMN_NAME = "local_config_id";
+  public static final String LOCAL_CONFIG_SYNCHRONIZED_DEVICES_DEVICE_ID_COLUMN_NAME = "device_id";
+
+
+  /*          LocalConfig_IgnoredDevices JoinTable Column Names        */
+
+  public static final String LOCAL_CONFIG_IGNORED_DEVICES_JOIN_TABLE_NAME = "LocalConfig_IgnoredDevices";
+
+  public static final String LOCAL_CONFIG_IGNORED_DEVICES_LOCAL_CONFIG_ID_COLUMN_NAME = "local_config_id";
+  public static final String LOCAL_CONFIG_IGNORED_DEVICES_DEVICE_ID_COLUMN_NAME = "device_id";
+
+
   /*          Device Column Names        */
 
   public static final String DEVICE_TABLE_NAME = "Device";
