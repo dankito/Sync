@@ -221,18 +221,22 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
+  @Override
   public List<DiscoveredDevice> getAllDiscoveredDevices() {
     return new ArrayList<>(discoveredDevices.values());
   }
 
+  @Override
   public List<DiscoveredDevice> getKnownSynchronizedDiscoveredDevices() {
     return new ArrayList<>(knownSynchronizedDevices.values());
   }
 
+  @Override
   public List<DiscoveredDevice> getKnownIgnoredDiscoveredDevices() {
     return new ArrayList<>(knownIgnoredDevices.values());
   }
 
+  @Override
   public List<DiscoveredDevice> getUnknownDiscoveredDevices() {
     return new ArrayList<>(unknownDevices.values());
   }

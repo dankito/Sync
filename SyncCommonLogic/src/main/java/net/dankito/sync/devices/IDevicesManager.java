@@ -1,6 +1,8 @@
 package net.dankito.sync.devices;
 
 
+import java.util.List;
+
 public interface IDevicesManager {
 
   void start();
@@ -15,4 +17,11 @@ public interface IDevicesManager {
 
   boolean removeKnownSynchronizedDevicesListener(KnownSynchronizedDevicesListener listener);
 
+  List<DiscoveredDevice> getAllDiscoveredDevices();
+
+  List<DiscoveredDevice> getKnownSynchronizedDiscoveredDevices();
+
+  List<DiscoveredDevice> getKnownIgnoredDiscoveredDevices();
+
+  List<DiscoveredDevice> getUnknownDiscoveredDevices();
 }
