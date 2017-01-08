@@ -62,7 +62,7 @@ public class DevicesManager implements IDevicesManager {
         DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
-        getDeviceDetailsFromDevice(deviceInfo, address);
+        requestDeviceDetailsFromDevice(deviceInfo, address);
       }
 
       @Override
@@ -99,7 +99,7 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
-  protected void getDeviceDetailsFromDevice(String deviceInfo, String address) {
+  protected void requestDeviceDetailsFromDevice(String deviceInfo, String address) {
     // TODO
 
     try {
