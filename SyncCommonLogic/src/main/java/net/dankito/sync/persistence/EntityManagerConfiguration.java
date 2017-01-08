@@ -17,9 +17,6 @@ import java.io.File;
  * Created by ganymed on 03/01/15.
  */
 public class EntityManagerConfiguration {
-  
-  public enum DatabaseType { SQLite, H2Embedded, H2Mem, Derby, HSQLDB, CouchbaseLite }
-  
 
   protected Class<? extends IEntityManager> entityManagerClass;
   
@@ -38,7 +35,6 @@ public class EntityManagerConfiguration {
   protected String databaseDriverUrl = null;
   protected String databaseDriver = null;
 
-  protected String ddlGeneration = null;
   protected boolean dropTables = false;
 
 
