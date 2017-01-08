@@ -13,6 +13,13 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.22'
 
     compile 'javax.inject:javax.inject:1'
+
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.mockito:mockito-all:1.10.19'
+    testCompile project(':CouchbaseLiteEntityManagerJava')
+
+    testCompile 'ch.qos.logback:logback-core:1.1.2'
+    testCompile 'ch.qos.logback:logback-classic:1.1.2'
 }
 
 
