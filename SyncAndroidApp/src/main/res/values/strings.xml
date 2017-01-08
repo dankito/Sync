@@ -1,8 +1,14 @@
 <resources>
+
     <string name="app_name">Sync</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+    <string name="ignore_device">Never ask again</string>
+    <string name="synchronize_with_device">Sync</string>
+    <string name="stop_synchronizing_with_device">Stop synchronizing</string>
+
 </resources>
