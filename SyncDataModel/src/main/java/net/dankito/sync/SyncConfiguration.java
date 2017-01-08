@@ -35,6 +35,11 @@ public class SyncConfiguration extends BaseEntity {
     this.destinationDevice = destinationDevice;
   }
 
+  public SyncConfiguration(Device sourceDevice, Device destinationDevice, List<SyncModuleConfiguration> syncModuleConfigurations) {
+    this(sourceDevice, destinationDevice);
+    this.syncModuleConfigurations = syncModuleConfigurations;
+  }
+
 
   public Device getSourceDevice() {
     return sourceDevice;
