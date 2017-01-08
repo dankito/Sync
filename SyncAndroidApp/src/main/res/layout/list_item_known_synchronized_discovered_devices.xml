@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/list_item_known_synchronized_discovered_device_height">
+
+    <ImageView
+        android:id="@+id/imgvwOsIcon"
+        android:layout_width="@dimen/list_item_known_synchronized_discovered_device_os_icon_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="@dimen/list_item_known_synchronized_discovered_device_buttons_right_margin"
+    />
+
+    <TextView
+        android:id="@+id/txtvwOsName"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/list_item_known_synchronized_discovered_device_os_name_height"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/imgvwOsIcon"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        style="@style/TextAppearance.AppCompat.Medium"
+    />
+
+    <TextView
+        android:id="@+id/txtvwIpAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/list_item_known_synchronized_discovered_device_ip_address_height"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/imgvwOsIcon"
+        android:layout_below="@id/txtvwOsName"
+        android:gravity="center_vertical"
+        style="@style/TextAppearance.AppCompat.Small"
+    />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/list_item_known_synchronized_discovered_device_buttons_height"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/txtvwIpAddress"
+        android:layout_toRightOf="@+id/imgvwOsIcon"
+    >
+
+        <Button
+            android:id="@+id/btnStopSynchronizingWithDevice"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginRight="@dimen/list_item_known_synchronized_discovered_device_buttons_right_margin"
+            android:textSize="@dimen/list_item_known_synchronized_discovered_device_buttons_text_size"
+            android:text="@string/stop_synchronizing_with_device"
+        />
+
+        <Button
+            android:id="@+id/btnViewSynchronizationLog"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginRight="@dimen/list_item_known_synchronized_discovered_device_buttons_right_margin"
+            android:textSize="@dimen/list_item_known_synchronized_discovered_device_buttons_text_size"
+            android:text="@string/show_synchronization_log"
+            android:enabled="false"
+        />
+
+    </LinearLayout>
+
+</RelativeLayout>

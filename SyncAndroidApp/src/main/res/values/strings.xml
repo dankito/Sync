@@ -10,5 +10,6 @@
     <string name="ignore_device">Never ask again</string>
     <string name="synchronize_with_device">Sync</string>
     <string name="stop_synchronizing_with_device">Stop synchronizing</string>
+    <string name="show_synchronization_log">View Sync Log</string>
 
 </resources>
