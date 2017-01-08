@@ -13,6 +13,6 @@
     <string name="ignore_device">Ignore</string>
     <string name="synchronize_with_device">Sync</string>
     <string name="stop_synchronizing_with_device">Stop sync</string>
-    <string name="show_synchronization_log">View Sync Log</string>
+    <string name="show_synchronization_log">Sync Log</string>
 
 </resources>
