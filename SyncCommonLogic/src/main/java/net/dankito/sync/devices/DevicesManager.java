@@ -58,7 +58,7 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void start() {
-    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getDeviceInfoFromDevice(localConfig.getLocalDevice()), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
+    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getDeviceInfoFromDeviceForDevicesDiscoverer(localConfig.getLocalDevice()), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
         DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
@@ -67,6 +67,12 @@ public class DevicesManager implements IDevicesManager {
 
       @Override
       public void deviceDisconnected(String deviceInfo) {
+        // TODO: normally deviceInfo is the unique device id, we still have to implement this
+        try {
+          Device device = objectMapper.readValue(deviceInfo, Device.class);
+          deviceInfo = device.getUniqueDeviceId();
+        } catch(Exception ignored) { }
+
         DiscoveredDevice device = discoveredDevices.get(deviceInfo);
         if(device != null) {
           disconnectedFromDevice(deviceInfo, device);
@@ -112,6 +118,8 @@ public class DevicesManager implements IDevicesManager {
       else {
         device = persistedDevice;
       }
+
+      deviceInfo = device.getUniqueDeviceId();
 
       discoveredDevice(deviceInfo, new DiscoveredDevice(device, address));
     } catch(Exception e) {
@@ -180,9 +188,8 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
-  protected String getDeviceInfoFromDevice(Device device) {
-    // TODO: should actually only return device.getUniqueDeviceId()
-
+  // TODO: replace by normal call to getDeviceInfoFromDevice() as soon as Message Bus is implemented
+  protected String getDeviceInfoFromDeviceForDevicesDiscoverer(Device device) {
     try {
       return objectMapper.writeValueAsString(device);
     } catch(Exception e) {
@@ -190,6 +197,10 @@ public class DevicesManager implements IDevicesManager {
     }
 
     return "";
+  }
+
+  protected String getDeviceInfoFromDevice(Device device) {
+    return device.getUniqueDeviceId();
   }
 
 
@@ -213,13 +224,6 @@ public class DevicesManager implements IDevicesManager {
 
   protected boolean addDeviceToKnownSynchronizedDevices(DiscoveredDevice device) {
     String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
-    // TODO: querying discoveredDevices can be removed as soon as we're using real device id
-    for(Map.Entry<String, DiscoveredDevice> entry : discoveredDevices.entrySet()) {
-      if(device == entry.getValue()) {
-        deviceInfo = entry.getKey();
-        break;
-      }
-    }
 
     if(deviceInfo != null) {
       unknownDevices.remove(deviceInfo);
