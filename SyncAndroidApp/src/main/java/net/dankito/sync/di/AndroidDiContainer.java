@@ -2,7 +2,12 @@ package net.dankito.sync.di;
 
 import android.app.Activity;
 
+import net.dankito.android.util.AlertHelper;
 import net.dankito.android.util.AndroidOnUiThreadRunner;
+import net.dankito.sync.persistence.CouchbaseLiteEntityManagerAndroid;
+import net.dankito.sync.persistence.EntityManagerConfiguration;
+import net.dankito.sync.persistence.EntityManagerDefaultConfiguration;
+import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IOnUiThreadRunner;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
@@ -42,6 +47,25 @@ public class AndroidDiContainer {
   @Singleton
   public IOnUiThreadRunner provideOnUiThreadRunner() {
     return new AndroidOnUiThreadRunner(getActivity());
+  }
+
+
+  @Provides
+  @Singleton
+  public EntityManagerConfiguration provideEntityManagerConfiguration() throws RuntimeException {
+    return new EntityManagerConfiguration(EntityManagerDefaultConfiguration.DEFAULT_DATA_FOLDER, EntityManagerDefaultConfiguration.APPLICATION_DATA_MODEL_VERSION);
+  }
+
+  @Provides
+  @Singleton
+  public IEntityManager provideEntityManager(EntityManagerConfiguration configuration) throws RuntimeException {
+    try {
+      return new CouchbaseLiteEntityManagerAndroid(getActivity(), configuration);
+    } catch(Exception e) {
+      AlertHelper.showErrorMessageThreadSafe(getActivity(), "Could not load Database, it is better closing Application now: " + e.getLocalizedMessage()); // TODO: translate
+    }
+
+    return null;
   }
 
 }
