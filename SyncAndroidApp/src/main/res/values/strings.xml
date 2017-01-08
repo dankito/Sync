@@ -10,9 +10,9 @@
     <string name="discovered_devices">Discovered not synchronized Devices</string>
     <string name="known_synchronized_discovered_devices">Discovered synchronized Devices</string>
 
-    <string name="ignore_device">Never ask again</string>
+    <string name="ignore_device">Ignore</string>
     <string name="synchronize_with_device">Sync</string>
-    <string name="stop_synchronizing_with_device">Stop synchronizing</string>
+    <string name="stop_synchronizing_with_device">Stop sync</string>
     <string name="show_synchronization_log">View Sync Log</string>
 
 </resources>
