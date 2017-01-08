@@ -6,6 +6,9 @@ import net.dankito.devicediscovery.DevicesDiscovererConfig;
 import net.dankito.devicediscovery.DevicesDiscovererListener;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.sync.Device;
+import net.dankito.sync.LocalConfig;
+import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.persistence.IEntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,9 @@ public class DevicesManager implements IDevicesManager {
 
   protected IDevicesDiscoverer devicesDiscoverer;
 
-  protected Device localDevice;
+  protected LocalConfig localConfig;
+
+  protected IEntityManager entityManager;
 
   protected ObjectMapper objectMapper = new ObjectMapper();
 
@@ -43,15 +48,16 @@ public class DevicesManager implements IDevicesManager {
   protected List<KnownSynchronizedDevicesListener> knownSynchronizedDevicesListeners = new CopyOnWriteArrayList<>();
 
 
-  public DevicesManager(IDevicesDiscoverer devicesDiscoverer, Device localDevice) {
+  public DevicesManager(IDevicesDiscoverer devicesDiscoverer, IEntityManager entityManager, LocalConfig localConfig) {
     this.devicesDiscoverer = devicesDiscoverer;
-    this.localDevice = localDevice;
+    this.entityManager = entityManager;
+    this.localConfig = localConfig;
   }
 
 
   @Override
   public void start() {
-    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getLocalDeviceInfo(localDevice), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
+    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getDeviceInfoFromDevice(localConfig.getLocalDevice()), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
         DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
@@ -164,14 +170,38 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
-  protected String getLocalDeviceInfo(Device localDevice) {
+  protected String getDeviceInfoFromDevice(Device device) {
+    // TODO: should actually only return device.getUniqueDeviceId()
+
     try {
-      return objectMapper.writeValueAsString(localDevice);
+      return objectMapper.writeValueAsString(device);
     } catch(Exception e) {
-      log.error("Could not serialize localDevice to JSON: " + localDevice, e);
+      log.error("Could not serialize device to JSON: " + device, e);
     }
 
     return "";
+  }
+
+
+  @Override
+  public void startSynchronizingWithDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
+
+  }
+
+
+  @Override
+  public void stopSynchronizingWithDevice(DiscoveredDevice device) {
+
+  }
+
+  @Override
+  public void addDeviceToIgnoreList(DiscoveredDevice device) {
+
+  }
+
+  @Override
+  public void startSynchronizingWithIgnoredDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
+
   }
 
 

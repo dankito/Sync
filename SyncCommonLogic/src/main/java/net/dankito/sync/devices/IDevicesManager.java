@@ -1,6 +1,8 @@
 package net.dankito.sync.devices;
 
 
+import net.dankito.sync.SyncModuleConfiguration;
+
 import java.util.List;
 
 public interface IDevicesManager {
@@ -9,6 +11,16 @@ public interface IDevicesManager {
 
   void stop();
 
+
+  void startSynchronizingWithDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations);
+
+  void stopSynchronizingWithDevice(DiscoveredDevice device);
+
+  void addDeviceToIgnoreList(DiscoveredDevice device);
+
+  void startSynchronizingWithIgnoredDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations);
+
+
   boolean addDiscoveredDevicesListener(DiscoveredDevicesListener listener);
 
   boolean removeDiscoveredDevicesListener(DiscoveredDevicesListener listener);
@@ -16,6 +28,7 @@ public interface IDevicesManager {
   boolean addKnownSynchronizedDevicesListener(KnownSynchronizedDevicesListener listener);
 
   boolean removeKnownSynchronizedDevicesListener(KnownSynchronizedDevicesListener listener);
+
 
   List<DiscoveredDevice> getAllDiscoveredDevices();
 
