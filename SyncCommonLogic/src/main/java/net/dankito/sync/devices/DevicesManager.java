@@ -104,6 +104,15 @@ public class DevicesManager implements IDevicesManager {
 
     try {
       Device device = objectMapper.readValue(deviceInfo, Device.class);
+
+      Device persistedDevice = entityManager.getEntityById(Device.class, device.getId());
+      if(persistedDevice == null) {
+        entityManager.persistEntity(device);
+      }
+      else {
+        device = persistedDevice;
+      }
+
       discoveredDevice(deviceInfo, new DiscoveredDevice(device, address));
     } catch(Exception e) {
       log.error("Could not deserialize Device from " + deviceInfo, e);
