@@ -8,6 +8,9 @@
 
     <string name="action_settings">Einstellungen</string>
 
+    <string name="discovered_devices">Gefundene nicht synchronisierte Geräte</string>
+    <string name="known_synchronized_discovered_devices">Gefundene synchronisierte Geräte</string>
+
     <string name="ignore_device">Nicht mehr fragen</string>
     <string name="synchronize_with_device">Synchronisieren</string>
     <string name="stop_synchronizing_with_device">Synchronisieren stoppen</string>
