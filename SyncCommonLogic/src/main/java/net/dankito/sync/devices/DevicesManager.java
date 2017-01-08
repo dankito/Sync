@@ -10,6 +10,7 @@ import net.dankito.sync.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -217,6 +218,23 @@ public class DevicesManager implements IDevicesManager {
     for(KnownSynchronizedDevicesListener listener : knownSynchronizedDevicesListeners) {
       listener.knownSynchronizedDeviceDisconnected(device);
     }
+  }
+
+
+  public List<DiscoveredDevice> getAllDiscoveredDevices() {
+    return new ArrayList<>(discoveredDevices.values());
+  }
+
+  public List<DiscoveredDevice> getKnownSynchronizedDiscoveredDevices() {
+    return new ArrayList<>(knownSynchronizedDevices.values());
+  }
+
+  public List<DiscoveredDevice> getKnownIgnoredDiscoveredDevices() {
+    return new ArrayList<>(knownIgnoredDevices.values());
+  }
+
+  public List<DiscoveredDevice> getUnknownDiscoveredDevices() {
+    return new ArrayList<>(unknownDevices.values());
   }
 
 }
