@@ -39,7 +39,7 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
 
   protected abstract int getListItemLayoutId();
 
-  protected abstract void setButtons(View convertView);
+  protected abstract void setButtons(View convertView, DiscoveredDevice device);
 
 
   @Override
@@ -67,7 +67,7 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
 
     showDeviceDetails(convertView, device);
 
-    setButtons(convertView);
+    setButtons(convertView, device);
 
     convertView.setTag(device);
 

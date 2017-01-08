@@ -28,11 +28,13 @@ public class KnownSynchronizedDiscoveredDevicesAdapter extends DiscoveredDevices
     return R.layout.list_item_known_synchronized_discovered_devices;
   }
 
-  protected void setButtons(View convertView) {
+  protected void setButtons(View convertView, DiscoveredDevice device) {
     Button btnStopSynchronizingWithDevice = (Button)convertView.findViewById(R.id.btnStopSynchronizingWithDevice);
+    btnStopSynchronizingWithDevice.setTag(device);
     btnStopSynchronizingWithDevice.setOnClickListener(btnStopSynchronizingWithDeviceClickListener);
 
     Button btnViewSynchronizationLog = (Button)convertView.findViewById(R.id.btnViewSynchronizationLog);
+    btnViewSynchronizationLog.setTag(device);
     btnViewSynchronizationLog.setOnClickListener(btnViewSynchronizationLogClickListener);
   }
 
@@ -40,7 +42,10 @@ public class KnownSynchronizedDiscoveredDevicesAdapter extends DiscoveredDevices
   protected View.OnClickListener btnStopSynchronizingWithDeviceClickListener = new View.OnClickListener() {
     @Override
     public void onClick(View view) {
-
+      DiscoveredDevice device = (DiscoveredDevice)view.getTag();
+      if(device != null) {
+        devicesManager.stopSynchronizingWithDevice(device);
+      }
     }
   };
 
