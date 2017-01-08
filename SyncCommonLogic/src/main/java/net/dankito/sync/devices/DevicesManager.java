@@ -212,7 +212,7 @@ public class DevicesManager implements IDevicesManager {
       if(addDeviceToKnownSynchronizedDevices(device)) {
         addDeviceToLocalConfigSynchronizedDevices(device);
 
-        // TODO: add to localDevice sourceSynchronizationConfigurations and remote devices destinationSynchronizationConfigurations
+        setSourceAndDestinationSyncConfigurationOnDevices(device, syncConfiguration);
 
         callDiscoveredDeviceDisconnectedListeners(device);
         callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
@@ -246,6 +246,16 @@ public class DevicesManager implements IDevicesManager {
     entityManager.updateEntity(localConfig);
   }
 
+  protected void setSourceAndDestinationSyncConfigurationOnDevices(DiscoveredDevice device, SyncConfiguration syncConfiguration) {
+    Device localDevice = localConfig.getLocalDevice();
+    localDevice.addSourceSyncConfiguration(syncConfiguration);
+    entityManager.updateEntity(localDevice);
+
+    Device remoteDevice = device.getDevice();
+    remoteDevice.addDestinationSyncConfiguration(syncConfiguration);
+    entityManager.updateEntity(remoteDevice);
+  }
+
 
   @Override
   public void stopSynchronizingWithDevice(DiscoveredDevice device) {
@@ -257,12 +267,25 @@ public class DevicesManager implements IDevicesManager {
         knownSynchronizedDevices.remove(deviceInfo);
         unknownDevices.put(deviceInfo, device);
 
-        // TODO: remove source- and destinationSynchronizationConfiguration from Devices
+        removeFromSourceAndDestinationSyncConfigurationOnDevices(device.getDevice());
 
         callKnownSynchronizedDeviceDisconnected(device);
 
         callDiscoveredDeviceDisconnectedListeners(device);
         callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.UNKNOWN_DEVICE);
+      }
+    }
+  }
+
+  protected void removeFromSourceAndDestinationSyncConfigurationOnDevices(Device remoteDevice) {
+    Device localDevice = localConfig.getLocalDevice();
+
+    for(SyncConfiguration syncConfiguration : localDevice.getSourceSyncConfigurations()) {
+      if(syncConfiguration.getDestinationDevice() == remoteDevice) {
+        localDevice.removeSourceSyncConfiguration(syncConfiguration);
+        remoteDevice.removeDestinationSyncConfiguration(syncConfiguration);
+
+        break;
       }
     }
   }

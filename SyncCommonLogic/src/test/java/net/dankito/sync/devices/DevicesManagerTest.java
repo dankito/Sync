@@ -58,6 +58,9 @@ public class DevicesManagerTest {
     Assert.assertEquals(1, underTest.unknownDevices.size());
     Assert.assertEquals(0, underTest.knownSynchronizedDevices.size());
 
+    Assert.assertEquals(0, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
+    Assert.assertEquals(0, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
+
 
     underTest.startSynchronizingWithDevice(discoveredDevice, new ArrayList<SyncModuleConfiguration>());
 
@@ -68,6 +71,9 @@ public class DevicesManagerTest {
 
     Assert.assertEquals(0, underTest.unknownDevices.size());
     Assert.assertEquals(1, underTest.knownSynchronizedDevices.size());
+
+    Assert.assertEquals(1, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
+    Assert.assertEquals(1, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
   }
 
 
@@ -83,6 +89,9 @@ public class DevicesManagerTest {
     Assert.assertEquals(0, underTest.unknownDevices.size());
     Assert.assertEquals(1, underTest.knownSynchronizedDevices.size());
 
+    Assert.assertEquals(1, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
+    Assert.assertEquals(1, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
+
 
     underTest.stopSynchronizingWithDevice(discoveredDevice);
 
@@ -92,6 +101,9 @@ public class DevicesManagerTest {
 
     Assert.assertEquals(1, underTest.unknownDevices.size());
     Assert.assertEquals(0, underTest.knownSynchronizedDevices.size());
+
+    Assert.assertEquals(0, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
+    Assert.assertEquals(0, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
   }
 
 
@@ -127,6 +139,9 @@ public class DevicesManagerTest {
     Assert.assertEquals(1, underTest.knownIgnoredDevices.size());
     Assert.assertEquals(0, underTest.knownSynchronizedDevices.size());
 
+    Assert.assertEquals(0, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
+    Assert.assertEquals(0, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
+
 
     underTest.startSynchronizingWithIgnoredDevice(discoveredDevice, new ArrayList<SyncModuleConfiguration>());
 
@@ -139,6 +154,9 @@ public class DevicesManagerTest {
 
     Assert.assertEquals(0, underTest.knownIgnoredDevices.size());
     Assert.assertEquals(1, underTest.knownSynchronizedDevices.size());
+
+    Assert.assertEquals(1, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
+    Assert.assertEquals(1, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
   }
 
 
