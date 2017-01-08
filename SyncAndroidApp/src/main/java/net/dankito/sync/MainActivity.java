@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import net.dankito.sync.adapter.KnownSynchronizedDiscoveredDevicesAdapter;
 import net.dankito.sync.adapter.UnknownDiscoveredDevicesAdapter;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.di.AndroidDiComponent;
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     ListView lstvwUnknownDiscoveredDevices = (ListView)findViewById(R.id.lstvwUnknownDiscoveredDevices);
     lstvwUnknownDiscoveredDevices.setAdapter(new UnknownDiscoveredDevicesAdapter(this, devicesManager));
+
+    ListView lstvwKnownSynchronizedDiscoveredDevices = (ListView)findViewById(R.id.lstvwKnownSynchronizedDiscoveredDevices);
+    lstvwKnownSynchronizedDiscoveredDevices.setAdapter(new KnownSynchronizedDiscoveredDevicesAdapter(this, devicesManager));
   }
 
   @Override

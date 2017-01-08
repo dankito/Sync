@@ -19,7 +19,20 @@
         android:id="@+id/lstvwUnknownDiscoveredDevices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_above="@+id/lstvwKnownSynchronizedDiscoveredDevices"
         />
+
+    <ListView
+        android:id="@+id/lstvwKnownSynchronizedDiscoveredDevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+    />
 
 
 </RelativeLayout>
