@@ -50,12 +50,7 @@ public class DevicesManagerTest {
 
   @Test
   public void startSynchronizingWithDevice() {
-    Device remoteDevice = new Device("Remote");
-    DiscoveredDevice discoveredDevice = new DiscoveredDevice(remoteDevice, "1-1-1-Love");
-    entityManager.persistEntity(remoteDevice);
-
-    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
-    underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
+    DiscoveredDevice discoveredDevice = mockUnknownDiscoveredDevice();
 
     Assert.assertFalse(localConfig.getSynchronizedDevices().contains(discoveredDevice.getDevice()));
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncConfiguration.class).size());
@@ -75,6 +70,40 @@ public class DevicesManagerTest {
     Assert.assertEquals(1, underTest.knownSynchronizedDevices.size());
   }
 
+
+  @Test
+  public void stopSynchronizingWithDevice() {
+    DiscoveredDevice discoveredDevice = mockUnknownDiscoveredDevice();
+
+    underTest.startSynchronizingWithDevice(discoveredDevice, new ArrayList<SyncModuleConfiguration>());
+
+    Assert.assertTrue(localConfig.getSynchronizedDevices().contains(discoveredDevice.getDevice()));
+    Assert.assertEquals(1, entityManager.getAllEntitiesOfType(SyncConfiguration.class).size());
+
+    Assert.assertEquals(0, underTest.unknownDevices.size());
+    Assert.assertEquals(1, underTest.knownSynchronizedDevices.size());
+
+
+    underTest.stopSynchronizingWithDevice(discoveredDevice);
+
+
+    Assert.assertFalse(localConfig.getSynchronizedDevices().contains(discoveredDevice.getDevice()));
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncConfiguration.class).size());
+
+    Assert.assertEquals(1, underTest.unknownDevices.size());
+    Assert.assertEquals(0, underTest.knownSynchronizedDevices.size());
+  }
+
+
+  protected DiscoveredDevice mockUnknownDiscoveredDevice() {
+    Device remoteDevice = new Device("Remote");
+    DiscoveredDevice discoveredDevice = new DiscoveredDevice(remoteDevice, "1-1-1-Love");
+    entityManager.persistEntity(remoteDevice);
+
+    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
+    underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
+    return discoveredDevice;
+  }
 
 
   protected void deleteFolderRecursively(String path) {
