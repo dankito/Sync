@@ -87,7 +87,13 @@ public class Device extends BaseEntity {
 
   @Override
   public String toString() {
-    return getOsName() + " " + getOsVersion();
+    String description = getOsName() + " " + getOsVersion();
+
+    if(name != null && name.length() > 0) {
+      description = name + " " + description;
+    }
+
+    return description;
   }
 
 }
