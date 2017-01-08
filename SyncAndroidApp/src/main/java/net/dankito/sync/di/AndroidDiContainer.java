@@ -22,7 +22,9 @@ import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.EntityManagerDefaultConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.CouchbaseLiteSyncManager;
+import net.dankito.sync.synchronization.ISyncConfigurationManager;
 import net.dankito.sync.synchronization.ISyncManager;
+import net.dankito.sync.synchronization.SyncConfigurationManagerAndroid;
 import net.dankito.sync.synchronization.SynchronizationConfig;
 import net.dankito.utils.IOnUiThreadRunner;
 import net.dankito.utils.IThreadPool;
@@ -134,6 +136,12 @@ public class AndroidDiContainer {
   public ISyncManager provideSyncManager(IEntityManager entityManager, INetworkConfigurationManager networkConfigurationManager, IDevicesManager devicesManager, IThreadPool threadPool) {
     return new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkConfigurationManager, devicesManager, threadPool,
         SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
+  }
+
+  @Provides
+  @Singleton
+  public ISyncConfigurationManager provideSyncConfigurationManager(ISyncManager syncManager, IDevicesManager devicesManager) {
+    return new SyncConfigurationManagerAndroid(getActivity(), syncManager, devicesManager);
   }
 
 }

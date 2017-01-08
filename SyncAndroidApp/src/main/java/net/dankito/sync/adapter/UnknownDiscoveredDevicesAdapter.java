@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.Button;
 
+import net.dankito.sync.ISyncModule;
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +18,13 @@ import java.util.List;
 public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBase {
 
 
-  public UnknownDiscoveredDevicesAdapter(Activity context, IDevicesManager devicesManager) {
+  protected ISyncConfigurationManager syncConfigurationManager;
+
+
+  public UnknownDiscoveredDevicesAdapter(Activity context, IDevicesManager devicesManager, ISyncConfigurationManager syncConfigurationManager) {
     super(context, devicesManager);
+
+    this.syncConfigurationManager = syncConfigurationManager;
   }
 
 
@@ -57,7 +64,13 @@ public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBas
     public void onClick(View view) {
       DiscoveredDevice device = (DiscoveredDevice)view.getTag();
       if(device != null) {
-        devicesManager.startSynchronizingWithDevice(device, new ArrayList<SyncModuleConfiguration>());
+        // TODO: show ConfigureSyncConfigurationActivity and set SyncModuleConfiguration there, remove ISyncConfigurationManager again
+        List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<SyncModuleConfiguration>();
+        for(ISyncModule syncModule : syncConfigurationManager.getAvailableSyncModules()) {
+          syncModuleConfigurations.add(new SyncModuleConfiguration(syncModule.getClass().getName()));
+        }
+
+        devicesManager.startSynchronizingWithDevice(device, syncModuleConfigurations);
       }
     }
   };
