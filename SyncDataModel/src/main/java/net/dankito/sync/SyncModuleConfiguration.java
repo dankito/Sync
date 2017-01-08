@@ -28,6 +28,15 @@ public class SyncModuleConfiguration extends BaseEntity {
   protected Set<SyncEntity> syncEntities = new HashSet<>();
 
 
+  public SyncModuleConfiguration() {
+
+  }
+
+  public SyncModuleConfiguration(String syncModuleClassName) {
+    this.syncModuleClassName = syncModuleClassName;
+  }
+
+
   public String getSyncModuleClassName() {
     return syncModuleClassName;
   }
