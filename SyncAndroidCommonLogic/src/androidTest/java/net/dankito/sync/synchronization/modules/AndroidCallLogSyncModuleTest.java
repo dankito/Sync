@@ -1,6 +1,9 @@
-package net.dankito.sync;
+package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
+
+import net.dankito.sync.CallLogSyncEntity;
+import net.dankito.sync.SyncEntity;
 
 import org.junit.Assert;
 

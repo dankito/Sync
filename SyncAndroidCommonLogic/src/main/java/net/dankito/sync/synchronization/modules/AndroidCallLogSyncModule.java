@@ -1,10 +1,16 @@
-package net.dankito.sync;
+package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.CallLog;
+
+import net.dankito.sync.CallLogSyncEntity;
+import net.dankito.sync.CallType;
+import net.dankito.sync.ISyncModule;
+import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncModuleConfiguration;
 
 /**
  * Created by ganymed on 05/01/17.

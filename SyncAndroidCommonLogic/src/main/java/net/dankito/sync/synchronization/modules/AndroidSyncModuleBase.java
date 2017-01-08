@@ -1,8 +1,13 @@
-package net.dankito.sync;
+package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+
+import net.dankito.sync.ISyncModule;
+import net.dankito.sync.ReadEntitiesCallback;
+import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncModuleConfiguration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

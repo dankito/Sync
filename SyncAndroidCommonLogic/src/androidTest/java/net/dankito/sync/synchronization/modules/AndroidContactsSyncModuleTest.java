@@ -1,7 +1,10 @@
-package net.dankito.sync;
+package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+
+import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.SyncEntity;
 
 import org.junit.Assert;
 
