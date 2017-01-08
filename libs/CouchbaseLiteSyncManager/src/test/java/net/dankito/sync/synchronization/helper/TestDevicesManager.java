@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization.helper;
 
 import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.DiscoveredDeviceType;
 
 public class TestDevicesManager extends DevicesManager {
 
@@ -13,7 +14,7 @@ public class TestDevicesManager extends DevicesManager {
 
 
   public void simulateDeviceConnected(DiscoveredDevice device) {
-    callDiscoveredDeviceConnectedListeners(device);
+    callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.UNKNOWN_DEVICE);
   }
 
   public void simulateDeviceDisconnected(DiscoveredDevice device) {

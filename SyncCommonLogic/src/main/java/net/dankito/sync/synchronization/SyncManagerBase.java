@@ -2,6 +2,7 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.KnownSynchronizedDevicesListener;
@@ -81,7 +82,7 @@ public abstract class SyncManagerBase implements ISyncManager {
   // TODO: this is wrong, could also be an unregistered device
   protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
     @Override
-    public void deviceDiscovered(DiscoveredDevice connectedDevice) {
+    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
       if(isListenerStarted() == false) {
         startSynchronizationListener();
       }

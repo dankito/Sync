@@ -105,18 +105,32 @@ public class DevicesManager implements IDevicesManager {
   protected void discoveredDevice(String deviceInfo, DiscoveredDevice device) {
     synchronized(discoveredDevices) {
       discoveredDevices.put(deviceInfo, device);
-      callDiscoveredDeviceConnectedListeners(device);
 
-      if(isKnownSynchronizedDevice(device)) {
+      DiscoveredDeviceType type = determineDiscoveredDeviceType(device);
+      callDiscoveredDeviceConnectedListeners(device, type);
+
+      if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
         knownSynchronizedDevices.put(deviceInfo, device);
         callKnownSynchronizedDeviceConnected(device);
       }
-      else if(isKnownIgnoredDevice(device)) {
+      else if(type == DiscoveredDeviceType.KNOWN_IGNORED_DEVICE) {
         knownIgnoredDevices.put(deviceInfo, device);
       }
       else {
         unknownDevices.put(deviceInfo, device);
       }
+    }
+  }
+
+  protected DiscoveredDeviceType determineDiscoveredDeviceType(DiscoveredDevice device) {
+    if(isKnownSynchronizedDevice(device)) {
+      return DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE;
+    }
+    else if(isKnownIgnoredDevice(device)) {
+      return DiscoveredDeviceType.KNOWN_IGNORED_DEVICE;
+    }
+    else {
+      return DiscoveredDeviceType.UNKNOWN_DEVICE;
     }
   }
 
@@ -170,9 +184,9 @@ public class DevicesManager implements IDevicesManager {
     return discoveredDevicesListeners.remove(listener);
   }
 
-  protected void callDiscoveredDeviceConnectedListeners(DiscoveredDevice device) {
+  protected void callDiscoveredDeviceConnectedListeners(DiscoveredDevice device, DiscoveredDeviceType type) {
     for(DiscoveredDevicesListener listener : discoveredDevicesListeners) {
-      listener.deviceDiscovered(device);
+      listener.deviceDiscovered(device, type);
     }
   }
 
