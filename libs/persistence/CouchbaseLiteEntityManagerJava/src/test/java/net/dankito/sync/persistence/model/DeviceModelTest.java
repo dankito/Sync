@@ -15,6 +15,8 @@ public class DeviceModelTest extends CouchbaseLiteEntityManagerJavaTestBase {
 
   protected static final String TEST_UNIQUE_DEVICE_ID = "270388";
 
+  protected static final String TEST_NAME = "Lenovo T530";
+
   protected static final OsType TEST_OS_TYPE = OsType.DESKTOP;
 
   protected static final String TEST_OS_NAME = "Linux";
@@ -23,6 +25,8 @@ public class DeviceModelTest extends CouchbaseLiteEntityManagerJavaTestBase {
 
   protected static final String TEST_DESCRIPTION = "Apple free";
 
+
+  protected static final String TEST_UPDATED_NAME = "Samsung Galaxy S3";
 
   protected static final OsType TEST_UPDATED_OS_TYPE = OsType.ANDROID;
 
@@ -42,6 +46,7 @@ public class DeviceModelTest extends CouchbaseLiteEntityManagerJavaTestBase {
   protected BaseEntity createTestEntity() {
     Device testEntity = new Device(TEST_UNIQUE_DEVICE_ID);
 
+    testEntity.setName(TEST_NAME);
     testEntity.setOsType(TEST_OS_TYPE);
     testEntity.setOsName(TEST_OS_NAME);
     testEntity.setOsVersion(TEST_OS_VERSION);
@@ -53,6 +58,7 @@ public class DeviceModelTest extends CouchbaseLiteEntityManagerJavaTestBase {
   protected void updateEntity(BaseEntity testEntity) {
     Device entity = (Device)testEntity;
 
+    entity.setName(TEST_UPDATED_NAME);
     entity.setOsType(TEST_UPDATED_OS_TYPE);
     entity.setOsName(TEST_UPDATED_OS_NAME);
     entity.setOsVersion(TEST_UPDATED_OS_VERSION);
@@ -70,6 +76,7 @@ public class DeviceModelTest extends CouchbaseLiteEntityManagerJavaTestBase {
     Device entity = (Device)retrievedEntity;
 
     Assert.assertEquals(TEST_UNIQUE_DEVICE_ID, entity.getUniqueDeviceId());
+    Assert.assertEquals(TEST_NAME, entity.getName());
     Assert.assertEquals(TEST_OS_TYPE, entity.getOsType());
     Assert.assertEquals(TEST_OS_NAME, entity.getOsName());
     Assert.assertEquals(TEST_OS_VERSION, entity.getOsVersion());
@@ -80,6 +87,7 @@ public class DeviceModelTest extends CouchbaseLiteEntityManagerJavaTestBase {
     Device entity = (Device)retrievedEntity;
 
     Assert.assertEquals(TEST_UNIQUE_DEVICE_ID, entity.getUniqueDeviceId());
+    Assert.assertEquals(TEST_UPDATED_NAME, entity.getName());
     Assert.assertEquals(TEST_UPDATED_OS_TYPE, entity.getOsType());
     Assert.assertEquals(TEST_UPDATED_OS_NAME, entity.getOsName());
     Assert.assertEquals(TEST_UPDATED_OS_VERSION, entity.getOsVersion());

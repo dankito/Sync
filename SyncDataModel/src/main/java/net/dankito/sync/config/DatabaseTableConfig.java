@@ -25,6 +25,7 @@ public class DatabaseTableConfig {
   public static final String DEVICE_TABLE_NAME = "Device";
 
   public static final String DEVICE_UNIQUE_DEVICE_ID_COLUMN_NAME = "unique_device_id";
+  public static final String DEVICE_NAME_TYPE_COLUMN_NAME = "name";
   public static final String DEVICE_OS_TYPE_COLUMN_NAME = "os_type";
   public static final String DEVICE_OS_NAME_TYPE_COLUMN_NAME = "os_name";
   public static final String DEVICE_OS_VERSION_TYPE_COLUMN_NAME = "os_version";

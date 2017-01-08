@@ -14,6 +14,9 @@ public class Device extends BaseEntity {
   @Column(name = DatabaseTableConfig.DEVICE_UNIQUE_DEVICE_ID_COLUMN_NAME)
   protected String uniqueDeviceId;
 
+  @Column(name = DatabaseTableConfig.DEVICE_NAME_TYPE_COLUMN_NAME)
+  protected String name;
+
   @Enumerated(EnumType.ORDINAL)
   @Column(name = DatabaseTableConfig.DEVICE_OS_TYPE_COLUMN_NAME)
   protected OsType osType;
@@ -39,6 +42,14 @@ public class Device extends BaseEntity {
 
   public String getUniqueDeviceId() {
     return uniqueDeviceId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public OsType getOsType() {
