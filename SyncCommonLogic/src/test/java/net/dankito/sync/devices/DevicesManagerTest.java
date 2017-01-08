@@ -115,13 +115,59 @@ public class DevicesManagerTest {
   }
 
 
+  @Test
+  public void startSynchronizingWithIgnoredDevice() {
+    DiscoveredDevice discoveredDevice = mockIgnoredDiscoveredDevice();
+
+    Assert.assertTrue(localConfig.getIgnoredDevices().contains(discoveredDevice.getDevice()));
+    Assert.assertFalse(localConfig.getSynchronizedDevices().contains(discoveredDevice.getDevice()));
+
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncConfiguration.class).size());
+
+    Assert.assertEquals(1, underTest.knownIgnoredDevices.size());
+    Assert.assertEquals(0, underTest.knownSynchronizedDevices.size());
+
+
+    underTest.startSynchronizingWithIgnoredDevice(discoveredDevice, new ArrayList<SyncModuleConfiguration>());
+
+
+    Assert.assertFalse(localConfig.getIgnoredDevices().contains(discoveredDevice.getDevice()));
+    Assert.assertTrue(localConfig.getSynchronizedDevices().contains(discoveredDevice.getDevice()));
+
+    List<SyncConfiguration> syncConfigurations = entityManager.getAllEntitiesOfType(SyncConfiguration.class);
+    Assert.assertEquals(1, syncConfigurations.size());
+
+    Assert.assertEquals(0, underTest.knownIgnoredDevices.size());
+    Assert.assertEquals(1, underTest.knownSynchronizedDevices.size());
+  }
+
+
   protected DiscoveredDevice mockUnknownDiscoveredDevice() {
+    DiscoveredDevice discoveredDevice = mockDiscoveredDevice();
+
+    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice.getDevice()), discoveredDevice);
+
+    return discoveredDevice;
+  }
+
+  protected DiscoveredDevice mockIgnoredDiscoveredDevice() {
+    DiscoveredDevice discoveredDevice = mockDiscoveredDevice();
+
+    underTest.knownIgnoredDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice.getDevice()), discoveredDevice);
+
+    localConfig.addIgnoredDevice(discoveredDevice.getDevice());
+    entityManager.updateEntity(localConfig);
+
+    return discoveredDevice;
+  }
+
+  protected DiscoveredDevice mockDiscoveredDevice() {
     Device remoteDevice = new Device("Remote");
     DiscoveredDevice discoveredDevice = new DiscoveredDevice(remoteDevice, "1-1-1-Love");
     entityManager.persistEntity(remoteDevice);
 
-    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
     underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
+
     return discoveredDevice;
   }
 

@@ -291,7 +291,14 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void startSynchronizingWithIgnoredDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
+    if(localConfig.removeIgnoredDevice(device.getDevice())) {
+        if(entityManager.updateEntity(localConfig)) {
+          String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+          knownIgnoredDevices.remove(deviceInfo);
 
+          startSynchronizingWithDevice(device, syncModuleConfigurations);
+        }
+    }
   }
 
 
