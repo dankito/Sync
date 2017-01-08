@@ -6,6 +6,11 @@ import net.dankito.android.util.AlertHelper;
 import net.dankito.android.util.AndroidOnUiThreadRunner;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
+import net.dankito.sync.AndroidPlatformConfigurationReader;
+import net.dankito.sync.Device;
+import net.dankito.sync.data.DataManager;
+import net.dankito.sync.data.IDataManager;
+import net.dankito.sync.data.IPlatformConfigurationReader;
 import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.INetworkConfigurationManager;
@@ -62,14 +67,33 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
+  public IPlatformConfigurationReader providePlatformConfigurationReader() {
+    return new AndroidPlatformConfigurationReader();
+  }
+
+  @Provides
+  @Singleton
+  public IDataManager provideDataManager(IEntityManager entityManager, IPlatformConfigurationReader platformConfigurationReader) {
+    return new DataManager(entityManager, platformConfigurationReader);
+  }
+
+  @Provides
+  @Singleton
+  public Device provideLocalDevice(IDataManager dataManager) {
+    return dataManager.getLocalDevice();
+  }
+
+
+  @Provides
+  @Singleton
   public IDevicesDiscoverer provideDevicesDiscoverer(IThreadPool threadPool) {
     return new UdpDevicesDiscovererAndroid(getActivity(), threadPool);
   }
 
   @Provides
   @Singleton
-  public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer) {
-    return new DevicesManager(devicesDiscoverer, null); // TODO: provide localDevice
+  public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, Device localDevice) {
+    return new DevicesManager(devicesDiscoverer, localDevice);
   }
 
   @Provides
