@@ -163,11 +163,11 @@ public class DevicesManager implements IDevicesManager {
 
 
   protected boolean isKnownSynchronizedDevice(DiscoveredDevice device) {
-    return false; // TODO
+    return localConfig.getSynchronizedDevices().contains(device.getDevice());
   }
 
   protected boolean isKnownIgnoredDevice(DiscoveredDevice device) {
-    return false; // TODO
+    return localConfig.getIgnoredDevices().contains(device.getDevice());
   }
 
 
