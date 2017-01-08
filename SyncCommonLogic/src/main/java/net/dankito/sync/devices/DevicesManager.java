@@ -7,6 +7,7 @@ import net.dankito.devicediscovery.DevicesDiscovererListener;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 
@@ -185,7 +186,51 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void startSynchronizingWithDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
+    // TODO: the whole process should actually run in a transaction
+    SyncConfiguration syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), device.getDevice(), syncModuleConfigurations);
+    if(entityManager.persistEntity(syncConfiguration)) {
+      if(addDeviceToKnownSynchronizedDevices(device)) {
+        addDeviceToLocalConfigSynchronizedDevices(device);
 
+        // TODO: add to localDevice sourceSynchronizationConfigurations and remote devices destinationSynchronizationConfigurations
+
+        callDiscoveredDeviceDisconnectedListeners(device);
+        callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
+
+        callKnownSynchronizedDeviceConnected(device);
+      }
+    }
+  }
+
+  protected boolean addDeviceToKnownSynchronizedDevices(DiscoveredDevice device) {
+    String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+    // TODO: querying discoveredDevices can be removed as soon as we're using real device id
+    for(Map.Entry<String, DiscoveredDevice> entry : discoveredDevices.entrySet()) {
+      if(device == entry.getValue()) {
+        deviceInfo = entry.getKey();
+        break;
+      }
+    }
+
+    if(deviceInfo != null) {
+      unknownDevices.remove(deviceInfo);
+      knownIgnoredDevices.remove(deviceInfo);
+
+      knownSynchronizedDevices.put(deviceInfo, device);
+
+      return true;
+    }
+
+    return false;
+  }
+
+  protected void addDeviceToLocalConfigSynchronizedDevices(DiscoveredDevice device) {
+    if(localConfig.getIgnoredDevices().contains(device.getDevice())) {
+      localConfig.removeIgnoredDevice(device.getDevice());
+    }
+    localConfig.addSynchronizedDevice(device.getDevice());
+
+    entityManager.updateEntity(localConfig);
   }
 
 

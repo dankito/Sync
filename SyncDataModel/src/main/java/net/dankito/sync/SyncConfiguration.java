@@ -5,6 +5,7 @@ import net.dankito.sync.config.DatabaseTableConfig;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -22,7 +23,7 @@ public class SyncConfiguration extends BaseEntity {
   @JoinColumn(name = DatabaseTableConfig.SYNC_CONFIGURATION_DESTINATION_DEVICE_JOIN_COLUMN_NAME)
   protected Device destinationDevice;
 
-  @OneToMany
+  @OneToMany(cascade = { CascadeType.PERSIST })
   protected List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<>();
 
 
