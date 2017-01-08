@@ -277,7 +277,16 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void addDeviceToIgnoreList(DiscoveredDevice device) {
+    if(localConfig.addIgnoredDevice(device.getDevice())) {
+      if(entityManager.updateEntity(localConfig)) {
+        String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+        unknownDevices.remove(deviceInfo);
+        knownIgnoredDevices.put(deviceInfo, device);
 
+        callDiscoveredDeviceDisconnectedListeners(device);
+        callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_IGNORED_DEVICE);
+      }
+    }
   }
 
   @Override

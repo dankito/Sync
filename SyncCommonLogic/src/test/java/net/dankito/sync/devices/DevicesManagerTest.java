@@ -95,6 +95,26 @@ public class DevicesManagerTest {
   }
 
 
+  @Test
+  public void addDeviceToIgnoreList() {
+    DiscoveredDevice discoveredDevice = mockUnknownDiscoveredDevice();
+
+    Assert.assertFalse(localConfig.getIgnoredDevices().contains(discoveredDevice.getDevice()));
+
+    Assert.assertEquals(1, underTest.unknownDevices.size());
+    Assert.assertEquals(0, underTest.knownIgnoredDevices.size());
+
+
+    underTest.addDeviceToIgnoreList(discoveredDevice);
+
+
+    Assert.assertTrue(localConfig.getIgnoredDevices().contains(discoveredDevice.getDevice()));
+
+    Assert.assertEquals(0, underTest.unknownDevices.size());
+    Assert.assertEquals(1, underTest.knownIgnoredDevices.size());
+  }
+
+
   protected DiscoveredDevice mockUnknownDiscoveredDevice() {
     Device remoteDevice = new Device("Remote");
     DiscoveredDevice discoveredDevice = new DiscoveredDevice(remoteDevice, "1-1-1-Love");
