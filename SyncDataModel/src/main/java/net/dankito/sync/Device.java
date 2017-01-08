@@ -10,8 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 
 @Entity(name = DatabaseTableConfig.DEVICE_TABLE_NAME)
@@ -36,12 +35,10 @@ public class Device extends BaseEntity {
   @Column(name = DatabaseTableConfig.DEVICE_DESCRIPTION_COLUMN_NAME)
   protected String description;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = DatabaseTableConfig.DEVICE_SOURCE_SYNC_CONFIGURATIONS_JOIN_COLUMN_NAME)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "sourceDevice")
   protected List<SyncConfiguration> sourceSyncConfigurations = new ArrayList<>();
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = DatabaseTableConfig.DEVICE_DESTINATION_SYNC_CONFIGURATIONS_JOIN_COLUMN_NAME)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "destinationDevice")
   protected List<SyncConfiguration> destinationSyncConfigurations = new ArrayList<>();
 
 
