@@ -2,10 +2,16 @@ package net.dankito.sync;
 
 import net.dankito.sync.config.DatabaseTableConfig;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 
 @Entity(name = DatabaseTableConfig.DEVICE_TABLE_NAME)
@@ -29,6 +35,14 @@ public class Device extends BaseEntity {
 
   @Column(name = DatabaseTableConfig.DEVICE_DESCRIPTION_COLUMN_NAME)
   protected String description;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = DatabaseTableConfig.DEVICE_SOURCE_SYNC_CONFIGURATIONS_JOIN_COLUMN_NAME)
+  protected List<SyncConfiguration> sourceSyncConfigurations = new ArrayList<>();
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = DatabaseTableConfig.DEVICE_DESTINATION_SYNC_CONFIGURATIONS_JOIN_COLUMN_NAME)
+  protected List<SyncConfiguration> destinationSyncConfigurations = new ArrayList<>();
 
 
   protected Device() { // for reflection
@@ -82,6 +96,30 @@ public class Device extends BaseEntity {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public List<SyncConfiguration> getSourceSyncConfigurations() {
+    return sourceSyncConfigurations;
+  }
+
+  public boolean addSourceSyncConfiguration(SyncConfiguration syncConfiguration) {
+    return sourceSyncConfigurations.add(syncConfiguration);
+  }
+
+  public boolean removeSourceSyncConfiguration(SyncConfiguration syncConfiguration) {
+    return sourceSyncConfigurations.remove(syncConfiguration);
+  }
+
+  public List<SyncConfiguration> getDestinationSyncConfigurations() {
+    return destinationSyncConfigurations;
+  }
+
+  public boolean addDestinationSyncConfiguration(SyncConfiguration syncConfiguration) {
+    return destinationSyncConfigurations.add(syncConfiguration);
+  }
+
+  public boolean removeDestinationSyncConfiguration(SyncConfiguration syncConfiguration) {
+    return destinationSyncConfigurations.remove(syncConfiguration);
   }
 
 

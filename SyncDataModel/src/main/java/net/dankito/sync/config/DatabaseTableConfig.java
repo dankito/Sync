@@ -46,6 +46,8 @@ public class DatabaseTableConfig {
   public static final String DEVICE_OS_NAME_TYPE_COLUMN_NAME = "os_name";
   public static final String DEVICE_OS_VERSION_TYPE_COLUMN_NAME = "os_version";
   public static final String DEVICE_DESCRIPTION_COLUMN_NAME = "description";
+  public static final String DEVICE_SOURCE_SYNC_CONFIGURATIONS_JOIN_COLUMN_NAME = "source_sync_configurations";
+  public static final String DEVICE_DESTINATION_SYNC_CONFIGURATIONS_JOIN_COLUMN_NAME = "destination_sync_configurations";
 
 
   /*          SyncEntity Column Names        */
