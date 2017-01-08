@@ -5,7 +5,6 @@ import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
-import net.dankito.sync.devices.KnownSynchronizedDevicesListener;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
@@ -31,7 +30,6 @@ public abstract class SyncManagerBase implements ISyncManager {
     this.threadPool = threadPool;
 
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
-    devicesManager.addKnownSynchronizedDevicesListener(knownSynchronizedDevicesListener);
   }
 
 
@@ -83,29 +81,17 @@ public abstract class SyncManagerBase implements ISyncManager {
   protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
     @Override
     public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
-      if(isListenerStarted() == false) {
-        startSynchronizationListener();
+      if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
+        if(isListenerStarted() == false) {
+          startSynchronizationListener();
+        }
+
+        startSynchronizationWithDeviceAsync(connectedDevice);
       }
     }
 
     @Override
     public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
-
-    }
-  };
-
-  protected KnownSynchronizedDevicesListener knownSynchronizedDevicesListener = new KnownSynchronizedDevicesListener() {
-    @Override
-    public void knownSynchronizedDeviceConnected(DiscoveredDevice connectedDevice) {
-      if(isListenerStarted() == false) {
-        startSynchronizationListener();
-      }
-
-      startSynchronizationWithDeviceAsync(connectedDevice);
-    }
-
-    @Override
-    public void knownSynchronizedDeviceDisconnected(DiscoveredDevice disconnectedDevice) {
 
     }
   };
