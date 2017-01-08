@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sync</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Einstellungen</string>
+
+    <string name="ignore_device">Nicht mehr fragen</string>
+    <string name="synchronize_with_device">Synchronisieren</string>
+    <string name="stop_synchronizing_with_device">Synchronisieren stoppen</string>
+
+</resources>
