@@ -64,8 +64,8 @@ public abstract class AndroidSyncModuleTestBase {
 
     for(SyncEntity entity : result) {
       Assert.assertNotNull(entity.getLookUpKeyOnSourceDevice());
-      Assert.assertNotNull(entity.getCreatedOn());
-      Assert.assertNotNull(entity.getModifiedOn());
+      Assert.assertNotNull(entity.getCreatedOnDevice());
+      Assert.assertNotNull(entity.getLastModifiedOnDevice());
 
       testEntity(entity);
     }

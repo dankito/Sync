@@ -33,8 +33,8 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     ImageFileSyncEntity entity = new ImageFileSyncEntity(syncModuleConfiguration);
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, MediaStore.Images.Media._ID));
-    entity.setCreatedOn(readDate(cursor, MediaStore.Images.Media.DATE_ADDED));
-    entity.setModifiedOn(readDate(cursor, MediaStore.Images.Media.DATE_MODIFIED));
+    entity.setCreatedOnDevice(readDate(cursor, MediaStore.Images.Media.DATE_ADDED));
+    entity.setLastModifiedOnDevice(readDate(cursor, MediaStore.Images.Media.DATE_MODIFIED));
     entity.setFilePath(readString(cursor, MediaStore.Images.Media.DATA));
     entity.setFileSize(readLong(cursor, MediaStore.Images.Media.SIZE));
     entity.setMimeType(readString(cursor, MediaStore.Images.Media.MIME_TYPE));

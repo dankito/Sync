@@ -32,8 +32,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, "raw_contact_id"));
-    entity.setCreatedOn(null); // TODO
-    entity.setModifiedOn(readDate(cursor, ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
+    entity.setCreatedOnDevice(null); // TODO
+    entity.setLastModifiedOnDevice(readDate(cursor, ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
 
     entity.setDisplayName(readString(cursor, ContactsContract.Contacts.DISPLAY_NAME));
 

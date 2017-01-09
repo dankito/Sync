@@ -35,12 +35,12 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     CallLogSyncEntity entity = new CallLogSyncEntity(syncModuleConfiguration);
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, CallLog.Calls._ID));
-    entity.setCreatedOn(readDate(cursor, CallLog.Calls.DATE));
+    entity.setCreatedOnDevice(readDate(cursor, CallLog.Calls.DATE));
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && readLong(cursor, CallLog.Calls.LAST_MODIFIED) > 0) {
-      entity.setModifiedOn(readDate(cursor, CallLog.Calls.LAST_MODIFIED));
+      entity.setLastModifiedOnDevice(readDate(cursor, CallLog.Calls.LAST_MODIFIED));
     }
     else{
-      entity.setModifiedOn(readDate(cursor, CallLog.Calls.DATE));
+      entity.setLastModifiedOnDevice(readDate(cursor, CallLog.Calls.DATE));
     }
 
     entity.setNumber(readString(cursor, CallLog.Calls.NUMBER));
