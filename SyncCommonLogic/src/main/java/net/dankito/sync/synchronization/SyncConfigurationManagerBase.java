@@ -141,8 +141,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           type = SyncEntityState.DELETED;
         }
         else {
-          if(mergeEntityIfChanged(persistedEntity, entity)) {
-            type = SyncEntityState.EDITED;
+          if(hasEntityBeenUpdated(persistedEntity, entity)) {
+            type = SyncEntityState.UPDATED;
           }
         }
       }
@@ -157,7 +157,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.persistEntity(lookUpKeyEntry);
   }
 
-  protected boolean mergeEntityIfChanged(SyncEntity persistedEntity, SyncEntity entity) {
+  protected boolean hasEntityBeenUpdated(SyncEntity persistedEntity, SyncEntity entity) {
     // TODO:
     return false;
   }

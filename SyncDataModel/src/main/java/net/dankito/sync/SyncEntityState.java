@@ -4,7 +4,7 @@ package net.dankito.sync;
 public enum SyncEntityState {
 
   CREATED,
-  EDITED,
+  UPDATED,
   DELETED,
   UNCHANGED
 
