@@ -8,6 +8,7 @@ import net.dankito.sync.ISyncModule;
 import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.persistence.IEntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,12 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
   protected Context context;
 
+  protected IEntityManager entityManager;
 
-  public AndroidSyncModuleBase(Context context) {
+
+  public AndroidSyncModuleBase(Context context, IEntityManager entityManager) {
     this.context = context;
+    this.entityManager = entityManager;
   }
 
 
@@ -43,7 +47,7 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     return null;
   }
 
-  protected abstract SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration);
+  protected abstract SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration);
 
   public void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback) {
     List<SyncEntity> result = new ArrayList<>();
@@ -68,7 +72,7 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
     if(cursor.moveToFirst()) {
       do {
-        SyncEntity entity = deserializeDatabaseEntry(cursor, syncModuleConfiguration);
+        SyncEntity entity = mapDatabaseEntryToSyncEntity(cursor, syncModuleConfiguration);
         result.add(entity);
       } while (cursor.moveToNext());
     }

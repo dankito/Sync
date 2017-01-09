@@ -11,6 +11,7 @@ import net.dankito.sync.CallType;
 import net.dankito.sync.ISyncModule;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.persistence.IEntityManager;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -19,8 +20,8 @@ import net.dankito.sync.SyncModuleConfiguration;
 public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
 
-  public AndroidCallLogSyncModule(Context context) {
-    super(context);
+  public AndroidCallLogSyncModule(Context context, IEntityManager entityManager) {
+    super(context, entityManager);
   }
 
 
@@ -30,7 +31,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   }
 
   @Override
-  protected SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     CallLogSyncEntity entity = new CallLogSyncEntity(syncModuleConfiguration);
 
     entity.setIdOnSourceDevice(readString(cursor, CallLog.Calls._ID));

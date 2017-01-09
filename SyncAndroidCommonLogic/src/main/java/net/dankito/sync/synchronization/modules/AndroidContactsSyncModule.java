@@ -9,6 +9,7 @@ import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.ISyncModule;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.persistence.IEntityManager;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -17,8 +18,8 @@ import net.dankito.sync.SyncModuleConfiguration;
 public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
 
-  public AndroidContactsSyncModule(Context context) {
-    super(context);
+  public AndroidContactsSyncModule(Context context, IEntityManager entityManager) {
+    super(context, entityManager);
   }
 
   @Override
@@ -27,7 +28,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @Override
-  protected SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
 
     entity.setIdOnSourceDevice(readString(cursor, "raw_contact_id"));

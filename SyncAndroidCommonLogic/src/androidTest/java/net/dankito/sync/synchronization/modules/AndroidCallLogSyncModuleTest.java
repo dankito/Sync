@@ -4,6 +4,7 @@ import android.content.Context;
 
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.persistence.IEntityManager;
 
 import org.junit.Assert;
 
@@ -15,8 +16,8 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext) {
-    return new AndroidCallLogSyncModule(appContext);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager) {
+    return new AndroidCallLogSyncModule(appContext, entityManager);
   }
 
   @Override

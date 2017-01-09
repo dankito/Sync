@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.persistence.IEntityManager;
 
 import org.junit.Assert;
 
@@ -17,8 +18,8 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @NonNull
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext) {
-    return new AndroidContactsSyncModule(appContext);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager) {
+    return new AndroidContactsSyncModule(appContext, entityManager);
   }
 
   @Override

@@ -9,6 +9,7 @@ import net.dankito.sync.ISyncModule;
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.persistence.IEntityManager;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -17,8 +18,8 @@ import net.dankito.sync.SyncModuleConfiguration;
 public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
 
-  public AndroidPhotosSyncModule(Context context) {
-    super(context);
+  public AndroidPhotosSyncModule(Context context, IEntityManager entityManager) {
+    super(context, entityManager);
   }
 
 
@@ -28,7 +29,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   }
 
   @Override
-  protected SyncEntity deserializeDatabaseEntry(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     ImageFileSyncEntity entity = new ImageFileSyncEntity(syncModuleConfiguration);
 
     entity.setIdOnSourceDevice(readString(cursor, MediaStore.Images.Media._ID));
