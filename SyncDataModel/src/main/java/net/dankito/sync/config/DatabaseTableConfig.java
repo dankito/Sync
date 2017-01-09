@@ -59,6 +59,8 @@ public class DatabaseTableConfig {
   public static final String SYNC_ENTITY_SYNC_MODULE_CONFIGURATION_JOIN_COLUMN_NAME = "sync_module_configuration_id";
   public static final String SYNC_ENTITY_SOURCE_DEVICE_ID_JOIN_COLUMN_NAME = "source_device_id";
   public static final String SYNC_ENTITY_LOOK_UP_KEY_ON_SOURCE_DEVICE_COLUMN_NAME = "look_up_key_on_source_device";
+  public static final String SYNC_ENTITY_CREATED_ON_DEVICE_COLUMN_NAME = "created_on_device";
+  public static final String SYNC_ENTITY_LAST_MODIFIED_ON_DEVICE_COLUMN_NAME = "last_modified_on_device";
 
 
   /*          CallLogSyncEntity Column Names        */
