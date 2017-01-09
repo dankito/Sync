@@ -45,6 +45,8 @@ public class SyncJobItem extends BaseEntity {
   public SyncJobItem(SyncModuleConfiguration config, SyncEntity entity) {
     this.syncModuleConfiguration = config;
     this.entity = entity;
+
+    this.startTime = new Date();
     this.state = SyncState.INITIALIZED;
   }
 
