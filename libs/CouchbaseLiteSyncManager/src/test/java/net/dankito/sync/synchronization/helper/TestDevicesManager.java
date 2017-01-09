@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.helper;
 
 
+import net.dankito.sync.LocalConfig;
 import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
@@ -9,7 +10,7 @@ public class TestDevicesManager extends DevicesManager {
 
 
   public TestDevicesManager() {
-    super(null, null);
+    super(null, null, new LocalConfig(null));
   }
 
 
@@ -23,11 +24,11 @@ public class TestDevicesManager extends DevicesManager {
 
 
   public void simulateKnownSynchronizedDeviceConnected(DiscoveredDevice device) {
-    callKnownSynchronizedDeviceConnected(device);
+    callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
   }
 
   public void simulateKnownSynchronizedDeviceDisconnected(DiscoveredDevice device) {
-    callKnownSynchronizedDeviceDisconnected(device);
+    callDiscoveredDeviceDisconnectedListeners(device);
   }
 
 }
