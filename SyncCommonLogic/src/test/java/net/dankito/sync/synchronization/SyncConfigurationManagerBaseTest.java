@@ -136,10 +136,10 @@ public class SyncConfigurationManagerBaseTest {
   public void syncUpdatedEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
     ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
-    testEntity01.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntity01.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntities.add(testEntity01);
     ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
-    testEntity02.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntity02.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity02);
 
     mockSynchronizeEntitiesWithDevice(testEntities);
@@ -165,10 +165,10 @@ public class SyncConfigurationManagerBaseTest {
   public void syncUneditedEntitiesToSync_NothingGetsSynced() {
     List<SyncEntity> testEntities = new ArrayList<>();
     ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
-    testEntity01.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntity01.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntities.add(testEntity01);
     ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
-    testEntity02.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntity02.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity02);
 
     mockSynchronizeEntitiesWithDevice(testEntities);
@@ -195,10 +195,10 @@ public class SyncConfigurationManagerBaseTest {
   public void deleteEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
     ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
-    testEntity01.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntity01.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntities.add(testEntity01);
     ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
-    testEntity02.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntity02.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity02);
 
     mockSynchronizeEntitiesWithDevice(testEntities);

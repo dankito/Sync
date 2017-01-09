@@ -31,7 +31,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
 
-    entity.setIdOnSourceDevice(readString(cursor, "raw_contact_id"));
+    entity.setLookUpKeyOnSourceDevice(readString(cursor, "raw_contact_id"));
     entity.setCreatedOn(null); // TODO
     entity.setModifiedOn(readDate(cursor, ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
 
@@ -52,7 +52,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected void readPhoneNumbers(ContactSyncEntity entity) {
     Cursor phones = context.getContentResolver().query(
         ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + entity.getIdOnSourceDevice(),
+        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + entity.getLookUpKeyOnSourceDevice(),
         null, null);
 
     if(phones.moveToFirst()) {
@@ -71,7 +71,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected void readEmailAddresses(ContactSyncEntity entity) {
     Cursor emails = context.getContentResolver().query(
         ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + entity.getIdOnSourceDevice(),
+        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + entity.getLookUpKeyOnSourceDevice(),
         null, null);
 
     if(emails.moveToFirst()) {
@@ -92,19 +92,19 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected void readContactDetails(ContactSyncEntity entity) {
     readContactNameDetails(entity);
 
-    entity.setNickname(readContactDetailString(entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+    entity.setNickname(readContactDetailString(entity.getLookUpKeyOnSourceDevice(), ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
         ContactsContract.CommonDataKinds.Nickname.NAME));
 
-    entity.setNote(readContactDetailString(entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
+    entity.setNote(readContactDetailString(entity.getLookUpKeyOnSourceDevice(), ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
         ContactsContract.CommonDataKinds.Note.NOTE));
 
-    entity.setWebsiteUrl(readContactDetailString(entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+    entity.setWebsiteUrl(readContactDetailString(entity.getLookUpKeyOnSourceDevice(), ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
         ContactsContract.CommonDataKinds.Website.URL)); // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
   }
 
   protected void readContactNameDetails(ContactSyncEntity entity) {
     String where = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
-    String[] whereParameters = new String[] { entity.getIdOnSourceDevice(), ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE };
+    String[] whereParameters = new String[] { entity.getLookUpKeyOnSourceDevice(), ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE };
 
     Cursor structuredNames = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
 

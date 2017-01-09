@@ -25,8 +25,8 @@ public abstract class SyncEntity extends BaseEntity {
   @JoinColumn(name = DatabaseTableConfig.SYNC_ENTITY_SOURCE_DEVICE_ID_JOIN_COLUMN_NAME)
   protected Device sourceDevice;
 
-  @Column(name = DatabaseTableConfig.SYNC_ENTITY_ID_ON_SOURCE_DEVICE_COLUMN_NAME)
-  protected String idOnSourceDevice;
+  @Column(name = DatabaseTableConfig.SYNC_ENTITY_LOOK_UP_KEY_ON_SOURCE_DEVICE_COLUMN_NAME)
+  protected String lookUpKeyOnSourceDevice;
 
 
   protected SyncEntity() { // for reflection
@@ -46,12 +46,12 @@ public abstract class SyncEntity extends BaseEntity {
     return sourceDevice;
   }
 
-  public String getIdOnSourceDevice() {
-    return idOnSourceDevice;
+  public String getLookUpKeyOnSourceDevice() {
+    return lookUpKeyOnSourceDevice;
   }
 
-  public void setIdOnSourceDevice(String idOnSourceDevice) {
-    this.idOnSourceDevice = idOnSourceDevice;
+  public void setLookUpKeyOnSourceDevice(String lookUpKeyOnSourceDevice) {
+    this.lookUpKeyOnSourceDevice = lookUpKeyOnSourceDevice;
   }
 
 }

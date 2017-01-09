@@ -34,7 +34,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     CallLogSyncEntity entity = new CallLogSyncEntity(syncModuleConfiguration);
 
-    entity.setIdOnSourceDevice(readString(cursor, CallLog.Calls._ID));
+    entity.setLookUpKeyOnSourceDevice(readString(cursor, CallLog.Calls._ID));
     entity.setCreatedOn(readDate(cursor, CallLog.Calls.DATE));
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && readLong(cursor, CallLog.Calls.LAST_MODIFIED) > 0) {
       entity.setModifiedOn(readDate(cursor, CallLog.Calls.LAST_MODIFIED));

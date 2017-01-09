@@ -128,7 +128,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
     }
     else {
-      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getIdOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
+      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
 
       if(entityLookUpKey == null) {
         persistLookUpKeyEntry(syncModuleConfiguration, entity);
@@ -153,7 +153,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void persistLookUpKeyEntry(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncEntityLocalLookUpKeys lookUpKeyEntry = new SyncEntityLocalLookUpKeys(getSyncEntityType(entity), entity.getId(),
-                                                                entity.getIdOnSourceDevice(), syncModuleConfiguration);
+                                                                entity.getLookUpKeyOnSourceDevice(), syncModuleConfiguration);
     entityManager.persistEntity(lookUpKeyEntry);
   }
 
