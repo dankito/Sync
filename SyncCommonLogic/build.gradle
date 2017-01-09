@@ -22,6 +22,20 @@ dependencies {
     testCompile 'ch.qos.logback:logback-classic:1.1.2'
 }
 
+// so that Test classes from other projects can see classes from src/test folder
+task testJar(type: Jar, dependsOn: testClasses) {
+    baseName = "test-${project.archivesBaseName}"
+    from sourceSets.test.output
+}
+
+configurations {
+    tests
+}
+
+artifacts {
+    tests testJar
+}
+
 
 apply plugin: 'pmd'
 

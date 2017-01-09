@@ -7,6 +7,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 
 import org.junit.Assert;
@@ -35,6 +36,8 @@ public abstract class AndroidSyncModuleTestBase {
 
   @Before
   public void setUp() {
+    entityManager = new EntityManagerStub();
+
     underTest = createSyncModuleToTest(appContext, entityManager);
   }
 
