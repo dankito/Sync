@@ -113,12 +113,13 @@ public class DevicesManager implements IDevicesManager {
     try {
       Device device = objectMapper.readValue(deviceInfo, Device.class);
 
-      Device persistedDevice = entityManager.getEntityById(Device.class, device.getId());
-      if(persistedDevice == null) {
+      try {
+        Device persistedDevice = entityManager.getEntityById(Device.class, device.getId());
+        if (persistedDevice != null) {
+          device = persistedDevice;
+        }
+      } catch(Exception e) {
         entityManager.persistEntity(device);
-      }
-      else {
-        device = persistedDevice;
       }
 
       deviceInfo = device.getUniqueDeviceId();
