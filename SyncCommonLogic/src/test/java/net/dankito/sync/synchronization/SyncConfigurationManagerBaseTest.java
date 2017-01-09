@@ -191,7 +191,38 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
-  private void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
+  @Test
+  public void deleteEntities() {
+    List<SyncEntity> testEntities = new ArrayList<>();
+    ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
+    testEntity01.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntities.add(testEntity01);
+    ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
+    testEntity02.setIdOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntities.add(testEntity02);
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+
+
+    testEntities.clear();
+    entityManager.deleteEntity(testEntity01);
+    entityManager.deleteEntity(testEntity02);
+
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+  }
+
+
+  protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
     ISyncModule testSyncModule = new ISyncModule() {
       @Override
       public void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback) {

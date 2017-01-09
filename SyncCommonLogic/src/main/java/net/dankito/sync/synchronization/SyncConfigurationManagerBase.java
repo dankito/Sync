@@ -98,6 +98,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
     }
 
+    List<SyncEntity> deletedEntities = getDeletedEntities(lookUpKeys); // SyncEntities still remaining in lookUpKeys have been deleted
+    entitiesToSync.addAll(deletedEntities);
+
     return entitiesToSync;
   }
 
@@ -157,6 +160,22 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected boolean mergeEntityIfChanged(SyncEntity persistedEntity, SyncEntity entity) {
     // TODO:
     return false;
+  }
+
+  protected List<SyncEntity> getDeletedEntities(Map<String, SyncEntityLocalLookUpKeys> lookUpKeys) {
+    List<SyncEntity> deletedEntities = new ArrayList<>(lookUpKeys.size());
+
+    for(SyncEntityLocalLookUpKeys lookUpKey : lookUpKeys.values()) {
+      SyncEntity deletedEntity = entityManager.getEntityById(getEntityClassFromEntityType(lookUpKey.getEntityType()), lookUpKey.getEntityDatabaseId());
+
+      if(deletedEntity != null) {
+        deletedEntities.add(deletedEntity);
+      }
+
+      entityManager.deleteEntity(lookUpKey);
+    }
+
+    return deletedEntities;
   }
 
 
