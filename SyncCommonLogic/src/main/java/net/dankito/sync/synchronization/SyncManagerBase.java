@@ -81,11 +81,11 @@ public abstract class SyncManagerBase implements ISyncManager {
   protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
     @Override
     public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
-      if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
-        if(isListenerStarted() == false) {
-          startSynchronizationListener();
-        }
+      if(isListenerStarted() == false) {
+        startSynchronizationListener();
+      }
 
+      if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE || isSyncDestinationForRemoteDevice(connectedDevice)) {
         startSynchronizationWithDeviceAsync(connectedDevice);
       }
     }
@@ -95,5 +95,14 @@ public abstract class SyncManagerBase implements ISyncManager {
 
     }
   };
+
+  protected boolean isSyncDestinationForRemoteDevice(DiscoveredDevice remoteDevice) {
+    // TODO
+//    for(SyncConfiguration syncConfiguration : remoteDevice.getDevice().getSourceSyncConfigurations()) {
+//      if()
+//    }
+
+    return true;
+  }
 
 }
