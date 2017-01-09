@@ -10,6 +10,7 @@ import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.SynchronizationConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +122,9 @@ public class DevicesManager implements IDevicesManager {
 
       deviceInfo = device.getUniqueDeviceId();
 
-      discoveredDevice(deviceInfo, new DiscoveredDevice(device, address));
+      DiscoveredDevice discoveredDevice = new DiscoveredDevice(device, address);
+      discoveredDevice.setSynchronizationPort(SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT); // TODO: ask from remote
+      discoveredDevice(deviceInfo, discoveredDevice);
     } catch(Exception e) {
       log.error("Could not deserialize Device from " + deviceInfo, e);
     }
