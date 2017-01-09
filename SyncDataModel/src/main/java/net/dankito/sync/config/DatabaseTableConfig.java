@@ -139,9 +139,20 @@ public class DatabaseTableConfig {
 
   public static final String SYNC_JOB_ITEM_TABLE_NAME = "SyncJobItem";
 
-  public static final String SYNC_JOB_ITEM_SYNC_MODULE_CONFIGURATION_JOIN_COLUMN_NAME = "source_device_id";
+  public static final String SYNC_JOB_ITEM_SYNC_MODULE_CONFIGURATION_JOIN_COLUMN_NAME = "sync_module_configuration";
   public static final String SYNC_JOB_ITEM_SYNC_ENTITY_JOIN_COLUMN_NAME = "sync_entity";
   public static final String SYNC_JOB_ITEM_STATE_COLUMN_NAME = "state";
   public static final String SYNC_JOB_ITEM_START_TIME_COLUMN_NAME = "start_time";
   public static final String SYNC_JOB_ITEM_FINISH_TIME_COLUMN_NAME = "finish_time";
+
+
+  /*          SyncEntityLocalLookUpKeys Column Names        */
+
+  public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_TABLE_NAME = "SyncEntityLocalLookUpKeys";
+
+  public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_TYPE_COLUMN_NAME = "entity_type";
+  public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_DATABASE_ID_COLUMN_NAME = "entity_database_id";
+  public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_LOCAL_LOOK_UP_KEY_COLUMN_NAME = "entity_local_look_up_key";
+  public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_SYNC_MODULE_CONFIGURATION_JOIN_COLUMN_NAME = "sync_module_configuration";
+
 }
