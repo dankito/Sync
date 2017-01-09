@@ -7,6 +7,7 @@ import net.dankito.devicediscovery.DevicesDiscovererListener;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.OsType;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
@@ -191,10 +192,81 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
+  public class DeviceMap {
+
+    protected String id;
+    protected String uniqueDeviceId;
+    protected String name;
+    protected OsType osType;
+    protected String osName;
+    protected String osVersion;
+
+    public DeviceMap() {
+
+    }
+
+    public DeviceMap(Device device) {
+      this.id = device.getId();
+      this.uniqueDeviceId = device.getUniqueDeviceId();
+      this.name = device.getName();
+      this.osType = device.getOsType();
+      this.osName = device.getOsName();
+      this.osVersion = device.getOsVersion();
+    }
+
+    public String getId() {
+      return id;
+    }
+
+    public void setId(String id) {
+      this.id = id;
+    }
+
+    public String getUniqueDeviceId() {
+      return uniqueDeviceId;
+    }
+
+    public void setUniqueDeviceId(String uniqueDeviceId) {
+      this.uniqueDeviceId = uniqueDeviceId;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public OsType getOsType() {
+      return osType;
+    }
+
+    public void setOsType(OsType osType) {
+      this.osType = osType;
+    }
+
+    public String getOsName() {
+      return osName;
+    }
+
+    public void setOsName(String osName) {
+      this.osName = osName;
+    }
+
+    public String getOsVersion() {
+      return osVersion;
+    }
+
+    public void setOsVersion(String osVersion) {
+      this.osVersion = osVersion;
+    }
+  }
+
   // TODO: replace by normal call to getDeviceInfoFromDevice() as soon as Message Bus is implemented
   protected String getDeviceInfoFromDeviceForDevicesDiscoverer(Device device) {
     try {
-      return objectMapper.writeValueAsString(device);
+      return objectMapper.writeValueAsString(new DeviceMap(device));
     } catch(Exception e) {
       log.error("Could not serialize device to JSON: " + device, e);
     }
