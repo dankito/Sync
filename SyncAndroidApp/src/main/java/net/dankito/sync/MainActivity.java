@@ -20,6 +20,7 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.di.AndroidDiComponent;
 import net.dankito.sync.di.AndroidDiContainer;
 import net.dankito.sync.di.DaggerAndroidDiComponent;
+import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
 import javax.inject.Inject;
 
@@ -30,6 +31,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   @Inject
   protected IDevicesManager devicesManager;
+
+  @Inject
+  protected ISyncConfigurationManager syncConfigurationManager;
 
 
   @Override
@@ -75,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     navigationView.setNavigationItemSelectedListener(this);
 
     ListView lstvwUnknownDiscoveredDevices = (ListView)findViewById(R.id.lstvwUnknownDiscoveredDevices);
-    lstvwUnknownDiscoveredDevices.setAdapter(new UnknownDiscoveredDevicesAdapter(this, devicesManager));
+    lstvwUnknownDiscoveredDevices.setAdapter(new UnknownDiscoveredDevicesAdapter(this, devicesManager, syncConfigurationManager));
 
     ListView lstvwKnownSynchronizedDiscoveredDevices = (ListView)findViewById(R.id.lstvwKnownSynchronizedDiscoveredDevices);
     lstvwKnownSynchronizedDiscoveredDevices.setAdapter(new KnownSynchronizedDiscoveredDevicesAdapter(this, devicesManager));

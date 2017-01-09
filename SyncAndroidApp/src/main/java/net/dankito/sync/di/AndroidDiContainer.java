@@ -140,8 +140,8 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public ISyncConfigurationManager provideSyncConfigurationManager(ISyncManager syncManager, IDevicesManager devicesManager) {
-    return new SyncConfigurationManagerAndroid(getActivity(), syncManager, devicesManager);
+  public ISyncConfigurationManager provideSyncConfigurationManager(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, LocalConfig localConfig) {
+    return new SyncConfigurationManagerAndroid(getActivity(), syncManager, entityManager, devicesManager, localConfig);
   }
 
 }
