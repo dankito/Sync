@@ -158,8 +158,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected boolean hasEntityBeenUpdated(SyncEntity persistedEntity, SyncEntity entity) {
-    // TODO:
-    return false;
+    if(persistedEntity.getLastModifiedOnDevice() == null) {
+      return entity.getLastModifiedOnDevice() != null;
+    }
+
+    return persistedEntity.getLastModifiedOnDevice().equals(entity.getLastModifiedOnDevice()) == false;
   }
 
   protected List<SyncEntity> getDeletedEntities(Map<String, SyncEntityLocalLookUpKeys> lookUpKeys) {

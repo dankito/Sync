@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,7 +151,9 @@ public class SyncConfigurationManagerBaseTest {
 
 
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    testEntity01.setLastModifiedOnDevice(new Date());
     testEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
+    testEntity02.setLastModifiedOnDevice(new Date());
 
 
     mockSynchronizeEntitiesWithDevice(testEntities);
