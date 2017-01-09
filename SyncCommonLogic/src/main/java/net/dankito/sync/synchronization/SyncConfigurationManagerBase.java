@@ -7,19 +7,29 @@ import net.dankito.sync.LocalConfig;
 import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncEntityLocalLookUpKeys;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class SyncConfigurationManagerBase implements ISyncConfigurationManager {
+
+  private static final Logger log = LoggerFactory.getLogger(SyncConfigurationManagerBase.class);
+
 
   protected ISyncManager syncManager;
 
@@ -28,6 +38,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected LocalConfig localConfig;
 
   protected Map<String, ISyncModule> availableSyncModules = null;
+
+  protected Map<String, Class<? extends SyncEntity>> entityClassTypes = new ConcurrentHashMap<>();
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
@@ -76,18 +88,77 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected List<SyncEntity> getEntitiesToSynchronize(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
     List<SyncEntity> entitiesToSync = new ArrayList<>();
 
-    // TODO: get last synchronization state
+    Map<String, SyncEntityLocalLookUpKeys> lookUpKeys = getLookUpKeysForSyncModuleConfiguration(syncModuleConfiguration);
 
     for(SyncEntity entity : entities) {
-      if(entity.getId() == null) {
-        entityManager.persistEntity(entity);
-      }
+      SyncEntityState type = shouldEntityBeSynchronized(syncModuleConfiguration, lookUpKeys, entity);
 
-      entitiesToSync.add(entity);
+      if(type != SyncEntityState.UNCHANGED) {
+        entitiesToSync.add(entity);
+      }
     }
 
     return entitiesToSync;
   }
+
+  protected Map<String, SyncEntityLocalLookUpKeys> getLookUpKeysForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
+    Map<String, SyncEntityLocalLookUpKeys> syncModuleConfigurationLookUpKeys = new HashMap<>();
+
+    List<SyncEntityLocalLookUpKeys> allLookUpKeys = entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class);
+
+    for(SyncEntityLocalLookUpKeys lookUpKey : allLookUpKeys) {
+      if(syncModuleConfiguration == lookUpKey.getSyncModuleConfiguration()) {
+        syncModuleConfigurationLookUpKeys.put(lookUpKey.getEntityLocalLookUpKey(), lookUpKey);
+      }
+    }
+
+    return syncModuleConfigurationLookUpKeys;
+  }
+
+  protected SyncEntityState shouldEntityBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, Map<String, SyncEntityLocalLookUpKeys> lookUpKeys, SyncEntity entity) {
+    SyncEntityState type = SyncEntityState.UNCHANGED;
+
+    if(entity.getId() == null) { // unpersisted SyncEntity
+      if(entityManager.persistEntity(entity)) {
+        persistLookUpKeyEntry(syncModuleConfiguration, entity);
+        type = SyncEntityState.CREATED;
+      }
+    }
+    else {
+      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getIdOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
+
+      if(entityLookUpKey == null) {
+        persistLookUpKeyEntry(syncModuleConfiguration, entity);
+        type = SyncEntityState.CREATED;
+      }
+      else {
+        SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
+        if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
+          entityManager.deleteEntity(entityLookUpKey);
+          type = SyncEntityState.DELETED;
+        }
+        else {
+          if(mergeEntityIfChanged(persistedEntity, entity)) {
+            type = SyncEntityState.EDITED;
+          }
+        }
+      }
+    }
+
+    return type;
+  }
+
+  protected void persistLookUpKeyEntry(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+    SyncEntityLocalLookUpKeys lookUpKeyEntry = new SyncEntityLocalLookUpKeys(getSyncEntityType(entity), entity.getId(),
+                                                                entity.getIdOnSourceDevice(), syncModuleConfiguration);
+    entityManager.persistEntity(lookUpKeyEntry);
+  }
+
+  protected boolean mergeEntityIfChanged(SyncEntity persistedEntity, SyncEntity entity) {
+    // TODO:
+    return false;
+  }
+
 
   protected void pushSyncEntitiesToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
     for(SyncEntity syncEntity : entities) {
@@ -118,6 +189,26 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected ISyncModule getSyncModuleForClassName(String syncModuleClassName) {
     getAvailableSyncModules(); // ensure availableSyncModules are loaded
     return availableSyncModules.get(syncModuleClassName);
+  }
+
+  protected String getSyncEntityType(SyncEntity entity) {
+    return entity.getClass().getName();
+  }
+
+  protected Class<? extends SyncEntity> getEntityClassFromEntityType(String entityType) {
+    Class<? extends SyncEntity> entityClass = entityClassTypes.get(entityType);
+
+    if(entityClass == null) {
+      try {
+        entityClass = (Class<? extends SyncEntity>)Class.forName(entityType);
+
+        entityClassTypes.put(entityType, entityClass);
+      } catch(Exception e) {
+        log.error("Could not get SyncEntity's Class from entityType " + entityType, e);
+      }
+    }
+
+    return entityClass;
   }
 
 
