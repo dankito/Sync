@@ -164,7 +164,7 @@ public class EntityManagerConfiguration {
 
 
   protected void setDatabaseConfiguration( boolean createTables) {
-    setDataCollectionFileName("deep_thought_db");
+    setDataCollectionFileName("sync_db"); // TODO: configure
     setCreateTables(createTables);
 
     if(new File(getDataCollectionPersistencePath()).exists() == false) {
