@@ -2,13 +2,13 @@ package net.dankito.sync.persistence;
 
 
 import net.dankito.sync.BaseEntity;
+import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.List;
 
 public abstract class CouchbaseLiteEntityManagerJavaTestBase {
@@ -34,7 +34,7 @@ public abstract class CouchbaseLiteEntityManagerJavaTestBase {
   public void tearDown() {
     underTest.close();
 
-    deleteFolderRecursively(underTest.getDatabasePath());
+    new JavaFileStorageService().deleteFolderRecursively(underTest.getDatabasePath());
   }
 
 
@@ -166,21 +166,6 @@ public abstract class CouchbaseLiteEntityManagerJavaTestBase {
     EntityManagerConfiguration configuration = new EntityManagerConfiguration(DATA_FOLDER_PATH, DATA_MODEL_VERSION);
 
     return configuration;
-  }
-
-
-  protected void deleteFolderRecursively(String path) {
-    deleteRecursively(new File(path));
-  }
-
-  protected void deleteRecursively(File file) {
-    if(file.isDirectory()) {
-      for(File containingFile : file.listFiles()) {
-        deleteRecursively(containingFile);
-      }
-    }
-
-    file.delete();
   }
 
 }

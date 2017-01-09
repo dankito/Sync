@@ -10,13 +10,13 @@ import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.ThreadPool;
+import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class DevicesManagerTest {
   public void tearDown() {
     underTest.stop();
 
-    deleteFolderRecursively(entityManager.getDatabasePath());
+    new JavaFileStorageService().deleteFolderRecursively(entityManager.getDatabasePath());
   }
 
 
@@ -187,21 +187,6 @@ public class DevicesManagerTest {
     underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
 
     return discoveredDevice;
-  }
-
-
-  protected void deleteFolderRecursively(String path) {
-    deleteRecursively(new File(path));
-  }
-
-  protected void deleteRecursively(File file) {
-    if(file.isDirectory()) {
-      for(File containingFile : file.listFiles()) {
-        deleteRecursively(containingFile);
-      }
-    }
-
-    file.delete();
   }
 
 }
