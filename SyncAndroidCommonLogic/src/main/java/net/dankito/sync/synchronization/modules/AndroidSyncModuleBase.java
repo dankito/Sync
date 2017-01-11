@@ -89,7 +89,9 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     if(cursor.moveToFirst()) {
       do {
         SyncEntity entity = mapDatabaseEntryToSyncEntity(cursor, syncModuleConfiguration);
-        result.add(entity);
+        if(entity != null) {
+          result.add(entity);
+        }
       } while (cursor.moveToNext());
     }
 
