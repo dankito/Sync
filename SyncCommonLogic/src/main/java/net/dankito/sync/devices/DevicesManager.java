@@ -289,16 +289,34 @@ public class DevicesManager implements IDevicesManager {
     // TODO: the whole process should actually run in a transaction
     SyncConfiguration syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), device.getDevice(), syncModuleConfigurations);
     if(entityManager.persistEntity(syncConfiguration)) {
-      if(addDeviceToKnownSynchronizedDevices(device)) {
-        addDeviceToLocalConfigSynchronizedDevices(device);
+      addDeviceToKnownSynchronizedDevicesAndCallListeners(device, syncConfiguration);
+    }
+  }
 
-        setSourceAndDestinationSyncConfigurationOnDevices(device, syncConfiguration);
+  @Override
+  public void remoteDeviceStartedSynchronizingWithUs(Device remoteDevice) {
+    String remoteDeviceInfo = getDeviceInfoFromDevice(remoteDevice);
 
-        callDiscoveredDeviceDisconnectedListeners(device);
-        callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
-
-        callKnownSynchronizedDeviceConnected(device);
+    for(DiscoveredDevice discoveredDevice : discoveredDevices.values()) {
+      if(remoteDeviceInfo.equals(getDeviceInfoFromDevice(discoveredDevice.getDevice()))) {
+        addDeviceToKnownSynchronizedDevicesAndCallListeners(discoveredDevice, null);
+        break;
       }
+    }
+  }
+
+  protected void addDeviceToKnownSynchronizedDevicesAndCallListeners(DiscoveredDevice device, SyncConfiguration syncConfiguration) {
+    if(addDeviceToKnownSynchronizedDevices(device)) {
+      addDeviceToLocalConfigSynchronizedDevices(device);
+
+      if(syncConfiguration != null) { // if remote device started synchronization, syncConfiguration is null
+        setSourceAndDestinationSyncConfigurationOnDevices(device, syncConfiguration);
+      }
+
+      callDiscoveredDeviceDisconnectedListeners(device);
+      callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
+
+      callKnownSynchronizedDeviceConnected(device);
     }
   }
 

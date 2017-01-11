@@ -1,6 +1,7 @@
 package net.dankito.sync.devices;
 
 
+import net.dankito.sync.Device;
 import net.dankito.sync.SyncModuleConfiguration;
 
 import java.util.List;
@@ -13,6 +14,8 @@ public interface IDevicesManager {
 
 
   void startSynchronizingWithDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations);
+
+  void remoteDeviceStartedSynchronizingWithUs(Device remoteDevice);
 
   void stopSynchronizingWithDevice(DiscoveredDevice device);
 
