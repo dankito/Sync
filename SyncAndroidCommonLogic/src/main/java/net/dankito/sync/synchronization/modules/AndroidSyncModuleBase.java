@@ -1,5 +1,6 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -164,6 +165,17 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     // TODO: get changed entities
 
     callEntityChangedListeners(null);
+  }
+
+
+  protected boolean wasInsertSuccessful(Uri contentUri) {
+    if(contentUri != null) {
+      long newEntryId = ContentUris.parseId(contentUri);
+
+      return newEntryId >= 0;
+    }
+
+    return false;
   }
 
 

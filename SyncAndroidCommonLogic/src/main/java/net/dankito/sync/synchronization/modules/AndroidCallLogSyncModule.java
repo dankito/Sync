@@ -80,12 +80,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
       ContentValues values = mapEntityToContentValues((CallLogSyncEntity)synchronizedEntity);
 
       Uri uri = context.getContentResolver().insert(CallLog.Calls.CONTENT_URI, values);
-      if(uri != null) {
-        long newCallLogEntryId = ContentUris.parseId(uri);
-        entity.setLookUpKeyOnSourceDevice("" + newCallLogEntryId);
-
-        return true;
-      }
+      return wasInsertSuccessful(uri);
     } catch(Exception e) {
       log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + synchronizedEntity, e);
     }

@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -157,8 +155,143 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   @Override
   protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+    ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
+
+    ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+    ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+        .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+        .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+        .build());
+
+    ContentResolver resolver = context.getContentResolver();
+
+    try {
+      ContentProviderResult[] results = resolver.applyBatch(ContactsContract.AUTHORITY, ops);
+
+      if(results.length > 0 && results[0] != null) {
+        String newRawContactIdString = results[0].uri.getLastPathSegment();
+        entity.setLookUpKeyOnSourceDevice(newRawContactIdString);
+      }
+    } catch(Exception e) {
+      log.error("Could not insert Contact into Database: " + entity, e);
+    }
+
+    if(entity.getLookUpKeyOnSourceDevice() != null) {
+      return saveContactDetails(entity);
+    }
+
     return false;
   }
+
+  protected boolean saveContactDetails(ContactSyncEntity entity) {
+    boolean result;
+    Long rawContactId = Long.parseLong(entity.getLookUpKeyOnSourceDevice());
+
+    result = saveName(entity, rawContactId);
+
+    result &= savePhoneNumbers(entity, rawContactId);
+
+    result &= saveEmailAddresses(entity, rawContactId);
+
+    result &= saveContactDetail(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Nickname.NAME, entity.getNickname());
+
+    result &= saveContactDetail(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Note.NOTE, entity.getNote());
+
+    result &= saveContactDetail(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Website.URL, entity.getWebsiteUrl());
+    // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
+
+    return result;
+  }
+
+  protected boolean saveName(ContactSyncEntity entity, Long rawContactId) {
+    try {
+      ContentValues values = new ContentValues();
+
+      values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
+      values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+
+      values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, entity.getDisplayName());
+
+      values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, entity.getGivenName());
+      values.put(ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME, entity.getMiddleName());
+      values.put(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, entity.getFamilyName());
+
+      values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME, entity.getPhoneticGivenName());
+      values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_MIDDLE_NAME, entity.getPhoneticMiddleName());
+      values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_FAMILY_NAME, entity.getPhoneticFamilyName());
+
+      Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+      return wasInsertSuccessful(uri);
+    } catch(Exception e) { log.error("Could not insert contact names into database for entity " + entity, e); }
+
+    return false;
+  }
+
+  protected boolean savePhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
+    // TODO: save all phone numbers
+
+    try {
+      ContentValues values = new ContentValues();
+
+      values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
+      values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+
+      values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, entity.getPhoneNumber());
+      values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+      // TODO: add custom type label
+//    values.put(ContactsContract.CommonDataKinds.Phone.LABEL, entity.);
+
+      Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+      return wasInsertSuccessful(uri);
+    } catch(Exception e) { log.error("Could not insert phone number into database for entity " + entity, e); }
+
+    return false;
+  }
+
+  protected boolean saveEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
+    // TODO: save all email addresses
+
+    try {
+      ContentValues values = new ContentValues();
+
+      values.put(ContactsContract.CommonDataKinds.Email.RAW_CONTACT_ID, rawContactId);
+      values.put(ContactsContract.CommonDataKinds.Email.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
+
+      values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, entity.getEmailAddress());
+      values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME);
+      // TODO: add custom type label
+//    values.put(ContactsContract.CommonDataKinds.Email.LABEL, entity.);
+
+      Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+      return wasInsertSuccessful(uri);
+    } catch(Exception e) { log.error("Could not insert email address into database for entity " + entity, e); }
+
+    return false;
+  }
+
+  protected boolean saveContactDetail(Long rawContactId, String mimeType, String valueColumnName, String value) {
+    return saveContactDetail(ContactsContract.Data.RAW_CONTACT_ID, rawContactId, ContactsContract.Data.MIMETYPE, mimeType, valueColumnName, value);
+  }
+
+  protected boolean saveContactDetail(String rawContactIdColumnName, Long rawContactId, String mimeTypeColumnName, String mimeType, String valueColumnName, String value) {
+    try {
+      ContentValues values = new ContentValues();
+
+      values.put(rawContactIdColumnName, rawContactId);
+      values.put(mimeTypeColumnName, mimeType);
+
+      values.put(valueColumnName, value);
+
+      Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+      return wasInsertSuccessful(uri);
+    } catch(Exception e) { log.error("Could not insert value '" + value + "' into mime type column '" + mimeTypeColumnName + "' for raw contact " + rawContactId, e); }
+
+    return false;
+  }
+
 
   @Override
   protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
