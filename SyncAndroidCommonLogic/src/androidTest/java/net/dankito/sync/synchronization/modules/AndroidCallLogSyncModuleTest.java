@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization.modules;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.CallLog;
+import android.support.annotation.NonNull;
 
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
@@ -51,15 +52,8 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Test
-  public void synchronizedNewEntity() throws ParseException {
-    CallLogSyncEntity entity = new CallLogSyncEntity(null);
-
-    entity.setNumber(TEST_NUMBER);
-    entity.setNormalizedNumber(TEST_NORMALIZED_NUMBER);
-    entity.setDate(new Date(TEST_DATE));
-    entity.setDurationInSeconds(TEST_DURATION_IN_SECONDS);
-    entity.setType(TEST_CALL_TYPE);
-    entity.setAssociatedContactName(TEST_ASSOCIATED_CONTACT_NAME);
+  public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
+    CallLogSyncEntity entity = createTestEntity();
 
     addEntityToDeleteAfterTest(entity);
 
@@ -71,13 +65,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   protected void testIfEntryHasSuccessfullyBeenAdded(CallLogSyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
-    Cursor cursor = appContext.getContentResolver().query(
-        underTest.getContentUris()[0],
-        null, // Which columns to return
-        CallLog.Calls._ID + " = ?",       // Which rows to return (all rows)
-        new String[] { entity.getLookUpKeyOnSourceDevice() },       // Selection arguments (none)
-        null        // Ordering
-    );
+    Cursor cursor = getCursorForEntity(entity);
 
     Assert.assertTrue(cursor.moveToFirst()); // does entry with this look up key exist?
 
@@ -88,6 +76,54 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_DATE, underTest.readLong(cursor, CallLog.Calls.DATE));
     Assert.assertEquals(TEST_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
     Assert.assertEquals(TEST_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
+  }
+
+
+  @Test
+  public void synchronizedDeletedEntity_EntityGetRemoved() throws ParseException {
+    CallLogSyncEntity entity = createTestEntity();
+
+    addEntityToDeleteAfterTest(entity);
+
+    underTest.addEntityToLocalDatabase(entity);
+
+
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED);
+
+
+    testIfEntryHasSuccessfullyBeenRemoved(entity);
+  }
+
+  protected void testIfEntryHasSuccessfullyBeenRemoved(CallLogSyncEntity entity) {
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+
+    Cursor cursor = getCursorForEntity(entity);
+
+    Assert.assertFalse(cursor.moveToFirst()); // assert entity does not exist anymore
+  }
+
+
+  @NonNull
+  protected CallLogSyncEntity createTestEntity() {
+    CallLogSyncEntity entity = new CallLogSyncEntity(null);
+
+    entity.setNumber(TEST_NUMBER);
+    entity.setNormalizedNumber(TEST_NORMALIZED_NUMBER);
+    entity.setDate(new Date(TEST_DATE));
+    entity.setDurationInSeconds(TEST_DURATION_IN_SECONDS);
+    entity.setType(TEST_CALL_TYPE);
+    entity.setAssociatedContactName(TEST_ASSOCIATED_CONTACT_NAME);
+    return entity;
+  }
+
+  protected Cursor getCursorForEntity(CallLogSyncEntity entity) {
+    return appContext.getContentResolver().query(
+        underTest.getContentUris()[0],
+        null, // Which columns to return
+        CallLog.Calls._ID + " = ?",       // Which rows to return (all rows)
+        new String[] { entity.getLookUpKeyOnSourceDevice() },       // Selection arguments (none)
+        null        // Ordering
+    );
   }
 
 }
