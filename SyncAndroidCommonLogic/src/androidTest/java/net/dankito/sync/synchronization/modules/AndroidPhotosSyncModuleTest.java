@@ -51,6 +51,11 @@ public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
 
   }
 
+  @Override
+  protected void testIfEntryHasSuccessfullyBeenUpdated(SyncEntity entity) {
+
+  }
+
   @NonNull
   protected String getIdColumnForEntity() {
     return MediaStore.Images.Media._ID; // TODO: is this correct?

@@ -71,6 +71,8 @@ public abstract class AndroidSyncModuleTestBase {
 
   protected abstract void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity);
 
+  protected abstract void testIfEntryHasSuccessfullyBeenUpdated(SyncEntity entity);
+
   @NonNull
   protected abstract String getIdColumnForEntity();
 
@@ -111,6 +113,22 @@ public abstract class AndroidSyncModuleTestBase {
     underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED);
 
     testIfEntryHasSuccessfullyBeenAdded(entity);
+  }
+
+
+  @Test
+  public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
+    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
+
+    underTest.addEntityToLocalDatabase(entity);
+
+    updateTestEntity(entity);
+
+
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.UPDATED);
+
+
+    testIfEntryHasSuccessfullyBeenUpdated(entity);
   }
 
 

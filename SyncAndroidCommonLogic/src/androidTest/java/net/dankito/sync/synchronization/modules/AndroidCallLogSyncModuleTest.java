@@ -93,6 +93,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_ASSOCIATED_CONTACT_LOOKUP_KEY, underTest.readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
   }
 
+  @Override
   protected void testIfEntryHasSuccessfullyBeenUpdated(SyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
