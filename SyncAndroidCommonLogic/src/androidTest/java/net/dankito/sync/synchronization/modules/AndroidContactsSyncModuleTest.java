@@ -217,7 +217,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @NonNull
   protected String getIdColumnForEntity() {
-    return ContactsContract.Data.RAW_CONTACT_ID;
+    return ContactsContract.Data._ID;
   }
 
 
@@ -225,7 +225,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
     return appContext.getContentResolver().query(
         contentUri,
         null, // Which columns to return
-        getIdColumnForEntity() + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",       // Which rows to return (all rows)
+        ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",       // Which rows to return (all rows)
         new String[] { entity.getLookUpKeyOnSourceDevice(), mimeType },       // Selection arguments (none)
         null        // Ordering
     );
