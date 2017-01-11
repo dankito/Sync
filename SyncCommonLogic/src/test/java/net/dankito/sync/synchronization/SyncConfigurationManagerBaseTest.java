@@ -9,6 +9,7 @@ import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookUpKeys;
+import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
@@ -231,6 +232,17 @@ public class SyncConfigurationManagerBaseTest {
       public void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback) {
         callback.done(testEntities);
       }
+
+      @Override
+      public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState) {
+        return false;
+      }
+
+      @Override
+      public void addSyncEntityChangeListener(SyncEntityChangeListener listener) { }
+
+      @Override
+      public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) { }
     };
 
     SyncConfigurationManagerStub syncConfigurationManagerStub = (SyncConfigurationManagerStub)underTest;

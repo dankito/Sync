@@ -70,4 +70,13 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     return false;
   }
 
+  @Override
+  protected Uri getContentUriForContentObserver() {
+    // TODO: register a ContentObserver for both
+//    return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
+    return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+  }
+
+//    Cursor cursor = context.getContentResolver().query(uri, null, null, null, "date_added DESC");
+
 }

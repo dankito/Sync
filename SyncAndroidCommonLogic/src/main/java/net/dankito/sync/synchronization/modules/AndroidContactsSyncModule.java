@@ -33,6 +33,11 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @Override
+  protected Uri getContentUriForContentObserver() {
+    return ContactsContract.Contacts.CONTENT_URI;
+  }
+
+  @Override
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
 

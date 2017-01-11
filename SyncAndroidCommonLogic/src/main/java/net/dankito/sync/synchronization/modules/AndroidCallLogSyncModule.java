@@ -128,6 +128,11 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     return false;
   }
 
+  @Override
+  protected Uri getContentUriForContentObserver() {
+    return CallLog.Calls.CONTENT_URI;
+  }
+
 
   @NonNull
   protected ContentValues mapEntityToContentValues(CallLogSyncEntity entity) {

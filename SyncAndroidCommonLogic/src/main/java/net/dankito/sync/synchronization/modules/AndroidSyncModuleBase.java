@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -10,6 +11,7 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -31,6 +34,8 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
   protected IEntityManager entityManager;
 
+  protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
+
 
   public AndroidSyncModuleBase(Context context, IEntityManager entityManager) {
     this.context = context;
@@ -39,6 +44,15 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
 
   protected abstract Uri[] getContentUris();
+
+  protected abstract Uri getContentUriForContentObserver();
+
+  protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity);
+
+  protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity);
+
+  protected abstract boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity);
+
 
   /**
    * May be overwritten in sub class to return only a specific amount of columns.
@@ -97,11 +111,60 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     return false;
   }
 
-  protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity);
 
-  protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity);
+  @Override
+  public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
+    synchronized(syncEntityChangeListeners) {
+      if(syncEntityChangeListeners.size() == 0) {
+        registerContentObserver();
+      }
 
-  protected abstract boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity);
+      syncEntityChangeListeners.add(listener);
+    }
+  }
+
+  @Override
+  public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
+    synchronized(syncEntityChangeListeners) {
+      syncEntityChangeListeners.remove(listener);
+
+      if(syncEntityChangeListeners.size() == 0) {
+        unregisterContentObserver();
+      }
+    }
+  }
+
+  protected void callEntityChangedListeners(SyncEntity entity) {
+    for(SyncEntityChangeListener listener : syncEntityChangeListeners) {
+      listener.entityChanged(entity);
+    }
+  }
+
+
+  protected void registerContentObserver() {
+    context.getContentResolver().registerContentObserver(getContentUriForContentObserver(), true, syncEntityContentObserver);
+  }
+
+  protected void unregisterContentObserver() {
+    context.getContentResolver().unregisterContentObserver(syncEntityContentObserver);
+  }
+
+  protected ContentObserver syncEntityContentObserver = new ContentObserver(null) {
+    @Override
+    public void onChange(boolean selfChange, Uri uri) {
+      if(selfChange == false) {
+        entitiesToSynchronizeChanged(uri);
+      }
+
+      super.onChange(selfChange, uri);
+    }
+  };
+
+  protected void entitiesToSynchronizeChanged(Uri uri) {
+    // TODO: get changed entities
+
+    callEntityChangedListeners(null);
+  }
 
 
   protected String readString(Cursor cursor, String columnName) {
