@@ -76,20 +76,6 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
 
-  @Test
-  public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
-    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
-
-    underTest.addEntityToLocalDatabase(entity);
-
-
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED);
-
-
-    testIfEntryHasSuccessfullyBeenRemoved(entity);
-  }
-
-
   @Override
   protected void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
@@ -121,14 +107,6 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_UPDATED_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
     Assert.assertEquals(TEST_UPDATED_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
     Assert.assertEquals(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY, underTest.readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
-  }
-
-  protected void testIfEntryHasSuccessfullyBeenRemoved(SyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
-
-    Cursor cursor = getCursorForEntity(entity);
-
-    Assert.assertFalse(cursor.moveToFirst()); // assert entity does not exist anymore
   }
 
 

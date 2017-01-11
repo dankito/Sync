@@ -13,6 +13,7 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.utils.StringUtils;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -114,6 +115,20 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @Test
+  public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
+    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
+
+    underTest.addEntityToLocalDatabase(entity);
+
+
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED);
+
+
+    testIfEntryHasSuccessfullyBeenRemoved(entity);
+  }
+
+
+  @Test
   public void addSyncEntityChangeListener_EntityGetsAdded_ListenerGetsCalled() {
     final List<SyncEntity> changedEntities = new ArrayList<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -183,6 +198,15 @@ public abstract class AndroidSyncModuleTestBase {
 
     Assert.assertEquals(1, changedEntities.size());
     // TODO: also check added Entity
+  }
+
+
+  protected void testIfEntryHasSuccessfullyBeenRemoved(SyncEntity entity) {
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+
+    Cursor cursor = getCursorForEntity(entity);
+
+    Assert.assertFalse(cursor.moveToFirst()); // assert entity does not exist anymore
   }
 
 
