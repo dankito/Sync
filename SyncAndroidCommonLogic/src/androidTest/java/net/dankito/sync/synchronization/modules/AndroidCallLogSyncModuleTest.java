@@ -10,6 +10,7 @@ import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
 import org.junit.Assert;
@@ -42,8 +43,8 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager) {
-    return new AndroidCallLogSyncModule(appContext, entityManager);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager, IThreadPool threadPool) {
+    return new AndroidCallLogSyncModule(appContext, entityManager, threadPool);
   }
 
   @Override

@@ -7,8 +7,8 @@ import android.provider.MediaStore;
 
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.IThreadPool;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -17,8 +17,8 @@ import net.dankito.sync.persistence.IEntityManager;
 public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
 
-  public AndroidPhotosSyncModule(Context context, IEntityManager entityManager) {
-    super(context, entityManager);
+  public AndroidPhotosSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+    super(context, entityManager, threadPool);
   }
 
 

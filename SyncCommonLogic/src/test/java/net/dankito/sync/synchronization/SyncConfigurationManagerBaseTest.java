@@ -18,6 +18,7 @@ import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.util.SyncConfigurationManagerStub;
+import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.After;
@@ -79,7 +80,7 @@ public class SyncConfigurationManagerBaseTest {
     entityManager.persistEntity(syncModuleConfiguration);
     entityManager.persistEntity(syncConfiguration);
 
-    underTest = new SyncConfigurationManagerStub(syncManager, entityManager, devicesManager, localConfig);
+    underTest = new SyncConfigurationManagerStub(syncManager, entityManager, devicesManager, new ThreadPool(), localConfig);
   }
 
   @After

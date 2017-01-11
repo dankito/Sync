@@ -12,6 +12,7 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
@@ -35,12 +36,15 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected IEntityManager entityManager;
 
+  protected IThreadPool threadPool;
+
   protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
 
 
-  public AndroidSyncModuleBase(Context context, IEntityManager entityManager) {
+  public AndroidSyncModuleBase(Context context, IEntityManager entityManager, IThreadPool threadPool) {
     this.context = context;
     this.entityManager = entityManager;
+    this.threadPool = threadPool;
   }
 
 
@@ -63,7 +67,16 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected abstract SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor);
 
-  public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
+  public void readAllEntitiesAsync(final ReadEntitiesCallback callback) {
+    threadPool.runAsync(new Runnable() {
+      @Override
+      public void run() {
+        readAllEntities(callback);
+      }
+    });
+  }
+
+  protected void readAllEntities(ReadEntitiesCallback callback) {
     List<SyncEntity> result = new ArrayList<>();
 
     for(Uri contentUri : getContentUris()) {

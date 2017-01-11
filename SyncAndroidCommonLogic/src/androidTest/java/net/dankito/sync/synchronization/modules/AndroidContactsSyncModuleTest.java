@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
 import org.junit.Assert;
@@ -48,8 +49,8 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @NonNull
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager) {
-    return new AndroidContactsSyncModule(appContext, entityManager);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager, IThreadPool threadPool) {
+    return new AndroidContactsSyncModule(appContext, entityManager, threadPool);
   }
 
   @NonNull

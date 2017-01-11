@@ -12,8 +12,8 @@ import android.support.annotation.NonNull;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
@@ -28,8 +28,8 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   private static final Logger log = LoggerFactory.getLogger(AndroidCallLogSyncModule.class);
 
 
-  public AndroidCallLogSyncModule(Context context, IEntityManager entityManager) {
-    super(context, entityManager);
+  public AndroidCallLogSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+    super(context, entityManager, threadPool);
   }
 
 

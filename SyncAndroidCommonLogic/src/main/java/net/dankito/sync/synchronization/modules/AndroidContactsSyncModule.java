@@ -12,8 +12,8 @@ import android.support.annotation.NonNull;
 
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +29,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
-  public AndroidContactsSyncModule(Context context, IEntityManager entityManager) {
-    super(context, entityManager);
+  public AndroidContactsSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+    super(context, entityManager, threadPool);
   }
 
   @Override

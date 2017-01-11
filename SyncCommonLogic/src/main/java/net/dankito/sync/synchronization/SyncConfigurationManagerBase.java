@@ -16,19 +16,20 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
+import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public abstract class SyncConfigurationManagerBase implements ISyncConfigurationManager {
 
@@ -41,22 +42,25 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected IEntityManager entityManager;
 
+  protected IThreadPool threadPool;
+
   protected LocalConfig localConfig;
 
   protected Map<String, ISyncModule> availableSyncModules = null;
 
   protected Map<String, Class<? extends SyncEntity>> entityClassTypes = new ConcurrentHashMap<>();
 
-  protected Set<ISyncModule> syncModulesWithEntityChanges = new ConcurrentSkipListSet<>();
+  protected Set<ISyncModule> syncModulesWithEntityChanges = new HashSet<>();
 
   protected Timer syncModulesWithEntityUpdatesTimer = new Timer();
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
 
-  public SyncConfigurationManagerBase(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, LocalConfig localConfig) {
+  public SyncConfigurationManagerBase(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig) {
     this.syncManager = syncManager;
     this.entityManager = entityManager;
+    this.threadPool = threadPool;
     this.localConfig = localConfig;
 
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
@@ -84,14 +88,18 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected void startContinuouslySynchronizationForModule(final DiscoveredDevice remoteDevice, final SyncModuleConfiguration syncModuleConfiguration) {
     ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
     if(syncModule != null) {
-      syncModule.readAllEntitiesAsync(syncModuleConfiguration, new ReadEntitiesCallback() {
+      syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
         @Override
         public void done(List<SyncEntity> entities) {
-          List<SyncEntity> entitiesToSync = getEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
-          pushSyncEntitiesToRemote(remoteDevice, syncModuleConfiguration, entitiesToSync);
+          getSyncEntityChangesAndPushToRemote(remoteDevice, syncModuleConfiguration, entities);
         }
       });
     }
+  }
+
+  protected void getSyncEntityChangesAndPushToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
+    List<SyncEntity> entitiesToSync = getEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
+    pushSyncEntitiesToRemote(remoteDevice, syncModuleConfiguration, entitiesToSync);
   }
 
 
@@ -278,7 +286,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
       @Override
       public void run() {
-        if(syncModulesWithEntityChanges.remove(syncModule)) {
+        if(syncModulesWithEntityChanges.remove(syncModule)) { // if syncModule hasn't removed (and therefore processed) yet
           pushModuleEntityChangesToRemoteDevices(syncModule);
         }
       }
