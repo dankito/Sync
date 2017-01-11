@@ -62,7 +62,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Test
   public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
-    CallLogSyncEntity entity = createTestEntity();
+    SyncEntity entity = createTestEntity();
 
     addEntityToDeleteAfterTest(entity);
 
@@ -74,7 +74,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Test
   public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
-    CallLogSyncEntity entity = createTestEntity();
+    SyncEntity entity = createTestEntity();
 
     addEntityToDeleteAfterTest(entity);
 
@@ -92,7 +92,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Test
   public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
-    CallLogSyncEntity entity = createTestEntity();
+    SyncEntity entity = createTestEntity();
 
     addEntityToDeleteAfterTest(entity);
 
@@ -106,7 +106,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
 
-  protected void testIfEntryHasSuccessfullyBeenAdded(CallLogSyncEntity entity) {
+  protected void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
     Cursor cursor = getCursorForEntity(entity);
@@ -122,7 +122,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_ASSOCIATED_CONTACT_LOOKUP_KEY, underTest.readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
   }
 
-  protected void testIfEntryHasSuccessfullyBeenUpdated(CallLogSyncEntity entity) {
+  protected void testIfEntryHasSuccessfullyBeenUpdated(SyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
     Cursor cursor = getCursorForEntity(entity);
@@ -138,7 +138,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY, underTest.readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
   }
 
-  protected void testIfEntryHasSuccessfullyBeenRemoved(CallLogSyncEntity entity) {
+  protected void testIfEntryHasSuccessfullyBeenRemoved(SyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
     Cursor cursor = getCursorForEntity(entity);
@@ -148,7 +148,8 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @NonNull
-  protected CallLogSyncEntity createTestEntity() {
+  @Override
+  protected SyncEntity createTestEntity() {
     CallLogSyncEntity entity = new CallLogSyncEntity(null);
 
     entity.setNumber(TEST_NUMBER);
@@ -162,7 +163,10 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     return entity;
   }
 
-  protected void updateTestEntity(CallLogSyncEntity entity) {
+  @Override
+  protected void updateTestEntity(SyncEntity entityToUpdate) {
+    CallLogSyncEntity entity = (CallLogSyncEntity)entityToUpdate;
+
     entity.setNumber(TEST_UPDATED_NUMBER);
     entity.setNormalizedNumber(TEST_UPDATED_NORMALIZED_NUMBER);
     entity.setDate(new Date(TEST_UPDATED_DATE));
@@ -172,7 +176,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setAssociatedContactLookUpKey(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY);
   }
 
-  protected Cursor getCursorForEntity(CallLogSyncEntity entity) {
+  protected Cursor getCursorForEntity(SyncEntity entity) {
     return appContext.getContentResolver().query(
         underTest.getContentUris()[0],
         null, // Which columns to return

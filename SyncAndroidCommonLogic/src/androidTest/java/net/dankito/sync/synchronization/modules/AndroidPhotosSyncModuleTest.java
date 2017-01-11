@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
@@ -18,6 +19,17 @@ public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
   @Override
   protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager) {
     return new AndroidPhotosSyncModule(appContext, entityManager);
+  }
+
+  @NonNull
+  @Override
+  protected SyncEntity createTestEntity() {
+    return null;
+  }
+
+  @Override
+  protected void updateTestEntity(SyncEntity entityToUpdate) {
+
   }
 
   @Override

@@ -10,6 +10,7 @@ import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -56,6 +57,11 @@ public abstract class AndroidSyncModuleTestBase {
   @NonNull
   protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager);
 
+  @NonNull
+  protected abstract SyncEntity createTestEntity();
+
+  protected abstract void updateTestEntity(SyncEntity entityToUpdate);
+
 
   @Test
   public void readAllEntitiesAsync() {
@@ -86,6 +92,82 @@ public abstract class AndroidSyncModuleTestBase {
   }
 
   protected abstract void testEntity(SyncEntity entityToTest);
+
+
+  @Test
+  public void addSyncEntityChangeListener_EntityGetsAdded_ListenerGetsCalled() {
+    final List<SyncEntity> changedEntities = new ArrayList<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
+      @Override
+      public void entityChanged(SyncEntity entity) {
+        changedEntities.add(entity);
+        countDownLatch.countDown();
+      }
+    });
+
+    SyncEntity syncEntity = createTestEntity();
+    addEntityToDeleteAfterTest(syncEntity);
+
+    underTest.addEntityToLocalDatabase(syncEntity);
+
+    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+
+    Assert.assertEquals(1, changedEntities.size());
+    // TODO: also check added Entity
+  }
+
+  @Test
+  public void addSyncEntityChangeListener_EntityGetsUpdated_ListenerGetsCalled() {
+    final List<SyncEntity> changedEntities = new ArrayList<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    SyncEntity syncEntity = createTestEntity();
+    addEntityToDeleteAfterTest(syncEntity);
+    underTest.addEntityToLocalDatabase(syncEntity);
+
+    underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
+      @Override
+      public void entityChanged(SyncEntity entity) {
+        changedEntities.add(entity);
+        countDownLatch.countDown();
+      }
+    });
+
+    updateTestEntity(syncEntity);
+    underTest.updateEntityInLocalDatabase(syncEntity);
+
+    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+
+    Assert.assertEquals(1, changedEntities.size());
+    // TODO: also check added Entity
+  }
+
+  @Test
+  public void addSyncEntityChangeListener_EntityGetsRemoved_ListenerGetsCalled() {
+    final List<SyncEntity> changedEntities = new ArrayList<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    SyncEntity syncEntity = createTestEntity();
+    addEntityToDeleteAfterTest(syncEntity);
+    underTest.addEntityToLocalDatabase(syncEntity);
+
+    underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
+      @Override
+      public void entityChanged(SyncEntity entity) {
+        changedEntities.add(entity);
+        countDownLatch.countDown();
+      }
+    });
+
+    underTest.deleteEntityFromLocalDatabase(syncEntity);
+
+    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+
+    Assert.assertEquals(1, changedEntities.size());
+    // TODO: also check added Entity
+  }
 
 
   protected void addEntityToDeleteAfterTest(SyncEntity entity) {
