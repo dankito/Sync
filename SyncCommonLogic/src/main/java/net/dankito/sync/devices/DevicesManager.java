@@ -115,8 +115,11 @@ public class DevicesManager implements IDevicesManager {
 
       try {
         Device persistedDevice = entityManager.getEntityById(Device.class, device.getId());
-        if (persistedDevice != null) {
+        if(persistedDevice != null) {
           device = persistedDevice;
+        }
+        else {
+          entityManager.persistEntity(device);
         }
       } catch(Exception e) {
         entityManager.persistEntity(device);
