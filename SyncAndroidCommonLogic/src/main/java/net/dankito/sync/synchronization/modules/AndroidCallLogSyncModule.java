@@ -39,7 +39,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   }
 
   @Override
-  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
     CallLogSyncEntity entity = new CallLogSyncEntity();
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, CallLog.Calls._ID));

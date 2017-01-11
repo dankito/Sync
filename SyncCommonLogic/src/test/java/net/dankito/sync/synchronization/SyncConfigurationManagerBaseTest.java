@@ -229,7 +229,7 @@ public class SyncConfigurationManagerBaseTest {
   protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
     ISyncModule testSyncModule = new ISyncModule() {
       @Override
-      public void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback) {
+      public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
         callback.done(testEntities);
       }
 

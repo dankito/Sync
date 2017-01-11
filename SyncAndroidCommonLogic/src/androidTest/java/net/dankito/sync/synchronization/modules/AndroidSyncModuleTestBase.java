@@ -82,7 +82,7 @@ public abstract class AndroidSyncModuleTestBase {
     final List<SyncEntity> result = new ArrayList<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.readAllEntitiesAsync(null, new ReadEntitiesCallback() {
+    underTest.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(List<SyncEntity> entities) {
         result.addAll(entities);

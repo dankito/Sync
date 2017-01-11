@@ -44,7 +44,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @Override
-  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
+  protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
     boolean isDeleted = readBoolean(cursor, "deleted");
     if(isDeleted) {
       return null;

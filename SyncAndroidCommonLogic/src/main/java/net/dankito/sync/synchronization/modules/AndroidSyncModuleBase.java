@@ -9,7 +9,6 @@ import android.net.Uri;
 
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
@@ -62,19 +61,19 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     return null;
   }
 
-  protected abstract SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration);
+  protected abstract SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor);
 
-  public void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback) {
+  public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
     List<SyncEntity> result = new ArrayList<>();
 
     for(Uri contentUri : getContentUris()) {
-      readEntitiesFromAndroidDatabase(result, syncModuleConfiguration, contentUri);
+      readEntitiesFromAndroidDatabase(result, contentUri);
     }
 
     callback.done(result);
   }
 
-  protected void readEntitiesFromAndroidDatabase(List<SyncEntity> result, SyncModuleConfiguration syncModuleConfiguration, Uri contentUri) {
+  protected void readEntitiesFromAndroidDatabase(List<SyncEntity> result, Uri contentUri) {
     Cursor cursor = context.getContentResolver().query(
         contentUri,
         getColumnNamesToRetrieve(), // Which columns to return
@@ -87,7 +86,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
     if(cursor.moveToFirst()) {
       do {
-        SyncEntity entity = mapDatabaseEntryToSyncEntity(cursor, syncModuleConfiguration);
+        SyncEntity entity = mapDatabaseEntryToSyncEntity(cursor);
         if(entity != null) {
           result.add(entity);
         }
