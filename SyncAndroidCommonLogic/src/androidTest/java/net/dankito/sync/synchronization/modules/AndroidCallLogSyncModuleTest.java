@@ -31,6 +31,13 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   protected static final CallType TEST_CALL_TYPE = CallType.OUTGOING;
   protected static final String TEST_ASSOCIATED_CONTACT_NAME = "Theresa";
 
+  protected static final String TEST_UPDATED_NUMBER = "012345678902";
+  protected static final String TEST_UPDATED_NORMALIZED_NUMBER = "+4712345678902";
+  protected static final long TEST_UPDATED_DATE = new Date().getTime() + 1;
+  protected static final int TEST_UPDATED_DURATION_IN_SECONDS = 11 * 60 + 24;
+  protected static final CallType TEST_UPDATED_CALL_TYPE = CallType.INCOMING;
+  protected static final String TEST_UPDATED_ASSOCIATED_CONTACT_NAME = "Mother Theresa";
+
 
   @Override
   protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager) {
@@ -62,25 +69,27 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     testIfEntryHasSuccessfullyBeenAdded(entity);
   }
 
-  protected void testIfEntryHasSuccessfullyBeenAdded(CallLogSyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
-    Cursor cursor = getCursorForEntity(entity);
+  @Test
+  public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
+    CallLogSyncEntity entity = createTestEntity();
 
-    Assert.assertTrue(cursor.moveToFirst()); // does entry with this look up key exist?
+    addEntityToDeleteAfterTest(entity);
 
-    Assert.assertEquals(TEST_NUMBER, underTest.readString(cursor, CallLog.Calls.NUMBER));
-    Assert.assertEquals(TEST_NORMALIZED_NUMBER, underTest.readString(cursor, CallLog.Calls.CACHED_NORMALIZED_NUMBER));
-    Assert.assertEquals(TEST_NORMALIZED_NUMBER, underTest.readString(cursor, CallLog.Calls.CACHED_FORMATTED_NUMBER));
+    underTest.addEntityToLocalDatabase(entity);
 
-    Assert.assertEquals(TEST_DATE, underTest.readLong(cursor, CallLog.Calls.DATE));
-    Assert.assertEquals(TEST_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
-    Assert.assertEquals(TEST_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
+    updateTestEntity(entity);
+
+
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.UPDATED);
+
+
+    testIfEntryHasSuccessfullyBeenUpdated(entity);
   }
 
 
   @Test
-  public void synchronizedDeletedEntity_EntityGetRemoved() throws ParseException {
+  public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
     CallLogSyncEntity entity = createTestEntity();
 
     addEntityToDeleteAfterTest(entity);
@@ -92,6 +101,37 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
     testIfEntryHasSuccessfullyBeenRemoved(entity);
+  }
+
+
+  protected void testIfEntryHasSuccessfullyBeenAdded(CallLogSyncEntity entity) {
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+
+    Cursor cursor = getCursorForEntity(entity);
+
+    Assert.assertTrue(cursor.moveToFirst()); // does entry with this look up key exist?
+
+    Assert.assertEquals(TEST_NUMBER, underTest.readString(cursor, CallLog.Calls.NUMBER));
+    Assert.assertEquals(TEST_NORMALIZED_NUMBER, underTest.readString(cursor, CallLog.Calls.CACHED_NORMALIZED_NUMBER));
+
+    Assert.assertEquals(TEST_DATE, underTest.readLong(cursor, CallLog.Calls.DATE));
+    Assert.assertEquals(TEST_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
+    Assert.assertEquals(TEST_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
+  }
+
+  protected void testIfEntryHasSuccessfullyBeenUpdated(CallLogSyncEntity entity) {
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+
+    Cursor cursor = getCursorForEntity(entity);
+
+    Assert.assertTrue(cursor.moveToFirst()); // does entry with this look up key exist?
+
+    Assert.assertEquals(TEST_UPDATED_NUMBER, underTest.readString(cursor, CallLog.Calls.NUMBER));
+    Assert.assertEquals(TEST_UPDATED_NORMALIZED_NUMBER, underTest.readString(cursor, CallLog.Calls.CACHED_NORMALIZED_NUMBER));
+
+    Assert.assertEquals(TEST_UPDATED_DATE, underTest.readLong(cursor, CallLog.Calls.DATE));
+    Assert.assertEquals(TEST_UPDATED_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
+    Assert.assertEquals(TEST_UPDATED_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
   }
 
   protected void testIfEntryHasSuccessfullyBeenRemoved(CallLogSyncEntity entity) {
@@ -113,7 +153,17 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setDurationInSeconds(TEST_DURATION_IN_SECONDS);
     entity.setType(TEST_CALL_TYPE);
     entity.setAssociatedContactName(TEST_ASSOCIATED_CONTACT_NAME);
+
     return entity;
+  }
+
+  protected void updateTestEntity(CallLogSyncEntity entity) {
+    entity.setNumber(TEST_UPDATED_NUMBER);
+    entity.setNormalizedNumber(TEST_UPDATED_NORMALIZED_NUMBER);
+    entity.setDate(new Date(TEST_UPDATED_DATE));
+    entity.setDurationInSeconds(TEST_UPDATED_DURATION_IN_SECONDS);
+    entity.setType(TEST_UPDATED_CALL_TYPE);
+    entity.setAssociatedContactName(TEST_UPDATED_ASSOCIATED_CONTACT_NAME);
   }
 
   protected Cursor getCursorForEntity(CallLogSyncEntity entity) {
