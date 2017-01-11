@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization;
 
 
+import net.dankito.sync.BaseEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
@@ -9,6 +10,7 @@ import net.dankito.sync.SyncEntityLocalLookUpKeys;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncState;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
@@ -63,6 +65,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     this.threadPool = threadPool;
     this.localConfig = localConfig;
 
+    syncManager.addSynchronizationListener(synchronizationListener);
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
   }
 
@@ -136,12 +139,33 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return syncModuleConfigurationLookUpKeys;
   }
 
+  /**
+   * SyncEntity's database id has to be set to be able to find its SyncEntityLocalLookUpKeys
+   * @param syncModuleConfiguration
+   * @param entity
+   * @return
+   */
+  protected SyncEntityLocalLookUpKeys getLookUpKeyForSyncEntityByDatabaseId(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+    String entityId = entity.getId();
+    List<SyncEntityLocalLookUpKeys> allLookUpKeys = entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class);
+
+    for(SyncEntityLocalLookUpKeys lookUpKey : allLookUpKeys) {
+      if(syncModuleConfiguration == lookUpKey.getSyncModuleConfiguration()) {
+        if(entityId.equals(lookUpKey.getEntityDatabaseId())) {
+          return lookUpKey;
+        }
+      }
+    }
+
+    return null;
+  }
+
   protected SyncEntityState shouldEntityBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, Map<String, SyncEntityLocalLookUpKeys> lookUpKeys, SyncEntity entity) {
     SyncEntityState type = SyncEntityState.UNCHANGED;
 
     if(entity.getId() == null) { // unpersisted SyncEntity
       if(entityManager.persistEntity(entity)) {
-        persistLookUpKeyEntry(syncModuleConfiguration, entity);
+        persistEntryLookUpKey(syncModuleConfiguration, entity);
         type = SyncEntityState.CREATED;
       }
     }
@@ -149,13 +173,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
 
       if(entityLookUpKey == null) {
-        persistLookUpKeyEntry(syncModuleConfiguration, entity);
+        persistEntryLookUpKey(syncModuleConfiguration, entity);
         type = SyncEntityState.CREATED;
       }
       else {
         SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
         if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
-          entityManager.deleteEntity(entityLookUpKey);
+          deleteEntryLookUpKey(entityLookUpKey);
           type = SyncEntityState.DELETED;
         }
         else {
@@ -169,10 +193,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return type;
   }
 
-  protected void persistLookUpKeyEntry(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+  protected void persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncEntityLocalLookUpKeys lookUpKeyEntry = new SyncEntityLocalLookUpKeys(getSyncEntityType(entity), entity.getId(),
                                                                 entity.getLookUpKeyOnSourceDevice(), syncModuleConfiguration);
     entityManager.persistEntity(lookUpKeyEntry);
+  }
+
+  protected void deleteEntryLookUpKey(SyncEntityLocalLookUpKeys lookUpKey) {
+    entityManager.deleteEntity(lookUpKey);
   }
 
   protected boolean hasEntityBeenUpdated(SyncEntity persistedEntity, SyncEntity entity) {
@@ -193,7 +221,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         deletedEntities.add(deletedEntity);
       }
 
-      entityManager.deleteEntity(lookUpKey);
+      deleteEntryLookUpKey(lookUpKey);
     }
 
     return deletedEntities;
@@ -311,6 +339,44 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         }
       }
     });
+  }
+
+
+  protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
+    @Override
+    public void entitySynchronized(BaseEntity entity) {
+      if(entity instanceof SyncJobItem) {
+        SyncJobItem syncJobItem = (SyncJobItem)entity;
+        if(syncJobItem.getState() == SyncState.INITIALIZED || syncJobItem.getState() == SyncState.COPIED_TO_OUTGOING_FOLDER) {
+          remoteEntitySynchronized((SyncJobItem) entity);
+        }
+      }
+    }
+  };
+
+  protected void remoteEntitySynchronized(SyncJobItem jobItem) {
+    SyncEntity entity = jobItem.getEntity();
+    SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
+    ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
+    SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, entity);
+
+    syncModule.synchronizedEntityRetrieved(entity, syncEntityState);
+  }
+
+  protected SyncEntityState getSyncEntityState(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+    SyncEntityLocalLookUpKeys lookupKey = getLookUpKeyForSyncEntityByDatabaseId(syncModuleConfiguration, entity);
+
+    if(lookupKey == null) {
+      persistEntryLookUpKey(syncModuleConfiguration, entity); // TODO: in this way method got side effects
+      return SyncEntityState.CREATED;
+    }
+    else if(entity.isDeleted()) {
+      deleteEntryLookUpKey(lookupKey); // TODO: in this way method got side effects
+      return SyncEntityState.DELETED;
+    }
+    else {
+      return SyncEntityState.UPDATED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
+    }
   }
 
 
