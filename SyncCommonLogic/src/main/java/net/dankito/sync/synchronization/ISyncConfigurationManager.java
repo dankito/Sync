@@ -1,6 +1,6 @@
 package net.dankito.sync.synchronization;
 
-import net.dankito.sync.ISyncModule;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 
 import java.util.List;
 

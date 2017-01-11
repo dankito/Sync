@@ -2,9 +2,7 @@ package net.dankito.sync.synchronization;
 
 
 import net.dankito.sync.Device;
-import net.dankito.sync.ISyncModule;
 import net.dankito.sync.LocalConfig;
-import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookUpKeys;
@@ -16,6 +14,8 @@ import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.modules.ISyncModule;
+import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

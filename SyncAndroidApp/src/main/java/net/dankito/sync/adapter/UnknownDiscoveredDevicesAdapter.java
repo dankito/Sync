@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.Button;
 
-import net.dankito.sync.ISyncModule;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;

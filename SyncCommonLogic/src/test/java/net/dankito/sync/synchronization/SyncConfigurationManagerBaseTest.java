@@ -3,9 +3,7 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
-import net.dankito.sync.ISyncModule;
 import net.dankito.sync.LocalConfig;
-import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookUpKeys;
@@ -17,6 +15,8 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.modules.ISyncModule;
+import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.util.SyncConfigurationManagerStub;
 import net.dankito.utils.services.JavaFileStorageService;
 

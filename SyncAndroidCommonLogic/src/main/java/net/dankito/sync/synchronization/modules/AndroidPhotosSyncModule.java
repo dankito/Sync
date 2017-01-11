@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
-import net.dankito.sync.ISyncModule;
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;

@@ -7,8 +7,6 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
-import net.dankito.sync.ISyncModule;
-import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncModuleConfiguration;

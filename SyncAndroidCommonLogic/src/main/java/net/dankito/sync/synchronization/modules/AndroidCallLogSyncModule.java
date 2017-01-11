@@ -1,6 +1,5 @@
 package net.dankito.sync.synchronization.modules;
 
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,7 +11,6 @@ import android.support.annotation.NonNull;
 
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
-import net.dankito.sync.ISyncModule;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;

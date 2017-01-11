@@ -1,7 +1,7 @@
 package net.dankito.sync.synchronization;
 
-import net.dankito.sync.ISyncModule;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 
 
 public class SyncEntityChange {

@@ -11,7 +11,6 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 
 import net.dankito.sync.ContactSyncEntity;
-import net.dankito.sync.ISyncModule;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;

@@ -7,7 +7,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import net.dankito.sync.ContactSyncEntity;
-import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.EntityManagerStub;

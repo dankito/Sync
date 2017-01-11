@@ -1,6 +1,6 @@
 package net.dankito.sync.synchronization.util;
 
-import net.dankito.sync.ISyncModule;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
