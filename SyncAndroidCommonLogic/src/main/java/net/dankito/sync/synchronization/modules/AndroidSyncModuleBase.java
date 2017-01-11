@@ -27,7 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by ganymed on 05/01/17.
  */
 
-public abstract class AndroidSyncModuleBase implements ISyncModule {
+public abstract class AndroidSyncModuleBase extends SyncModuleBase implements ISyncModule {
 
   private static final Logger log = LoggerFactory.getLogger(AndroidSyncModuleBase.class);
 

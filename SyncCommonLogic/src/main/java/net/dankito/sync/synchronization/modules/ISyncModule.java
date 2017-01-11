@@ -15,6 +15,8 @@ public interface ISyncModule {
 
   boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState);
 
+  String getModuleUniqueKey();
+
   void addSyncEntityChangeListener(SyncEntityChangeListener listener);
   void removeSyncEntityChangeListener(SyncEntityChangeListener listener);
 
