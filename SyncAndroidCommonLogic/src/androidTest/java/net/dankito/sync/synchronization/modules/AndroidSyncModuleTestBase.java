@@ -13,6 +13,7 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.utils.StringUtils;
 
 import org.junit.After;
@@ -153,8 +154,8 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
-      public void entityChanged(SyncEntity entity) {
-        changedEntities.add(entity);
+      public void entityChanged(SyncEntityChange syncEntityChange) {
+        changedEntities.add(syncEntityChange.getSyncEntity());
         countDownLatch.countDown();
       }
     });
@@ -179,8 +180,8 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
-      public void entityChanged(SyncEntity entity) {
-        changedEntities.add(entity);
+      public void entityChanged(SyncEntityChange syncEntityChange) {
+        changedEntities.add(syncEntityChange.getSyncEntity());
         countDownLatch.countDown();
       }
     });
@@ -204,8 +205,8 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
-      public void entityChanged(SyncEntity entity) {
-        changedEntities.add(entity);
+      public void entityChanged(SyncEntityChange syncEntityChange) {
+        changedEntities.add(syncEntityChange.getSyncEntity());
         countDownLatch.countDown();
       }
     });

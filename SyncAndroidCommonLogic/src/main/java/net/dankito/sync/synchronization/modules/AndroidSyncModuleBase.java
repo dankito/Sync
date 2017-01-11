@@ -13,6 +13,7 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.utils.StringUtils;
 
@@ -155,7 +156,7 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
   protected void callEntityChangedListeners(SyncEntity entity) {
     for(SyncEntityChangeListener listener : syncEntityChangeListeners) {
-      listener.entityChanged(entity);
+      listener.entityChanged(new SyncEntityChange(this, entity));
     }
   }
 
