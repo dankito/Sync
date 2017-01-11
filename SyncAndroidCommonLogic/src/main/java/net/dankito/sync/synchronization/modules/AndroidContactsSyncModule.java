@@ -183,6 +183,15 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     return false;
   }
 
+
+  @Override
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+    ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
+
+    return saveContactDetails(entity);
+  }
+
+
   protected boolean saveContactDetails(ContactSyncEntity entity) {
     boolean result;
     Long rawContactId = Long.parseLong(entity.getLookUpKeyOnSourceDevice());
@@ -289,12 +298,6 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       return wasInsertSuccessful(uri);
     } catch(Exception e) { log.error("Could not insert value '" + value + "' into mime type column '" + mimeTypeColumnName + "' for raw contact " + rawContactId, e); }
 
-    return false;
-  }
-
-
-  @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
     return false;
   }
 
