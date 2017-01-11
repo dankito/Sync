@@ -1,10 +1,13 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.CallLog;
+import android.support.annotation.NonNull;
 
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
@@ -12,6 +15,7 @@ import net.dankito.sync.ISyncModule;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +73,22 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
   @Override
   protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+    try {
+      CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
+
+      ContentValues values = mapEntityToContentValues((CallLogSyncEntity)synchronizedEntity);
+
+      Uri uri = context.getContentResolver().insert(CallLog.Calls.CONTENT_URI, values);
+      if(uri != null) {
+        long newCallLogEntryId = ContentUris.parseId(uri);
+        entity.setLookUpKeyOnSourceDevice("" + newCallLogEntryId);
+
+        return true;
+      }
+    } catch(Exception e) {
+      log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + synchronizedEntity, e);
+    }
+
     return false;
   }
 
@@ -83,6 +103,50 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     return false;
   }
 
+
+  @NonNull
+  protected ContentValues mapEntityToContentValues(CallLogSyncEntity entity) {
+    ContentValues values = new ContentValues();
+
+    values.put(CallLog.Calls.NUMBER, entity.getNumber());
+    if(StringUtils.isNotNullOrEmpty(entity.getNormalizedNumber())) {
+      values.put(CallLog.Calls.CACHED_NORMALIZED_NUMBER, entity.getNormalizedNumber());
+      values.put(CallLog.Calls.CACHED_FORMATTED_NUMBER, entity.getNormalizedNumber());
+    }
+
+    if(entity.getDate() != null) {
+      values.put(CallLog.Calls.DATE, entity.getDate().getTime());
+    }
+    values.put(CallLog.Calls.DURATION, entity.getDurationInSeconds());
+
+    values.put(CallLog.Calls.TYPE, mapCallTypeToAndroidCallType(entity.getType()));
+    values.put(CallLog.Calls.NEW, 1);
+
+    values.put(CallLog.Calls.CACHED_NAME, entity.getAssociatedContactName());
+
+    return values;
+  }
+
+  protected int mapCallTypeToAndroidCallType(CallType type) {
+    switch(type) {
+      case INCOMING:
+        return CallLog.Calls.INCOMING_TYPE;
+      case OUTGOING:
+        return CallLog.Calls.OUTGOING_TYPE;
+      case MISSED:
+        return CallLog.Calls.MISSED_TYPE;
+      case REJECTED:
+        return CallLog.Calls.REJECTED_TYPE;
+      case BLOCKED:
+        return CallLog.Calls.BLOCKED_TYPE;
+      case VOICE_MAIL:
+        return CallLog.Calls.VOICEMAIL_TYPE;
+      case ANSWERED_EXTERNALLY:
+        return CallLog.Calls.ANSWERED_EXTERNALLY_TYPE;
+      default:
+        return 0;
+    }
+  }
 
   protected CallType parseCallType(Cursor cursor) {
     int typeInt = readInteger(cursor, CallLog.Calls.TYPE);
