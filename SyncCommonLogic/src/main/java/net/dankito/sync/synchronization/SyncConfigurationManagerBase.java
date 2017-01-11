@@ -44,6 +44,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected IEntityManager entityManager;
 
+  protected IDevicesManager devicesManager;
+
   protected IThreadPool threadPool;
 
   protected LocalConfig localConfig;
@@ -62,6 +64,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   public SyncConfigurationManagerBase(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig) {
     this.syncManager = syncManager;
     this.entityManager = entityManager;
+    this.devicesManager = devicesManager;
     this.threadPool = threadPool;
     this.localConfig = localConfig;
 
@@ -349,6 +352,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         SyncJobItem syncJobItem = (SyncJobItem)entity;
         if(syncJobItem.getState() == SyncState.INITIALIZED || syncJobItem.getState() == SyncState.COPIED_TO_OUTGOING_FOLDER) {
           remoteEntitySynchronized((SyncJobItem) entity);
+        }
+      }
+      else if(entity instanceof SyncConfiguration) {
+        SyncConfiguration syncConfiguration = (SyncConfiguration)entity;
+        if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice()) {
+          devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
         }
       }
     }
