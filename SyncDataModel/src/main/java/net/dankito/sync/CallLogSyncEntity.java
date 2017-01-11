@@ -26,6 +26,9 @@ public class CallLogSyncEntity extends SyncEntity {
   @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_ASSOCIATED_CONTACT_NAME_COLUMN_NAME)
   protected String associatedContactName;
 
+  @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_ASSOCIATED_CONTACT_LOOK_UP_KEY_COLUMN_NAME)
+  protected String associatedContactLookUpKey;
+
   @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = DatabaseTableConfig.CALL_LOG_SYNC_ENTITY_DATE_COLUMN_NAME)
   protected Date date;
@@ -69,6 +72,14 @@ public class CallLogSyncEntity extends SyncEntity {
 
   public void setAssociatedContactName(String associatedContactName) {
     this.associatedContactName = associatedContactName;
+  }
+
+  public String getAssociatedContactLookUpKey() {
+    return associatedContactLookUpKey;
+  }
+
+  public void setAssociatedContactLookUpKey(String associatedContactLookUpKey) {
+    this.associatedContactLookUpKey = associatedContactLookUpKey;
   }
 
   public Date getDate() {

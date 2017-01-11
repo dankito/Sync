@@ -30,6 +30,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   protected static final int TEST_DURATION_IN_SECONDS = 11 * 60 + 23;
   protected static final CallType TEST_CALL_TYPE = CallType.OUTGOING;
   protected static final String TEST_ASSOCIATED_CONTACT_NAME = "Theresa";
+  protected static final String TEST_ASSOCIATED_CONTACT_LOOKUP_KEY = "content://com.android.contacts/contacts/lookup/3585r1-2B314331474B3953294F/1";
 
   protected static final String TEST_UPDATED_NUMBER = "012345678902";
   protected static final String TEST_UPDATED_NORMALIZED_NUMBER = "+4712345678902";
@@ -37,6 +38,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   protected static final int TEST_UPDATED_DURATION_IN_SECONDS = 11 * 60 + 24;
   protected static final CallType TEST_UPDATED_CALL_TYPE = CallType.INCOMING;
   protected static final String TEST_UPDATED_ASSOCIATED_CONTACT_NAME = "Mother Theresa";
+  protected static final String TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY = "content://com.android.contacts/contacts/lookup/3585r6-3D3F29514D/6";
 
 
   @Override
@@ -117,6 +119,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_DATE, underTest.readLong(cursor, CallLog.Calls.DATE));
     Assert.assertEquals(TEST_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
     Assert.assertEquals(TEST_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
+    Assert.assertEquals(TEST_ASSOCIATED_CONTACT_LOOKUP_KEY, underTest.readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
   }
 
   protected void testIfEntryHasSuccessfullyBeenUpdated(CallLogSyncEntity entity) {
@@ -132,6 +135,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertEquals(TEST_UPDATED_DATE, underTest.readLong(cursor, CallLog.Calls.DATE));
     Assert.assertEquals(TEST_UPDATED_DURATION_IN_SECONDS, underTest.readInteger(cursor, CallLog.Calls.DURATION));
     Assert.assertEquals(TEST_UPDATED_ASSOCIATED_CONTACT_NAME, underTest.readString(cursor, CallLog.Calls.CACHED_NAME));
+    Assert.assertEquals(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY, underTest.readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
   }
 
   protected void testIfEntryHasSuccessfullyBeenRemoved(CallLogSyncEntity entity) {
@@ -153,6 +157,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setDurationInSeconds(TEST_DURATION_IN_SECONDS);
     entity.setType(TEST_CALL_TYPE);
     entity.setAssociatedContactName(TEST_ASSOCIATED_CONTACT_NAME);
+    entity.setAssociatedContactLookUpKey(TEST_ASSOCIATED_CONTACT_LOOKUP_KEY);
 
     return entity;
   }
@@ -164,6 +169,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setDurationInSeconds(TEST_UPDATED_DURATION_IN_SECONDS);
     entity.setType(TEST_UPDATED_CALL_TYPE);
     entity.setAssociatedContactName(TEST_UPDATED_ASSOCIATED_CONTACT_NAME);
+    entity.setAssociatedContactLookUpKey(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY);
   }
 
   protected Cursor getCursorForEntity(CallLogSyncEntity entity) {

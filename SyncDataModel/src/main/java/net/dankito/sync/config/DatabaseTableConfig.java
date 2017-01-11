@@ -71,6 +71,7 @@ public class DatabaseTableConfig {
   public static final String CALL_LOG_SYNC_ENTITY_NUMBER_COLUMN_NAME = "number";
   public static final String CALL_LOG_SYNC_ENTITY_NORMALIZED_NUMBER_COLUMN_NAME = "normalized_number";
   public static final String CALL_LOG_SYNC_ENTITY_ASSOCIATED_CONTACT_NAME_COLUMN_NAME = "associated_contact_name";
+  public static final String CALL_LOG_SYNC_ENTITY_ASSOCIATED_CONTACT_LOOK_UP_KEY_COLUMN_NAME = "associated_contact_look_up_key";
   public static final String CALL_LOG_SYNC_ENTITY_DATE_COLUMN_NAME = "date";
   public static final String CALL_LOG_SYNC_ENTITY_DURATION_IN_SECONDS_COLUMN_NAME = "duration_in_seconds";
   public static final String CALL_LOG_SYNC_ENTITY_TYPE_COLUMN_NAME = "type";
