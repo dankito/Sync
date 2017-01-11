@@ -55,7 +55,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
   @NonNull
   @Override
   protected SyncEntity createTestEntity() {
-    ContactSyncEntity entity = new ContactSyncEntity(null);
+    ContactSyncEntity entity = new ContactSyncEntity();
 
     entity.setDisplayName(TEST_DISPLAY_NAME);
     entity.setNickname(TEST_NICK_NAME);

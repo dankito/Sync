@@ -29,7 +29,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
   @Override
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
-    ImageFileSyncEntity entity = new ImageFileSyncEntity(syncModuleConfiguration);
+    ImageFileSyncEntity entity = new ImageFileSyncEntity();
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, MediaStore.Images.Media._ID));
     entity.setCreatedOnDevice(readDate(cursor, MediaStore.Images.Media.DATE_ADDED));

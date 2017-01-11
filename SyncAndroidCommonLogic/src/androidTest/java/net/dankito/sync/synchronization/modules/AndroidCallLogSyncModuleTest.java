@@ -114,7 +114,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   @NonNull
   @Override
   protected SyncEntity createTestEntity() {
-    CallLogSyncEntity entity = new CallLogSyncEntity(null);
+    CallLogSyncEntity entity = new CallLogSyncEntity();
 
     entity.setNumber(TEST_NUMBER);
     entity.setNormalizedNumber(TEST_NORMALIZED_NUMBER);

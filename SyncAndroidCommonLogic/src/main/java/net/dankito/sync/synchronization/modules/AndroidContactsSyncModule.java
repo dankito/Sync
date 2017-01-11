@@ -50,7 +50,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       return null;
     }
 
-    ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
+    ContactSyncEntity entity = new ContactSyncEntity();
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, ContactsContract.RawContacts._ID));
     entity.setCreatedOnDevice(null); // TODO

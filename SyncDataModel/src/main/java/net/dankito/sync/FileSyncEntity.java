@@ -27,12 +27,8 @@ public class FileSyncEntity extends SyncEntity {
   protected String mimeType;
 
 
-  protected FileSyncEntity() { // for reflection
-
-  }
-
-  public FileSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
-    super(syncModuleConfiguration);
+  public FileSyncEntity() {
+    super();
   }
 
 

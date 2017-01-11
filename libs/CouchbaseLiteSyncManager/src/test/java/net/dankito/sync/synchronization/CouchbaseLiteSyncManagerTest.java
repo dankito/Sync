@@ -107,7 +107,7 @@ public class CouchbaseLiteSyncManagerTest {
       }
     });
 
-    ContactSyncEntity testEntity = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity = new ContactSyncEntity();
     testEntity.setDisplayName("Gandhi");
     testEntity.setGivenName("");
     testEntity.setFamilyName("Gandhi");

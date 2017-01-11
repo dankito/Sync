@@ -49,12 +49,8 @@ public class ContactSyncEntity extends SyncEntity {
   protected String note;
 
 
-  protected ContactSyncEntity() { // for reflection
+  public ContactSyncEntity() {
 
-  }
-
-  public ContactSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
-    super(syncModuleConfiguration);
   }
 
 

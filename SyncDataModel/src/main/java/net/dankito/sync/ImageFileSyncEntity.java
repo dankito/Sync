@@ -35,12 +35,8 @@ public class ImageFileSyncEntity extends FileSyncEntity {
   protected int orientation;
 
 
-  protected ImageFileSyncEntity() { // for reflection
+  public ImageFileSyncEntity() {
 
-  }
-
-  public ImageFileSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
-    super(syncModuleConfiguration);
   }
 
 

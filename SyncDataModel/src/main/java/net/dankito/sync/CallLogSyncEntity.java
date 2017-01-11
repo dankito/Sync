@@ -41,12 +41,8 @@ public class CallLogSyncEntity extends SyncEntity {
   protected CallType type;
 
 
-  protected CallLogSyncEntity() { // for reflection
+  public CallLogSyncEntity() {
 
-  }
-
-  public CallLogSyncEntity(SyncModuleConfiguration syncModuleConfiguration) {
-    super(syncModuleConfiguration);
   }
 
 
