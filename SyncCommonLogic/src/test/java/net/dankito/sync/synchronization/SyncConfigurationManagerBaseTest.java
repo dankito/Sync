@@ -93,8 +93,8 @@ public class SyncConfigurationManagerBaseTest {
   @Test
   public void syncNewEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
-    SyncEntity testEntity01 = new ContactSyncEntity(null);
-    SyncEntity testEntity02 = new ContactSyncEntity(null);
+    SyncEntity testEntity01 = new ContactSyncEntity();
+    SyncEntity testEntity02 = new ContactSyncEntity();
     testEntities.add(testEntity01);
     testEntities.add(testEntity02);
 
@@ -114,8 +114,8 @@ public class SyncConfigurationManagerBaseTest {
   @Test
   public void syncPersistedButUnsyncedEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
-    SyncEntity testEntity01 = new ContactSyncEntity(null);
-    SyncEntity testEntity02 = new ContactSyncEntity(null);
+    SyncEntity testEntity01 = new ContactSyncEntity();
+    SyncEntity testEntity02 = new ContactSyncEntity();
     testEntities.add(testEntity01);
     testEntities.add(testEntity02);
     entityManager.persistEntity(testEntity01);
@@ -137,10 +137,10 @@ public class SyncConfigurationManagerBaseTest {
   @Test
   public void syncUpdatedEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
-    ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntities.add(testEntity01);
-    ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
     testEntity02.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity02);
 
@@ -168,10 +168,10 @@ public class SyncConfigurationManagerBaseTest {
   @Test
   public void syncUneditedEntitiesToSync_NothingGetsSynced() {
     List<SyncEntity> testEntities = new ArrayList<>();
-    ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntities.add(testEntity01);
-    ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
     testEntity02.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity02);
 
@@ -198,10 +198,10 @@ public class SyncConfigurationManagerBaseTest {
   @Test
   public void deleteEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
-    ContactSyncEntity testEntity01 = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntities.add(testEntity01);
-    ContactSyncEntity testEntity02 = new ContactSyncEntity(null);
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
     testEntity02.setLookUpKeyOnSourceDevice(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity02);
 
@@ -236,6 +236,11 @@ public class SyncConfigurationManagerBaseTest {
       @Override
       public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState) {
         return false;
+      }
+
+      @Override
+      public String getModuleUniqueKey() {
+        return null;
       }
 
       @Override
