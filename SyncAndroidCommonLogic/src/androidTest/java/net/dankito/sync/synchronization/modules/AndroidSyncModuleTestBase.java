@@ -11,6 +11,7 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,8 @@ public abstract class AndroidSyncModuleTestBase {
 
   protected IEntityManager entityManager;
 
+  protected List<SyncEntity> entitiesToDeleteAfterTest = new ArrayList<>();
+
 
   @Before
   public void setUp() {
@@ -41,6 +44,14 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest = createSyncModuleToTest(appContext, entityManager);
   }
+
+  @After
+  public void tearDown() {
+    for(SyncEntity entityToDelete : entitiesToDeleteAfterTest) {
+      underTest.deleteEntityFromLocalDatabase(entityToDelete);
+    }
+  }
+
 
   @NonNull
   protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager);
@@ -75,6 +86,11 @@ public abstract class AndroidSyncModuleTestBase {
   }
 
   protected abstract void testEntity(SyncEntity entityToTest);
+
+
+  protected void addEntityToDeleteAfterTest(SyncEntity entity) {
+    entitiesToDeleteAfterTest.add(entity);
+  }
 
 
 }
