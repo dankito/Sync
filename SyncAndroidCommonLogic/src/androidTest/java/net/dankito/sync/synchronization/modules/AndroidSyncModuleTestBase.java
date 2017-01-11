@@ -107,12 +107,11 @@ public abstract class AndroidSyncModuleTestBase {
       }
     });
 
-    SyncEntity syncEntity = createTestEntity();
-    addEntityToDeleteAfterTest(syncEntity);
+    SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
 
     underTest.addEntityToLocalDatabase(syncEntity);
 
-    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertEquals(1, changedEntities.size());
     // TODO: also check added Entity
@@ -123,8 +122,7 @@ public abstract class AndroidSyncModuleTestBase {
     final List<SyncEntity> changedEntities = new ArrayList<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    SyncEntity syncEntity = createTestEntity();
-    addEntityToDeleteAfterTest(syncEntity);
+    SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
     underTest.addEntityToLocalDatabase(syncEntity);
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
@@ -138,7 +136,7 @@ public abstract class AndroidSyncModuleTestBase {
     updateTestEntity(syncEntity);
     underTest.updateEntityInLocalDatabase(syncEntity);
 
-    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertEquals(1, changedEntities.size());
     // TODO: also check added Entity
@@ -149,8 +147,7 @@ public abstract class AndroidSyncModuleTestBase {
     final List<SyncEntity> changedEntities = new ArrayList<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    SyncEntity syncEntity = createTestEntity();
-    addEntityToDeleteAfterTest(syncEntity);
+    SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
     underTest.addEntityToLocalDatabase(syncEntity);
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
@@ -163,12 +160,20 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest.deleteEntityFromLocalDatabase(syncEntity);
 
-    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertEquals(1, changedEntities.size());
     // TODO: also check added Entity
   }
 
+
+  protected SyncEntity createTestEntityAndAddToDeleteAfterTest() {
+    SyncEntity testEntity = createTestEntityAndAddToDeleteAfterTest();
+
+    addEntityToDeleteAfterTest(testEntity);
+
+    return testEntity;
+  }
 
   protected void addEntityToDeleteAfterTest(SyncEntity entity) {
     entitiesToDeleteAfterTest.add(entity);

@@ -62,9 +62,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Test
   public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
-    SyncEntity entity = createTestEntity();
-
-    addEntityToDeleteAfterTest(entity);
+    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
     underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED);
 
@@ -74,9 +72,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Test
   public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
-    SyncEntity entity = createTestEntity();
-
-    addEntityToDeleteAfterTest(entity);
+    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
     underTest.addEntityToLocalDatabase(entity);
 
@@ -92,9 +88,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Test
   public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
-    SyncEntity entity = createTestEntity();
-
-    addEntityToDeleteAfterTest(entity);
+    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
     underTest.addEntityToLocalDatabase(entity);
 
