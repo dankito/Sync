@@ -168,7 +168,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   protected SyncEntity createTestEntityAndAddToDeleteAfterTest() {
-    SyncEntity testEntity = createTestEntityAndAddToDeleteAfterTest();
+    SyncEntity testEntity = createTestEntity();
 
     addEntityToDeleteAfterTest(testEntity);
 
