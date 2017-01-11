@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
 import net.dankito.sync.ImageFileSyncEntity;
@@ -32,8 +33,9 @@ public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
 
   }
 
+
   @Override
-  protected void testEntity(SyncEntity entityToTest) {
+  protected void testReadEntity(SyncEntity entityToTest) {
     Assert.assertTrue(entityToTest instanceof ImageFileSyncEntity);
 
     ImageFileSyncEntity entity = (ImageFileSyncEntity)entityToTest;
@@ -42,6 +44,16 @@ public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertNotNull(entity.getName());
     Assert.assertNotNull(entity.getMimeType());
     Assert.assertNotNull(entity.getImageTakenOn());
+  }
+
+  @Override
+  protected void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity) {
+
+  }
+
+  @NonNull
+  protected String getIdColumnForEntity() {
+    return MediaStore.Images.Media._ID; // TODO: is this correct?
   }
 
 }

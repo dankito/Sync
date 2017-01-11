@@ -47,7 +47,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
   @Override
-  protected void testEntity(SyncEntity entityToTest) {
+  protected void testReadEntity(SyncEntity entityToTest) {
     Assert.assertTrue(entityToTest instanceof CallLogSyncEntity);
 
     CallLogSyncEntity entity = (CallLogSyncEntity)entityToTest;
@@ -57,16 +57,6 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertNotNull(entity.getDate());
     Assert.assertTrue(entity.getDurationInSeconds() >= 0);
     Assert.assertNotNull(entity.getType());
-  }
-
-
-  @Test
-  public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
-    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
-
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED);
-
-    testIfEntryHasSuccessfullyBeenAdded(entity);
   }
 
 
@@ -100,6 +90,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
   }
 
 
+  @Override
   protected void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity) {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
@@ -170,14 +161,9 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setAssociatedContactLookUpKey(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY);
   }
 
-  protected Cursor getCursorForEntity(SyncEntity entity) {
-    return appContext.getContentResolver().query(
-        underTest.getContentUris()[0],
-        null, // Which columns to return
-        CallLog.Calls._ID + " = ?",       // Which rows to return (all rows)
-        new String[] { entity.getLookUpKeyOnSourceDevice() },       // Selection arguments (none)
-        null        // Ordering
-    );
+  @NonNull
+  protected String getIdColumnForEntity() {
+    return CallLog.Calls._ID;
   }
 
 }

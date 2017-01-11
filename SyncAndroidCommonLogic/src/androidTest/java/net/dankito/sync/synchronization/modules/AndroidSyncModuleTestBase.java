@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -8,6 +9,7 @@ import android.support.test.runner.AndroidJUnit4;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
@@ -18,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -63,6 +66,14 @@ public abstract class AndroidSyncModuleTestBase {
   protected abstract void updateTestEntity(SyncEntity entityToUpdate);
 
 
+  protected abstract void testReadEntity(SyncEntity entityToTest);
+
+  protected abstract void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity);
+
+  @NonNull
+  protected abstract String getIdColumnForEntity();
+
+
   @Test
   public void readAllEntitiesAsync() {
     final List<SyncEntity> result = new ArrayList<>();
@@ -87,11 +98,19 @@ public abstract class AndroidSyncModuleTestBase {
       }
       Assert.assertNotNull(entity.getLastModifiedOnDevice());
 
-      testEntity(entity);
+      testReadEntity(entity);
     }
   }
 
-  protected abstract void testEntity(SyncEntity entityToTest);
+
+  @Test
+  public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
+    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
+
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED);
+
+    testIfEntryHasSuccessfullyBeenAdded(entity);
+  }
 
 
   @Test
@@ -164,6 +183,17 @@ public abstract class AndroidSyncModuleTestBase {
 
     Assert.assertEquals(1, changedEntities.size());
     // TODO: also check added Entity
+  }
+
+
+  protected Cursor getCursorForEntity(SyncEntity entity) {
+    return appContext.getContentResolver().query(
+        underTest.getContentUris()[0],
+        null, // Which columns to return
+        getIdColumnForEntity() + " = ?",       // Which rows to return (all rows)
+        new String[] { entity.getLookUpKeyOnSourceDevice() },       // Selection arguments (none)
+        null        // Ordering
+    );
   }
 
 
