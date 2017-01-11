@@ -137,7 +137,6 @@ public class DevicesManager implements IDevicesManager {
       discoveredDevices.put(deviceInfo, device);
 
       DiscoveredDeviceType type = determineDiscoveredDeviceType(device);
-      callDiscoveredDeviceConnectedListeners(device, type);
 
       if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
         knownSynchronizedDevices.put(deviceInfo, device);
@@ -149,6 +148,8 @@ public class DevicesManager implements IDevicesManager {
       else {
         unknownDevices.put(deviceInfo, device);
       }
+
+      callDiscoveredDeviceConnectedListeners(device, type);
     }
   }
 
