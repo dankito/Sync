@@ -1,5 +1,6 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -13,6 +14,7 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +53,6 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
   protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity);
 
   protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity);
-
-  protected abstract boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity);
 
 
   /**
@@ -107,6 +107,22 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     }
     else if(entityState == SyncEntityState.DELETED) {
       return deleteEntityFromLocalDatabase(synchronizedEntity);
+    }
+
+    return false;
+  }
+
+  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity) {
+    if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
+      try {
+        ContentResolver resolver = context.getContentResolver();
+        // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
+        int result = resolver.delete(Uri.withAppendedPath(getContentUris()[0], entity.getLookUpKeyOnSourceDevice()), "", null);
+
+        return result > 0;
+      } catch(Exception e) {
+        log.error("Could not delete Entry from Database: " + entity, e);
+      }
     }
 
     return false;

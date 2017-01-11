@@ -66,11 +66,6 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   }
 
   @Override
-  protected boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity) {
-    return false;
-  }
-
-  @Override
   protected Uri getContentUriForContentObserver() {
     // TODO: register a ContentObserver for both
 //    return MediaStore.Images.Media.INTERNAL_CONTENT_URI;

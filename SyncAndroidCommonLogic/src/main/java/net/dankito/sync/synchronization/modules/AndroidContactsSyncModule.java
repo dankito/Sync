@@ -298,9 +298,4 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     return false;
   }
 
-  @Override
-  protected boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity) {
-    return false;
-  }
-
 }
