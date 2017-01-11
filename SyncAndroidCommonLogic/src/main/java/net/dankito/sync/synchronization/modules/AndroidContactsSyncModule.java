@@ -1,5 +1,9 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,6 +17,10 @@ import net.dankito.sync.persistence.IEntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -29,7 +37,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   @Override
   protected Uri[] getContentUris() {
-    return new Uri[] { ContactsContract.CommonDataKinds.Phone.CONTENT_URI };
+    return new Uri[] { ContactsContract.RawContacts.CONTENT_URI };
   }
 
   @Override
@@ -41,16 +49,13 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor, SyncModuleConfiguration syncModuleConfiguration) {
     ContactSyncEntity entity = new ContactSyncEntity(syncModuleConfiguration);
 
-    entity.setLookUpKeyOnSourceDevice(readString(cursor, "raw_contact_id"));
+    entity.setLookUpKeyOnSourceDevice(readString(cursor, ContactsContract.RawContacts._ID));
     entity.setCreatedOnDevice(null); // TODO
-    entity.setLastModifiedOnDevice(readDate(cursor, ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
+    entity.setLastModifiedOnDevice(readDate(cursor, "version")); // TODO: don't know a better way to tell if raw contact has changed
 
-    entity.setDisplayName(readString(cursor, ContactsContract.Contacts.DISPLAY_NAME));
+    entity.setDisplayName(readString(cursor, ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY));
 
-    boolean hasPhoneNumber = readBoolean(cursor, ContactsContract.Contacts.HAS_PHONE_NUMBER);
-    if(hasPhoneNumber) {
-      readPhoneNumbers(entity);
-    }
+    readPhoneNumbers(entity);
 
     readEmailAddresses(entity);
 
