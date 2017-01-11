@@ -1,5 +1,6 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -100,6 +101,18 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
   @Override
   protected boolean deleteEntityFromLocalDatabase(SyncEntity entity) {
+    if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
+      try {
+        ContentResolver resolver = context.getContentResolver();
+        // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
+        int result = resolver.delete(Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, entity.getLookUpKeyOnSourceDevice()), "", null);
+
+        return result > 0;
+      } catch(Exception e) {
+        log.error("Could not delete Entry from CallLog: " + entity, e);
+      }
+    }
+
     return false;
   }
 
