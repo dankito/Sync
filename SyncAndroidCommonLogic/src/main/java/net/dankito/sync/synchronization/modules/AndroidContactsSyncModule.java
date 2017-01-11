@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.ISyncModule;
@@ -177,22 +178,13 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     }
 
     if(entity.getLookUpKeyOnSourceDevice() != null) {
-      return saveContactDetails(entity);
+      return saveContactToDatabase(entity);
     }
 
     return false;
   }
 
-
-  @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
-    ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
-
-    return saveContactDetails(entity);
-  }
-
-
-  protected boolean saveContactDetails(ContactSyncEntity entity) {
+  protected boolean saveContactToDatabase(ContactSyncEntity entity) {
     boolean result;
     Long rawContactId = Long.parseLong(entity.getLookUpKeyOnSourceDevice());
 
@@ -217,20 +209,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   protected boolean saveName(ContactSyncEntity entity, Long rawContactId) {
     try {
-      ContentValues values = new ContentValues();
-
-      values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
-      values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-
-      values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, entity.getDisplayName());
-
-      values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, entity.getGivenName());
-      values.put(ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME, entity.getMiddleName());
-      values.put(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, entity.getFamilyName());
-
-      values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME, entity.getPhoneticGivenName());
-      values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_MIDDLE_NAME, entity.getPhoneticMiddleName());
-      values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_FAMILY_NAME, entity.getPhoneticFamilyName());
+      ContentValues values = mapEntityToNameContentValues(entity, rawContactId);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
       return wasInsertSuccessful(uri);
@@ -243,15 +222,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     // TODO: save all phone numbers
 
     try {
-      ContentValues values = new ContentValues();
-
-      values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
-      values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
-
-      values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, entity.getPhoneNumber());
-      values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-      // TODO: add custom type label
-//    values.put(ContactsContract.CommonDataKinds.Phone.LABEL, entity.);
+      ContentValues values = mapEntityToPhoneNumberContentValues(entity, rawContactId);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
       return wasInsertSuccessful(uri);
@@ -264,15 +235,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     // TODO: save all email addresses
 
     try {
-      ContentValues values = new ContentValues();
-
-      values.put(ContactsContract.CommonDataKinds.Email.RAW_CONTACT_ID, rawContactId);
-      values.put(ContactsContract.CommonDataKinds.Email.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
-
-      values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, entity.getEmailAddress());
-      values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME);
-      // TODO: add custom type label
-//    values.put(ContactsContract.CommonDataKinds.Email.LABEL, entity.);
+      ContentValues values = mapEntityToEmailAddressContentValues(entity, rawContactId);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
       return wasInsertSuccessful(uri);
@@ -282,23 +245,171 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean saveContactDetail(Long rawContactId, String mimeType, String valueColumnName, String value) {
-    return saveContactDetail(ContactsContract.Data.RAW_CONTACT_ID, rawContactId, ContactsContract.Data.MIMETYPE, mimeType, valueColumnName, value);
-  }
-
-  protected boolean saveContactDetail(String rawContactIdColumnName, Long rawContactId, String mimeTypeColumnName, String mimeType, String valueColumnName, String value) {
     try {
-      ContentValues values = new ContentValues();
-
-      values.put(rawContactIdColumnName, rawContactId);
-      values.put(mimeTypeColumnName, mimeType);
-
-      values.put(valueColumnName, value);
+      ContentValues values = mapEntityToContactDetailContentValues(rawContactId, mimeType, valueColumnName, value);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
       return wasInsertSuccessful(uri);
-    } catch(Exception e) { log.error("Could not insert value '" + value + "' into mime type column '" + mimeTypeColumnName + "' for raw contact " + rawContactId, e); }
+    } catch(Exception e) { log.error("Could not insert value '" + value + "' of mime type '" + mimeType + "' for raw contact " + rawContactId, e); }
 
     return false;
+  }
+
+
+  @Override
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+    ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
+
+    return updateContactInDatabase(entity);
+  }
+
+
+  protected boolean updateContactInDatabase(ContactSyncEntity entity) {
+    boolean result;
+    Long rawContactId = Long.parseLong(entity.getLookUpKeyOnSourceDevice());
+
+    result = updateName(entity, rawContactId);
+
+    result &= updatePhoneNumbers(entity, rawContactId);
+
+    result &= updateEmailAddresses(entity, rawContactId);
+
+    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Nickname.NAME, entity.getNickname());
+
+    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Note.NOTE, entity.getNote());
+
+    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Website.URL, entity.getWebsiteUrl());
+    // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
+
+    return result;
+  }
+
+  protected boolean updateName(ContactSyncEntity entity, Long rawContactId) {
+    try {
+      ContentValues values = mapEntityToNameContentValues(entity, rawContactId);
+
+      int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
+          ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
+          new String[] { "" + rawContactId, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE });
+
+      return result > 0;
+    } catch(Exception e) { log.error("Could not update contact names in database for entity " + entity, e); }
+
+    return false;
+  }
+
+  protected boolean updatePhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
+    // TODO: save all phone numbers
+
+    try {
+      ContentValues values = mapEntityToPhoneNumberContentValues(entity, rawContactId);
+
+      int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
+          ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
+          new String[] { "" + rawContactId, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE });
+
+      return result > 0;
+    } catch(Exception e) { log.error("Could not update phone number in database for entity " + entity, e); }
+
+    return false;
+  }
+
+  protected boolean updateEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
+    // TODO: save all email addresses
+
+    try {
+      ContentValues values = mapEntityToEmailAddressContentValues(entity, rawContactId);
+
+      int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
+          ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
+          new String[] { "" + rawContactId, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE });
+
+      return result > 0;
+    } catch(Exception e) { log.error("Could not update email address in database for entity " + entity, e); }
+
+    return false;
+  }
+
+  protected boolean updateContactDetail(Long rawContactId, String mimeType, String valueColumnName, String value) {
+    try {
+      ContentValues values = mapEntityToContactDetailContentValues(rawContactId, mimeType, valueColumnName, value);
+
+      int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
+          ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
+          new String[] { "" + rawContactId, mimeType });
+
+      return result > 0;
+    } catch(Exception e) { log.error("Could not update value '" + value + "' of mime type '" + mimeType + "' for raw contact " + rawContactId, e); }
+
+    return false;
+  }
+
+
+  protected ContentValues mapEntityToNameContentValues(ContactSyncEntity entity, Long rawContactId) {
+    ContentValues values = new ContentValues();
+
+    values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
+    values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+
+    values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, entity.getDisplayName());
+
+    values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, entity.getGivenName());
+    values.put(ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME, entity.getMiddleName());
+    values.put(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, entity.getFamilyName());
+
+    values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME, entity.getPhoneticGivenName());
+    values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_MIDDLE_NAME, entity.getPhoneticMiddleName());
+    values.put(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_FAMILY_NAME, entity.getPhoneticFamilyName());
+
+    return values;
+  }
+
+  @NonNull
+  protected ContentValues mapEntityToPhoneNumberContentValues(ContactSyncEntity entity, Long rawContactId) {
+    ContentValues values = new ContentValues();
+
+    values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
+    values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+
+    values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, entity.getPhoneNumber());
+    values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+    // TODO: add custom type label
+//    values.put(ContactsContract.CommonDataKinds.Phone.LABEL, entity.);
+    return values;
+  }
+
+  @NonNull
+  protected ContentValues mapEntityToEmailAddressContentValues(ContactSyncEntity entity, Long rawContactId) {
+    ContentValues values = new ContentValues();
+
+    values.put(ContactsContract.CommonDataKinds.Email.RAW_CONTACT_ID, rawContactId);
+    values.put(ContactsContract.CommonDataKinds.Email.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
+
+    values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, entity.getEmailAddress());
+    values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME);
+    // TODO: add custom type label
+//    values.put(ContactsContract.CommonDataKinds.Email.LABEL, entity.);
+    return values;
+  }
+
+  @NonNull
+  protected ContentValues mapEntityToContactDetailContentValues(Long rawContactId, String mimeType, String valueColumnName, String value) {
+    return mapEntityToContactDetailContentValues(ContactsContract.Data.RAW_CONTACT_ID, rawContactId, ContactsContract.Data.MIMETYPE, mimeType, valueColumnName, value);
+  }
+
+  @NonNull
+  protected ContentValues mapEntityToContactDetailContentValues(String rawContactIdColumnName, Long rawContactId, String mimeTypeColumnName, String mimeType, String valueColumnName, String value) {
+    ContentValues values = new ContentValues();
+
+    values.put(rawContactIdColumnName, rawContactId);
+    values.put(mimeTypeColumnName, mimeType);
+
+    values.put(valueColumnName, value);
+
+    return values;
   }
 
 }

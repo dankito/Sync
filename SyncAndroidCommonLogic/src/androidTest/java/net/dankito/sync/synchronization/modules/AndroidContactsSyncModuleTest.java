@@ -167,17 +167,17 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
 
     // comparing values makes currently no sense as Android creates a new Raw Contact when the original Raw Contact is edited too much
-//    testUpdatedContactNames(entity);
-//
-//    testUpdatedContactPhoneNumbers(entity);
-//
-//    testUpdatedContactEmailAddresses(entity);
-//
-//    testContactDetail(entity, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Nickname.NAME, TEST_UPDATED_NICK_NAME);
-//
-//    testContactDetail(entity, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Note.NOTE, TEST_UPDATED_NOTE);
-//
-//    testContactDetail(entity, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Website.URL, TEST_UPDATED_WEBSITE_URL);
+    testUpdatedContactNames(entity);
+
+    testUpdatedContactPhoneNumbers(entity);
+
+    testUpdatedContactEmailAddresses(entity);
+
+    testContactDetail(entity, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Nickname.NAME, TEST_UPDATED_NICK_NAME);
+
+    testContactDetail(entity, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Note.NOTE, TEST_UPDATED_NOTE);
+
+    testContactDetail(entity, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Website.URL, TEST_UPDATED_WEBSITE_URL);
   }
 
   protected void testUpdatedContactNames(SyncEntity entity) {
@@ -187,13 +187,13 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
     Assert.assertEquals(TEST_UPDATED_DISPLAY_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME));
 
-//    Assert.assertEquals(TEST_UPDATED_GIVEN_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME));
-//    Assert.assertEquals(TEST_UPDATED_MIDDLE_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME));
-//    Assert.assertEquals(TEST_UPDATED_FAMILY_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME));
-//
-//    Assert.assertEquals(TEST_UPDATED_PHONETIC_GIVEN_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME));
-//    Assert.assertEquals(TEST_UPDATED_PHONETIC_MIDDLE_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.PHONETIC_MIDDLE_NAME));
-//    Assert.assertEquals(TEST_UPDATED_PHONETIC_FAMILY_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.PHONETIC_FAMILY_NAME));
+    Assert.assertEquals(TEST_UPDATED_GIVEN_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME));
+    Assert.assertEquals(TEST_UPDATED_MIDDLE_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME));
+    Assert.assertEquals(TEST_UPDATED_FAMILY_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME));
+
+    Assert.assertEquals(TEST_UPDATED_PHONETIC_GIVEN_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME));
+    Assert.assertEquals(TEST_UPDATED_PHONETIC_MIDDLE_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.PHONETIC_MIDDLE_NAME));
+    Assert.assertEquals(TEST_UPDATED_PHONETIC_FAMILY_NAME, underTest.readString(cursor, ContactsContract.CommonDataKinds.StructuredName.PHONETIC_FAMILY_NAME));
   }
 
   protected void testUpdatedContactPhoneNumbers(SyncEntity entity) {
