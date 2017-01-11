@@ -8,4 +8,6 @@ public interface ISyncModule {
 
   void readAllEntitiesAsync(SyncModuleConfiguration syncModuleConfiguration, ReadEntitiesCallback callback);
 
+  boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState);
+
 }

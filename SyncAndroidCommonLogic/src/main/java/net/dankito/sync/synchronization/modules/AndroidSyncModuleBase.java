@@ -7,6 +7,7 @@ import android.net.Uri;
 import net.dankito.sync.ISyncModule;
 import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 
@@ -53,13 +54,13 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
     List<SyncEntity> result = new ArrayList<>();
 
     for(Uri contentUri : getContentUris()) {
-      readEntitiesFromDatabase(result, syncModuleConfiguration, contentUri);
+      readEntitiesFromAndroidDatabase(result, syncModuleConfiguration, contentUri);
     }
 
     callback.done(result);
   }
 
-  protected void readEntitiesFromDatabase(List<SyncEntity> result, SyncModuleConfiguration syncModuleConfiguration, Uri contentUri) {
+  protected void readEntitiesFromAndroidDatabase(List<SyncEntity> result, SyncModuleConfiguration syncModuleConfiguration, Uri contentUri) {
     Cursor cursor = context.getContentResolver().query(
         contentUri,
         getColumnNamesToRetrieve(), // Which columns to return
@@ -79,6 +80,28 @@ public abstract class AndroidSyncModuleBase implements ISyncModule {
 
     cursor.close();
   }
+
+
+  @Override
+  public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState) {
+    if(entityState == SyncEntityState.CREATED) {
+      return addEntityToLocalDatabase(synchronizedEntity);
+    }
+    else if(entityState == SyncEntityState.UPDATED) {
+      return updateEntityInLocalDatabase(synchronizedEntity);
+    }
+    else if(entityState == SyncEntityState.DELETED) {
+      return deleteEntityFromLocalDatabase(synchronizedEntity);
+    }
+
+    return false;
+  }
+
+  protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity);
+
+  protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity);
+
+  protected abstract boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity);
 
 
   protected String readString(Cursor cursor, String columnName) {

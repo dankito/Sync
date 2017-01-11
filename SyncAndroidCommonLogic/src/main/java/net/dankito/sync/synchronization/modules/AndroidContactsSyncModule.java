@@ -11,11 +11,16 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by ganymed on 05/01/17.
  */
 
 public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements ISyncModule {
+
+  private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
   public AndroidContactsSyncModule(Context context, IEntityManager entityManager) {
@@ -137,6 +142,22 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     details.close();
 
     return value;
+  }
+
+
+  @Override
+  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
+  }
+
+  @Override
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
+  }
+
+  @Override
+  protected boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
   }
 
 }

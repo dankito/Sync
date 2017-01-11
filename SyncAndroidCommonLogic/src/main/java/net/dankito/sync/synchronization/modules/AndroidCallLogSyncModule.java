@@ -13,11 +13,16 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by ganymed on 05/01/17.
  */
 
 public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements ISyncModule {
+
+  private static final Logger log = LoggerFactory.getLogger(AndroidCallLogSyncModule.class);
 
 
   public AndroidCallLogSyncModule(Context context, IEntityManager entityManager) {
@@ -61,6 +66,24 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     return entity;
   }
 
+
+  @Override
+  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
+  }
+
+  @Override
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+    // TODO
+    return false;
+  }
+
+  @Override
+  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity) {
+    return false;
+  }
+
+
   protected CallType parseCallType(Cursor cursor) {
     int typeInt = readInteger(cursor, CallLog.Calls.TYPE);
 
@@ -71,12 +94,12 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
         return CallType.OUTGOING;
       case CallLog.Calls.MISSED_TYPE:
         return CallType.MISSED;
-      case CallLog.Calls.VOICEMAIL_TYPE:
-        return CallType.VOICE_MAIL;
       case CallLog.Calls.REJECTED_TYPE:
         return CallType.REJECTED;
       case CallLog.Calls.BLOCKED_TYPE:
         return CallType.BLOCKED;
+      case CallLog.Calls.VOICEMAIL_TYPE:
+        return CallType.VOICE_MAIL;
       case CallLog.Calls.ANSWERED_EXTERNALLY_TYPE:
         return CallType.ANSWERED_EXTERNALLY;
       default:

@@ -54,4 +54,20 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     return entity;
   }
 
+
+  @Override
+  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
+  }
+
+  @Override
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
+  }
+
+  @Override
+  protected boolean deleteEntityFromLocalDatabase(SyncEntity synchronizedEntity) {
+    return false;
+  }
+
 }
