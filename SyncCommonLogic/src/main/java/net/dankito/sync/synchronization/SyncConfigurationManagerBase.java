@@ -293,19 +293,24 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }, SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY);
   }
 
-  protected void pushModuleEntityChangesToRemoteDevices(ISyncModule syncModule) {
-    String syncModuleName = syncModule.getClass().getName();
+  protected void pushModuleEntityChangesToRemoteDevices(final ISyncModule syncModule) {
+    syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
+      @Override
+      public void done(List<SyncEntity> entities) {
+        String syncModuleName = syncModule.getModuleUniqueKey();
 
-    for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
-      SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
-      if(syncConfiguration != null) {
-        for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-          if(syncModuleName.equals(syncModuleConfiguration.getSyncModuleClassName())) {
-
+        for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
+          SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
+          if(syncConfiguration != null) {
+            for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+              if(syncModuleName.equals(syncModuleConfiguration.getSyncModuleClassName())) {
+                getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
+              }
+            }
           }
         }
       }
-    }
+    });
   }
 
 
