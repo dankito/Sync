@@ -95,7 +95,19 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
   @Override
   protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
-    // TODO
+    try {
+      CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
+
+      ContentValues values = mapEntityToContentValues((CallLogSyncEntity)synchronizedEntity);
+
+      Uri contentUri = Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, entity.getLookUpKeyOnSourceDevice());
+      int result = context.getContentResolver().update(contentUri, values, null, null);
+
+      return result > 0;
+    } catch(Exception e) {
+      log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + synchronizedEntity, e);
+    }
+
     return false;
   }
 
