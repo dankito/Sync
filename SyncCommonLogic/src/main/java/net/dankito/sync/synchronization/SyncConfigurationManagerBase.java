@@ -247,10 +247,19 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     SyncConfiguration syncConfiguration = null;
     Device localDevice = localConfig.getLocalDevice();
 
-    for(SyncConfiguration config : device.getDestinationSyncConfigurations()) {
-      if(localDevice == config.getSourceDevice()) {
+    for(SyncConfiguration config : localDevice.getSourceSyncConfigurations()) {
+      if(device == config.getDestinationDevice()) {
         syncConfiguration = config;
         break;
+      }
+    }
+
+    if(syncConfiguration == null) {
+      for (SyncConfiguration config : localDevice.getDestinationSyncConfigurations()) {
+        if (device == config.getSourceDevice()) {
+          syncConfiguration = config;
+          break;
+        }
       }
     }
 
