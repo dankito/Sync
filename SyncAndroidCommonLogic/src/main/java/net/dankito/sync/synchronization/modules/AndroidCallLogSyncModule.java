@@ -77,7 +77,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     try {
       CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
 
-      ContentValues values = mapEntityToContentValues((CallLogSyncEntity)synchronizedEntity);
+      ContentValues values = mapEntityToContentValues(entity);
 
       Uri uri = context.getContentResolver().insert(CallLog.Calls.CONTENT_URI, values);
       return wasInsertSuccessful(uri);
