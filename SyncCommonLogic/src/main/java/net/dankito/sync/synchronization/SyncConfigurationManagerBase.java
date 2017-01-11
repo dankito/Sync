@@ -8,9 +8,9 @@ import net.dankito.sync.ReadEntitiesCallback;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookUpKeys;
+import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
-import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
@@ -24,9 +24,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public abstract class SyncConfigurationManagerBase implements ISyncConfigurationManager {
+
+  protected static final int SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY = 3 * 1000; // 3 seconds delay
 
   private static final Logger log = LoggerFactory.getLogger(SyncConfigurationManagerBase.class);
 
@@ -40,6 +46,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected Map<String, ISyncModule> availableSyncModules = null;
 
   protected Map<String, Class<? extends SyncEntity>> entityClassTypes = new ConcurrentHashMap<>();
+
+  protected Set<ISyncModule> syncModulesWithEntityChanges = new ConcurrentSkipListSet<>();
+
+  protected Timer syncModulesWithEntityUpdatesTimer = new Timer();
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
@@ -238,10 +248,56 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     synchronized(this) {
       if(availableSyncModules == null) {
         availableSyncModules = retrieveAvailableSyncModules();
+
+        // TODO: only add SyncEntityChangeListener if ISyncModule gets activated
+        for(ISyncModule syncModule : availableSyncModules.values()) {
+          syncModule.addSyncEntityChangeListener(syncEntityChangeListener);
+        }
       }
     }
 
     return new ArrayList<>(availableSyncModules.values());
+  }
+
+
+  protected SyncEntityChangeListener syncEntityChangeListener = new SyncEntityChangeListener() {
+    @Override
+    public void entityChanged(SyncEntityChange syncEntityChange) {
+      pushModuleEntityChangesToRemoteDevicesAfterADelay(syncEntityChange);
+    }
+  };
+
+  /**
+   * Some Modules have a lot of changes in a very short period -> don't react on every change, wait some time till all changes are made
+   * @param syncEntityChange
+   */
+  protected void pushModuleEntityChangesToRemoteDevicesAfterADelay(SyncEntityChange syncEntityChange) {
+    final ISyncModule syncModule = syncEntityChange.getSyncModule();
+    syncModulesWithEntityChanges.add(syncModule);
+
+    syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        if(syncModulesWithEntityChanges.remove(syncModule)) {
+          pushModuleEntityChangesToRemoteDevices(syncModule);
+        }
+      }
+    }, SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY);
+  }
+
+  protected void pushModuleEntityChangesToRemoteDevices(ISyncModule syncModule) {
+    String syncModuleName = syncModule.getClass().getName();
+
+    for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
+      SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
+      if(syncConfiguration != null) {
+        for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+          if(syncModuleName.equals(syncModuleConfiguration.getSyncModuleClassName())) {
+
+          }
+        }
+      }
+    }
   }
 
 
