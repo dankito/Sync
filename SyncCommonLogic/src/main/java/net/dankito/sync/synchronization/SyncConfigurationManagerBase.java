@@ -52,7 +52,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected Set<ISyncModule> syncModulesWithEntityChanges = new HashSet<>();
 
-  protected Timer syncModulesWithEntityUpdatesTimer = new Timer();
+  protected Timer syncModulesWithEntityUpdatesTimer = new Timer("SyncModulesWithEntityUpdatesTimer");
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
