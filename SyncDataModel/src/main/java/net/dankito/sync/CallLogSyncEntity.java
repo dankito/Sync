@@ -101,4 +101,11 @@ public class CallLogSyncEntity extends SyncEntity {
   public void setType(CallType type) {
     this.type = type;
   }
+
+
+  @Override
+  public String toString() {
+    return "CallLogEntry: " + getDate() + " " + getNumber();
+  }
+
 }

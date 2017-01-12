@@ -153,7 +153,7 @@ public class ContactSyncEntity extends SyncEntity {
 
   @Override
   public String toString() {
-    return getDisplayName();
+    return "Contact: " + getDisplayName();
   }
 
 }
