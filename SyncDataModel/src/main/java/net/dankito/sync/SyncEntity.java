@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 @Entity(name = DatabaseTableConfig.SYNC_ENTITY_TABLE_NAME)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -24,7 +25,7 @@ public abstract class SyncEntity extends BaseEntity {
   @JoinColumn(name = DatabaseTableConfig.SYNC_ENTITY_SOURCE_DEVICE_ID_JOIN_COLUMN_NAME)
   protected Device sourceDevice;
 
-  @Column(name = DatabaseTableConfig.SYNC_ENTITY_LOOK_UP_KEY_ON_SOURCE_DEVICE_COLUMN_NAME)
+  @Transient
   protected String lookUpKeyOnSourceDevice;
 
   @Temporal(TemporalType.TIMESTAMP)
