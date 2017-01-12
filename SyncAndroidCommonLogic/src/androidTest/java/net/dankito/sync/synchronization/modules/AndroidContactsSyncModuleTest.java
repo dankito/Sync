@@ -14,6 +14,9 @@ import net.dankito.utils.StringUtils;
 
 import org.junit.Assert;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 /**
  * Created by ganymed on 05/01/17.
  */
@@ -223,13 +226,30 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   protected Cursor getCursorForEntity(SyncEntity entity, Uri contentUri, String mimeType) {
-    return appContext.getContentResolver().query(
-        contentUri,
-        null, // Which columns to return
-        ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",       // Which rows to return (all rows)
-        new String[] { entity.getLookUpKeyOnSourceDevice(), mimeType },       // Selection arguments (none)
-        null        // Ordering
+    Cursor contactIdCursor = appContext.getContentResolver().query(
+        Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, entity.getLookUpKeyOnSourceDevice()),
+        new String[] { ContactsContract.Contacts._ID }, null, null, null
     );
+
+    if(contactIdCursor.moveToFirst()) {
+      Long contactId = underTest.readLong(contactIdCursor, ContactsContract.Contacts._ID);
+      contactIdCursor.close();
+
+      Set<Long> rawContactIds = ((AndroidContactsSyncModule)underTest).getRawContactIdsForContact(contactId);
+      if(rawContactIds.size() > 0) {
+        Long rawContactId = new ArrayList<Long>(rawContactIds).get(0);
+
+        return appContext.getContentResolver().query(
+            contentUri,
+            null, // Which columns to return
+            ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",       // Which rows to return (all rows)
+            new String[] { "" + rawContactId, mimeType },       // Selection arguments (none)
+            null        // Ordering
+        );
+      }
+    }
+
+    return null;
   }
 
 }
