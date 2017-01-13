@@ -11,6 +11,7 @@ import net.dankito.sync.synchronization.modules.AndroidContactsSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidPhotosSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.services.IFileStorageService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,9 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected Context context;
 
 
-  public SyncConfigurationManagerAndroid(Context context, ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig) {
-    super(syncManager, entityManager, devicesManager, threadPool, localConfig);
+  public SyncConfigurationManagerAndroid(Context context, ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
+                                         IThreadPool threadPool, LocalConfig localConfig) {
+    super(syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig);
 
     this.context = context;
   }

@@ -29,6 +29,7 @@ import net.dankito.sync.synchronization.SynchronizationConfig;
 import net.dankito.utils.IOnUiThreadRunner;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
+import net.dankito.utils.services.IFileStorageService;
 
 import javax.inject.Singleton;
 
@@ -140,8 +141,9 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public ISyncConfigurationManager provideSyncConfigurationManager(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig) {
-    return new SyncConfigurationManagerAndroid(getActivity(), syncManager, entityManager, devicesManager, threadPool, localConfig);
+  public ISyncConfigurationManager provideSyncConfigurationManager(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager,
+                                              IFileStorageService fileStorageService, IThreadPool threadPool, LocalConfig localConfig) {
+    return new SyncConfigurationManagerAndroid(getActivity(), syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig);
   }
 
 }

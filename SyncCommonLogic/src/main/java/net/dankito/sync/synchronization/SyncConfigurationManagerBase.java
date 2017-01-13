@@ -19,6 +19,7 @@ import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.services.IFileStorageService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected IDevicesManager devicesManager;
 
+  protected IFileStorageService fileStorageService;
+
   protected IThreadPool threadPool;
 
   protected LocalConfig localConfig;
@@ -61,10 +64,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
 
-  public SyncConfigurationManagerBase(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig) {
+  public SyncConfigurationManagerBase(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
+                                      IThreadPool threadPool, LocalConfig localConfig) {
     this.syncManager = syncManager;
     this.entityManager = entityManager;
     this.devicesManager = devicesManager;
+    this.fileStorageService = fileStorageService;
     this.threadPool = threadPool;
     this.localConfig = localConfig;
 

@@ -9,6 +9,7 @@ import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SyncConfigurationManagerBase;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.services.IFileStorageService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +20,14 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
   protected Map<String, ISyncModule> mockedAvailableSyncModules;
 
 
-  public SyncConfigurationManagerStub(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig) {
-    this(syncManager, entityManager, devicesManager, threadPool, localConfig, new HashMap<String, ISyncModule>());
+  public SyncConfigurationManagerStub(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
+                                      IThreadPool threadPool, LocalConfig localConfig) {
+    this(syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig, new HashMap<String, ISyncModule>());
   }
 
-  public SyncConfigurationManagerStub(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IThreadPool threadPool, LocalConfig localConfig, Map<String, ISyncModule> mockedAvailableSyncModules) {
-    super(syncManager, entityManager, devicesManager, threadPool, localConfig);
+  public SyncConfigurationManagerStub(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
+                                      IThreadPool threadPool, LocalConfig localConfig, Map<String, ISyncModule> mockedAvailableSyncModules) {
+    super(syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig);
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
   }
 

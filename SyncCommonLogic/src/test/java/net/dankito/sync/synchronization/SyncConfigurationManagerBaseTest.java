@@ -80,7 +80,7 @@ public class SyncConfigurationManagerBaseTest {
     entityManager.persistEntity(syncModuleConfiguration);
     entityManager.persistEntity(syncConfiguration);
 
-    underTest = new SyncConfigurationManagerStub(syncManager, entityManager, devicesManager, new ThreadPool(), localConfig);
+    underTest = new SyncConfigurationManagerStub(syncManager, entityManager, devicesManager, new JavaFileStorageService(), new ThreadPool(), localConfig);
   }
 
   @After
