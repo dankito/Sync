@@ -82,6 +82,7 @@
         android:contextClickable="true"
         android:linksClickable="true"
         style="@style/TextAppearance.AppCompat.Medium"
+        android:text="@string/start_sync_app_on_other_device"
     />
 
 
