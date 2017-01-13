@@ -362,11 +362,21 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       else if(entity instanceof SyncConfiguration) {
         SyncConfiguration syncConfiguration = (SyncConfiguration)entity;
         if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice()) {
-          devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
+          remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
         }
       }
     }
   };
+
+  protected void remoteDeviceStartedSynchronizingWithUs(final SyncConfiguration syncConfiguration) {
+    Timer timer = new Timer();
+    timer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
+      }
+    }, 3000);
+  }
 
   protected void remoteEntitySynchronized(SyncJobItem jobItem) {
     SyncEntity entity = jobItem.getEntity();
