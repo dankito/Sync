@@ -36,7 +36,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
   protected static final String FILTER_NAME = "ENTITIES_FILTER";
 
-  protected static final int MILLIS_TO_WAIT_BEFORE_PROCESSING_SYNCHRONIZED_ENTITY = 2500;
+  protected static final int MILLIS_TO_WAIT_BEFORE_PROCESSING_SYNCHRONIZED_ENTITY = 1500;
 
 
   private static final Logger log = LoggerFactory.getLogger(CouchbaseLiteSyncManager.class);
@@ -49,6 +49,10 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   protected Manager manager;
 
   protected INetworkConfigurationManager configurationManager;
+
+  protected SynchronizedDataMerger dataMerger;
+
+  protected ConflictHandler conflictHandler;
 
   protected boolean alsoUsePullReplication;
 
@@ -78,6 +82,9 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     this.configurationManager = configurationManager;
     this.synchronizationPort = synchronizationPort;
     this.alsoUsePullReplication = alsoUsePullReplication;
+
+    this.dataMerger = new SynchronizedDataMerger(this, entityManager, database);
+    this.conflictHandler = new ConflictHandler(entityManager, database);
 
     // wait some time before processing synchronized entities as they may have dependent entities which haven't been synchronized yet
     this.changeQueue = new AsyncProducerConsumerQueue<>(1, MILLIS_TO_WAIT_BEFORE_PROCESSING_SYNCHRONIZED_ENTITY, synchronizationChangesHandler);
@@ -267,14 +274,20 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   protected void handleSynchronizedChanges(List<DocumentChange> changes) {
     for(DocumentChange change : changes) {
       Class<? extends BaseEntity> entityType = getEntityTypeFromDocumentChange(change);
-      if(entityType != null) {
-        BaseEntity synchronizedEntity = getEntityFromDocumentChange(change, entityType);
 
+      if(entityType != null) {
         if(change.isConflict()) {
-          handleConflict(change, entityType);
+          conflictHandler.handleConflict(change, entityType);
         }
 
-        callEntitySynchronizedListeners(synchronizedEntity);
+        BaseEntity synchronizedEntity = dataMerger.updateCachedSynchronizedEntity(change, entityType);
+        if(synchronizedEntity == null) { // this entity is new tou our side
+          synchronizedEntity = entityManager.getEntityById(entityType, change.getDocumentId());
+        }
+
+        if(synchronizedEntity != null) {
+          callEntitySynchronizedListeners(synchronizedEntity);
+        }
       }
     }
   }
@@ -290,17 +303,6 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     }
 
     return entityType;
-  }
-
-  protected BaseEntity getEntityFromDocumentChange(DocumentChange change, Class<? extends BaseEntity> entityType) {
-    String id = (String)change.getAddedRevision().getPropertyForKey(Dao.ID_COLUMN_NAME);
-
-    return entityManager.getEntityById(entityType, id);
-  }
-
-
-  protected void handleConflict(DocumentChange change, Class<? extends BaseEntity> entityType) {
-    // TODO
   }
 
 }
