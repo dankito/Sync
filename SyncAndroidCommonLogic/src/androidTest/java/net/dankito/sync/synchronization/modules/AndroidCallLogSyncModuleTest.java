@@ -8,15 +8,12 @@ import android.support.annotation.NonNull;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
 import org.junit.Assert;
-import org.junit.Test;
 
-import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -58,22 +55,6 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     Assert.assertNotNull(entity.getDate());
     Assert.assertTrue(entity.getDurationInSeconds() >= 0);
     Assert.assertNotNull(entity.getType());
-  }
-
-
-  @Test
-  public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
-    SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
-
-    underTest.addEntityToLocalDatabase(entity);
-
-    updateTestEntity(entity);
-
-
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.UPDATED);
-
-
-    testIfEntryHasSuccessfullyBeenUpdated(entity);
   }
 
 
