@@ -9,6 +9,7 @@ import android.net.Uri;
 
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
@@ -111,7 +112,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
 
   @Override
-  public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState) {
+  public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     if(entityState == SyncEntityState.CREATED) {
       return addEntityToLocalDatabase(synchronizedEntity);
     }

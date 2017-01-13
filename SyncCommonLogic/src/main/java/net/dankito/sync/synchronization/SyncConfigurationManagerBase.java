@@ -398,6 +398,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void remoteEntitySynchronized(SyncJobItem jobItem) {
     jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
+    byte[] syncEntityData = jobItem.getSyncEntityData();
+    jobItem.setSyncEntityData(null);
     entityManager.updateEntity(jobItem);
 
     SyncEntity entity = jobItem.getEntity();
@@ -405,7 +407,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
     SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, entity);
 
-    if(syncModule.synchronizedEntityRetrieved(entity, syncEntityState)) {
+    if(syncModule.synchronizedEntityRetrieved(entity, syncEntityState, syncModuleConfiguration, syncEntityData)) {
       jobItem.setState(SyncState.DONE);
       entityManager.updateEntity(jobItem);
     }

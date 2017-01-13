@@ -9,6 +9,7 @@ import android.support.test.runner.AndroidJUnit4;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
@@ -36,7 +37,11 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public abstract class AndroidSyncModuleTestBase {
 
+
   protected AndroidSyncModuleBase underTest;
+
+
+  protected SyncModuleConfiguration syncModuleConfiguration;
 
   protected Context appContext = InstrumentationRegistry.getTargetContext();
 
@@ -53,6 +58,8 @@ public abstract class AndroidSyncModuleTestBase {
     threadPool = new ThreadPool();
 
     underTest = createSyncModuleToTest(appContext, entityManager, threadPool);
+
+    syncModuleConfiguration = new SyncModuleConfiguration(underTest.getModuleUniqueKey());
   }
 
   @After
@@ -80,6 +87,11 @@ public abstract class AndroidSyncModuleTestBase {
 
   @NonNull
   protected abstract String getIdColumnForEntity();
+
+
+  protected byte[] getSyncEntityData(SyncEntity entity) {
+    return null; // may be overwritten in sub classes (for FileSyncEntities)
+  }
 
 
   @Test
@@ -115,7 +127,7 @@ public abstract class AndroidSyncModuleTestBase {
   public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
     SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED);
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(entity));
 
     testIfEntryHasSuccessfullyBeenAdded(entity);
   }
@@ -130,7 +142,7 @@ public abstract class AndroidSyncModuleTestBase {
     updateTestEntity(entity);
 
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.UPDATED);
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.UPDATED, syncModuleConfiguration, getSyncEntityData(entity));
 
 
     testIfEntryHasSuccessfullyBeenUpdated(entity);
@@ -144,7 +156,7 @@ public abstract class AndroidSyncModuleTestBase {
     underTest.addEntityToLocalDatabase(entity);
 
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED);
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(entity));
 
 
     testIfEntryHasSuccessfullyBeenRemoved(entity);
