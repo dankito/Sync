@@ -32,8 +32,7 @@ public abstract class SyncEntity extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_ENTITY_CREATED_ON_DEVICE_COLUMN_NAME)
   protected Date createdOnDevice;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = DatabaseTableConfig.SYNC_ENTITY_LAST_MODIFIED_ON_DEVICE_COLUMN_NAME)
+  @Transient
   protected Date lastModifiedOnDevice;
 
 
