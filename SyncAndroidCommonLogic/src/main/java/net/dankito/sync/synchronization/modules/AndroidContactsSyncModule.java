@@ -354,13 +354,13 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected Set<Long> getRawContactIdsForContactLookupKey(String contactLookupKey) {
-    Cursor lookupKeyCursor = context.getContentResolver().query(
+    Cursor contactIdCursor = context.getContentResolver().query(
         Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contactLookupKey),
         new String[] { ContactsContract.Contacts._ID }, null, null, null
     );
 
-    if(lookupKeyCursor.moveToFirst()) {
-      String contactId = readString(lookupKeyCursor, ContactsContract.Contacts._ID);
+    if(contactIdCursor.moveToFirst()) {
+      String contactId = readString(contactIdCursor, ContactsContract.Contacts._ID);
 
       return getRawContactIdsForContact(Long.parseLong(contactId));
     }
