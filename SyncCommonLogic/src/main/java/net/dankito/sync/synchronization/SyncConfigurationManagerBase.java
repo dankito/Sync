@@ -355,7 +355,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     public void entitySynchronized(BaseEntity entity) {
       if(entity instanceof SyncJobItem) {
         SyncJobItem syncJobItem = (SyncJobItem)entity;
-        if(syncJobItem.getState() == SyncState.INITIALIZED || syncJobItem.getState() == SyncState.COPIED_TO_OUTGOING_FOLDER) {
+        if(isInitializedSyncJobForUs(syncJobItem)) {
           remoteEntitySynchronized((SyncJobItem) entity);
         }
       }
@@ -367,6 +367,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
     }
   };
+
+  protected boolean isInitializedSyncJobForUs(SyncJobItem syncJobItem) {
+    return syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED;
+  }
 
   protected void remoteDeviceStartedSynchronizingWithUs(final SyncConfiguration syncConfiguration) {
     Timer timer = new Timer();
