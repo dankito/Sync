@@ -144,6 +144,7 @@ public class DatabaseTableConfig {
   public static final String SYNC_JOB_ITEM_STATE_COLUMN_NAME = "state";
   public static final String SYNC_JOB_ITEM_SOURCE_DEVICE_COLUMN_NAME = "source_device";
   public static final String SYNC_JOB_ITEM_DESTINATION_DEVICE_COLUMN_NAME = "destination_device";
+  public static final String SYNC_JOB_ITEM_SYNC_ENTITY_DATA_COLUMN_NAME = "sync_entity_data";
   public static final String SYNC_JOB_ITEM_START_TIME_COLUMN_NAME = "start_time";
   public static final String SYNC_JOB_ITEM_FINISH_TIME_COLUMN_NAME = "finish_time";
 
