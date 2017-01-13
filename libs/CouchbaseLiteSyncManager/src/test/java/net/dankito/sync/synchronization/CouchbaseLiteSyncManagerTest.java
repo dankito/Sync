@@ -14,6 +14,8 @@ import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.synchronization.helper.TestDevicesManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
+import net.dankito.utils.services.IFileStorageService;
+import net.dankito.utils.services.JavaFileStorageService;
 import net.dankito.utils.services.NetworkHelper;
 
 import org.junit.After;
@@ -21,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -75,6 +78,8 @@ public class CouchbaseLiteSyncManagerTest {
 
     devicesManager1.simulateKnownSynchronizedDeviceConnected(device2);
     devicesManager2.simulateKnownSynchronizedDeviceConnected(device1);
+
+    try { Thread.sleep(500); } catch(Exception ignored) { } // wait till components are initialized
   }
 
 
@@ -89,8 +94,9 @@ public class CouchbaseLiteSyncManagerTest {
     entityManager1.close();
     entityManager2.close();
 
-    entityManager1.getDatabase().delete();
-    entityManager2.getDatabase().delete();
+    IFileStorageService fileStorageService = new JavaFileStorageService();
+    fileStorageService.deleteFolderRecursively(new File(entityManager1.getDatabasePath()).getParent());
+    fileStorageService.deleteFolderRecursively(new File(entityManager2.getDatabasePath()).getParent());
   }
 
 
@@ -116,6 +122,44 @@ public class CouchbaseLiteSyncManagerTest {
     try { synchronizationLatch.await(5, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertEquals(1, synchronizedEntities.size());
+
+    ContactSyncEntity synchronizedEntity = (ContactSyncEntity)synchronizedEntities.get(0);
+    Assert.assertEquals(testEntity.getId(), synchronizedEntity.getId());
+    Assert.assertEquals(testEntity.getDisplayName(), synchronizedEntity.getDisplayName());
+    Assert.assertEquals(testEntity.getGivenName(), synchronizedEntity.getGivenName());
+    Assert.assertEquals(testEntity.getFamilyName(), synchronizedEntity.getFamilyName());
+  }
+
+
+  @Test
+  public void updatePersistedEntity_EntityGetSynchronizedCorrectly() {
+    final CountDownLatch synchronizationLatch = new CountDownLatch(2);
+    final List<BaseEntity> synchronizedEntities = new ArrayList<>();
+
+    syncManager2.addSynchronizationListener(new SynchronizationListener() {
+      @Override
+      public void entitySynchronized(BaseEntity entity) {
+        synchronizedEntities.add(entity);
+        synchronizationLatch.countDown();
+      }
+    });
+
+    ContactSyncEntity testEntity = new ContactSyncEntity();
+    testEntity.setDisplayName("Gandhi");
+    testEntity.setGivenName("");
+    testEntity.setFamilyName("Gandhi");
+    entityManager1.persistEntity(testEntity);
+
+
+    testEntity.setDisplayName("Mandela");
+    testEntity.setFamilyName("Mandela");
+
+    entityManager1.updateEntity(testEntity);
+
+
+    try { synchronizationLatch.await(10, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+    Assert.assertEquals(2, synchronizedEntities.size());
 
     ContactSyncEntity synchronizedEntity = (ContactSyncEntity)synchronizedEntities.get(0);
     Assert.assertEquals(testEntity.getId(), synchronizedEntity.getId());
