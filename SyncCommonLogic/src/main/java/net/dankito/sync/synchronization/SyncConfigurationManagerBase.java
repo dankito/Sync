@@ -397,6 +397,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void remoteEntitySynchronized(SyncJobItem jobItem) {
+    jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
+    entityManager.updateEntity(jobItem);
+
     SyncEntity entity = jobItem.getEntity();
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
     ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
