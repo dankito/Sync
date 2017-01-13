@@ -53,9 +53,9 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected abstract Uri getContentUriForContentObserver();
 
-  protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity);
+  protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData);
 
-  protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity);
+  protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData);
 
 
   /**
@@ -114,19 +114,19 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   @Override
   public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     if(entityState == SyncEntityState.CREATED) {
-      return addEntityToLocalDatabase(synchronizedEntity);
+      return addEntityToLocalDatabase(synchronizedEntity, syncModuleConfiguration, syncEntityData);
     }
     else if(entityState == SyncEntityState.UPDATED) {
-      return updateEntityInLocalDatabase(synchronizedEntity);
+      return updateEntityInLocalDatabase(synchronizedEntity, syncModuleConfiguration, syncEntityData);
     }
     else if(entityState == SyncEntityState.DELETED) {
-      return deleteEntityFromLocalDatabase(synchronizedEntity);
+      return deleteEntityFromLocalDatabase(synchronizedEntity, syncModuleConfiguration, syncEntityData);
     }
 
     return false;
   }
 
-  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity) {
+  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
       try {
         ContentResolver resolver = context.getContentResolver();

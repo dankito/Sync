@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
@@ -186,7 +187,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
 
     ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
@@ -430,7 +431,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity) {
+  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
       try {
         ContentResolver resolver = context.getContentResolver();

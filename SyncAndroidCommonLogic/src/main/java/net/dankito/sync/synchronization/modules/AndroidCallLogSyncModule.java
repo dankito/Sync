@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
@@ -71,7 +72,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
 
   @Override
-  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     try {
       CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
 
@@ -92,7 +93,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   }
 
   @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     try {
       CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
 

@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 
@@ -55,12 +56,12 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
 
   @Override
-  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity) {
+  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     return false;
   }
 
   @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     return false;
   }
 
