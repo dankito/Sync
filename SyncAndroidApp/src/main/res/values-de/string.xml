@@ -11,6 +11,9 @@
     <string name="discovered_devices">Gefundene nicht synchronisierte Geräte</string>
     <string name="known_synchronized_discovered_devices">Gefundene synchronisierte Geräte</string>
 
+    <string name="start_sync_app_on_other_device">Starten Sie <a href="https://www.dankito.de/downloads/DeepThoughtJavaFx_withPlugins.zip">Sync auf Ihrem Computer</a> oder
+        Ihrem anderen Android</string>
+
     <string name="ignore_device">Ignorieren</string>
     <string name="synchronize_with_device">Sync</string>
     <string name="stop_synchronizing_with_device">Stop Sync</string>

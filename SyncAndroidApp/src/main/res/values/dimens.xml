@@ -8,6 +8,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="main_activity_list_view_unknown_discovered_devices_margin_bottom">24dp</dimen>
+    <dimen name="main_activity_hint_start_sync_app_on_other_device_height">60dp</dimen>
 
     <dimen name="list_item_unknown_discovered_device_height">100dp</dimen>
     <dimen name="list_item_unknown_discovered_device_os_icon_width">80dp</dimen>

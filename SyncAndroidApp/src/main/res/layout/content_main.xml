@@ -15,42 +15,73 @@
     tools:showIn="@layout/app_bar_main">
 
 
-    <TextView
-        android:id="@+id/txtUnknownDiscoveredDevices"
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/linlytUnknownDiscoveredDevices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.AppCompat.Medium"
-        android:text="@string/discovered_devices"
-    />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+    >
 
-    <ListView
-        android:id="@+id/lstvwUnknownDiscoveredDevices"
+        <TextView
+            android:id="@+id/txtUnknownDiscoveredDevices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:text="@string/discovered_devices"
+        />
+
+        <ListView
+            android:id="@+id/lstvwUnknownDiscoveredDevices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/main_activity_list_view_unknown_discovered_devices_margin_bottom"
+            />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/linlytKnownSynchronizedDiscoveredDevices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/txtUnknownDiscoveredDevices"
-        android:layout_marginBottom="@dimen/main_activity_list_view_unknown_discovered_devices_margin_bottom"
+        android:layout_above="@+id/txtvwStartSyncAppOnOtherDeviceHint"
+        android:layout_below="@+id/linlytUnknownDiscoveredDevices"
+    >
+
+        <TextView
+            android:id="@+id/txtKnownSynchronizedDiscoveredDevices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:text="@string/known_synchronized_discovered_devices"
         />
 
+        <ListView
+            android:id="@+id/lstvwKnownSynchronizedDiscoveredDevices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        />
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/txtKnownSynchronizedDiscoveredDevices"
+        android:id="@+id/txtvwStartSyncAppOnOtherDeviceHint"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/lstvwUnknownDiscoveredDevices"
-        style="@style/TextAppearance.AppCompat.Medium"
-        android:text="@string/known_synchronized_discovered_devices"
-    />
-
-    <ListView
-        android:id="@+id/lstvwKnownSynchronizedDiscoveredDevices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/main_activity_hint_start_sync_app_on_other_device_height"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/txtKnownSynchronizedDiscoveredDevices"
+        android:autoLink="web"
+        android:clickable="true"
+        android:contextClickable="true"
+        android:linksClickable="true"
+        style="@style/TextAppearance.AppCompat.Medium"
     />
 
 
