@@ -65,7 +65,7 @@ public abstract class AndroidSyncModuleTestBase {
   @After
   public void tearDown() {
     for(SyncEntity entityToDelete : entitiesToDeleteAfterTest) {
-      underTest.deleteEntityFromLocalDatabase(entityToDelete);
+      underTest.synchronizedEntityRetrieved(entityToDelete, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(entityToDelete));
     }
   }
 
@@ -137,7 +137,7 @@ public abstract class AndroidSyncModuleTestBase {
   public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
     SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.addEntityToLocalDatabase(entity);
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(entity));
 
     updateTestEntity(entity);
 
@@ -153,7 +153,7 @@ public abstract class AndroidSyncModuleTestBase {
   public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
     SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.addEntityToLocalDatabase(entity);
+    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(entity));
 
 
     underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(entity));
@@ -178,7 +178,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.addEntityToLocalDatabase(syncEntity);
+    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
@@ -192,7 +192,7 @@ public abstract class AndroidSyncModuleTestBase {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
-    underTest.addEntityToLocalDatabase(syncEntity);
+    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
@@ -203,7 +203,7 @@ public abstract class AndroidSyncModuleTestBase {
     });
 
     updateTestEntity(syncEntity);
-    underTest.updateEntityInLocalDatabase(syncEntity);
+    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.UPDATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
@@ -217,7 +217,7 @@ public abstract class AndroidSyncModuleTestBase {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
-    underTest.addEntityToLocalDatabase(syncEntity);
+    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
@@ -227,7 +227,7 @@ public abstract class AndroidSyncModuleTestBase {
       }
     });
 
-    underTest.deleteEntityFromLocalDatabase(syncEntity);
+    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(syncEntity));
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
