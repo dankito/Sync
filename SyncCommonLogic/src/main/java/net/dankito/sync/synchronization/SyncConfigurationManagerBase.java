@@ -198,7 +198,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncEntityLocalLookUpKeys lookUpKeyEntry = new SyncEntityLocalLookUpKeys(getSyncEntityType(entity), entity.getId(),
-                                                                entity.getLookUpKeyOnSourceDevice(), syncModuleConfiguration);
+                                                                entity.getLookUpKeyOnSourceDevice(), entity.getLastModifiedOnDevice(), syncModuleConfiguration);
     entityManager.persistEntity(lookUpKeyEntry);
   }
 
@@ -206,12 +206,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.deleteEntity(lookUpKey);
   }
 
-  protected boolean hasEntityBeenUpdated(SyncEntity persistedEntity, SyncEntity entity) {
-    if(persistedEntity.getLastModifiedOnDevice() == null) {
-      return entity.getLastModifiedOnDevice() != null;
+  protected boolean hasEntityBeenUpdated(SyncEntity entity, SyncEntityLocalLookUpKeys entityLookupKey) {
+    if(entity.getLastModifiedOnDevice() == null) {
+      return entityLookupKey.getEntityLastModifiedOnDevice() != null;
     }
 
-    return persistedEntity.getLastModifiedOnDevice().equals(entity.getLastModifiedOnDevice()) == false;
+    return entity.getLastModifiedOnDevice().equals(entityLookupKey.getEntityLastModifiedOnDevice()) == false;
   }
 
   protected List<SyncEntity> getDeletedEntities(Map<String, SyncEntityLocalLookUpKeys> lookUpKeys) {
