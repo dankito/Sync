@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import net.dankito.android.util.AlertHelper;
 import net.dankito.android.util.AndroidOnUiThreadRunner;
+import net.dankito.android.util.services.AndroidFileStorageService;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
 import net.dankito.sync.AndroidPlatformConfigurationReader;
@@ -104,6 +105,12 @@ public class AndroidDiContainer {
   @Singleton
   public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, IEntityManager entityManager, LocalConfig localConfig) {
     return new DevicesManager(devicesDiscoverer, entityManager, localConfig);
+  }
+
+  @Provides
+  @Singleton
+  public IFileStorageService provideFileStorageService() {
+    return new AndroidFileStorageService(getActivity());
   }
 
   @Provides
