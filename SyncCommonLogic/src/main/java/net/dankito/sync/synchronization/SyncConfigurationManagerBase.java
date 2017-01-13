@@ -166,29 +166,25 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected SyncEntityState shouldEntityBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, Map<String, SyncEntityLocalLookUpKeys> lookUpKeys, SyncEntity entity) {
     SyncEntityState type = SyncEntityState.UNCHANGED;
 
-    if(entity.getId() == null) { // unpersisted SyncEntity
+    SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
+
+    if(entityLookUpKey == null) { // unpersisted SyncEntity
       if(entityManager.persistEntity(entity)) {
         persistEntryLookUpKey(syncModuleConfiguration, entity);
         type = SyncEntityState.CREATED;
       }
     }
     else {
-      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
-
-      if(entityLookUpKey == null) {
-        persistEntryLookUpKey(syncModuleConfiguration, entity);
-        type = SyncEntityState.CREATED;
+      SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
+      if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
+        deleteEntryLookUpKey(entityLookUpKey);
+        type = SyncEntityState.DELETED;
       }
       else {
-        SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
-        if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
-          deleteEntryLookUpKey(entityLookUpKey);
-          type = SyncEntityState.DELETED;
-        }
-        else {
-          if(hasEntityBeenUpdated(persistedEntity, entity)) {
-            type = SyncEntityState.UPDATED;
-          }
+        if(hasEntityBeenUpdated(entity, entityLookUpKey)) {
+          entityLookUpKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
+          entityManager.updateEntity(entityLookUpKey);
+          type = SyncEntityState.UPDATED;
         }
       }
     }
