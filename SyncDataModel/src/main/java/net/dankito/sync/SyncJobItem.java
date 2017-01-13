@@ -8,8 +8,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -29,6 +31,14 @@ public class SyncJobItem extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_JOB_ITEM_STATE_COLUMN_NAME)
   protected SyncState state;
 
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = DatabaseTableConfig.SYNC_JOB_ITEM_SOURCE_DEVICE_COLUMN_NAME)
+  protected Device sourceDevice;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = DatabaseTableConfig.SYNC_JOB_ITEM_DESTINATION_DEVICE_COLUMN_NAME)
+  protected Device destinationDevice;
+
   @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = DatabaseTableConfig.SYNC_JOB_ITEM_START_TIME_COLUMN_NAME)
   protected Date startTime;
@@ -42,9 +52,11 @@ public class SyncJobItem extends BaseEntity {
 
   }
 
-  public SyncJobItem(SyncModuleConfiguration config, SyncEntity entity) {
+  public SyncJobItem(SyncModuleConfiguration config, SyncEntity entity, Device sourceDevice, Device destinationDevice) {
     this.syncModuleConfiguration = config;
     this.entity = entity;
+    this.sourceDevice = sourceDevice;
+    this.destinationDevice = destinationDevice;
 
     this.startTime = new Date();
     this.state = SyncState.INITIALIZED;
@@ -65,6 +77,14 @@ public class SyncJobItem extends BaseEntity {
 
   public void setState(SyncState state) {
     this.state = state;
+  }
+
+  public Device getSourceDevice() {
+    return sourceDevice;
+  }
+
+  public Device getDestinationDevice() {
+    return destinationDevice;
   }
 
   public Date getStartTime() {

@@ -234,7 +234,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void pushSyncEntityToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
-    SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity);
+    SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity, localConfig.getLocalDevice(), remoteDevice.getDevice());
     entityManager.persistEntity(jobItem);
   }
 
