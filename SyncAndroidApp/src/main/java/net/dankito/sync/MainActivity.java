@@ -12,10 +12,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import net.dankito.sync.adapter.KnownSynchronizedDiscoveredDevicesAdapter;
 import net.dankito.sync.adapter.UnknownDiscoveredDevicesAdapter;
+import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.DiscoveredDeviceType;
+import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.di.AndroidDiComponent;
 import net.dankito.sync.di.AndroidDiContainer;
@@ -34,6 +39,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   @Inject
   protected ISyncConfigurationManager syncConfigurationManager;
+
+
+  protected LinearLayout linlytUnknownDiscoveredDevices;
+
+  protected LinearLayout linlytKnownSynchronizedDiscoveredDevices;
+
+  protected TextView txtvwStartSyncAppOnOtherDeviceHint;
 
 
   @Override
@@ -83,6 +95,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     ListView lstvwKnownSynchronizedDiscoveredDevices = (ListView)findViewById(R.id.lstvwKnownSynchronizedDiscoveredDevices);
     lstvwKnownSynchronizedDiscoveredDevices.setAdapter(new KnownSynchronizedDiscoveredDevicesAdapter(this, devicesManager));
+
+    linlytUnknownDiscoveredDevices = (LinearLayout)findViewById(R.id.linlytUnknownDiscoveredDevices);
+
+    linlytKnownSynchronizedDiscoveredDevices = (LinearLayout)findViewById(R.id.linlytKnownSynchronizedDiscoveredDevices);
+    linlytKnownSynchronizedDiscoveredDevices.setVisibility(View.GONE);
+
+    txtvwStartSyncAppOnOtherDeviceHint = (TextView)findViewById(R.id.txtvwStartSyncAppOnOtherDeviceHint);
   }
 
   @Override
@@ -144,7 +163,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
   protected void setupLogic() {
+    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
+
     devicesManager.start();
+  }
+
+
+  protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
+    @Override
+    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+      discoveredDevicesChangedThreadSafe();
+    }
+
+    @Override
+    public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+      discoveredDevicesChangedThreadSafe();
+    }
+  };
+
+  protected void discoveredDevicesChangedThreadSafe() {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        discoveredDevicesChanged();
+      }
+    });
+  }
+
+  protected void discoveredDevicesChanged() {
+    int countDiscoveredDevices = devicesManager.getAllDiscoveredDevices().size();
+    int countDiscoveredKnownSynchronizedDevices = devicesManager.getKnownSynchronizedDiscoveredDevices().size();
+
+    txtvwStartSyncAppOnOtherDeviceHint.setVisibility(countDiscoveredDevices == 0 ? View.VISIBLE : View.GONE);
+
+    linlytKnownSynchronizedDiscoveredDevices.setVisibility(countDiscoveredKnownSynchronizedDevices > 0 ? View.VISIBLE : View.GONE);
   }
 
 }
