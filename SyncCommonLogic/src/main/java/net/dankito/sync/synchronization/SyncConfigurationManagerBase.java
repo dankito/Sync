@@ -399,6 +399,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       return SyncEntityState.DELETED;
     }
     else {
+      entity.setLookUpKeyOnSourceDevice(lookupKey.getEntityLocalLookUpKey());
+      entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
       return SyncEntityState.UPDATED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
     }
   }
