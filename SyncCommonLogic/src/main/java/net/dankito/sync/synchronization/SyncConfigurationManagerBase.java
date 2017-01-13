@@ -405,7 +405,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
     SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, entity);
 
-    syncModule.synchronizedEntityRetrieved(entity, syncEntityState);
+    if(syncModule.synchronizedEntityRetrieved(entity, syncEntityState)) {
+      jobItem.setState(SyncState.DONE);
+      entityManager.updateEntity(jobItem);
+    }
   }
 
   protected SyncEntityState getSyncEntityState(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
