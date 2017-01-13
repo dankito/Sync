@@ -212,6 +212,12 @@ public abstract class CouchbaseLiteEntityManagerBase implements IEntityManager {
   }
 
 
+  public boolean isCouchbaseLiteSystemProperty(String propertyName) {
+    return "_id".equals(propertyName) || "_rev".equals(propertyName) || "_revisions".equals(propertyName) ||
+        "attachments".equals(propertyName) || "_deleted".equals(propertyName);
+  }
+
+
   public Database getDatabase() {
     return database;
   }
