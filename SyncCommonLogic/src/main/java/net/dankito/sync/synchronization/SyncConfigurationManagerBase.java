@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.Device;
+import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
@@ -240,6 +241,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void pushSyncEntityToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity, localConfig.getLocalDevice(), remoteDevice.getDevice());
+
+    if(entity instanceof FileSyncEntity) {
+      String filePath = ((FileSyncEntity)entity).getFilePath();
+      try {
+        jobItem.setSyncEntityData(fileStorageService.readFromBinaryFile(filePath));
+      } catch(Exception e) { log.error("Could not read file for FileSyncItem " + entity, e); }
+    }
+
     entityManager.persistEntity(jobItem);
   }
 
