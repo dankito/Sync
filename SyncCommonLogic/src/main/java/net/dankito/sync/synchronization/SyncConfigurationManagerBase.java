@@ -407,6 +407,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, entity);
 
     if(syncModule.synchronizedEntityRetrieved(entity, syncEntityState, syncModuleConfiguration, syncEntityData)) {
+      // TODO: for created entities set lookup key / update lookup key (+ last modified on device)
       jobItem.setState(SyncState.DONE);
       jobItem.setSyncEntityData(null);
       entityManager.updateEntity(jobItem);
@@ -420,14 +421,17 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       persistEntryLookUpKey(syncModuleConfiguration, entity); // TODO: in this way method got side effects
       return SyncEntityState.CREATED;
     }
-    else if(entity.isDeleted()) {
-      deleteEntryLookUpKey(lookupKey); // TODO: in this way method got side effects
-      return SyncEntityState.DELETED;
-    }
     else {
-      entity.setLookUpKeyOnSourceDevice(lookupKey.getEntityLocalLookUpKey());
+      entity.setLookUpKeyOnSourceDevice(lookupKey.getEntityLocalLookUpKey()); // TODO: in this way method got side effects
       entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
-      return SyncEntityState.UPDATED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
+
+      if(entity.isDeleted()) {
+        deleteEntryLookUpKey(lookupKey); // TODO: in this way method got side effects
+        return SyncEntityState.DELETED;
+      }
+      else {
+        return SyncEntityState.UPDATED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
+      }
     }
   }
 
