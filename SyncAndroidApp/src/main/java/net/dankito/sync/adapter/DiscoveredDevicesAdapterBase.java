@@ -7,6 +7,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import net.dankito.sync.Device;
 import net.dankito.sync.R;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
@@ -76,7 +77,7 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
 
   protected void showDeviceDetails(View convertView, DiscoveredDevice device) {
     ImageView imgvwOsIcon = (ImageView)convertView.findViewById(R.id.imgvwOsIcon);
-    // TODO
+    imgvwOsIcon.setImageResource(getOsLogoId(device.getDevice()));
 
     TextView txtvwOsName = (TextView)convertView.findViewById(R.id.txtvwOsName);
     String osName = device.getDevice().getOsName() + " " + device.getDevice().getOsVersion();
@@ -87,6 +88,24 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
 
     TextView txtvwIpAddress = (TextView)convertView.findViewById(R.id.txtvwIpAddress);
     txtvwIpAddress.setText(device.getAddress());
+  }
+
+
+  protected int getOsLogoId(Device device) {
+    String osName = device.getOsName().toLowerCase();
+
+    if(osName.contains("android"))
+      return R.drawable.android_logo;
+    else if(osName.contains("linux"))
+      return R.drawable.linux_logo;
+    else if(osName.contains("windows"))
+      return R.drawable.windows_logo;
+    else if(osName.contains("mac"))
+      return R.drawable.apple_logo;
+    else if(osName.contains("solaris"))
+      return R.drawable.sun_solaris_logo;
+
+    return 0; // TODO: create a placeholder logo
   }
 
 
