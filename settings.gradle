@@ -1,8 +1,8 @@
-include ':SyncAndroidApp'
-include ':SyncAndroidCommonLogic'
-include ':SyncJavaCommonLogic'
+include ':SyncAndroidApp', ':SyncAndroidCommonLogic'
+include ':SyncJavaFX', ':SyncJavaCommonLogic'
 include ':SyncCommonLogic'
 include ':SyncDataModel'
+
 include ':DevicesDiscovererAndroid'
 include ':DevicesDiscoverer'
 include ':AndroidUtils'
