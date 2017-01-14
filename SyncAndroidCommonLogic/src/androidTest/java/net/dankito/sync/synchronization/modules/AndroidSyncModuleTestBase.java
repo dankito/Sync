@@ -9,6 +9,7 @@ import android.support.test.runner.AndroidJUnit4;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
@@ -65,8 +66,13 @@ public abstract class AndroidSyncModuleTestBase {
   @After
   public void tearDown() {
     for(SyncEntity entityToDelete : entitiesToDeleteAfterTest) {
-      underTest.synchronizedEntityRetrieved(entityToDelete, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(entityToDelete));
+      underTest.synchronizedEntityRetrieved(createSyncJobItem(entityToDelete), SyncEntityState.DELETED);
     }
+  }
+
+  @NonNull
+  protected SyncJobItem createSyncJobItem(SyncEntity entity) {
+    return new SyncJobItem(syncModuleConfiguration, entity, null, null, getSyncEntityData(entity));
   }
 
 
@@ -127,7 +133,7 @@ public abstract class AndroidSyncModuleTestBase {
   public void synchronizedNewEntity_EntityGetsAdded() throws ParseException {
     SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(entity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(entity), SyncEntityState.CREATED);
 
     testIfEntryHasSuccessfullyBeenAdded(entity);
   }
@@ -137,12 +143,12 @@ public abstract class AndroidSyncModuleTestBase {
   public void synchronizedUpdatedEntity_EntityGetsUpdated() throws ParseException {
     SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(entity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(entity), SyncEntityState.CREATED);
 
     updateTestEntity(entity);
 
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.UPDATED, syncModuleConfiguration, getSyncEntityData(entity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(entity), SyncEntityState.UPDATED);
 
 
     testIfEntryHasSuccessfullyBeenUpdated(entity);
@@ -153,10 +159,10 @@ public abstract class AndroidSyncModuleTestBase {
   public void synchronizedDeletedEntity_EntityGetsRemoved() throws ParseException {
     SyncEntity entity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(entity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(entity), SyncEntityState.CREATED);
 
 
-    underTest.synchronizedEntityRetrieved(entity, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(entity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(entity), SyncEntityState.DELETED);
 
 
     testIfEntryHasSuccessfullyBeenRemoved(entity);
@@ -178,7 +184,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
 
-    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(syncEntity), SyncEntityState.CREATED);
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
@@ -192,7 +198,7 @@ public abstract class AndroidSyncModuleTestBase {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
-    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(syncEntity), SyncEntityState.CREATED);
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
@@ -203,7 +209,7 @@ public abstract class AndroidSyncModuleTestBase {
     });
 
     updateTestEntity(syncEntity);
-    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.UPDATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(syncEntity), SyncEntityState.UPDATED);
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
@@ -217,7 +223,7 @@ public abstract class AndroidSyncModuleTestBase {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     SyncEntity syncEntity = createTestEntityAndAddToDeleteAfterTest();
-    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.CREATED, syncModuleConfiguration, getSyncEntityData(syncEntity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(syncEntity), SyncEntityState.CREATED);
 
     underTest.addSyncEntityChangeListener(new SyncEntityChangeListener() {
       @Override
@@ -227,7 +233,7 @@ public abstract class AndroidSyncModuleTestBase {
       }
     });
 
-    underTest.synchronizedEntityRetrieved(syncEntity, SyncEntityState.DELETED, syncModuleConfiguration, getSyncEntityData(syncEntity));
+    underTest.synchronizedEntityRetrieved(createSyncJobItem(syncEntity), SyncEntityState.DELETED);
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 

@@ -12,7 +12,7 @@ import android.support.annotation.NonNull;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
@@ -72,39 +72,39 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
 
   @Override
-  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
+  protected boolean addEntityToLocalDatabase(SyncJobItem jobItem) {
     try {
-      CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
+      CallLogSyncEntity entity = (CallLogSyncEntity)jobItem.getEntity();
 
       ContentValues values = mapEntityToContentValues(entity);
 
       Uri uri = context.getContentResolver().insert(CallLog.Calls.CONTENT_URI, values);
       if(uri != null) {
         long newCallLogEntryId = ContentUris.parseId(uri);
-        synchronizedEntity.setLookUpKeyOnSourceDevice("" + newCallLogEntryId);
+        entity.setLookUpKeyOnSourceDevice("" + newCallLogEntryId);
 
         return newCallLogEntryId >= 0;
       }
     } catch(Exception e) {
-      log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + synchronizedEntity, e);
+      log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + jobItem.getEntity(), e);
     }
 
     return false;
   }
 
   @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
+  protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
     try {
-      CallLogSyncEntity entity = (CallLogSyncEntity)synchronizedEntity;
+      CallLogSyncEntity entity = (CallLogSyncEntity)jobItem.getEntity();
 
-      ContentValues values = mapEntityToContentValues((CallLogSyncEntity)synchronizedEntity);
+      ContentValues values = mapEntityToContentValues(entity);
 
       Uri contentUri = Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, entity.getLookUpKeyOnSourceDevice());
       int result = context.getContentResolver().update(contentUri, values, null, null);
 
       return result > 0;
     } catch(Exception e) {
-      log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + synchronizedEntity, e);
+      log.error("Could not insert CallLogSyncEntity into Android CallLog Database: " + jobItem.getEntity(), e);
     }
 
     return false;

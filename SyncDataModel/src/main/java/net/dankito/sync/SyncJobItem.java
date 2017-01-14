@@ -67,6 +67,10 @@ public class SyncJobItem extends BaseEntity {
     this.state = SyncState.INITIALIZED;
   }
 
+  public SyncJobItem(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, Device sourceDevice, Device destinationDevice, byte[] syncEntityData) {
+    this(syncModuleConfiguration, entity, sourceDevice, destinationDevice);
+    this.syncEntityData = syncEntityData;
+  }
 
   public SyncModuleConfiguration getSyncModuleConfiguration() {
     return syncModuleConfiguration;

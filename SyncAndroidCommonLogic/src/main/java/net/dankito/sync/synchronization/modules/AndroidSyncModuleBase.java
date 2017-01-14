@@ -9,7 +9,7 @@ import android.net.Uri;
 
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
-import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
@@ -53,9 +53,9 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected abstract Uri getContentUriForContentObserver();
 
-  protected abstract boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData);
+  protected abstract boolean addEntityToLocalDatabase(SyncJobItem jobItem);
 
-  protected abstract boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData);
+  protected abstract boolean updateEntityInLocalDatabase(SyncJobItem jobItem);
 
 
   /**
@@ -112,30 +112,32 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
 
   @Override
-  public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
+  public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
     if(entityState == SyncEntityState.CREATED) {
-      return addEntityToLocalDatabase(synchronizedEntity, syncModuleConfiguration, syncEntityData);
+      return addEntityToLocalDatabase(jobItem);
     }
     else if(entityState == SyncEntityState.UPDATED) {
-      return updateEntityInLocalDatabase(synchronizedEntity, syncModuleConfiguration, syncEntityData);
+      return updateEntityInLocalDatabase(jobItem);
     }
     else if(entityState == SyncEntityState.DELETED) {
-      return deleteEntityFromLocalDatabase(synchronizedEntity, syncModuleConfiguration, syncEntityData);
+      return deleteEntityFromLocalDatabase(jobItem);
     }
 
     return false;
   }
 
-  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
-    if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
+  protected boolean deleteEntityFromLocalDatabase(SyncJobItem jobItem) {
+    String lookupKey = jobItem.getEntity().getLookUpKeyOnSourceDevice();
+
+    if(StringUtils.isNotNullOrEmpty(lookupKey)) {
       try {
         ContentResolver resolver = context.getContentResolver();
         // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
-        int result = resolver.delete(Uri.withAppendedPath(getContentUris()[0], entity.getLookUpKeyOnSourceDevice()), "", null);
+        int result = resolver.delete(Uri.withAppendedPath(getContentUris()[0], lookupKey), "", null);
 
         return result > 0;
       } catch(Exception e) {
-        log.error("Could not delete Entry from Database: " + entity, e);
+        log.error("Could not delete Entry from Database: " + jobItem.getEntity(), e);
       }
     }
 

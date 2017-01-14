@@ -235,7 +235,7 @@ public class SyncConfigurationManagerBaseTest {
       }
 
       @Override
-      public boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
+      public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
         return false;
       }
 

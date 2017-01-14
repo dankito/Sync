@@ -398,15 +398,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void remoteEntitySynchronized(SyncJobItem jobItem) {
     jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
-    byte[] syncEntityData = jobItem.getSyncEntityData();
     entityManager.updateEntity(jobItem);
 
-    SyncEntity entity = jobItem.getEntity();
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
     ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
-    SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, entity);
+    SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, jobItem.getEntity());
 
-    if(syncModule.synchronizedEntityRetrieved(entity, syncEntityState, syncModuleConfiguration, syncEntityData)) {
+    if(syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
       // TODO: for created entities set lookup key / update lookup key (+ last modified on device)
       jobItem.setState(SyncState.DONE);
       jobItem.setSyncEntityData(null);

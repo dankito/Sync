@@ -1,8 +1,7 @@
 package net.dankito.sync.synchronization.modules;
 
-import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
-import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 /**
@@ -13,7 +12,7 @@ public interface ISyncModule {
 
   void readAllEntitiesAsync(ReadEntitiesCallback callback);
 
-  boolean synchronizedEntityRetrieved(SyncEntity synchronizedEntity, SyncEntityState entityState, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData);
+  boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState);
 
   String getModuleUniqueKey();
 

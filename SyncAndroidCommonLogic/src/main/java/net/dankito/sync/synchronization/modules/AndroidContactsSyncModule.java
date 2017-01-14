@@ -13,7 +13,7 @@ import android.support.annotation.Nullable;
 
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
@@ -187,8 +187,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
-    ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
+  protected boolean addEntityToLocalDatabase(SyncJobItem jobItem) {
+    ContactSyncEntity entity = (ContactSyncEntity)jobItem.getEntity();
 
     ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
     ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
@@ -319,14 +319,9 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
-    ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
+  protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
+    ContactSyncEntity entity = (ContactSyncEntity)jobItem.getEntity();
 
-    return updateContactInDatabase(entity);
-  }
-
-
-  protected boolean updateContactInDatabase(ContactSyncEntity entity) {
     Long contactId = getContactIdForContact(entity);
     if(contactId == null) {
       return false;
@@ -463,10 +458,12 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected boolean deleteEntityFromLocalDatabase(SyncEntity entity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
-    if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
+  protected boolean deleteEntityFromLocalDatabase(SyncJobItem jobItem) {
+    String lookupKey = jobItem.getEntity().getLookUpKeyOnSourceDevice();
+
+    if(StringUtils.isNotNullOrEmpty(lookupKey)) {
       try {
-        String contactId = getContactIdStringForContact((ContactSyncEntity)entity);
+        String contactId = getContactIdStringForContact((ContactSyncEntity)jobItem.getEntity());
 
         ContentResolver resolver = context.getContentResolver();
         // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
@@ -474,7 +471,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
         return result > 0;
       } catch(Exception e) {
-        log.error("Could not delete Entry from Database: " + entity, e);
+        log.error("Could not delete Entry from Database: " + jobItem.getEntity(), e);
       }
     }
 

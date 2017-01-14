@@ -8,7 +8,7 @@ import android.provider.MediaStore;
 
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
@@ -70,8 +70,8 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
 
   @Override
-  protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
-    ImageFileSyncEntity entity = (ImageFileSyncEntity)synchronizedEntity;
+  protected boolean addEntityToLocalDatabase(SyncJobItem jobItem) {
+    ImageFileSyncEntity entity = (ImageFileSyncEntity)jobItem.getEntity();
 
     // TODO: name folder to source device (or destination device respectively)
     File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "synchronized");
@@ -81,7 +81,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     try {
       file.createNewFile();
 
-      fileStorageService.writeToBinaryFile(syncEntityData, file.getAbsolutePath());
+      fileStorageService.writeToBinaryFile(jobItem.getSyncEntityData(), file.getAbsolutePath());
       entity.setLookUpKeyOnSourceDevice(file.getAbsolutePath());
 
       notifyAndroidSystemOfNewImageAsync(entity, file);
@@ -107,7 +107,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   }
 
   @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
+  protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
     return false;
   }
 
