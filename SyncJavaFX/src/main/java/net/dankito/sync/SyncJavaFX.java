@@ -53,7 +53,7 @@ public class SyncJavaFX extends Application {
       stage.setScene(scene);
 
       MainWindowController controller = (MainWindowController)loader.getController();
-      controller.setStage(stage);
+      controller.init(context, stage);
 
       stage.show();
 
