@@ -2,17 +2,31 @@ package net.dankito.sync.javafx.controller;
 
 
 import net.dankito.sync.data.IDataManager;
+import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.DiscoveredDeviceType;
+import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.javafx.FXUtils;
+import net.dankito.sync.javafx.controls.cells.DeviceTreeCell;
+import net.dankito.sync.javafx.controls.treeitems.DeviceRootTreeItem;
+import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
 import org.springframework.context.ApplicationContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeView;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class MainWindowController {
 
@@ -28,6 +42,11 @@ public class MainWindowController {
   protected ISyncConfigurationManager syncConfigurationManager;
 
 
+  protected Map<DiscoveredDevice, DeviceTreeItem> mapUnknownDeviceDeviceTreeItem = new HashMap<>();
+
+  protected Map<DiscoveredDevice, DeviceTreeItem> mapKnownSynchronizedDeviceDeviceTreeItem = new HashMap<>();
+
+
   @FXML
   protected Label statusLabel;
   @FXML
@@ -36,17 +55,93 @@ public class MainWindowController {
   @FXML
   protected SplitPane contentPane;
 
+  @FXML
+  protected TreeView trvwUnknownDiscoveredDevices;
+
+  @FXML
+  protected TreeView trvwKnownSynchronizedDevices;
+
+  @FXML
+  protected ScrollPane scrpnDeviceDetails;
+
 
   public void init(ApplicationContext context, Stage stage) {
     this.stage = stage;
 
+    initDependencies(context);
+
+    setupUi();
+
+    setupLogic();
+  }
+
+
+  protected void initDependencies(ApplicationContext context) {
     entityManager = context.getBean(IEntityManager.class);
     dataManager = context.getBean(IDataManager.class);
 
     syncConfigurationManager = context.getBean(ISyncConfigurationManager.class);
 
     devicesManager = context.getBean(IDevicesManager.class);
+  }
+
+  protected void setupLogic() {
+    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
     devicesManager.start();
+  }
+
+
+  protected void setupUi() {
+    setupDeviceTreeViews();
+  }
+
+  protected void setupDeviceTreeViews() {
+    trvwUnknownDiscoveredDevices.setCellFactory(new Callback<TreeView, TreeCell>() {
+      @Override
+      public TreeCell call(TreeView param) {
+        return new DeviceTreeCell();
+      }
+    });
+
+    trvwUnknownDiscoveredDevices.setShowRoot(false);
+    trvwUnknownDiscoveredDevices.setRoot(new DeviceRootTreeItem());
+
+
+    trvwKnownSynchronizedDevices.setCellFactory(new Callback<TreeView, TreeCell>() {
+      @Override
+      public TreeCell call(TreeView param) {
+        return new DeviceTreeCell();
+      }
+    });
+
+    trvwKnownSynchronizedDevices.setShowRoot(false);
+    trvwKnownSynchronizedDevices.setRoot(new DeviceRootTreeItem());
+  }
+
+
+  protected void connectedToUnknownDevice(DiscoveredDevice connectedDevice) {
+    DeviceTreeItem treeItem = new DeviceTreeItem(connectedDevice, dataManager.getLocalConfig().getLocalDevice());
+    trvwUnknownDiscoveredDevices.getRoot().getChildren().add(treeItem);
+
+    mapUnknownDeviceDeviceTreeItem.put(connectedDevice, treeItem);
+  }
+
+  protected void connectedToSynchronizedDevice(DiscoveredDevice connectedDevice) {
+    DeviceTreeItem treeItem = new DeviceTreeItem(connectedDevice, dataManager.getLocalConfig().getLocalDevice());
+    trvwKnownSynchronizedDevices.getRoot().getChildren().add(treeItem);
+
+    mapKnownSynchronizedDeviceDeviceTreeItem.put(connectedDevice, treeItem);
+  }
+
+  protected void disconnectedFromDevice(DiscoveredDevice device) {
+    if(mapUnknownDeviceDeviceTreeItem.containsKey(device)) {
+      DeviceTreeItem deviceTreeItem = mapUnknownDeviceDeviceTreeItem.remove(device);
+      trvwUnknownDiscoveredDevices.getRoot().getChildren().remove(deviceTreeItem);
+    }
+    else if(mapKnownSynchronizedDeviceDeviceTreeItem.containsKey(device)) {
+      DeviceTreeItem deviceTreeItem = mapKnownSynchronizedDeviceDeviceTreeItem.remove(device);
+      trvwKnownSynchronizedDevices.getRoot().getChildren().remove(deviceTreeItem);
+    }
   }
 
 
@@ -54,6 +149,26 @@ public class MainWindowController {
   public void handleMenuItemFileCloseAction(ActionEvent event) {
     stage.close();
   }
+
+
+  protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
+    @Override
+    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+      FXUtils.runOnUiThread(() -> {
+        if(type == DiscoveredDeviceType.UNKNOWN_DEVICE) {
+          connectedToUnknownDevice(connectedDevice);
+        }
+        else if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
+          connectedToSynchronizedDevice(connectedDevice);
+        }
+      });
+    }
+
+    @Override
+    public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+      FXUtils.runOnUiThread(() -> MainWindowController.this.disconnectedFromDevice(disconnectedDevice));
+    }
+  };
 
 
 }
