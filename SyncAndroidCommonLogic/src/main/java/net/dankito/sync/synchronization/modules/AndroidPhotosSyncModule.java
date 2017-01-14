@@ -2,6 +2,7 @@ package net.dankito.sync.synchronization.modules;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -102,7 +103,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
   protected void notifyAndroidSystemOfNewImage(ImageFileSyncEntity entity, File file) {
     try {
-      MediaStore.Images.Media.insertImage(context.getContentResolver(), file.getAbsolutePath(), file.getName(), entity.getDescription());
+      MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath()}, new String[] { entity.getMimeType() }, null);
     } catch(Exception e) { log.error("Could not start MediaScanner for inserted image file " + file.getAbsolutePath(), e); }
   }
 
