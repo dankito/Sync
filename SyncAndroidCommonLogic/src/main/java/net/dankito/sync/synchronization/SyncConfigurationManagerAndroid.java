@@ -33,7 +33,7 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected Map<String, ISyncModule> retrieveAvailableSyncModules() {
     Map<String, ISyncModule> availableSyncModules = new HashMap<>();
 
-    availableSyncModules.put(AndroidPhotosSyncModule.class.getName(), new AndroidPhotosSyncModule(context, entityManager, threadPool));
+    availableSyncModules.put(AndroidPhotosSyncModule.class.getName(), new AndroidPhotosSyncModule(context, entityManager, threadPool, fileStorageService));
     availableSyncModules.put(AndroidContactsSyncModule.class.getName(), new AndroidContactsSyncModule(context, entityManager, threadPool));
     availableSyncModules.put(AndroidCallLogSyncModule.class.getName(), new AndroidCallLogSyncModule(context, entityManager, threadPool));
 

@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization.modules;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 
 import net.dankito.sync.ImageFileSyncEntity;
@@ -10,6 +11,12 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.services.IFileStorageService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -17,9 +24,16 @@ import net.dankito.utils.IThreadPool;
 
 public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
+  private static final Logger log = LoggerFactory.getLogger(AndroidPhotosSyncModule.class);
 
-  public AndroidPhotosSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+
+  protected IFileStorageService fileStorageService;
+
+
+  public AndroidPhotosSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
     super(context, entityManager, threadPool);
+
+    this.fileStorageService = fileStorageService;
   }
 
 
@@ -57,7 +71,39 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
   @Override
   protected boolean addEntityToLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
+    ImageFileSyncEntity entity = (ImageFileSyncEntity)synchronizedEntity;
+
+    // TODO: name folder to source device (or destination device respectively)
+    File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "synchronized");
+    directory.mkdirs();
+    String fileName = entity.getName() != null ? entity.getName() : "file_" + System.currentTimeMillis() + ".jpg";
+    File file = new File(directory, fileName);
+    try {
+      file.createNewFile();
+
+      fileStorageService.writeToBinaryFile(syncEntityData, file.getAbsolutePath());
+      entity.setLookUpKeyOnSourceDevice(file.getAbsolutePath());
+
+      notifyAndroidSystemOfNewImageAsync(entity, file);
+
+      return true;
+    } catch (Exception e) { log.error("Could not write entity data to file for entity " + entity, e); }
     return false;
+  }
+
+  protected void notifyAndroidSystemOfNewImageAsync(final ImageFileSyncEntity entity, final File file) {
+    threadPool.runAsync(new Runnable() {
+      @Override
+      public void run() {
+        notifyAndroidSystemOfNewImage(entity, file);
+      }
+    });
+  }
+
+  protected void notifyAndroidSystemOfNewImage(ImageFileSyncEntity entity, File file) {
+    try {
+      MediaStore.Images.Media.insertImage(context.getContentResolver(), file.getAbsolutePath(), file.getName(), entity.getDescription());
+    } catch(Exception e) { log.error("Could not start MediaScanner for inserted image file " + file.getAbsolutePath(), e); }
   }
 
   @Override
