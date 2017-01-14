@@ -1,7 +1,9 @@
 package net.dankito.sync.synchronization.helper;
 
 
+import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
@@ -10,7 +12,17 @@ public class TestDevicesManager extends DevicesManager {
 
 
   public TestDevicesManager() {
-    super(null, null, new LocalConfig(null));
+    super(null, new IDataManager() {
+      @Override
+      public LocalConfig getLocalConfig() {
+        return new LocalConfig(null);
+      }
+
+      @Override
+      public Device getLocalDevice() {
+        return null;
+      }
+    }, null);
   }
 
 

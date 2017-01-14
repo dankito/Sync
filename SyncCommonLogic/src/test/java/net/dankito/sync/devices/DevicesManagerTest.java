@@ -6,6 +6,7 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
@@ -16,6 +17,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,8 @@ public class DevicesManagerTest {
   protected DevicesManager underTest;
 
   protected IEntityManager entityManager;
+
+  protected IDataManager dataManager;
 
   protected LocalConfig localConfig;
 
@@ -37,7 +41,11 @@ public class DevicesManagerTest {
     this.localConfig = new LocalConfig(localDevice);
     entityManager.persistEntity(localConfig);
 
-    underTest = new DevicesManager(new UdpDevicesDiscoverer(new ThreadPool()), entityManager, localConfig);
+    dataManager = Mockito.mock(IDataManager.class);
+    Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
+    Mockito.when(dataManager.getLocalDevice()).thenReturn(localDevice);
+
+    underTest = new DevicesManager(new UdpDevicesDiscoverer(new ThreadPool()), dataManager, entityManager);
   }
 
   @After

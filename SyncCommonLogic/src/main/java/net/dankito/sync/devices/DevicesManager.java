@@ -10,6 +10,7 @@ import net.dankito.sync.LocalConfig;
 import net.dankito.sync.OsType;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SynchronizationConfig;
 
@@ -54,10 +55,11 @@ public class DevicesManager implements IDevicesManager {
   protected List<KnownSynchronizedDevicesListener> knownSynchronizedDevicesListeners = new CopyOnWriteArrayList<>();
 
 
-  public DevicesManager(IDevicesDiscoverer devicesDiscoverer, IEntityManager entityManager, LocalConfig localConfig) {
+  public DevicesManager(IDevicesDiscoverer devicesDiscoverer, IDataManager dataManager, IEntityManager entityManager) {
     this.devicesDiscoverer = devicesDiscoverer;
     this.entityManager = entityManager;
-    this.localConfig = localConfig;
+
+    this.localConfig = dataManager.getLocalConfig();
   }
 
 

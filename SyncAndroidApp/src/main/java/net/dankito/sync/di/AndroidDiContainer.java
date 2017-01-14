@@ -103,8 +103,8 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, IEntityManager entityManager, LocalConfig localConfig) {
-    return new DevicesManager(devicesDiscoverer, entityManager, localConfig);
+  public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, IDataManager dataManager, IEntityManager entityManager) {
+    return new DevicesManager(devicesDiscoverer, dataManager, entityManager);
   }
 
   @Provides
