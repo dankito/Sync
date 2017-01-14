@@ -319,7 +319,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity) {
+  protected boolean updateEntityInLocalDatabase(SyncEntity synchronizedEntity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     ContactSyncEntity entity = (ContactSyncEntity)synchronizedEntity;
 
     return updateContactInDatabase(entity);
@@ -327,7 +327,12 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   protected boolean updateContactInDatabase(ContactSyncEntity entity) {
-    Set<Long> rawContactIds = getRawContactIdsForContactLookupKey(entity.getLookUpKeyOnSourceDevice());
+    Long contactId = getContactIdForContact(entity);
+    if(contactId == null) {
+      return false;
+    }
+
+    Set<Long> rawContactIds = getRawContactIdsForContact(contactId);
     boolean result = rawContactIds.size() > 0;
 
     if(rawContactIds.size() > 0) {
@@ -351,22 +356,49 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
     }
 
+
+    Cursor cursor = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
+        new String[]{ ContactsContract.Contacts.LOOKUP_KEY },
+        ContactsContract.Contacts._ID + "=?",
+        new String[]{String.valueOf(contactId)}, null);
+
+    if(cursor != null && cursor.moveToFirst()) {
+      entity.setLookUpKeyOnSourceDevice(readString(cursor, ContactsContract.Contacts.LOOKUP_KEY));
+
+      cursor.close();
+    }
+
     return result;
   }
 
-  protected Set<Long> getRawContactIdsForContactLookupKey(String contactLookupKey) {
+  protected Long getContactIdForContact(ContactSyncEntity contact) {
+    try {
+      return Long.parseLong(getContactIdStringForContact(contact));
+    } catch(Exception e) { log.error("Could not get ContactId for Contact " + contact); }
+
+    return null;
+  }
+
+  protected String getContactIdStringForContact(ContactSyncEntity contact) {
+    String lookupKey = contact.getLookUpKeyOnSourceDevice();
+    if(lookupKey.endsWith("-")) {
+      lookupKey = lookupKey.substring(0, lookupKey.length() - 1);
+    }
+
     Cursor contactIdCursor = context.getContentResolver().query(
-        Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contactLookupKey),
-        new String[] { ContactsContract.Contacts._ID }, null, null, null
+        ContactsContract.Contacts.CONTENT_URI,
+        null,
+        ContactsContract.Contacts.LOOKUP_KEY + " LIKE ?", new String[] { lookupKey + "%" }, null
     );
 
     if(contactIdCursor.moveToFirst()) {
       String contactId = readString(contactIdCursor, ContactsContract.Contacts._ID);
+      contactIdCursor.close();
 
-      return getRawContactIdsForContact(Long.parseLong(contactId));
+      return contactId;
     }
 
-    return new HashSet<>();
+    return null;
   }
 
   protected boolean updateName(ContactSyncEntity entity, Long rawContactId) {
@@ -434,9 +466,11 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected boolean deleteEntityFromLocalDatabase(SyncEntity entity, SyncModuleConfiguration syncModuleConfiguration, byte[] syncEntityData) {
     if(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice())) {
       try {
+        String contactId = getContactIdStringForContact((ContactSyncEntity)entity);
+
         ContentResolver resolver = context.getContentResolver();
         // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
-        int result = resolver.delete(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, entity.getLookUpKeyOnSourceDevice()), "", null);
+        int result = resolver.delete(ContactsContract.Contacts.CONTENT_URI, ContactsContract.Contacts._ID + " = ? ", new String[] { contactId });
 
         return result > 0;
       } catch(Exception e) {
