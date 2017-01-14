@@ -12,6 +12,7 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.SyncState;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
@@ -65,14 +66,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
 
-  public SyncConfigurationManagerBase(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
-                                      IThreadPool threadPool, LocalConfig localConfig) {
+  public SyncConfigurationManagerBase(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+                                      IFileStorageService fileStorageService, IThreadPool threadPool) {
     this.syncManager = syncManager;
     this.entityManager = entityManager;
     this.devicesManager = devicesManager;
     this.fileStorageService = fileStorageService;
     this.threadPool = threadPool;
-    this.localConfig = localConfig;
+    this.localConfig = dataManager.getLocalConfig();
 
     syncManager.addSynchronizationListener(synchronizationListener);
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);

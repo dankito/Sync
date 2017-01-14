@@ -3,11 +3,9 @@ package net.dankito.sync.synchronization;
 
 import android.content.Context;
 
-import net.dankito.sync.LocalConfig;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
-import net.dankito.sync.synchronization.modules.AndroidCallLogSyncModule;
-import net.dankito.sync.synchronization.modules.AndroidContactsSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidPhotosSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
@@ -21,9 +19,9 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected Context context;
 
 
-  public SyncConfigurationManagerAndroid(Context context, ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
-                                         IThreadPool threadPool, LocalConfig localConfig) {
-    super(syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig);
+  public SyncConfigurationManagerAndroid(Context context, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+                                         IFileStorageService fileStorageService, IThreadPool threadPool) {
+    super(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
 
     this.context = context;
   }

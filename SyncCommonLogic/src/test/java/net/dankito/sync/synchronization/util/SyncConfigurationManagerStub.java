@@ -1,13 +1,13 @@
 package net.dankito.sync.synchronization.util;
 
-import net.dankito.sync.synchronization.modules.ISyncModule;
-import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SyncConfigurationManagerBase;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -20,14 +20,14 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
   protected Map<String, ISyncModule> mockedAvailableSyncModules;
 
 
-  public SyncConfigurationManagerStub(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
-                                      IThreadPool threadPool, LocalConfig localConfig) {
-    this(syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig, new HashMap<String, ISyncModule>());
+  public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+                                      IFileStorageService fileStorageService, IThreadPool threadPool) {
+    this(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool, new HashMap<String, ISyncModule>());
   }
 
-  public SyncConfigurationManagerStub(ISyncManager syncManager, IEntityManager entityManager, IDevicesManager devicesManager, IFileStorageService fileStorageService,
-                                      IThreadPool threadPool, LocalConfig localConfig, Map<String, ISyncModule> mockedAvailableSyncModules) {
-    super(syncManager, entityManager, devicesManager, fileStorageService, threadPool, localConfig);
+  public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+                                      IFileStorageService fileStorageService, IThreadPool threadPool, Map<String, ISyncModule> mockedAvailableSyncModules) {
+    super(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
   }
 

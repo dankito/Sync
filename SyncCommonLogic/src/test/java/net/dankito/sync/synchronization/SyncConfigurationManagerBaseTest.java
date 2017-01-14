@@ -10,6 +10,7 @@ import net.dankito.sync.SyncEntityLocalLookUpKeys;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
@@ -54,6 +55,8 @@ public class SyncConfigurationManagerBaseTest {
 
   protected IDevicesManager devicesManager;
 
+  protected IDataManager dataManager;
+
   protected LocalConfig localConfig;
 
   protected Device remoteDevice;
@@ -72,6 +75,10 @@ public class SyncConfigurationManagerBaseTest {
     Device localDevice = new Device("local");
     localConfig = new LocalConfig(localDevice);
 
+    dataManager = Mockito.mock(IDataManager.class);
+    Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
+    Mockito.when(dataManager.getLocalDevice()).thenReturn(localDevice);
+
     remoteDevice = new Device("remote");
 
     syncModuleConfiguration = new SyncModuleConfiguration(TEST_SYNC_MODULE_NAME);
@@ -80,7 +87,7 @@ public class SyncConfigurationManagerBaseTest {
     entityManager.persistEntity(syncModuleConfiguration);
     entityManager.persistEntity(syncConfiguration);
 
-    underTest = new SyncConfigurationManagerStub(syncManager, entityManager, devicesManager, new JavaFileStorageService(), new ThreadPool(), localConfig);
+    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, new JavaFileStorageService(), new ThreadPool());
   }
 
   @After
