@@ -33,7 +33,17 @@
       </GridPane>
    </bottom>
    <center>
-      <SplitPane fx:id="contentPane" BorderPane.alignment="CENTER" />
+      <SplitPane fx:id="contentPane" dividerPositions="0.3" BorderPane.alignment="CENTER">
+         <items>
+            <SplitPane dividerPositions="0.4" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0">
+               <items>
+                  <TreeView fx:id="trvwUnknownDiscoveredDevices" prefHeight="200.0" prefWidth="200.0" />
+                  <TreeView fx:id="trvwKnownSynchronizedDevices" prefHeight="200.0" prefWidth="200.0" />
+               </items>
+            </SplitPane>
+            <ScrollPane fx:id="scrpnDeviceDetails" prefHeight="200.0" prefWidth="200.0" />
+         </items>
+      </SplitPane>
    </center>
    <top>
       <MenuBar fx:id="mainMenu" BorderPane.alignment="CENTER">
