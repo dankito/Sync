@@ -72,9 +72,4 @@ public class DataManager implements IDataManager {
     return localConfig;
   }
 
-  @Override
-  public Device getLocalDevice() {
-    return localDevice;
-  }
-
 }
