@@ -52,8 +52,8 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @NonNull
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager, IThreadPool threadPool) {
-    return new AndroidContactsSyncModule(appContext, entityManager, threadPool);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+    return new AndroidContactsSyncModule(context, entityManager, threadPool);
   }
 
   @NonNull

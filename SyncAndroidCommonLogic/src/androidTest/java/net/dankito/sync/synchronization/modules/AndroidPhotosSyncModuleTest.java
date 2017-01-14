@@ -8,6 +8,7 @@ import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.Assert;
 
@@ -19,8 +20,8 @@ public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager, IThreadPool threadPool) {
-    return new AndroidPhotosSyncModule(appContext, entityManager, threadPool);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+    return new AndroidPhotosSyncModule(context, entityManager, threadPool, new JavaFileStorageService());
   }
 
   @NonNull

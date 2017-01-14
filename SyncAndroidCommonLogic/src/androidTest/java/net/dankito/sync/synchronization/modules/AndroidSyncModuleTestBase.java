@@ -71,7 +71,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @NonNull
-  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context appContext, IEntityManager entityManager, IThreadPool threadPool);
+  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool);
 
   @NonNull
   protected abstract SyncEntity createTestEntity();
