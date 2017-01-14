@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
+import net.dankito.sync.Device;
 import net.dankito.sync.ImageFileSyncEntity;
+import net.dankito.sync.OsType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.persistence.IEntityManager;
@@ -74,8 +76,8 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   protected boolean addEntityToLocalDatabase(SyncJobItem jobItem) {
     ImageFileSyncEntity entity = (ImageFileSyncEntity)jobItem.getEntity();
 
-    // TODO: name folder to source device (or destination device respectively)
-    File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "synchronized");
+    String deviceName = getDeviceName(jobItem);
+    File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), deviceName);
     directory.mkdirs();
     String fileName = entity.getName() != null ? entity.getName() : "file_" + System.currentTimeMillis() + ".jpg";
     File file = new File(directory, fileName);
@@ -92,25 +94,32 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     return false;
   }
 
+  @Override
+  protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
+    return false;
+  }
+
+
   protected void notifyAndroidSystemOfNewImageAsync(final ImageFileSyncEntity entity, final File file) {
     threadPool.runAsync(new Runnable() {
       @Override
       public void run() {
-        notifyAndroidSystemOfNewImage(entity, file);
+        notifyAndroidSystemOfChangedOrAddedImage(entity, file);
       }
     });
   }
 
-  protected void notifyAndroidSystemOfNewImage(ImageFileSyncEntity entity, File file) {
+  protected void notifyAndroidSystemOfChangedOrAddedImage(ImageFileSyncEntity entity, File file) {
     try {
       MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath()}, new String[] { entity.getMimeType() }, null);
     } catch(Exception e) { log.error("Could not start MediaScanner for inserted image file " + file.getAbsolutePath(), e); }
   }
 
-  @Override
-  protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
-    return false;
+  protected String getDeviceName(SyncJobItem jobItem) {
+    Device remoteDevice = jobItem.getSourceDevice();
+    return remoteDevice.getOsType() == OsType.ANDROID ? remoteDevice.getName() : remoteDevice.getOsName();
   }
+
 
   @Override
   protected Uri getContentUriForContentObserver() {
