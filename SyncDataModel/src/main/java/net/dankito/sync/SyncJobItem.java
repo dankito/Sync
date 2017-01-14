@@ -123,7 +123,7 @@ public class SyncJobItem extends BaseEntity {
 
   @Override
   public String toString() {
-    return getState() + " " + getEntity();
+    return "SyncJob: " + getState() + " " + getEntity();
   }
 
 }

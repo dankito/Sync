@@ -75,7 +75,7 @@ public class FileSyncEntity extends SyncEntity {
 
   @Override
   public String toString() {
-    return getName();
+    return "File: " + getName();
   }
 
 }
