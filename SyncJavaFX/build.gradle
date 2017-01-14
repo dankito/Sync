@@ -1,9 +1,37 @@
 apply plugin: 'java'
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+
+
+apply plugin:'application'
+
+
+defaultTasks 'run'
 
 
 dependencies {
     compile project(':SyncJavaCommonLogic')
+}
+
+
+mainClassName = 'net.dankito.sync.SyncJavaFx'
+
+def version = '1.0 Beta'
+def title = 'Sync'
+
+
+// create a single Jar with all dependencies. Taken from: http://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': title,
+                'Implementation-Version': version,
+                'Main-Class': mainClassName
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
