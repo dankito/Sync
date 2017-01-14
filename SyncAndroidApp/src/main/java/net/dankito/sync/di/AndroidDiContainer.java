@@ -4,7 +4,6 @@ import android.app.Activity;
 
 import net.dankito.android.util.AlertHelper;
 import net.dankito.android.util.AndroidOnUiThreadRunner;
-import net.dankito.android.util.services.AndroidFileStorageService;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
 import net.dankito.sync.AndroidPlatformConfigurationReader;
@@ -31,6 +30,7 @@ import net.dankito.utils.IOnUiThreadRunner;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.IFileStorageService;
+import net.dankito.utils.services.JavaFileStorageService;
 
 import javax.inject.Singleton;
 
@@ -110,7 +110,7 @@ public class AndroidDiContainer {
   @Provides
   @Singleton
   public IFileStorageService provideFileStorageService() {
-    return new AndroidFileStorageService(getActivity());
+    return new JavaFileStorageService();
   }
 
   @Provides
