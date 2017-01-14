@@ -4,6 +4,7 @@ import net.dankito.sync.Device;
 import net.dankito.sync.OsType;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.javafx.FXUtils;
+import net.dankito.sync.javafx.services.IconManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +12,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -53,7 +55,10 @@ public class DeviceTreeCell extends TreeCell<DiscoveredDevice> {
 
     imgvwOsIcon = new ImageView();
     imgvwOsIcon.setFitWidth(TREE_CELL_HEIGHT);
+    imgvwOsIcon.setFitHeight(TREE_CELL_HEIGHT );
+
     graphicPane.getChildren().add(imgvwOsIcon);
+    HBox.setMargin(imgvwOsIcon, new Insets(6, 6, 6, 0));
 
     pnDeviceInfo = new VBox();
     pnDeviceInfo.setAlignment(Pos.CENTER_LEFT);
@@ -91,6 +96,8 @@ public class DeviceTreeCell extends TreeCell<DiscoveredDevice> {
     }
     else {
       setGraphic(graphicPane);
+
+      imgvwOsIcon.setImage(new Image(IconManager.getInstance().getLogoForOperatingSystem(item.getDevice().getOsName(), item.getDevice().getOsVersion())));
 
       lblDeviceName.setText(getDeviceDescription(item.getDevice()));
       lblDeviceAddress.setText(item.getAddress());
