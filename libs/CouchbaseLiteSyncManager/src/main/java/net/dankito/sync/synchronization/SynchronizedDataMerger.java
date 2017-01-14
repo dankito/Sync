@@ -142,7 +142,6 @@ public class SynchronizedDataMerger {
 
   protected Map<String, Object> getChanges(BaseEntity cachedEntity, Dao dao, EntityConfig entityConfig, SavedRevision currentRevision) {
     Map<String, Object> detectedChanges = new HashMap<>();
-    Map<String, Object> currentRevisionProperties = currentRevision.getProperties();
 
     for(PropertyConfig propertyConfig : entityConfig.getPropertiesIncludingInheritedOnes()) {
       if(propertyConfig.isId() || propertyConfig.isVersion() || propertyConfig instanceof DiscriminatorColumnConfig ||
@@ -151,19 +150,10 @@ public class SynchronizedDataMerger {
       }
 
       try {
-        Object currentRevisionValue = currentRevisionProperties.get(propertyConfig.getColumnName());
         Object cachedEntityValue = dao.getPersistablePropertyValue(cachedEntity, propertyConfig);
 
-        if(propertyConfig.isCollectionProperty() == false) {
-          if ((cachedEntityValue == null && currentRevisionValue != null) || (cachedEntityValue != null && currentRevisionValue == null) ||
-              (cachedEntityValue != null && cachedEntityValue.equals(currentRevisionValue) == false)) {
-            detectedChanges.put(propertyConfig.getColumnName(), cachedEntityValue);
-          }
-        }
-        else {
-          if (hasCollectionPropertyChanged(dao, currentRevisionValue, cachedEntityValue)) {
-            detectedChanges.put(propertyConfig.getColumnName(), cachedEntityValue);
-          }
+        if(hasPropertyValueChanged(cachedEntity, propertyConfig, cachedEntityValue, dao, currentRevision)) {
+          detectedChanges.put(propertyConfig.getColumnName(), cachedEntityValue);
         }
       } catch(Exception e) {
         log.error("Could not check Property " + propertyConfig + " for changes", e);
@@ -171,6 +161,30 @@ public class SynchronizedDataMerger {
     }
 
     return detectedChanges;
+  }
+
+  protected boolean hasPropertyValueChanged(BaseEntity cachedEntity, PropertyConfig propertyConfig, Object cachedEntityValue, Dao dao, SavedRevision currentRevision) throws SQLException {
+    Object currentRevisionValue = currentRevision.getProperties().get(propertyConfig.getColumnName());
+
+    if(propertyConfig.isLob()) {
+      currentRevisionValue = dao.getLobFromAttachment(propertyConfig, currentRevision.getDocument());
+      if(currentRevisionValue != cachedEntityValue) {
+        dao.setValueOnObject(cachedEntity, propertyConfig, currentRevisionValue); // TODO: this produces a side effect, but i would have to change structure too hard to implement this little feature
+      }
+    }
+    else if(propertyConfig.isCollectionProperty() == false) {
+      if ((cachedEntityValue == null && currentRevisionValue != null) || (cachedEntityValue != null && currentRevisionValue == null) ||
+          (cachedEntityValue != null && cachedEntityValue.equals(currentRevisionValue) == false)) {
+        return true;
+      }
+    }
+    else {
+      if(hasCollectionPropertyChanged(dao, currentRevisionValue, cachedEntityValue)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   protected boolean hasCollectionPropertyChanged(Dao dao, Object currentRevisionValue, Object cachedEntityValue) throws SQLException {
