@@ -77,7 +77,6 @@ public class SyncConfigurationManagerBaseTest {
 
     dataManager = Mockito.mock(IDataManager.class);
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
-    Mockito.when(dataManager.getLocalDevice()).thenReturn(localDevice);
 
     remoteDevice = new Device("remote");
 

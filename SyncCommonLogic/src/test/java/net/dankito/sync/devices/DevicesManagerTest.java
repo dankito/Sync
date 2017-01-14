@@ -43,7 +43,6 @@ public class DevicesManagerTest {
 
     dataManager = Mockito.mock(IDataManager.class);
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
-    Mockito.when(dataManager.getLocalDevice()).thenReturn(localDevice);
 
     underTest = new DevicesManager(new UdpDevicesDiscoverer(new ThreadPool()), dataManager, entityManager);
   }
