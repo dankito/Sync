@@ -4,6 +4,10 @@ import com.couchbase.lite.Context;
 
 import java.io.File;
 
+import javax.inject.Named;
+
+
+@Named
 public class CouchbaseLiteEntityManagerJava extends CouchbaseLiteEntityManagerBase {
 
   public CouchbaseLiteEntityManagerJava(EntityManagerConfiguration configuration) throws Exception {

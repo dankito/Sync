@@ -8,7 +8,10 @@ import net.dankito.sync.persistence.IEntityManager;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Named;
 
+
+@Named
 public class DataManager implements IDataManager {
 
   protected IEntityManager entityManager;

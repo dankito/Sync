@@ -24,9 +24,10 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Created by ganymed on 05/06/16.
- */
+import javax.inject.Named;
+
+
+@Named
 public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
   protected static final String DEVICES_DISCOVERY_MESSAGE = "DevicesDiscovery";

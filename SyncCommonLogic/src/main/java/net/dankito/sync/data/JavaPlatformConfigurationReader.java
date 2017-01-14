@@ -1,6 +1,10 @@
 package net.dankito.sync.data;
 
 
+import javax.inject.Named;
+
+
+@Named
 public class JavaPlatformConfigurationReader implements IPlatformConfigurationReader {
 
   @Override
