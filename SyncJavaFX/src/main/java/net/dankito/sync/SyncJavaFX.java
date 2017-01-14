@@ -4,6 +4,9 @@ import net.dankito.sync.javafx.controller.MainWindowController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
 import java.util.ResourceBundle;
 
@@ -15,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
+@SpringBootApplication(scanBasePackages = { "net.dankito", "net.dankito.utils", "net.dankito.devicediscovery" })
 public class SyncJavaFX extends Application {
 
   private final static Logger log = LoggerFactory.getLogger(SyncJavaFX.class);
@@ -37,6 +41,8 @@ public class SyncJavaFX extends Application {
   @Override
   public void start(Stage stage) throws Exception {
     try {
+      ApplicationContext context = SpringApplication.run(SyncJavaFX.class);
+
       FXMLLoader loader = new FXMLLoader();
       loader.setResources(ResourceBundle.getBundle("Strings"));
       loader.setLocation(getClass().getClassLoader().getResource("dialogs/MainWindow.fxml"));
