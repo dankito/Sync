@@ -31,7 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.inject.Named;
 
+
+@Named
 public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
   protected static final String FILTER_NAME = "ENTITIES_FILTER";

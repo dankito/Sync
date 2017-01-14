@@ -1,8 +1,11 @@
 package net.dankito.sync.devices;
 
-
 import net.dankito.sync.Device;
 
+import javax.inject.Named;
+
+
+@Named
 public class NetworkConfigurationManager implements INetworkConfigurationManager {
 
   protected Device localHostDevice;
