@@ -1,11 +1,13 @@
 apply plugin: 'java'
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 
 dependencies {
     compile project(':SyncCommonLogic')
+
+    compile 'org.springframework.boot:spring-boot-starter:1.4.3.RELEASE'
 
     compile 'ch.qos.logback:logback-classic:1.1.3'
     compile 'ch.qos.logback:logback-core:1.1.3'
