@@ -12,7 +12,7 @@
 
     <dimen name="list_item_unknown_discovered_device_height">100dp</dimen>
     <dimen name="list_item_unknown_discovered_device_os_icon_width">80dp</dimen>
-    <dimen name="list_item_unknown_discovered_device_os_icon_right_margin">6dp</dimen>
+    <dimen name="list_item_unknown_discovered_device_os_icon_margin">6dp</dimen>
     <dimen name="list_item_unknown_discovered_device_os_name_height">30dp</dimen>
     <dimen name="list_item_unknown_discovered_device_ip_address_height">30dp</dimen>
     <dimen name="list_item_unknown_discovered_device_buttons_height">30dp</dimen>
@@ -21,7 +21,7 @@
 
     <dimen name="list_item_known_synchronized_discovered_device_height">100dp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_os_icon_width">80dp</dimen>
-    <dimen name="list_item_known_synchronized_discovered_device_os_icon_right_margin">6dp</dimen>
+    <dimen name="list_item_known_synchronized_discovered_device_os_icon_margin">6dp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_os_name_height">30dp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_ip_address_height">30dp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_buttons_height">30dp</dimen>
