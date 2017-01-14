@@ -7,7 +7,6 @@ import net.dankito.android.util.AndroidOnUiThreadRunner;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
 import net.dankito.sync.AndroidPlatformConfigurationReader;
-import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.data.DataManager;
 import net.dankito.sync.data.IDataManager;
@@ -86,12 +85,6 @@ public class AndroidDiContainer {
   @Singleton
   public LocalConfig provideLocalConfig(IDataManager dataManager) {
     return dataManager.getLocalConfig();
-  }
-
-  @Provides
-  @Singleton
-  public Device provideLocalDevice(IDataManager dataManager) {
-    return dataManager.getLocalDevice();
   }
 
 
