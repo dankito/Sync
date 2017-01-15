@@ -15,6 +15,9 @@ public class SyncModuleConfiguration extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_IS_BI_DIRECTIONAL_COLUMN_NAME)
   protected boolean isBiDirectional;
 
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_SOURCE_PATH_COLUMN_NAME)
+  protected String sourcePath; // for FileSyncEntities
+
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_DESTINATION_PATH_COLUMN_NAME)
   protected String destinationPath; // for FileSyncEntities
 
@@ -46,6 +49,14 @@ public class SyncModuleConfiguration extends BaseEntity {
 
   public void setBiDirectional(boolean biDirectional) {
     isBiDirectional = biDirectional;
+  }
+
+  public String getSourcePath() {
+    return sourcePath;
+  }
+
+  public void setSourcePath(String sourcePath) {
+    this.sourcePath = sourcePath;
   }
 
   public String getDestinationPath() {
