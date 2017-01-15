@@ -53,6 +53,8 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected abstract String getPermissionToReadEntities();
 
+  protected abstract String getPermissionToWriteEntities();
+
   protected abstract int getPermissionRationaleResourceId();
 
   protected abstract boolean addEntityToLocalDatabase(SyncJobItem jobItem);
@@ -128,6 +130,15 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   @Override
   public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
+    // TODO: find better architecture. Yes, permission has been requested before, when reading all entities, but we should re-request it here
+    if(permissionsManager.isPermissionGranted(getPermissionToWriteEntities())) {
+      return synchronizedEntityRetrievedPermissionGranted(jobItem, entityState);
+    }
+
+    return false;
+  }
+
+  protected boolean synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState) {
     if(entityState == SyncEntityState.CREATED) {
       return addEntityToLocalDatabase(jobItem);
     }

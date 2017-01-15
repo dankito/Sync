@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SyncAndroidCommonLogic</string>
+
+    <string name="rational_for_accessing_external_storage_permission">Um externe Daten wie Fotos synchronisieren zu können,
+        benötigt die App Erlaubnis auf externe Daten zugreifen zu können. Zugriff auf externe Daten erlauben?</string>
+    <string name="rational_for_accessing_contacts_permission">Um Kontakte synchronisieren zu können,
+        benötigt die App Erlaubnis auf Kontakte zugreifen zu können. Zugriff auf Kontakte erlauben?</string>
+    <string name="rational_for_accessing_call_log_permission">Um die Anrufliste synchronisieren zu können,
+        benötigt die App Erlaubnis auf die Anrufliste zugreifen zu können. Zugriff auf die Anrufliste erlauben?</string>
+
+</resources>

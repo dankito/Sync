@@ -42,6 +42,11 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
   }
 
   @Override
+  protected String getPermissionToWriteEntities() {
+    return Manifest.permission.WRITE_EXTERNAL_STORAGE;
+  }
+
+  @Override
   protected int getPermissionRationaleResourceId() {
     return R.string.rational_for_accessing_external_storage_permission;
   }

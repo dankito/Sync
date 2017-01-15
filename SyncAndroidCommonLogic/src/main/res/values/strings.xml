@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SyncAndroidCommonLogic</string>
+
+    <string name="rational_for_accessing_external_storage_permission">In order to synchronize files from external storage (like Photos),
+        App needs permission to access external storage. Would you allow accessing external storage?</string>
+    <string name="rational_for_accessing_contacts_permission">In order to synchronize Contacts,
+        App needs permission to access Contacts. Would you allow accessing Contacts?</string>
+    <string name="rational_for_accessing_call_log_permission">In order to synchronize Call Log,
+        App needs permission to access Call Log. Would you allow accessing Call Log?</string>
+
 </resources>
