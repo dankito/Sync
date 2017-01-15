@@ -99,7 +99,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void startContinuouslySynchronizationForModule(final DiscoveredDevice remoteDevice, final SyncModuleConfiguration syncModuleConfiguration) {
-    ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
+    ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
     if(syncModule != null) {
       syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
         @Override
@@ -278,9 +278,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return syncConfiguration;
   }
 
-  protected ISyncModule getSyncModuleForClassName(String syncModuleClassName) {
+  protected ISyncModule getSyncModuleForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
     getAvailableSyncModules(); // ensure availableSyncModules are loaded
-    return availableSyncModules.get(syncModuleClassName);
+    return availableSyncModules.get(syncModuleConfiguration.getSyncModuleClassName());
   }
 
   protected String getSyncEntityType(SyncEntity entity) {
@@ -403,7 +403,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.updateEntity(jobItem);
 
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
-    ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
+    ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
     SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, jobItem.getEntity());
 
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
