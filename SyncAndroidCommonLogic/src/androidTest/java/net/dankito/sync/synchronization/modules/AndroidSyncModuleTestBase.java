@@ -7,6 +7,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.Device;
+import net.dankito.sync.OsType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -50,6 +52,10 @@ public abstract class AndroidSyncModuleTestBase {
 
   protected IThreadPool threadPool;
 
+  protected Device localDevice;
+
+  protected Device remoteDevice;
+
   protected List<SyncEntity> entitiesToDeleteAfterTest = new ArrayList<>();
 
 
@@ -57,6 +63,17 @@ public abstract class AndroidSyncModuleTestBase {
   public void setUp() {
     entityManager = new EntityManagerStub();
     threadPool = new ThreadPool();
+
+    localDevice = new Device("local");
+    localDevice.setOsName("Linux");
+    localDevice.setOsType(OsType.DESKTOP);
+    localDevice.setOsVersion("4.9");
+
+    remoteDevice = new Device("remote");
+    remoteDevice.setName("Motorola Moto G4");
+    remoteDevice.setOsName("Android");
+    remoteDevice.setOsType(OsType.ANDROID);
+    remoteDevice.setOsVersion("7.1");
 
     underTest = createSyncModuleToTest(appContext, threadPool);
 
@@ -72,7 +89,7 @@ public abstract class AndroidSyncModuleTestBase {
 
   @NonNull
   protected SyncJobItem createSyncJobItem(SyncEntity entity) {
-    return new SyncJobItem(syncModuleConfiguration, entity, null, null, getSyncEntityData(entity));
+    return new SyncJobItem(syncModuleConfiguration, entity, localDevice, remoteDevice, getSyncEntityData(entity));
   }
 
 
