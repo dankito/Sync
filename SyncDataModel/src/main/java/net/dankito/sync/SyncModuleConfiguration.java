@@ -13,7 +13,7 @@ public class SyncModuleConfiguration extends BaseEntity {
   protected String syncModuleType;
 
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_IS_BI_DIRECTIONAL_COLUMN_NAME)
-  protected boolean isBiDirectional;
+  protected boolean isBiDirectional = true;
 
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_SOURCE_PATH_COLUMN_NAME)
   protected String sourcePath; // for FileSyncEntities
