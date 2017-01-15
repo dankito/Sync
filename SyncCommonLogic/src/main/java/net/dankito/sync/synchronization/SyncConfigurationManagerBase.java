@@ -408,7 +408,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
 
-    if(syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
+    if(syncModule != null && syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
       // TODO: for created entities set lookup key / update lookup key (+ last modified on device)
       log.info("Successfully synchronized " + jobItem);
       jobItem.setState(SyncState.DONE);
