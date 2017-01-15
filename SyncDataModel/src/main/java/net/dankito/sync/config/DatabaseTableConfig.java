@@ -133,6 +133,7 @@ public class DatabaseTableConfig {
   public static final String SYNC_MODULE_CONFIGURATION_SYNC_MODULE_TYPE_COLUMN_NAME = "sync_module_type";
   public static final String SYNC_MODULE_CONFIGURATION_IS_BI_DIRECTIONAL_COLUMN_NAME = "is_bi_directional";
   public static final String SYNC_MODULE_CONFIGURATION_DESTINATION_PATH_COLUMN_NAME = "destination_path";
+  public static final String SYNC_MODULE_CONFIGURATION_KEEP_DELETED_ENTITIES_ON_DESTINATION_COLUMN_NAME = "keep_deleted_entities_on_destination";
 
 
   /*          SyncJobItem Column Names        */

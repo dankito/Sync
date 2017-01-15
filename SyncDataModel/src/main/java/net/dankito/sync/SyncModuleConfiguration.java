@@ -18,6 +18,9 @@ public class SyncModuleConfiguration extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_DESTINATION_PATH_COLUMN_NAME)
   protected String destinationPath; // for FileSyncEntities
 
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_KEEP_DELETED_ENTITIES_ON_DESTINATION_COLUMN_NAME)
+  protected boolean keepDeletedEntitiesOnDestination = false;
+
 
   protected SyncModuleConfiguration() {
 
@@ -25,6 +28,11 @@ public class SyncModuleConfiguration extends BaseEntity {
 
   public SyncModuleConfiguration(String syncModuleType) {
     this.syncModuleType = syncModuleType;
+  }
+
+  public SyncModuleConfiguration(String syncModuleType, boolean keepDeletedEntitiesOnDestination) {
+    this.syncModuleType = syncModuleType;
+    this.keepDeletedEntitiesOnDestination = keepDeletedEntitiesOnDestination;
   }
 
 
@@ -46,6 +54,14 @@ public class SyncModuleConfiguration extends BaseEntity {
 
   public void setDestinationPath(String destinationPath) {
     this.destinationPath = destinationPath;
+  }
+
+  public boolean isKeepDeletedEntitiesOnDestination() {
+    return keepDeletedEntitiesOnDestination;
+  }
+
+  public void setKeepDeletedEntitiesOnDestination(boolean keepDeletedEntitiesOnDestination) {
+    this.keepDeletedEntitiesOnDestination = keepDeletedEntitiesOnDestination;
   }
 
 }
