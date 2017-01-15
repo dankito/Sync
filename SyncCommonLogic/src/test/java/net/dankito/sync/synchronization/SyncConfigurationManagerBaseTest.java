@@ -236,6 +236,11 @@ public class SyncConfigurationManagerBaseTest {
   protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
     ISyncModule testSyncModule = new ISyncModule() {
       @Override
+      public String[] getSyncEntityTypesItCanHandle() {
+        return new String[0];
+      }
+
+      @Override
       public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
         callback.done(testEntities);
       }
@@ -243,11 +248,6 @@ public class SyncConfigurationManagerBaseTest {
       @Override
       public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
         return false;
-      }
-
-      @Override
-      public String getModuleUniqueKey() {
-        return null;
       }
 
       @Override

@@ -349,14 +349,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(List<SyncEntity> entities) {
-        String syncModuleName = syncModule.getModuleUniqueKey();
-
         for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
           SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
           if(syncConfiguration != null) {
             for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-              if(syncModuleName.equals(syncModuleConfiguration.getSyncModuleType())) {
-                getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
+              for(String syncModuleType : syncModule.getSyncEntityTypesItCanHandle()) {
+                if(syncModuleType.equals(syncModuleConfiguration.getSyncModuleType())) {
+                  getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
+                }
               }
             }
           }
