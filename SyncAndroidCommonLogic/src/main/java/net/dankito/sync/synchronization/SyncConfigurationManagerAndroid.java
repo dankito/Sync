@@ -33,9 +33,9 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected List<ISyncModule> retrieveAvailableSyncModules() {
     List<ISyncModule> availableSyncModules = new ArrayList<>();
 
-    availableSyncModules.add(new AndroidPhotosSyncModule(context, entityManager, threadPool, fileStorageService));
-    availableSyncModules.add(new AndroidContactsSyncModule(context, entityManager, threadPool));
-    availableSyncModules.add(new AndroidCallLogSyncModule(context, entityManager, threadPool));
+    availableSyncModules.add(new AndroidPhotosSyncModule(context, threadPool, fileStorageService));
+    availableSyncModules.add(new AndroidContactsSyncModule(context, threadPool));
+    availableSyncModules.add(new AndroidCallLogSyncModule(context, threadPool));
 
     return availableSyncModules;
   }

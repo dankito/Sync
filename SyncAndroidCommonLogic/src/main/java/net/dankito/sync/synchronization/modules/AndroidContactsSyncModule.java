@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
-import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
@@ -34,8 +33,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
-  public AndroidContactsSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool) {
-    super(context, entityManager, threadPool);
+  public AndroidContactsSyncModule(Context context, IThreadPool threadPool) {
+    super(context, threadPool);
   }
 
 

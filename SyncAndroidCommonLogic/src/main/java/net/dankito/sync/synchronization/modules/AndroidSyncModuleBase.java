@@ -10,7 +10,6 @@ import android.net.Uri;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
-import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.utils.IThreadPool;
@@ -24,9 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Created by ganymed on 05/01/17.
- */
 
 public abstract class AndroidSyncModuleBase extends SyncModuleBase implements ISyncModule {
 
@@ -35,16 +31,13 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected Context context;
 
-  protected IEntityManager entityManager;
-
   protected IThreadPool threadPool;
 
   protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
 
 
-  public AndroidSyncModuleBase(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+  public AndroidSyncModuleBase(Context context, IThreadPool threadPool) {
     this.context = context;
-    this.entityManager = entityManager;
     this.threadPool = threadPool;
   }
 

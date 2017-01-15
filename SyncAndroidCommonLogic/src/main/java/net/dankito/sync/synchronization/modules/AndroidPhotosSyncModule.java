@@ -12,7 +12,6 @@ import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.OsType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
-import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -33,8 +32,8 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   protected IFileStorageService fileStorageService;
 
 
-  public AndroidPhotosSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
-    super(context, entityManager, threadPool);
+  public AndroidPhotosSyncModule(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
+    super(context, threadPool);
 
     this.fileStorageService = fileStorageService;
   }
