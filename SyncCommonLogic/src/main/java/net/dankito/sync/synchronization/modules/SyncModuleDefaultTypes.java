@@ -5,7 +5,8 @@ public enum SyncModuleDefaultTypes {
 
   Contacts("Contacts"),
   CallLog("CallLog"),
-  AndroidPhotos("AndroidPhotos");
+  AndroidInternalPhotos("AndroidInternalPhotos"),
+  AndroidExternalPhotos("AndroidExternalPhotos");
 
 
   private String typeName;
