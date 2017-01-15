@@ -9,30 +9,31 @@ import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
 
-public class AndroidExternalPhotosSyncModule extends AndroidPhotosSyncModuleBase {
+public class AndroidInternalPhotosSyncModule extends AndroidPhotosSyncModuleBase {
 
-  public AndroidExternalPhotosSyncModule(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
+  public AndroidInternalPhotosSyncModule(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
     super(context, threadPool, fileStorageService);
   }
 
 
   public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName() };
+    return new String[] { SyncModuleDefaultTypes.AndroidInternalPhotos.getTypeName() };
   }
 
 
   @Override
   protected Uri[] getContentUris() {
-    return new Uri[] { MediaStore.Images.Media.EXTERNAL_CONTENT_URI };
+    return new Uri[] { MediaStore.Images.Media.INTERNAL_CONTENT_URI };
   }
 
   @Override
   protected Uri getContentUriForContentObserver() {
-    return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    return MediaStore.Images.Media.INTERNAL_CONTENT_URI; // content://media/internal/images/media
   }
 
   @Override
   public String getRootFolder() {
+    // TODO: how to get internal pictures root path?
     return Environment.getExternalStorageDirectory().getAbsolutePath();
   }
 
