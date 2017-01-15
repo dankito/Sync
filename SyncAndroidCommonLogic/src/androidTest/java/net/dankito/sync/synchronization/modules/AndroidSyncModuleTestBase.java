@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.OsType;
@@ -15,8 +16,9 @@ import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
-import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.synchronization.SyncEntityChange;
+import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.sync.synchronization.modules.util.PermissionsManagerStub;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 import net.dankito.utils.ThreadPool;
@@ -75,7 +77,9 @@ public abstract class AndroidSyncModuleTestBase {
     remoteDevice.setOsType(OsType.ANDROID);
     remoteDevice.setOsVersion("7.1");
 
-    underTest = createSyncModuleToTest(appContext, threadPool);
+    IPermissionsManager permissionsManager = new PermissionsManagerStub();
+
+    underTest = createSyncModuleToTest(appContext, permissionsManager, threadPool);
 
     syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypesItCanHandle()[0]);
   }
@@ -94,7 +98,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @NonNull
-  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, IThreadPool threadPool);
+  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool);
 
   @NonNull
   protected abstract SyncEntity createTestEntity();
