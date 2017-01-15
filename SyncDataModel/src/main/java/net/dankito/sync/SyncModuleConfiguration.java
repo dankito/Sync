@@ -33,11 +33,6 @@ public class SyncModuleConfiguration extends BaseEntity {
     this.syncModuleType = syncModuleType;
   }
 
-  public SyncModuleConfiguration(String syncModuleType, boolean keepDeletedEntitiesOnDestination) {
-    this.syncModuleType = syncModuleType;
-    this.keepDeletedEntitiesOnDestination = keepDeletedEntitiesOnDestination;
-  }
-
 
   public String getSyncModuleType() {
     return syncModuleType;
