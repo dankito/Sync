@@ -96,7 +96,7 @@ public abstract class AndroidPhotosSyncModuleBaseTest extends AndroidSyncModuleT
     Assert.assertEquals(TEST_WIDTH, entity.getWidth());
     Assert.assertEquals(TEST_FILE_SIZE, entity.getFileSize());
     Assert.assertEquals(TEST_LATITUDE, entity.getLatitude(), 0.01);
-    Assert.assertEquals(TEST_LATITUDE, entity.getLongitude(), 0.01);
+    Assert.assertEquals(TEST_LONGITUDE, entity.getLongitude(), 0.01);
     Assert.assertEquals(TEST_IMAGE_TAKEN_ON, entity.getImageTakenOn());
   }
 
