@@ -10,11 +10,11 @@ import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 public interface ISyncModule {
 
+  String[] getSyncEntityTypesItCanHandle();
+
   void readAllEntitiesAsync(ReadEntitiesCallback callback);
 
   boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState);
-
-  String getModuleUniqueKey();
 
   void addSyncEntityChangeListener(SyncEntityChangeListener listener);
   void removeSyncEntityChangeListener(SyncEntityChangeListener listener);

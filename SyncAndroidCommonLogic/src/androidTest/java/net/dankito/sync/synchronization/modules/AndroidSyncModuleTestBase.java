@@ -60,7 +60,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest = createSyncModuleToTest(appContext, entityManager, threadPool);
 
-    syncModuleConfiguration = new SyncModuleConfiguration(underTest.getModuleUniqueKey());
+    syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypesItCanHandle()[0]);
   }
 
   @After

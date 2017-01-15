@@ -38,6 +38,12 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     super(context, entityManager, threadPool);
   }
 
+
+  public String[] getSyncEntityTypesItCanHandle() {
+    return new String[] { SyncModuleDefaultTypes.Contacts.getTypeName() };
+  }
+
+
   @Override
   protected Uri[] getContentUris() {
     return new Uri[] { ContactsContract.Contacts.CONTENT_URI };

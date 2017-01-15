@@ -40,6 +40,11 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   }
 
 
+  public String[] getSyncEntityTypesItCanHandle() {
+    return new String[] { SyncModuleDefaultTypes.AndroidPhotos.getTypeName() };
+  }
+
+
   @Override
   protected Uri[] getContentUris() {
     return new Uri[] { MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Images.Media.EXTERNAL_CONTENT_URI };

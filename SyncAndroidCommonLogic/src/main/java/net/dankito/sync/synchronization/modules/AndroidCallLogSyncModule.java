@@ -20,9 +20,6 @@ import net.dankito.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by ganymed on 05/01/17.
- */
 
 public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
@@ -31,6 +28,11 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
   public AndroidCallLogSyncModule(Context context, IEntityManager entityManager, IThreadPool threadPool) {
     super(context, entityManager, threadPool);
+  }
+
+
+  public String[] getSyncEntityTypesItCanHandle() {
+    return new String[] { SyncModuleDefaultTypes.CallLog.getTypeName() };
   }
 
 

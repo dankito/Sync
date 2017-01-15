@@ -67,7 +67,9 @@ public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBas
         // TODO: show ConfigureSyncConfigurationActivity and set SyncModuleConfiguration there, remove ISyncConfigurationManager again
         List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<SyncModuleConfiguration>();
         for(ISyncModule syncModule : syncConfigurationManager.getAvailableSyncModules()) {
-          syncModuleConfigurations.add(new SyncModuleConfiguration(syncModule.getModuleUniqueKey()));
+          for(String syncEntityType : syncModule.getSyncEntityTypesItCanHandle()) {
+            syncModuleConfigurations.add(new SyncModuleConfiguration(syncEntityType));
+          }
         }
 
         devicesManager.startSynchronizingWithDevice(device, syncModuleConfigurations);
