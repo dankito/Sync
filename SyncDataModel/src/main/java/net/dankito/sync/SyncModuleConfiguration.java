@@ -19,7 +19,7 @@ public class SyncModuleConfiguration extends BaseEntity {
   protected String destinationPath; // for FileSyncEntities
 
 
-  public SyncModuleConfiguration() {
+  protected SyncModuleConfiguration() {
 
   }
 
@@ -30,10 +30,6 @@ public class SyncModuleConfiguration extends BaseEntity {
 
   public String getSyncModuleType() {
     return syncModuleType;
-  }
-
-  public void setSyncModuleType(String syncModuleType) {
-    this.syncModuleType = syncModuleType;
   }
 
   public boolean isBiDirectional() {
