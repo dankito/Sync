@@ -94,6 +94,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
       notifyAndroidSystemOfNewImageAsync(entity, file);
 
+      log.info("Successfully wrote Image File " + entity + " to destination");
       return true;
     } catch (Exception e) { log.error("Could not write entity data to file for entity " + entity, e); }
     return false;
