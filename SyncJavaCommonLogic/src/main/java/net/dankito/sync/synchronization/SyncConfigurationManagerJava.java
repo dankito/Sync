@@ -4,6 +4,7 @@ import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.modules.ISyncModule;
+import net.dankito.sync.synchronization.modules.SyncModuleWithoutSystemStorage;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -24,7 +25,11 @@ public class SyncConfigurationManagerJava extends SyncConfigurationManagerBase {
 
   @Override
   protected List<ISyncModule> retrieveAvailableSyncModules() {
-    return new ArrayList<>();
+    List<ISyncModule> availableSyncModules = new ArrayList<>();
+
+    availableSyncModules.add(new SyncModuleWithoutSystemStorage());
+
+    return availableSyncModules;
   }
 
 }
