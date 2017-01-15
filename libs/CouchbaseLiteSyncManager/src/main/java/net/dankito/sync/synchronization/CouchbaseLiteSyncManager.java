@@ -274,26 +274,32 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     }
   };
 
+
   protected void handleSynchronizedChanges(List<DocumentChange> changes) {
     for(DocumentChange change : changes) {
       Class<? extends BaseEntity> entityType = getEntityTypeFromDocumentChange(change);
 
       if(entityType != null) {
-        if(change.isConflict()) {
-          conflictHandler.handleConflict(change, entityType);
-        }
-
-        BaseEntity synchronizedEntity = dataMerger.updateCachedSynchronizedEntity(change, entityType);
-        if(synchronizedEntity == null) { // this entity is new tou our side
-          synchronizedEntity = entityManager.getEntityById(entityType, change.getDocumentId());
-        }
-
-        if(synchronizedEntity != null) {
-          callEntitySynchronizedListeners(synchronizedEntity);
-        }
+        handleChange(change, entityType);
       }
     }
   }
+
+  protected void handleChange(DocumentChange change, Class<? extends BaseEntity> entityType) {
+    if(change.isConflict()) {
+      conflictHandler.handleConflict(change, entityType);
+    }
+
+    BaseEntity synchronizedEntity = dataMerger.updateCachedSynchronizedEntity(change, entityType);
+    if(synchronizedEntity == null) { // this entity is new to our side
+      synchronizedEntity = entityManager.getEntityById(entityType, change.getDocumentId());
+    }
+
+    if(synchronizedEntity != null) {
+      callEntitySynchronizedListeners(synchronizedEntity);
+    }
+  }
+
 
   protected Class<? extends BaseEntity> getEntityTypeFromDocumentChange(DocumentChange change) {
     String entityTypeString = (String)change.getAddedRevision().getPropertyForKey(Dao.TYPE_COLUMN_NAME);
