@@ -170,6 +170,10 @@ public class SynchronizedDataMerger {
       currentRevisionValue = dao.getLobFromAttachment(propertyConfig, currentRevision.getDocument());
       if(currentRevisionValue != cachedEntityValue) {
         dao.setValueOnObject(cachedEntity, propertyConfig, currentRevisionValue); // TODO: this produces a side effect, but i would have to change structure too hard to implement this little feature
+
+        if(cachedEntityValue != null && cachedEntityValue instanceof byte[] && dao.shouldCompactDatabase(((byte[])cachedEntityValue).length)) {
+          dao.compactDatabase();
+        }
       }
     }
     else if(propertyConfig.isCollectionProperty() == false) {
