@@ -125,6 +125,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       SyncEntityState type = shouldEntityBeSynchronized(syncModuleConfiguration, lookUpKeys, entity);
 
       if(type != SyncEntityState.UNCHANGED) {
+        log.info("Entity " + entity + " has SyncEntityState of " + type);
         entitiesToSync.add(entity);
       }
     }
@@ -405,8 +406,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     ISyncModule syncModule = getSyncModuleForClassName(syncModuleConfiguration.getSyncModuleClassName());
     SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, jobItem.getEntity());
 
+    log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
+
     if(syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
       // TODO: for created entities set lookup key / update lookup key (+ last modified on device)
+      log.info("Successfully synchronized " + jobItem);
       jobItem.setState(SyncState.DONE);
       jobItem.setSyncEntityData(null);
       entityManager.updateEntity(jobItem);
