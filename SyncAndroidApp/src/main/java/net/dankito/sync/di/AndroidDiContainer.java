@@ -4,6 +4,8 @@ import android.app.Activity;
 
 import net.dankito.android.util.AlertHelper;
 import net.dankito.android.util.AndroidOnUiThreadRunner;
+import net.dankito.android.util.services.IPermissionsManager;
+import net.dankito.android.util.services.PermissionsManager;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
 import net.dankito.sync.AndroidPlatformConfigurationReader;
@@ -66,6 +68,12 @@ public class AndroidDiContainer {
   @Singleton
   public IOnUiThreadRunner provideOnUiThreadRunner() {
     return new AndroidOnUiThreadRunner(getActivity());
+  }
+
+  @Provides
+  @Singleton
+  public IPermissionsManager providePermissionsManager() {
+    return new PermissionsManager(getActivity());
   }
 
 
@@ -141,9 +149,9 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public ISyncConfigurationManager provideSyncConfigurationManager(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+  public ISyncConfigurationManager provideSyncConfigurationManager(IPermissionsManager permissionsManager, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                               IFileStorageService fileStorageService, IThreadPool threadPool) {
-    return new SyncConfigurationManagerAndroid(getActivity(), syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
+    return new SyncConfigurationManagerAndroid(getActivity(), permissionsManager, syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
   }
 
 }

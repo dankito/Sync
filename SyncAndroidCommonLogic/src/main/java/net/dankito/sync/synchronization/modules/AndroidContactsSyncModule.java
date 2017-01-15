@@ -1,5 +1,6 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -11,9 +12,11 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.android.common.R;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
@@ -24,17 +27,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by ganymed on 05/01/17.
- */
 
 public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
   private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
-  public AndroidContactsSyncModule(Context context, IThreadPool threadPool) {
-    super(context, threadPool);
+  public AndroidContactsSyncModule(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+    super(context, permissionsManager, threadPool);
   }
 
 
@@ -52,6 +52,17 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected Uri getContentUriForContentObserver() {
     return ContactsContract.Contacts.CONTENT_URI;
   }
+
+  @Override
+  protected String getPermissionToReadEntities() {
+    return Manifest.permission.READ_CONTACTS;
+  }
+
+  @Override
+  protected int getPermissionRationaleResourceId() {
+    return R.string.rational_for_accessing_contacts_permission;
+  }
+
 
   @Override
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {

@@ -1,6 +1,7 @@
 package net.dankito.sync;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -12,10 +13,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.adapter.KnownSynchronizedDiscoveredDevicesAdapter;
 import net.dankito.sync.adapter.UnknownDiscoveredDevicesAdapter;
 import net.dankito.sync.devices.DiscoveredDevice;
@@ -39,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   @Inject
   protected ISyncConfigurationManager syncConfigurationManager;
+
+  @Inject
+  protected IPermissionsManager IPermissionsManager;
 
 
   protected LinearLayout linlytUnknownDiscoveredDevices;
@@ -113,6 +119,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
       super.onBackPressed();
     }
   }
+
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    IPermissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+  }
+
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {

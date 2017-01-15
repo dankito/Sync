@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization;
 
 import android.content.Context;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
@@ -21,12 +22,15 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
 
   protected Context context;
 
+  protected IPermissionsManager permissionsManager;
 
-  public SyncConfigurationManagerAndroid(Context context, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+
+  public SyncConfigurationManagerAndroid(Context context, IPermissionsManager permissionsManager, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                          IFileStorageService fileStorageService, IThreadPool threadPool) {
     super(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
 
     this.context = context;
+    this.permissionsManager = permissionsManager;
   }
 
 
@@ -34,10 +38,10 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected List<ISyncModule> retrieveAvailableSyncModules() {
     List<ISyncModule> availableSyncModules = new ArrayList<>();
 
-    availableSyncModules.add(new AndroidInternalPhotosSyncModule(context, threadPool, fileStorageService));
-    availableSyncModules.add(new AndroidExternalPhotosSyncModule(context, threadPool, fileStorageService));
-    availableSyncModules.add(new AndroidContactsSyncModule(context, threadPool));
-    availableSyncModules.add(new AndroidCallLogSyncModule(context, threadPool));
+    availableSyncModules.add(new AndroidInternalPhotosSyncModule(context, permissionsManager, threadPool, fileStorageService));
+    availableSyncModules.add(new AndroidExternalPhotosSyncModule(context, permissionsManager, threadPool, fileStorageService));
+    availableSyncModules.add(new AndroidContactsSyncModule(context, permissionsManager, threadPool));
+    availableSyncModules.add(new AndroidCallLogSyncModule(context, permissionsManager, threadPool));
 
     return availableSyncModules;
   }

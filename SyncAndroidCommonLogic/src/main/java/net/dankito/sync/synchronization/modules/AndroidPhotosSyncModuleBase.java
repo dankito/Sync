@@ -1,15 +1,18 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
 import android.media.MediaScannerConnection;
 import android.provider.MediaStore;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.Device;
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.OsType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.android.common.R;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -26,10 +29,21 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
   protected FileHandler fileHandler;
 
 
-  public AndroidPhotosSyncModuleBase(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
-    super(context, threadPool);
+  public AndroidPhotosSyncModuleBase(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
+    super(context, permissionsManager, threadPool);
 
     this.fileHandler = new FileHandler(fileStorageService);
+  }
+
+
+  @Override
+  protected String getPermissionToReadEntities() {
+    return Manifest.permission.READ_EXTERNAL_STORAGE;
+  }
+
+  @Override
+  protected int getPermissionRationaleResourceId() {
+    return R.string.rational_for_accessing_external_storage_permission;
   }
 
 

@@ -5,14 +5,15 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
 
 public class AndroidExternalPhotosSyncModule extends AndroidPhotosSyncModuleBase {
 
-  public AndroidExternalPhotosSyncModule(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
-    super(context, threadPool, fileStorageService);
+  public AndroidExternalPhotosSyncModule(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
+    super(context, permissionsManager, threadPool, fileStorageService);
   }
 
 

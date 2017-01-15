@@ -1,5 +1,6 @@
 package net.dankito.sync.synchronization.modules;
 
+import android.Manifest;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,10 +10,12 @@ import android.os.Build;
 import android.provider.CallLog;
 import android.support.annotation.NonNull;
 
+import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.android.common.R;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
@@ -25,8 +28,8 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   private static final Logger log = LoggerFactory.getLogger(AndroidCallLogSyncModule.class);
 
 
-  public AndroidCallLogSyncModule(Context context, IThreadPool threadPool) {
-    super(context, threadPool);
+  public AndroidCallLogSyncModule(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+    super(context, permissionsManager, threadPool);
   }
 
 
@@ -39,6 +42,22 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   protected Uri getContentUri() {
     return CallLog.Calls.CONTENT_URI;
   }
+
+  @Override
+  protected Uri getContentUriForContentObserver() {
+    return CallLog.Calls.CONTENT_URI;
+  }
+
+  @Override
+  protected String getPermissionToReadEntities() {
+    return Manifest.permission.READ_CALL_LOG;
+  }
+
+  @Override
+  protected int getPermissionRationaleResourceId() {
+    return R.string.rational_for_accessing_call_log_permission;
+  }
+
 
   @Override
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
@@ -109,11 +128,6 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     }
 
     return false;
-  }
-
-  @Override
-  protected Uri getContentUriForContentObserver() {
-    return CallLog.Calls.CONTENT_URI;
   }
 
 

@@ -7,6 +7,8 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
+import net.dankito.android.util.services.IPermissionsManager;
+import net.dankito.android.util.services.PermissionRequestCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -31,13 +33,16 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected Context context;
 
+  protected IPermissionsManager permissionsManager;
+
   protected IThreadPool threadPool;
 
   protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
 
 
-  public AndroidSyncModuleBase(Context context, IThreadPool threadPool) {
+  public AndroidSyncModuleBase(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool) {
     this.context = context;
+    this.permissionsManager = permissionsManager;
     this.threadPool = threadPool;
   }
 
@@ -45,6 +50,10 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected abstract Uri getContentUri();
 
   protected abstract Uri getContentUriForContentObserver();
+
+  protected abstract String getPermissionToReadEntities();
+
+  protected abstract int getPermissionRationaleResourceId();
 
   protected abstract boolean addEntityToLocalDatabase(SyncJobItem jobItem);
 
@@ -70,7 +79,22 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     });
   }
 
-  protected void readAllEntities(ReadEntitiesCallback callback) {
+  protected void readAllEntities(final ReadEntitiesCallback callback) {
+    permissionsManager.checkPermission(getPermissionToReadEntities(), getPermissionRationaleResourceId(), new PermissionRequestCallback() {
+      @Override
+      public void permissionCheckDone(String permission, boolean isGranted) {
+        if(isGranted) {
+          readAllEntitiesPermissionsGranted(callback);
+        }
+        else {
+          log.error("User didn't give Permission " + getPermissionToReadEntities() + ", cannot read entities therefore");
+          callback.done(new ArrayList<SyncEntity>());
+        }
+      }
+    });
+  }
+
+  protected void readAllEntitiesPermissionsGranted(ReadEntitiesCallback callback) {
     List<SyncEntity> result = new ArrayList<>();
 
     readEntitiesFromAndroidDatabase(result, getContentUri());
