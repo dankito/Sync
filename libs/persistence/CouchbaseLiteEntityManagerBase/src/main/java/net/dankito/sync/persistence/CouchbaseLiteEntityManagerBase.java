@@ -28,7 +28,7 @@ import java.util.Map;
 
 public abstract class CouchbaseLiteEntityManagerBase implements IEntityManager {
 
-  protected static final int MINIMUM_DELAY_BETWEEN_TWO_COMPACT_RUNS_MILLIS = 60 * 1000; // at maximum every minute
+  protected static final int MINIMUM_DELAY_BETWEEN_TWO_COMPACT_RUNS_MILLIS = 10 * 1000; // at maximum each 10 seconds
 
   private static final Logger log = LoggerFactory.getLogger(CouchbaseLiteEntityManagerBase.class);
 
