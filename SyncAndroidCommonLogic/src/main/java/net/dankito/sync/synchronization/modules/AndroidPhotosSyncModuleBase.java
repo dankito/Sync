@@ -3,8 +3,6 @@ package net.dankito.sync.synchronization.modules;
 import android.content.Context;
 import android.database.Cursor;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 
 import net.dankito.sync.Device;
@@ -20,41 +18,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule, IFileSyncModule {
+public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase implements ISyncModule, IFileSyncModule {
 
-  private static final Logger log = LoggerFactory.getLogger(AndroidPhotosSyncModule.class);
+  private static final Logger log = LoggerFactory.getLogger(AndroidPhotosSyncModuleBase.class);
 
 
   protected FileHandler fileHandler;
 
 
-  public AndroidPhotosSyncModule(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
+  public AndroidPhotosSyncModuleBase(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
     super(context, threadPool);
 
     this.fileHandler = new FileHandler(fileStorageService);
-  }
-
-
-  public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.AndroidPhotos.getTypeName() };
-  }
-
-
-  @Override
-  protected Uri[] getContentUris() {
-    return new Uri[] { MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Images.Media.EXTERNAL_CONTENT_URI };
-  }
-
-  @Override
-  protected Uri getContentUriForContentObserver() {
-    // TODO: register a ContentObserver for both
-//    return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
-    return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-  }
-
-  @Override
-  public String getRootFolder() {
-    return Environment.getExternalStorageDirectory().getAbsolutePath();
   }
 
 
@@ -90,7 +65,7 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     ImageFileSyncEntity entity = (ImageFileSyncEntity)jobItem.getEntity();
 
     String deviceName = getDeviceName(jobItem);
-    File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), deviceName);
+    File directory = new File(getRootFolder(), deviceName);
     String fileName = entity.getName() != null ? entity.getName() : "file_" + System.currentTimeMillis() + ".jpg";
     File fileDestinationPath = new File(directory, fileName);
 
@@ -106,6 +81,9 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   @Override
   protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
     // TODO
+    // first get File instance for previously saved file
+    // if name changed, move previously saved file
+    // if syncEntityData != null, write to file
     return false;
   }
 

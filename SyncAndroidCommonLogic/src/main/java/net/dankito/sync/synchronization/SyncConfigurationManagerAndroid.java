@@ -8,7 +8,7 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.modules.AndroidCallLogSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidContactsSyncModule;
-import net.dankito.sync.synchronization.modules.AndroidPhotosSyncModule;
+import net.dankito.sync.synchronization.modules.AndroidExternalPhotosSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
@@ -33,7 +33,7 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected List<ISyncModule> retrieveAvailableSyncModules() {
     List<ISyncModule> availableSyncModules = new ArrayList<>();
 
-    availableSyncModules.add(new AndroidPhotosSyncModule(context, threadPool, fileStorageService));
+    availableSyncModules.add(new AndroidExternalPhotosSyncModule(context, threadPool, fileStorageService));
     availableSyncModules.add(new AndroidContactsSyncModule(context, threadPool));
     availableSyncModules.add(new AndroidCallLogSyncModule(context, threadPool));
 

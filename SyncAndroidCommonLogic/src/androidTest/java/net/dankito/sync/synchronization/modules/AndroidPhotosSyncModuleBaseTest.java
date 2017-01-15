@@ -1,14 +1,10 @@
 package net.dankito.sync.synchronization.modules;
 
-import android.content.Context;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.persistence.IEntityManager;
-import net.dankito.utils.IThreadPool;
-import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.Assert;
 
@@ -18,7 +14,7 @@ import java.util.Date;
  * Created by ganymed on 05/01/17.
  */
 
-public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
+public abstract class AndroidPhotosSyncModuleBaseTest extends AndroidSyncModuleTestBase {
 
   protected static final byte[] TEST_IMAGE_DATA = new byte[] { 54, 64, -118, 73 };
 
@@ -44,11 +40,6 @@ public class AndroidPhotosSyncModuleTest extends AndroidSyncModuleTestBase {
 
   protected static final int TEST_ORIENTATION = 90;
 
-
-  @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool) {
-    return new AndroidPhotosSyncModule(context, entityManager, threadPool, new JavaFileStorageService());
-  }
 
   @Override
   protected byte[] getSyncEntityData(SyncEntity entity) {
