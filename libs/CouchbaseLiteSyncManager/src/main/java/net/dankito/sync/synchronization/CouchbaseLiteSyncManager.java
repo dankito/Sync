@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 
@@ -72,6 +73,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   protected AsyncProducerConsumerQueue<Database.ChangeEvent> changeQueue;
 
 
+  @Inject
   public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkConfigurationManager configurationManager, IDevicesManager devicesManager, IThreadPool threadPool) {
     this(entityManager, configurationManager, devicesManager, threadPool, SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, true);
   }
