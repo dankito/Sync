@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.Button;
 
-import net.dankito.sync.synchronization.modules.AndroidPhotosSyncModule;
-import net.dankito.sync.synchronization.modules.ISyncModule;
+import net.dankito.sync.Device;
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
+import net.dankito.sync.synchronization.modules.IFileSyncModule;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +66,22 @@ public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBas
     @Override
     public void onClick(View view) {
       DiscoveredDevice device = (DiscoveredDevice)view.getTag();
+      Device localDevice = ((DevicesManager)devicesManager).localConfig.getLocalDevice();
+      String destinationPath = "data/" + localDevice.getName()+ "_" + localDevice.getUniqueDeviceId();
+
       if(device != null) {
         // TODO: show ConfigureSyncConfigurationActivity and set SyncModuleConfiguration there, remove ISyncConfigurationManager again
         List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<SyncModuleConfiguration>();
         for(ISyncModule syncModule : syncConfigurationManager.getAvailableSyncModules()) {
           for(String syncEntityType : syncModule.getSyncEntityTypesItCanHandle()) {
-            syncModuleConfigurations.add(new SyncModuleConfiguration(syncEntityType, syncModule instanceof AndroidPhotosSyncModule));
+            SyncModuleConfiguration syncModuleConfiguration = new SyncModuleConfiguration(syncEntityType);
+            if(syncModule instanceof IFileSyncModule) {
+              syncModuleConfiguration.setSourcePath(((IFileSyncModule)syncModule).getRootFolder());
+              syncModuleConfiguration.setDestinationPath(destinationPath + "/" + syncEntityType.replace("Android", ""));
+              syncModuleConfiguration.setBiDirectional(false);
+              syncModuleConfiguration.setKeepDeletedEntitiesOnDestination(true);
+            }
+            syncModuleConfigurations.add(syncModuleConfiguration);
           }
         }
 
