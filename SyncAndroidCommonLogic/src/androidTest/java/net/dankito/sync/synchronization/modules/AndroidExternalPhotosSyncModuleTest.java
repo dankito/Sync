@@ -13,7 +13,7 @@ import net.dankito.utils.services.JavaFileStorageService;
 public class AndroidExternalPhotosSyncModuleTest extends AndroidPhotosSyncModuleBaseTest {
 
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool) {
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IThreadPool threadPool) {
     return new AndroidExternalPhotosSyncModule(context, threadPool, new JavaFileStorageService());
   }
 

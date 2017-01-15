@@ -40,8 +40,8 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool) {
-    return new AndroidCallLogSyncModule(context, entityManager, threadPool);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, IThreadPool threadPool) {
+    return new AndroidCallLogSyncModule(context, threadPool);
   }
 
   @Override

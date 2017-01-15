@@ -58,7 +58,7 @@ public abstract class AndroidSyncModuleTestBase {
     entityManager = new EntityManagerStub();
     threadPool = new ThreadPool();
 
-    underTest = createSyncModuleToTest(appContext, entityManager, threadPool);
+    underTest = createSyncModuleToTest(appContext, threadPool);
 
     syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypesItCanHandle()[0]);
   }
@@ -77,7 +77,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @NonNull
-  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, IEntityManager entityManager, IThreadPool threadPool);
+  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, IThreadPool threadPool);
 
   @NonNull
   protected abstract SyncEntity createTestEntity();
