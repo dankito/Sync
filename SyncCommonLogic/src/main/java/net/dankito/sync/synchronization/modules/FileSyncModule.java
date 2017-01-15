@@ -35,7 +35,7 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFile
       return createOrUpdateFile(jobItem);
     }
     else if(entityState == SyncEntityState.UPDATED) {
-
+      return createOrUpdateFile(jobItem); // TODO: first check if file data really got updated (or only file metadata)
     }
     else if(entityState == SyncEntityState.DELETED) {
       // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
