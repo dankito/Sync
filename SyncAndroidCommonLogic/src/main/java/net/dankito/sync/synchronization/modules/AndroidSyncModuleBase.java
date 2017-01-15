@@ -42,7 +42,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
 
-  protected abstract Uri[] getContentUris();
+  protected abstract Uri getContentUri();
 
   protected abstract Uri getContentUriForContentObserver();
 
@@ -73,9 +73,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected void readAllEntities(ReadEntitiesCallback callback) {
     List<SyncEntity> result = new ArrayList<>();
 
-    for(Uri contentUri : getContentUris()) {
-      readEntitiesFromAndroidDatabase(result, contentUri);
-    }
+    readEntitiesFromAndroidDatabase(result, getContentUri());
 
     callback.done(result);
   }
@@ -132,7 +130,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
       try {
         ContentResolver resolver = context.getContentResolver();
         // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
-        int result = resolver.delete(Uri.withAppendedPath(getContentUris()[0], lookupKey), "", null);
+        int result = resolver.delete(Uri.withAppendedPath(getContentUri(), lookupKey), "", null);
 
         return result > 0;
       } catch(Exception e) {

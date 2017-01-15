@@ -44,8 +44,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   @Override
-  protected Uri[] getContentUris() {
-    return new Uri[] { ContactsContract.Contacts.CONTENT_URI };
+  protected Uri getContentUri() {
+    return ContactsContract.Contacts.CONTENT_URI;
   }
 
   @Override

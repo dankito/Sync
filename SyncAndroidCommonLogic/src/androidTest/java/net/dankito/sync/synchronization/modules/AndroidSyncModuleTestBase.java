@@ -270,7 +270,7 @@ public abstract class AndroidSyncModuleTestBase {
 
   protected Cursor getCursorForEntity(SyncEntity entity) {
     return appContext.getContentResolver().query(
-        underTest.getContentUris()[0],
+        underTest.getContentUri(),
         null, // Which columns to return
         getIdColumnForEntity() + " = ?",       // Which rows to return (all rows)
         new String[] { entity.getLookUpKeyOnSourceDevice() },       // Selection arguments (none)

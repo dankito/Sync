@@ -22,8 +22,8 @@ public class AndroidExternalPhotosSyncModule extends AndroidPhotosSyncModuleBase
 
 
   @Override
-  protected Uri[] getContentUris() {
-    return new Uri[] { MediaStore.Images.Media.EXTERNAL_CONTENT_URI };
+  protected Uri getContentUri() {
+    return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
   }
 
   @Override

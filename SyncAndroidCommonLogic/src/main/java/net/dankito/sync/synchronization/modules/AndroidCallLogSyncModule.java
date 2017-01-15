@@ -36,8 +36,8 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
 
   @Override
-  protected Uri[] getContentUris() {
-    return new Uri[] { CallLog.Calls.CONTENT_URI };
+  protected Uri getContentUri() {
+    return CallLog.Calls.CONTENT_URI;
   }
 
   @Override

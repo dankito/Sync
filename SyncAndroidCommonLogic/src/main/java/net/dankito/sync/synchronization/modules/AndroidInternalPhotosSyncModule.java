@@ -22,8 +22,8 @@ public class AndroidInternalPhotosSyncModule extends AndroidPhotosSyncModuleBase
 
 
   @Override
-  protected Uri[] getContentUris() {
-    return new Uri[] { MediaStore.Images.Media.INTERNAL_CONTENT_URI };
+  protected Uri getContentUri() {
+    return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
   }
 
   @Override
