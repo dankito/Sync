@@ -13,6 +13,7 @@ import net.dankito.jpa.annotationreader.config.EntityConfig;
 import net.dankito.jpa.cache.DaoCache;
 import net.dankito.jpa.cache.ObjectCache;
 import net.dankito.jpa.couchbaselite.Dao;
+import net.dankito.jpa.util.DatabaseCompacter;
 import net.dankito.sync.BaseEntity;
 
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ import java.util.Map;
 
 public abstract class CouchbaseLiteEntityManagerBase implements IEntityManager {
 
+  protected static final int MINIMUM_DELAY_BETWEEN_TWO_COMPACT_RUNS_MILLIS = 60 * 1000; // at maximum every minute
+
   private static final Logger log = LoggerFactory.getLogger(CouchbaseLiteEntityManagerBase.class);
 
 
@@ -35,6 +38,8 @@ public abstract class CouchbaseLiteEntityManagerBase implements IEntityManager {
   protected Context context;
 
   protected Database database;
+
+  protected DatabaseCompacter databaseCompacter;
 
   protected DaoCache daoCache = new DaoCache();
 
@@ -74,6 +79,8 @@ public abstract class CouchbaseLiteEntityManagerBase implements IEntityManager {
     options.setCreate(true);
 
     database = manager.openDatabase(configuration.getDataCollectionFileName(), options);
+
+    databaseCompacter = new DatabaseCompacter(database, MINIMUM_DELAY_BETWEEN_TWO_COMPACT_RUNS_MILLIS);
   }
 
   protected void createDaos(JpaAnnotationReaderResult result) {
@@ -86,7 +93,7 @@ public abstract class CouchbaseLiteEntityManagerBase implements IEntityManager {
   }
 
   protected Dao createDaoForEntity(EntityConfig entityConfig) {
-    return new Dao(database, entityConfig, objectCache, daoCache);
+    return new Dao(database, entityConfig, objectCache, daoCache, databaseCompacter);
   }
 
 
