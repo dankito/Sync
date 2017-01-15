@@ -80,7 +80,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
-  protected abstract Map<String, ISyncModule> retrieveAvailableSyncModules();
+  protected abstract List<ISyncModule> retrieveAvailableSyncModules();
 
 
   protected void connectedToSynchronizedDevice(DiscoveredDevice remoteDevice) {
@@ -307,10 +307,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   public List<ISyncModule> getAvailableSyncModules() {
     synchronized(this) {
       if(availableSyncModules == null) {
-        availableSyncModules = retrieveAvailableSyncModules();
+        availableSyncModules = new HashMap<>();
 
-        // TODO: only add SyncEntityChangeListener if ISyncModule gets activated
-        for(ISyncModule syncModule : availableSyncModules.values()) {
+        for(ISyncModule syncModule : retrieveAvailableSyncModules()) {
+          for(String syncEntityType : syncModule.getSyncEntityTypesItCanHandle()) {
+            availableSyncModules.put(syncEntityType, syncModule);
+          }
+
+          // TODO: only add SyncEntityChangeListener if ISyncModule gets activated
           syncModule.addSyncEntityChangeListener(syncEntityChangeListener);
         }
       }

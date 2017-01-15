@@ -31,13 +31,11 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SyncConfigurationManagerBaseTest {
 
-  protected static final String TEST_SYNC_MODULE_NAME = "TestSyncModule";
+  protected static final String TEST_SYNC_MODULE_TYPE = "TestSyncModule";
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID = "01";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME = "Mandela";
@@ -80,7 +78,7 @@ public class SyncConfigurationManagerBaseTest {
 
     remoteDevice = new Device("remote");
 
-    syncModuleConfiguration = new SyncModuleConfiguration(TEST_SYNC_MODULE_NAME);
+    syncModuleConfiguration = new SyncModuleConfiguration(TEST_SYNC_MODULE_TYPE);
     syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), remoteDevice,
         Arrays.asList(new SyncModuleConfiguration[] {  syncModuleConfiguration }));
     entityManager.persistEntity(syncModuleConfiguration);
@@ -237,7 +235,7 @@ public class SyncConfigurationManagerBaseTest {
     ISyncModule testSyncModule = new ISyncModule() {
       @Override
       public String[] getSyncEntityTypesItCanHandle() {
-        return new String[0];
+        return new String[] { TEST_SYNC_MODULE_TYPE };
       }
 
       @Override
@@ -258,8 +256,8 @@ public class SyncConfigurationManagerBaseTest {
     };
 
     SyncConfigurationManagerStub syncConfigurationManagerStub = (SyncConfigurationManagerStub)underTest;
-    Map<String, ISyncModule> mockedAvailableSyncModules = new HashMap<>();
-    mockedAvailableSyncModules.put(TEST_SYNC_MODULE_NAME, testSyncModule);
+    List<ISyncModule> mockedAvailableSyncModules = new ArrayList<>();
+    mockedAvailableSyncModules.add(testSyncModule);
     syncConfigurationManagerStub.setMockedAvailableSyncModules(mockedAvailableSyncModules);
 
     syncConfigurationManagerStub.startContinuouslySynchronizationWithDevice(new DiscoveredDevice(remoteDevice, "1-1-Love"), syncConfiguration);

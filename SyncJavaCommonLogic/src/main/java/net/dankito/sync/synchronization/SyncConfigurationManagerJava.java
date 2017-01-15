@@ -7,8 +7,8 @@ import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -23,8 +23,8 @@ public class SyncConfigurationManagerJava extends SyncConfigurationManagerBase {
 
 
   @Override
-  protected Map<String, ISyncModule> retrieveAvailableSyncModules() {
-    return new HashMap<>();
+  protected List<ISyncModule> retrieveAvailableSyncModules() {
+    return new ArrayList<>();
   }
 
 }

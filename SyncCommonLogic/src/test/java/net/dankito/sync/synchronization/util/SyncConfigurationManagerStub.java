@@ -11,33 +11,33 @@ import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
 
-  protected Map<String, ISyncModule> mockedAvailableSyncModules;
+  protected List<ISyncModule> mockedAvailableSyncModules;
 
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                       IFileStorageService fileStorageService, IThreadPool threadPool) {
-    this(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool, new HashMap<String, ISyncModule>());
+    this(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool, new ArrayList<ISyncModule>());
   }
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IFileStorageService fileStorageService, IThreadPool threadPool, Map<String, ISyncModule> mockedAvailableSyncModules) {
+                                      IFileStorageService fileStorageService, IThreadPool threadPool, List<ISyncModule> mockedAvailableSyncModules) {
     super(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
   }
 
 
   @Override
-  protected Map<String, ISyncModule> retrieveAvailableSyncModules() {
+  protected List<ISyncModule> retrieveAvailableSyncModules() {
     return mockedAvailableSyncModules;
   }
 
-  public void setMockedAvailableSyncModules(Map<String, ISyncModule> mockedAvailableSyncModules) {
+  public void setMockedAvailableSyncModules(List<ISyncModule> mockedAvailableSyncModules) {
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
   }
 

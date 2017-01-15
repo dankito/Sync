@@ -13,8 +13,8 @@ import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBase {
 
@@ -30,12 +30,12 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
 
 
   @Override
-  protected Map<String, ISyncModule> retrieveAvailableSyncModules() {
-    Map<String, ISyncModule> availableSyncModules = new HashMap<>();
+  protected List<ISyncModule> retrieveAvailableSyncModules() {
+    List<ISyncModule> availableSyncModules = new ArrayList<>();
 
-    availableSyncModules.put(AndroidPhotosSyncModule.class.getName(), new AndroidPhotosSyncModule(context, entityManager, threadPool, fileStorageService));
-    availableSyncModules.put(AndroidContactsSyncModule.class.getName(), new AndroidContactsSyncModule(context, entityManager, threadPool));
-    availableSyncModules.put(AndroidCallLogSyncModule.class.getName(), new AndroidCallLogSyncModule(context, entityManager, threadPool));
+    availableSyncModules.add(new AndroidPhotosSyncModule(context, entityManager, threadPool, fileStorageService));
+    availableSyncModules.add(new AndroidContactsSyncModule(context, entityManager, threadPool));
+    availableSyncModules.add(new AndroidCallLogSyncModule(context, entityManager, threadPool));
 
     return availableSyncModules;
   }
