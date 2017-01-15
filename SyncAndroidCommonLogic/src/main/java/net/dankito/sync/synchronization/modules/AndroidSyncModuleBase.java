@@ -120,6 +120,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
       return updateEntityInLocalDatabase(jobItem);
     }
     else if(entityState == SyncEntityState.DELETED) {
+      // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
       if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination() == false) {
         return deleteEntityFromLocalDatabase(jobItem);
       }
