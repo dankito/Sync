@@ -6,6 +6,8 @@ import android.content.Context;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.modules.AndroidCallLogSyncModule;
+import net.dankito.sync.synchronization.modules.AndroidContactsSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidPhotosSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
