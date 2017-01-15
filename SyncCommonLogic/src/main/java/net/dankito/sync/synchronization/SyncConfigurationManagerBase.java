@@ -245,7 +245,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity, localConfig.getLocalDevice(), remoteDevice.getDevice());
 
     if(entity instanceof FileSyncEntity) {
-      String filePath = ((FileSyncEntity)entity).getFilePath();
+      String filePath = ((FileSyncEntity)entity).getFilePath(); // TODO: this is not valid for destination device -> use path from LocalLookupKey
       try {
         jobItem.setSyncEntityData(fileStorageService.readFromBinaryFile(filePath));
       } catch(Exception e) { log.error("Could not read file for FileSyncItem " + entity, e); }
