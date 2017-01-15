@@ -59,6 +59,10 @@ public class SyncEntityLocalLookUpKeys extends BaseEntity {
     return entityLocalLookUpKey;
   }
 
+  public void setEntityLocalLookUpKey(String entityLocalLookUpKey) {
+    this.entityLocalLookUpKey = entityLocalLookUpKey;
+  }
+
   public Date getEntityLastModifiedOnDevice() {
     return entityLastModifiedOnDevice;
   }
