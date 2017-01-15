@@ -11,6 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+
+/**
+ * Implements common file handling functionality for Android and Java SyncModules.
+ * As the have different parent classes, these methods cannot be implemented in a common parent class.
+ */
 public class FileHandler {
 
   private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
