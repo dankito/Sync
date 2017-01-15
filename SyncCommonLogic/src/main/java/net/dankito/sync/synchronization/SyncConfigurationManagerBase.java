@@ -207,10 +207,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return type;
   }
 
-  protected void persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+  protected SyncEntityLocalLookUpKeys persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncEntityLocalLookUpKeys lookUpKeyEntry = new SyncEntityLocalLookUpKeys(getSyncEntityType(entity), entity.getId(),
                                                                 entity.getLookUpKeyOnSourceDevice(), entity.getLastModifiedOnDevice(), syncModuleConfiguration);
     entityManager.persistEntity(lookUpKeyEntry);
+
+    return lookUpKeyEntry;
   }
 
   protected void deleteEntryLookUpKey(SyncEntityLocalLookUpKeys lookUpKey) {
@@ -249,6 +251,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void pushSyncEntityToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+    log.info("Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
+
     SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity, localConfig.getLocalDevice(), remoteDevice.getDevice());
 
     if(entity instanceof FileSyncEntity) {
@@ -334,6 +338,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected SyncEntityChangeListener syncEntityChangeListener = new SyncEntityChangeListener() {
     @Override
     public void entityChanged(SyncEntityChange syncEntityChange) {
+      log.info("SyncEntityChangeListener called for " + syncEntityChange.getSyncModule().getClass().getSimpleName());
       pushModuleEntityChangesToRemoteDevicesAfterADelay(syncEntityChange);
     }
   };
@@ -413,9 +418,17 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
     entityManager.updateEntity(jobItem);
 
+    SyncEntity entity = jobItem.getEntity();
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
-    SyncEntityState syncEntityState = getSyncEntityState(syncModuleConfiguration, jobItem.getEntity());
+
+    SyncEntityLocalLookUpKeys lookupKey = getLookUpKeyForSyncEntityByDatabaseId(syncModuleConfiguration, entity);
+    if(lookupKey == null) {
+      lookupKey = persistEntryLookUpKey(syncModuleConfiguration, entity);
+    }
+
+    SyncEntityState syncEntityState = getSyncEntityState(jobItem.getEntity(), lookupKey);
+    setSyncEntityLocalValuesFromLookupKey(entity, lookupKey, syncEntityState);
 
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
 
@@ -425,28 +438,33 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       jobItem.setState(SyncState.DONE);
       jobItem.setFinishTime(new Date());
       jobItem.setSyncEntityData(null);
+
+      if(syncEntityState == SyncEntityState.DELETED) {
+        deleteEntryLookUpKey(lookupKey);
+      }
+
       entityManager.updateEntity(jobItem);
     }
   }
 
-  protected SyncEntityState getSyncEntityState(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
-    SyncEntityLocalLookUpKeys lookupKey = getLookUpKeyForSyncEntityByDatabaseId(syncModuleConfiguration, entity);
-
+  protected SyncEntityState getSyncEntityState(SyncEntity entity, SyncEntityLocalLookUpKeys lookupKey) {
     if(lookupKey == null) {
-      persistEntryLookUpKey(syncModuleConfiguration, entity); // TODO: in this way method got side effects
       return SyncEntityState.CREATED;
     }
     else {
-      entity.setLookUpKeyOnSourceDevice(lookupKey.getEntityLocalLookUpKey()); // TODO: in this way method got side effects
-      entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
-
       if(entity.isDeleted()) {
-        deleteEntryLookUpKey(lookupKey); // TODO: in this way method got side effects
         return SyncEntityState.DELETED;
       }
       else {
         return SyncEntityState.UPDATED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
       }
+    }
+  }
+
+  protected void setSyncEntityLocalValuesFromLookupKey(SyncEntity entity, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
+    if(syncEntityState == SyncEntityState.UPDATED || syncEntityState == SyncEntityState.DELETED) {
+      entity.setLookUpKeyOnSourceDevice(lookupKey.getEntityLocalLookUpKey());
+      entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
     }
   }
 
