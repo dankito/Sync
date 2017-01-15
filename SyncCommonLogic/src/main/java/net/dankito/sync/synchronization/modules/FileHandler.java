@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization.modules;
 
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.utils.services.IFileStorageService;
 
 import org.slf4j.Logger;
@@ -23,7 +24,16 @@ public class FileHandler {
   }
 
 
-  public boolean writeFileToDestinationPath(SyncJobItem jobItem, File fileDestinationPath) {
+  public boolean writeFileToDestinationPath(SyncJobItem jobItem) {
+    FileSyncEntity entity = (FileSyncEntity)jobItem.getEntity();
+    SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
+
+    File fileDestinationPath = getFileDestinationPath(syncModuleConfiguration.getSourcePath(), syncModuleConfiguration.getDestinationPath(), entity.getFilePath());
+
+    return writeFileToDestinationPath(jobItem, fileDestinationPath);
+  }
+
+  protected boolean writeFileToDestinationPath(SyncJobItem jobItem, File fileDestinationPath) {
     try {
       FileSyncEntity entity = (FileSyncEntity)jobItem.getEntity();
 
@@ -41,14 +51,13 @@ public class FileHandler {
   }
 
 
-
-  public File getFileDestinationPath(String synchronizationSourceRootFolder, String synchronizationDestinationRootFolder, String entitySourcePathString) {
+  protected File getFileDestinationPath(String synchronizationSourceRootFolder, String synchronizationDestinationRootFolder, String entitySourcePathString) {
     File entityRelativeSourcePath = getFileRelativePath(synchronizationSourceRootFolder, entitySourcePathString);
 
     return new File(synchronizationDestinationRootFolder, entityRelativeSourcePath.getPath());
   }
 
-  public File getFileRelativePath(String rootFolderString, String filePathString) {
+  protected File getFileRelativePath(String rootFolderString, String filePathString) {
     File rootFolder = new File(rootFolderString);
     File filePath = new File(filePathString);
 

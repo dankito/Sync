@@ -1,15 +1,12 @@
 package net.dankito.sync.synchronization.modules;
 
 
-import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.utils.services.IFileStorageService;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFileSyncModule {
@@ -35,7 +32,7 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFile
   @Override
   public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
     if(entityState == SyncEntityState.CREATED) {
-      return saveCreatedEntity(jobItem);
+      return createOrUpdateFile(jobItem);
     }
     else if(entityState == SyncEntityState.UPDATED) {
 
@@ -54,13 +51,8 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFile
   }
 
 
-  protected boolean saveCreatedEntity(SyncJobItem jobItem) {
-    FileSyncEntity entity = (FileSyncEntity)jobItem.getEntity();
-    SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
-
-    File fileDestinationPath = fileHandler.getFileDestinationPath(syncModuleConfiguration.getSourcePath(), syncModuleConfiguration.getDestinationPath(), entity.getFilePath());
-
-    return fileHandler.writeFileToDestinationPath(jobItem, fileDestinationPath);
+  protected boolean createOrUpdateFile(SyncJobItem jobItem) {
+    return fileHandler.writeFileToDestinationPath(jobItem);
   }
 
 
