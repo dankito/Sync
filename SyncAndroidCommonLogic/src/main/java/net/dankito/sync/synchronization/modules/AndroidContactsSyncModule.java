@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.ContactSyncEntity;
@@ -18,14 +17,11 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
 import net.dankito.utils.IThreadPool;
-import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements ISyncModule {
@@ -45,12 +41,12 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   @Override
   protected Uri getContentUri() {
-    return ContactsContract.Contacts.CONTENT_URI;
+    return ContactsContract.RawContacts.CONTENT_URI;
   }
 
   @Override
   protected Uri getContentUriForContentObserver() {
-    return ContactsContract.Contacts.CONTENT_URI;
+    return ContactsContract.RawContacts.CONTENT_URI;
   }
 
   @Override
@@ -71,68 +67,47 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   @Override
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
+    boolean isDeleted = readBoolean(cursor, "deleted");
+    if(isDeleted) {
+      return null;
+    }
+
     ContactSyncEntity entity = new ContactSyncEntity();
 
-    entity.setLookUpKeyOnSourceDevice(readString(cursor, ContactsContract.Contacts.LOOKUP_KEY));
+    Long rawContactId = readLong(cursor, ContactsContract.RawContacts._ID);
+
+    entity.setLookUpKeyOnSourceDevice("" + rawContactId);
     entity.setCreatedOnDevice(null); // TODO
-    entity.setLastModifiedOnDevice(readDate(cursor, ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
+    entity.setLastModifiedOnDevice(readDate(cursor, "version")); // TODO: don't know a better way to tell if raw contact has changed
 
-    entity.setDisplayName(readString(cursor, ContactsContract.Contacts.DISPLAY_NAME));
+    entity.setDisplayName(readString(cursor, ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY));
 
-    long contactId = readLong(cursor, ContactsContract.Contacts._ID);
-    Set<Long> rawContactIds = getRawContactIdsForContact(contactId);
-
-    boolean hasPhoneNumber = readBoolean(cursor, ContactsContract.Contacts.HAS_PHONE_NUMBER);
-
-    readRawContactsForContact(entity, rawContactIds, hasPhoneNumber);
+    readRawContactDetails(entity, rawContactId);
 
     return entity;
   }
 
-  protected Set<Long> getRawContactIdsForContact(long contactId) {
-    HashSet<Long> ids = new HashSet<Long>();
+  protected void readRawContactDetails(ContactSyncEntity entity, Long rawContactId) {
+    readPhoneNumbers(entity, rawContactId);
 
-    Cursor cursor = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI,
-        new String[]{ ContactsContract.RawContacts._ID },
-        ContactsContract.RawContacts.CONTACT_ID + "=?",
-        new String[]{String.valueOf(contactId)}, null);
+    readEmailAddresses(entity, rawContactId);
 
-    if(cursor != null && cursor.moveToFirst()) {
-      do {
-        ids.add(cursor.getLong(0));
-      } while (cursor.moveToNext());
+    readContactNameDetails(entity, rawContactId);
 
-      cursor.close();
-    }
+    entity.setNickname(readContactDetailString(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Nickname.NAME));
 
-    return ids;
-  }
+    entity.setNote(readContactDetailString(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Note.NOTE));
 
-  protected void readRawContactsForContact(ContactSyncEntity entity, Set<Long> rawContactIds, boolean hasPhoneNumber) {
-    for(Long rawContactId : rawContactIds) {
-      if(hasPhoneNumber) {
-        readPhoneNumbers(entity, rawContactId);
-      }
-
-      readEmailAddresses(entity, rawContactId);
-
-      readContactNameDetails(entity, rawContactId);
-
-      entity.setNickname(readContactDetailString(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
-          ContactsContract.CommonDataKinds.Nickname.NAME));
-
-      entity.setNote(readContactDetailString(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
-          ContactsContract.CommonDataKinds.Note.NOTE));
-
-      entity.setWebsiteUrl(readContactDetailString(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
-          ContactsContract.CommonDataKinds.Website.URL)); // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
-    }
+    entity.setWebsiteUrl(readContactDetailString(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Website.URL)); // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
   }
 
   protected void readPhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
     Cursor phones = context.getContentResolver().query(
         ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + rawContactId,
+        ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID + " = " + rawContactId,
         null, null);
 
     if(phones.moveToFirst()) {
@@ -151,7 +126,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected void readEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
     Cursor emails = context.getContentResolver().query(
         ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + rawContactId,
+        ContactsContract.CommonDataKinds.Email.RAW_CONTACT_ID + " = " + rawContactId,
         null, null);
 
     if(emails.moveToFirst()) {
@@ -226,9 +201,9 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
       if(results.length > 0 && results[0] != null) {
         String newRawContactIdString = results[0].uri.getLastPathSegment();
-        newRawContactId = Long.parseLong(newRawContactIdString);
+        newRawContactId = parseLocalLookupKeyToLong(newRawContactIdString);
 
-        getLookupKeyForNewContact(entity, resolver, newRawContactIdString);
+        entity.setLookUpKeyOnSourceDevice(newRawContactIdString);
       }
     } catch(Exception e) {
       log.error("Could not insert Contact into Database: " + entity, e);
@@ -239,33 +214,6 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     }
 
     return false;
-  }
-
-  protected void getLookupKeyForNewContact(ContactSyncEntity entity, ContentResolver resolver, String newRawContactIdString) {
-    Cursor rawContactCursor = resolver.query(ContactsContract.RawContacts.CONTENT_URI, new String[] { ContactsContract.RawContacts.CONTACT_ID },
-        ContactsContract.RawContacts._ID + " = ? ", new String[] { newRawContactIdString }, null);
-
-    if(rawContactCursor.moveToFirst()) {
-      String contactId = readString(rawContactCursor, ContactsContract.RawContacts.CONTACT_ID);
-
-      String contactLookupKey = getLookupKeyForContact(contactId);
-      if(contactLookupKey != null) {
-        entity.setLookUpKeyOnSourceDevice(contactLookupKey);
-      }
-    }
-  }
-
-  @Nullable
-  protected String getLookupKeyForContact(String contactId) {
-    Cursor lookupKeyCursor = context.getContentResolver().query(
-        ContactsContract.Contacts.CONTENT_URI, new String[] { ContactsContract.Contacts.LOOKUP_KEY },
-        ContactsContract.Contacts._ID + " = ? ", new String[] { contactId }, null);
-
-    if (lookupKeyCursor.moveToFirst()) {
-      return readString(lookupKeyCursor, ContactsContract.Contacts.LOOKUP_KEY);
-    }
-
-    return null;
   }
 
   protected boolean saveContactToDatabase(ContactSyncEntity entity, Long rawContactId) {
@@ -343,78 +291,29 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
     ContactSyncEntity entity = (ContactSyncEntity)jobItem.getEntity();
 
-    Long contactId = getContactIdForContact(entity);
-    if(contactId == null) {
+    Long rawContactId = parseLocalLookupKeyToLong(entity);
+    if(rawContactId == null) {
       return false;
     }
 
-    Set<Long> rawContactIds = getRawContactIdsForContact(contactId);
-    boolean result = rawContactIds.size() > 0;
 
-    if(rawContactIds.size() > 0) {
-      // TODO: as i don't know from which RawContact the original data originated, i simply choose the first one and update that one. Not ideal though
-      Long rawContactId = new ArrayList<>(rawContactIds).get(0);
+    boolean result = updateName(entity, rawContactId);
 
-      result &= updateName(entity, rawContactId);
+    result &= updatePhoneNumbers(entity, rawContactId);
 
-      result &= updatePhoneNumbers(entity, rawContactId);
+    result &= updateEmailAddresses(entity, rawContactId);
 
-      result &= updateEmailAddresses(entity, rawContactId);
+    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Nickname.NAME, entity.getNickname());
 
-      result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
-          ContactsContract.CommonDataKinds.Nickname.NAME, entity.getNickname());
+    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Note.NOTE, entity.getNote());
 
-      result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
-          ContactsContract.CommonDataKinds.Note.NOTE, entity.getNote());
-
-      result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
-          ContactsContract.CommonDataKinds.Website.URL, entity.getWebsiteUrl());
-      // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
-    }
-
-
-    Cursor cursor = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
-        new String[]{ ContactsContract.Contacts.LOOKUP_KEY },
-        ContactsContract.Contacts._ID + "=?",
-        new String[]{String.valueOf(contactId)}, null);
-
-    if(cursor != null && cursor.moveToFirst()) {
-      entity.setLookUpKeyOnSourceDevice(readString(cursor, ContactsContract.Contacts.LOOKUP_KEY));
-
-      cursor.close();
-    }
+    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+        ContactsContract.CommonDataKinds.Website.URL, entity.getWebsiteUrl());
+    // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
 
     return result;
-  }
-
-  protected Long getContactIdForContact(ContactSyncEntity contact) {
-    try {
-      return Long.parseLong(getContactIdStringForContact(contact));
-    } catch(Exception e) { log.error("Could not get ContactId for Contact " + contact); }
-
-    return null;
-  }
-
-  protected String getContactIdStringForContact(ContactSyncEntity contact) {
-    String lookupKey = contact.getLookUpKeyOnSourceDevice();
-    if(lookupKey.endsWith("-")) {
-      lookupKey = lookupKey.substring(0, lookupKey.length() - 1);
-    }
-
-    Cursor contactIdCursor = context.getContentResolver().query(
-        ContactsContract.Contacts.CONTENT_URI,
-        null,
-        ContactsContract.Contacts.LOOKUP_KEY + " LIKE ?", new String[] { lookupKey + "%" }, null
-    );
-
-    if(contactIdCursor.moveToFirst()) {
-      String contactId = readString(contactIdCursor, ContactsContract.Contacts._ID);
-      contactIdCursor.close();
-
-      return contactId;
-    }
-
-    return null;
   }
 
   protected boolean updateName(ContactSyncEntity entity, Long rawContactId) {
@@ -473,28 +372,6 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
       return result > 0;
     } catch(Exception e) { log.error("Could not update value '" + value + "' of mime type '" + mimeType + "' for raw contact " + rawContactId, e); }
-
-    return false;
-  }
-
-
-  @Override
-  protected boolean deleteEntityFromLocalDatabase(SyncJobItem jobItem) {
-    String lookupKey = jobItem.getEntity().getLookUpKeyOnSourceDevice();
-
-    if(StringUtils.isNotNullOrEmpty(lookupKey)) {
-      try {
-        String contactId = getContactIdStringForContact((ContactSyncEntity)jobItem.getEntity());
-
-        ContentResolver resolver = context.getContentResolver();
-        // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
-        int result = resolver.delete(ContactsContract.Contacts.CONTENT_URI, ContactsContract.Contacts._ID + " = ? ", new String[] { contactId });
-
-        return result > 0;
-      } catch(Exception e) {
-        log.error("Could not delete Entry from Database: " + jobItem.getEntity(), e);
-      }
-    }
 
     return false;
   }

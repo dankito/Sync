@@ -243,6 +243,19 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
 
+  protected Long parseLocalLookupKeyToLong(SyncEntity entity) {
+    return parseLocalLookupKeyToLong(entity.getLookUpKeyOnSourceDevice());
+  }
+
+  protected Long parseLocalLookupKeyToLong(String localLookupKey) {
+    try {
+      return Long.parseLong(localLookupKey);
+    } catch(Exception e) { log.error("Could not parse local lookup key " + localLookupKey + " to long", e); }
+
+    return null;
+  }
+
+
   protected String readString(Cursor cursor, String columnName) {
     return cursor.getString(getColumnIndex(cursor, columnName));
   }
