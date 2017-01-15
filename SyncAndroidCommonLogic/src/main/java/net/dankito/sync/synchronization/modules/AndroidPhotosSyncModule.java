@@ -25,13 +25,13 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   private static final Logger log = LoggerFactory.getLogger(AndroidPhotosSyncModule.class);
 
 
-  protected IFileStorageService fileStorageService;
+  protected FileHandler fileHandler;
 
 
   public AndroidPhotosSyncModule(Context context, IThreadPool threadPool, IFileStorageService fileStorageService) {
     super(context, threadPool);
 
-    this.fileStorageService = fileStorageService;
+    this.fileHandler = new FileHandler(fileStorageService);
   }
 
 
@@ -91,27 +91,25 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
 
     String deviceName = getDeviceName(jobItem);
     File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), deviceName);
-    directory.mkdirs();
     String fileName = entity.getName() != null ? entity.getName() : "file_" + System.currentTimeMillis() + ".jpg";
-    File file = new File(directory, fileName);
-    try {
-      file.createNewFile();
+    File fileDestinationPath = new File(directory, fileName);
 
-      fileStorageService.writeToBinaryFile(jobItem.getSyncEntityData(), file.getAbsolutePath());
-      entity.setLookUpKeyOnSourceDevice(file.getAbsolutePath());
+    if(fileHandler.writeFileToDestinationPath(jobItem, fileDestinationPath)) {
+      notifyAndroidSystemOfNewImageAsync(entity, fileDestinationPath);
 
-      notifyAndroidSystemOfNewImageAsync(entity, file);
-
-      log.info("Successfully wrote Image File " + entity + " to destination");
       return true;
-    } catch (Exception e) { log.error("Could not write entity data to file for entity " + entity, e); }
+    }
+
     return false;
   }
 
   @Override
   protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
+    // TODO
     return false;
   }
+
+  // TODO: also implement deleting file?
 
 
   protected void notifyAndroidSystemOfNewImageAsync(final ImageFileSyncEntity entity, final File file) {

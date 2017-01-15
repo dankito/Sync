@@ -33,7 +33,7 @@ public class FileHandler {
     return writeFileToDestinationPath(jobItem, fileDestinationPath);
   }
 
-  protected boolean writeFileToDestinationPath(SyncJobItem jobItem, File fileDestinationPath) {
+  public boolean writeFileToDestinationPath(SyncJobItem jobItem, File fileDestinationPath) {
     try {
       FileSyncEntity entity = (FileSyncEntity)jobItem.getEntity();
 
