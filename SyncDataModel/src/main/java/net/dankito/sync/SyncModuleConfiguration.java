@@ -9,8 +9,8 @@ import javax.persistence.Entity;
 @Entity(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_TABLE_NAME)
 public class SyncModuleConfiguration extends BaseEntity {
 
-  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_SYNC_MODULE_CLASS_NAME_COLUMN_NAME)
-  protected String syncModuleClassName;
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_SYNC_MODULE_TYPE_COLUMN_NAME)
+  protected String syncModuleType;
 
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_IS_BI_DIRECTIONAL_COLUMN_NAME)
   protected boolean isBiDirectional;
@@ -23,17 +23,17 @@ public class SyncModuleConfiguration extends BaseEntity {
 
   }
 
-  public SyncModuleConfiguration(String syncModuleClassName) {
-    this.syncModuleClassName = syncModuleClassName;
+  public SyncModuleConfiguration(String syncModuleType) {
+    this.syncModuleType = syncModuleType;
   }
 
 
-  public String getSyncModuleClassName() {
-    return syncModuleClassName;
+  public String getSyncModuleType() {
+    return syncModuleType;
   }
 
-  public void setSyncModuleClassName(String syncModuleClassName) {
-    this.syncModuleClassName = syncModuleClassName;
+  public void setSyncModuleType(String syncModuleType) {
+    this.syncModuleType = syncModuleType;
   }
 
   public boolean isBiDirectional() {

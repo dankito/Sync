@@ -280,7 +280,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected ISyncModule getSyncModuleForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
     getAvailableSyncModules(); // ensure availableSyncModules are loaded
-    return availableSyncModules.get(syncModuleConfiguration.getSyncModuleClassName());
+    return availableSyncModules.get(syncModuleConfiguration.getSyncModuleType());
   }
 
   protected String getSyncEntityType(SyncEntity entity) {
@@ -355,7 +355,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
           if(syncConfiguration != null) {
             for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-              if(syncModuleName.equals(syncModuleConfiguration.getSyncModuleClassName())) {
+              if(syncModuleName.equals(syncModuleConfiguration.getSyncModuleType())) {
                 getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
               }
             }
