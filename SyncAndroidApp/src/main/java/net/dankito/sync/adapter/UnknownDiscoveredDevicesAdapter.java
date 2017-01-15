@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.Button;
 
+import net.dankito.sync.synchronization.modules.AndroidPhotosSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
@@ -68,7 +69,7 @@ public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBas
         List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<SyncModuleConfiguration>();
         for(ISyncModule syncModule : syncConfigurationManager.getAvailableSyncModules()) {
           for(String syncEntityType : syncModule.getSyncEntityTypesItCanHandle()) {
-            syncModuleConfigurations.add(new SyncModuleConfiguration(syncEntityType));
+            syncModuleConfigurations.add(new SyncModuleConfiguration(syncEntityType, syncModule instanceof AndroidPhotosSyncModule));
           }
         }
 

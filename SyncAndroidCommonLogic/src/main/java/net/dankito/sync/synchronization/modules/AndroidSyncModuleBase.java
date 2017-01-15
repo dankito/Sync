@@ -120,7 +120,12 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
       return updateEntityInLocalDatabase(jobItem);
     }
     else if(entityState == SyncEntityState.DELETED) {
-      return deleteEntityFromLocalDatabase(jobItem);
+      if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination() == false) {
+        return deleteEntityFromLocalDatabase(jobItem);
+      }
+      else { // keepDeletedEntitiesOnDestination is set to true -> keep file -> synchronization is successfully done
+        return true;
+      }
     }
 
     return false;
