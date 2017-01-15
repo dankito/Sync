@@ -12,7 +12,7 @@ import net.dankito.utils.services.IFileStorageService;
 import java.io.File;
 import java.util.ArrayList;
 
-public class FileSyncModule extends SyncModuleBase implements ISyncModule {
+public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFileSyncModule {
 
   protected FileHandler fileHandler;
 
@@ -72,6 +72,12 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule {
   @Override
   public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
     // currently is no FileSystemWatcher implemented
+  }
+
+
+  @Override
+  public String getRootFolder() {
+    return null;
   }
 
 }

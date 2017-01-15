@@ -20,11 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-/**
- * Created by ganymed on 05/01/17.
- */
-
-public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule {
+public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements ISyncModule, IFileSyncModule {
 
   private static final Logger log = LoggerFactory.getLogger(AndroidPhotosSyncModule.class);
 
@@ -48,6 +44,19 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
   protected Uri[] getContentUris() {
     return new Uri[] { MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Images.Media.EXTERNAL_CONTENT_URI };
   }
+
+  @Override
+  protected Uri getContentUriForContentObserver() {
+    // TODO: register a ContentObserver for both
+//    return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
+    return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+  }
+
+  @Override
+  public String getRootFolder() {
+    return Environment.getExternalStorageDirectory().getAbsolutePath();
+  }
+
 
   @Override
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
@@ -125,13 +134,6 @@ public class AndroidPhotosSyncModule extends AndroidSyncModuleBase implements IS
     return remoteDevice.getOsType() == OsType.ANDROID ? remoteDevice.getName() : remoteDevice.getOsName();
   }
 
-
-  @Override
-  protected Uri getContentUriForContentObserver() {
-    // TODO: register a ContentObserver for both
-//    return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
-    return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-  }
 
 //    Cursor cursor = context.getContentResolver().query(uri, null, null, null, "date_added DESC");
 
