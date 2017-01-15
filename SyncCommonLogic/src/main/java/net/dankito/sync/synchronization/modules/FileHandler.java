@@ -51,6 +51,23 @@ public class FileHandler {
   }
 
 
+  protected boolean deleteFile(SyncJobItem jobItem) {
+    try {
+      FileSyncEntity entity = (FileSyncEntity) jobItem.getEntity();
+      SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
+
+      File fileDestinationPath = getFileDestinationPath(syncModuleConfiguration.getSourcePath(), syncModuleConfiguration.getDestinationPath(), entity.getFilePath());
+
+      return fileDestinationPath.delete();
+    } catch(Exception e) {
+      log.error("Could not delete file for SyncJobItem " + jobItem, e);
+    }
+
+    return false;
+  }
+
+
+
   protected File getFileDestinationPath(String synchronizationSourceRootFolder, String synchronizationDestinationRootFolder, String entitySourcePathString) {
     File entityRelativeSourcePath = getFileRelativePath(synchronizationSourceRootFolder, entitySourcePathString);
 

@@ -43,7 +43,7 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFile
         return true;
       }
       else {
-
+        return fileHandler.deleteFile(jobItem);
       }
     }
 
