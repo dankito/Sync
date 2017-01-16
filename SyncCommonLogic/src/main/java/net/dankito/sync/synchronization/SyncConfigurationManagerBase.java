@@ -445,12 +445,16 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
 
+    SyncEntityState syncEntityState;
     SyncEntityLocalLookUpKeys lookupKey = getLookUpKeyForSyncEntityByDatabaseId(syncModuleConfiguration, entity);
     if(lookupKey == null) {
       lookupKey = persistEntryLookUpKey(syncModuleConfiguration, entity);
+      syncEntityState = SyncEntityState.CREATED;
+    }
+    else {
+      syncEntityState = getSyncEntityState(jobItem.getEntity(), lookupKey);
     }
 
-    SyncEntityState syncEntityState = getSyncEntityState(jobItem.getEntity(), lookupKey);
     setSyncEntityLocalValuesFromLookupKey(entity, lookupKey, syncEntityState);
 
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
@@ -488,7 +492,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected SyncEntityState getSyncEntityState(SyncEntity entity, SyncEntityLocalLookUpKeys lookupKey) {
-    if(lookupKey == null) {
+    if(lookupKey == null || lookupKey.getEntityLocalLookUpKey() == null) {
       return SyncEntityState.CREATED;
     }
     else {
