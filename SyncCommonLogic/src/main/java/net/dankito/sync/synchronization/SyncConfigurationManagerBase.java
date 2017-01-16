@@ -129,11 +129,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     Map<String, SyncEntityLocalLookUpKeys> lookUpKeys = getLookUpKeysForSyncModuleConfiguration(syncModuleConfiguration);
 
     for(SyncEntity entity : entities) {
-      SyncEntityState type = shouldEntityBeSynchronized(syncModuleConfiguration, lookUpKeys, entity);
+      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
+      SyncEntityState type = shouldEntityBeSynchronized(syncModuleConfiguration, entity, entityLookUpKey);
 
       if(type != SyncEntityState.UNCHANGED) {
         log.info("Entity " + entity + " has SyncEntityState of " + type);
-        entitiesToSync.add(entity);
+        SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookUpKey);
+        entitiesToSync.add(persistedEntity);
       }
     }
 
@@ -178,33 +180,54 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return null;
   }
 
-  protected SyncEntityState shouldEntityBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, Map<String, SyncEntityLocalLookUpKeys> lookUpKeys, SyncEntity entity) {
+  protected SyncEntityState shouldEntityBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookUpKeys entityLookUpKey) {
     SyncEntityState type = SyncEntityState.UNCHANGED;
 
-    SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
-
     if(entityLookUpKey == null) { // unpersisted SyncEntity
-      if(entityManager.persistEntity(entity)) {
-        persistEntryLookUpKey(syncModuleConfiguration, entity);
-        type = SyncEntityState.CREATED;
-      }
+      type = SyncEntityState.CREATED;
     }
     else {
       SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
+
       if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
-        deleteEntryLookUpKey(entityLookUpKey);
         type = SyncEntityState.DELETED;
       }
       else {
         if(hasEntityBeenUpdated(entity, entityLookUpKey)) {
-          entityLookUpKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
-          entityManager.updateEntity(entityLookUpKey);
           type = SyncEntityState.UPDATED;
         }
       }
     }
 
     return type;
+  }
+
+  protected SyncEntity handleEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookUpKeys entityLookUpKey) {
+    if(entityLookUpKey == null) { // unpersisted SyncEntity
+      entityManager.persistEntity(entity);
+      persistEntryLookUpKey(syncModuleConfiguration, entity);
+
+      return entity;
+    }
+    else {
+      SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
+
+      if(persistedEntity.isDeleted()) {
+        deleteEntryLookUpKey(entityLookUpKey);
+      }
+      else {
+        entityLookUpKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
+        entityManager.updateEntity(entityLookUpKey);
+
+        mergePersistedEntityWithExtractedOne(persistedEntity, entity);
+      }
+
+      return persistedEntity;
+    }
+  }
+
+  protected void mergePersistedEntityWithExtractedOne(SyncEntity persistedEntity, SyncEntity entity) {
+    // TODO
   }
 
   protected SyncEntityLocalLookUpKeys persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
