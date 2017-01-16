@@ -130,7 +130,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     for(SyncEntity entity : entities) {
       SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
-      SyncEntityState type = shouldEntityBeSynchronized(syncModuleConfiguration, entity, entityLookUpKey);
+      SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookUpKey);
 
       if(type != SyncEntityState.UNCHANGED) {
         log.info("Entity " + entity + " has SyncEntityState of " + type);
@@ -180,7 +180,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return null;
   }
 
-  protected SyncEntityState shouldEntityBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookUpKeys entityLookUpKey) {
+  protected SyncEntityState shouldEntityBeSynchronized(SyncEntity entity, SyncEntityLocalLookUpKeys entityLookUpKey) {
     SyncEntityState type = SyncEntityState.UNCHANGED;
 
     if(entityLookUpKey == null) { // unpersisted SyncEntity
