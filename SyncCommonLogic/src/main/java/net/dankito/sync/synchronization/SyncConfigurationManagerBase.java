@@ -456,17 +456,34 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
 
     if(syncModule != null && syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
-      // TODO: for created entities set lookup key / update lookup key (+ last modified on device)
-      log.info("Successfully synchronized " + jobItem);
-      jobItem.setState(SyncState.DONE);
-      jobItem.setFinishTime(new Date());
-      jobItem.setSyncEntityData(null);
+      entitySuccessfullySynchronized(jobItem, lookupKey, syncEntityState);
 
-      if(syncEntityState == SyncEntityState.DELETED) {
-        deleteEntryLookUpKey(lookupKey);
-      }
+    }
+  }
 
-      entityManager.updateEntity(jobItem);
+  protected void entitySuccessfullySynchronized(SyncJobItem jobItem, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
+    log.info("Successfully synchronized " + jobItem);
+
+    jobItem.setState(SyncState.DONE);
+    jobItem.setFinishTime(new Date());
+    jobItem.setSyncEntityData(null);
+
+    entityManager.updateEntity(jobItem);
+
+    handleLookupKeyForSuccessfullySynchronizedEntity(jobItem, lookupKey, syncEntityState);
+  }
+
+  protected void handleLookupKeyForSuccessfullySynchronizedEntity(SyncJobItem jobItem, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
+    if(syncEntityState == SyncEntityState.DELETED) {
+      deleteEntryLookUpKey(lookupKey);
+    }
+    else {
+      SyncEntity entity = jobItem.getEntity();
+
+      lookupKey.setEntityLocalLookUpKey(entity.getLookUpKeyOnSourceDevice());
+      lookupKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
+
+      entityManager.updateEntity(lookupKey);
     }
   }
 
