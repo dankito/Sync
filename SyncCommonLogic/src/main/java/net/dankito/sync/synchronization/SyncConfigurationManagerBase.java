@@ -158,7 +158,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     for(SyncEntityLocalLookUpKeys lookUpKey : allLookUpKeys) {
       if(syncModuleConfiguration == lookUpKey.getSyncModuleConfiguration()) {
-        syncModuleConfigurationLookUpKeys.put(lookUpKey.getEntityLocalLookUpKey(), lookUpKey);
+        if(lookUpKey.getEntityLocalLookUpKey() != null) { // otherwise SyncEntity to this lookup key hasn't been added to system storage yet -> no local lookup key
+          syncModuleConfigurationLookUpKeys.put(lookUpKey.getEntityLocalLookUpKey(), lookUpKey);
+        }
       }
     }
 
