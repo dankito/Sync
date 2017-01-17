@@ -3,7 +3,6 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.Device;
-import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
@@ -56,6 +55,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected LocalConfig localConfig;
 
+  protected EntitiesSyncQueue syncQueue;
+
   protected Map<String, ISyncModule> availableSyncModules = null;
 
   protected Map<String, Class<? extends SyncEntity>> entityClassTypes = new ConcurrentHashMap<>();
@@ -75,6 +76,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     this.fileStorageService = fileStorageService;
     this.threadPool = threadPool;
     this.localConfig = dataManager.getLocalConfig();
+
+    this.syncQueue = new EntitiesSyncQueue(entityManager, fileStorageService, localConfig.getLocalDevice());
 
     syncManager.addSynchronizationListener(synchronizationListener);
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
@@ -118,31 +121,29 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void getSyncEntityChangesAndPushToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
-    List<SyncEntity> entitiesToSync = getEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
-    pushSyncEntitiesToRemote(remoteDevice, syncModuleConfiguration, entitiesToSync);
+    determineEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
   }
 
 
-  protected List<SyncEntity> getEntitiesToSynchronize(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
-    List<SyncEntity> entitiesToSync = new ArrayList<>();
-
+  protected void determineEntitiesToSynchronize(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
     Map<String, SyncEntityLocalLookUpKeys> lookUpKeys = getLookUpKeysForSyncModuleConfiguration(syncModuleConfiguration);
 
-    for(SyncEntity entity : entities) {
+    for(int i = 0; i < entities.size(); i++) {
+      SyncEntity entity = entities.remove(i);
       SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
       SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookUpKey);
 
       if(type != SyncEntityState.UNCHANGED) {
         log.info("Entity " + entity + " has SyncEntityState of " + type);
         SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookUpKey);
-        entitiesToSync.add(persistedEntity);
+        syncQueue.addEntityToPushToRemote(persistedEntity, remoteDevice, syncModuleConfiguration);
       }
     }
 
     List<SyncEntity> deletedEntities = getDeletedEntities(lookUpKeys); // SyncEntities still remaining in lookUpKeys have been deleted
-    entitiesToSync.addAll(deletedEntities);
-
-    return entitiesToSync;
+    for(SyncEntity deletedEntity : deletedEntities) {
+      syncQueue.addEntityToPushToRemote(deletedEntity, remoteDevice, syncModuleConfiguration);
+    }
   }
 
   protected Map<String, SyncEntityLocalLookUpKeys> getLookUpKeysForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
@@ -264,28 +265,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     return deletedEntities;
-  }
-
-
-  protected void pushSyncEntitiesToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
-    for(SyncEntity syncEntity : entities) {
-      pushSyncEntityToRemote(remoteDevice, syncModuleConfiguration, syncEntity);
-    }
-  }
-
-  protected void pushSyncEntityToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
-    log.info("Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
-
-    SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity, localConfig.getLocalDevice(), remoteDevice.getDevice());
-
-    if(entity instanceof FileSyncEntity) {
-      String filePath = ((FileSyncEntity)entity).getFilePath(); // TODO: this is not valid for destination device -> use path from LocalLookupKey
-      try {
-        jobItem.setSyncEntityData(fileStorageService.readFromBinaryFile(filePath));
-      } catch(Exception e) { log.error("Could not read file for FileSyncItem " + entity, e); }
-    }
-
-    entityManager.persistEntity(jobItem);
   }
 
 
@@ -466,11 +445,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void entitySuccessfullySynchronized(SyncJobItem jobItem, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
-    log.info("Successfully synchronized " + jobItem);
-
     jobItem.setState(SyncState.DONE);
     jobItem.setFinishTime(new Date());
     jobItem.setSyncEntityData(null);
+
+    log.info("Successfully synchronized " + jobItem);
 
     entityManager.updateEntity(jobItem);
 
