@@ -26,7 +26,7 @@ public abstract class SyncEntity extends BaseEntity {
   protected Device sourceDevice;
 
   @Transient
-  protected String lookUpKeyOnSourceDevice;
+  protected String localLookupKey;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = DatabaseTableConfig.SYNC_ENTITY_CREATED_ON_DEVICE_COLUMN_NAME)
@@ -45,12 +45,12 @@ public abstract class SyncEntity extends BaseEntity {
     return sourceDevice;
   }
 
-  public String getLookUpKeyOnSourceDevice() {
-    return lookUpKeyOnSourceDevice;
+  public String getLocalLookupKey() {
+    return localLookupKey;
   }
 
-  public void setLookUpKeyOnSourceDevice(String lookUpKeyOnSourceDevice) {
-    this.lookUpKeyOnSourceDevice = lookUpKeyOnSourceDevice;
+  public void setLocalLookupKey(String localLookupKey) {
+    this.localLookupKey = localLookupKey;
   }
 
   public Date getCreatedOnDevice() {

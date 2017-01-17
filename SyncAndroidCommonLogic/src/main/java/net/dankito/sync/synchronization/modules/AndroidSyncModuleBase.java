@@ -170,7 +170,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
   protected boolean deleteEntityFromLocalDatabase(SyncJobItem jobItem) {
-    String lookupKey = jobItem.getEntity().getLookUpKeyOnSourceDevice();
+    String lookupKey = jobItem.getEntity().getLocalLookupKey();
 
     if(StringUtils.isNotNullOrEmpty(lookupKey)) {
       try {
@@ -254,7 +254,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
 
   protected Long parseLocalLookupKeyToLong(SyncEntity entity) {
-    return parseLocalLookupKeyToLong(entity.getLookUpKeyOnSourceDevice());
+    return parseLocalLookupKeyToLong(entity.getLocalLookupKey());
   }
 
   protected Long parseLocalLookupKeyToLong(String localLookupKey) {

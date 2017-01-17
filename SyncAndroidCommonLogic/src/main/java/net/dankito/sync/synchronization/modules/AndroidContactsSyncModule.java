@@ -76,7 +76,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
     Long rawContactId = readLong(cursor, ContactsContract.RawContacts._ID);
 
-    entity.setLookUpKeyOnSourceDevice("" + rawContactId);
+    entity.setLocalLookupKey("" + rawContactId);
     entity.setCreatedOnDevice(null); // TODO
     entity.setLastModifiedOnDevice(readDate(cursor, "version")); // TODO: don't know a better way to tell if raw contact has changed
 
@@ -203,13 +203,13 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         String newRawContactIdString = results[0].uri.getLastPathSegment();
         newRawContactId = parseLocalLookupKeyToLong(newRawContactIdString);
 
-        entity.setLookUpKeyOnSourceDevice(newRawContactIdString);
+        entity.setLocalLookupKey(newRawContactIdString);
       }
     } catch(Exception e) {
       log.error("Could not insert Contact into Database: " + entity, e);
     }
 
-    if(entity.getLookUpKeyOnSourceDevice() != null && newRawContactId != null) {
+    if(entity.getLocalLookupKey() != null && newRawContactId != null) {
       return saveContactToDatabase(entity, newRawContactId);
     }
 
@@ -449,7 +449,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         getContentUri(),
         new String[] { "version" },
         ContactsContract.RawContacts._ID + " = ? ",
-        new String[] { syncEntity.getLookUpKeyOnSourceDevice() },
+        new String[] { syncEntity.getLocalLookupKey() },
         null        // Ordering
     );
 

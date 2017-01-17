@@ -141,7 +141,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     for(int i = entities.size() - 1; i >= 0; i--) {
       SyncEntity entity = entities.remove(i);
-      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLookUpKeyOnSourceDevice()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
+      SyncEntityLocalLookUpKeys entityLookUpKey = lookUpKeys.remove(entity.getLocalLookupKey()); // remove from lookUpKeys so that in the end only deleted entities remain in  lookUpKeys
       SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookUpKey, currentlySynchronizedEntities);
 
       if(type != SyncEntityState.UNCHANGED) {
@@ -221,7 +221,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected boolean isCurrentlySynchronizedEntity(SyncEntity entity, List<SyncEntity> currentlySynchronizedEntities) {
     // check if it's a entity that currently is synchronized that which's local lookup key hasn't been stored to database yet
     for(SyncEntity currentlySynchronizedEntity : currentlySynchronizedEntities) {
-      if(entity.getLookUpKeyOnSourceDevice().equals(currentlySynchronizedEntity.getLookUpKeyOnSourceDevice())) {
+      if(entity.getLocalLookupKey().equals(currentlySynchronizedEntity.getLocalLookupKey())) {
         return true;
       }
     }
@@ -261,7 +261,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected SyncEntityLocalLookUpKeys persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncEntityLocalLookUpKeys lookUpKeyEntry = new SyncEntityLocalLookUpKeys(getSyncEntityType(entity), entity.getId(),
-                                                                entity.getLookUpKeyOnSourceDevice(), entity.getLastModifiedOnDevice(), syncModuleConfiguration);
+                                                                entity.getLocalLookupKey(), entity.getLastModifiedOnDevice(), syncModuleConfiguration);
     entityManager.persistEntity(lookUpKeyEntry);
 
     return lookUpKeyEntry;
@@ -515,7 +515,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     else {
       SyncEntity entity = jobItem.getEntity();
 
-      lookupKey.setEntityLocalLookUpKey(entity.getLookUpKeyOnSourceDevice());
+      lookupKey.setEntityLocalLookUpKey(entity.getLocalLookupKey());
       lookupKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
 
       entityManager.updateEntity(lookupKey);
@@ -538,7 +538,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void setSyncEntityLocalValuesFromLookupKey(SyncEntity entity, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
     if(syncEntityState == SyncEntityState.UPDATED || syncEntityState == SyncEntityState.DELETED) {
-      entity.setLookUpKeyOnSourceDevice(lookupKey.getEntityLocalLookUpKey());
+      entity.setLocalLookupKey(lookupKey.getEntityLocalLookUpKey());
       entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
     }
   }

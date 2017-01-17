@@ -68,7 +68,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
     CallLogSyncEntity entity = new CallLogSyncEntity();
 
-    entity.setLookUpKeyOnSourceDevice(readString(cursor, CallLog.Calls._ID));
+    entity.setLocalLookupKey(readString(cursor, CallLog.Calls._ID));
     entity.setCreatedOnDevice(readDate(cursor, CallLog.Calls.DATE));
     readLastModifiedOnFromCursor(cursor, entity);
 
@@ -101,7 +101,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
       Uri uri = context.getContentResolver().insert(CallLog.Calls.CONTENT_URI, values);
       if(uri != null) {
         long newCallLogEntryId = ContentUris.parseId(uri);
-        entity.setLookUpKeyOnSourceDevice("" + newCallLogEntryId);
+        entity.setLocalLookupKey("" + newCallLogEntryId);
 
         return newCallLogEntryId >= 0;
       }
@@ -119,7 +119,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
       ContentValues values = mapEntityToContentValues(entity);
 
-      Uri contentUri = Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, entity.getLookUpKeyOnSourceDevice());
+      Uri contentUri = Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, entity.getLocalLookupKey());
       int result = context.getContentResolver().update(contentUri, values, null, null);
 
       return true; // return result > 0 is wrong as if there was nothing to update result is 0
@@ -140,7 +140,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     }
 
     Cursor cursor = context.getContentResolver().query(
-        Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, syncEntity.getLookUpKeyOnSourceDevice()),
+        Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, syncEntity.getLocalLookupKey()),
         projection,
         null,
         null,

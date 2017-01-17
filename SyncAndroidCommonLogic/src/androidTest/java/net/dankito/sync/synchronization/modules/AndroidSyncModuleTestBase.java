@@ -139,7 +139,7 @@ public abstract class AndroidSyncModuleTestBase {
     Assert.assertNotEquals(0, result.size());
 
     for(SyncEntity entity : result) {
-      Assert.assertNotNull(entity.getLookUpKeyOnSourceDevice());
+      Assert.assertNotNull(entity.getLocalLookupKey());
       if(entity instanceof ContactSyncEntity == false) { // is null for ContactSyncEntities
         Assert.assertNotNull(entity.getCreatedOnDevice());
       }
@@ -264,7 +264,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   protected void testIfEntryHasSuccessfullyBeenRemoved(SyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLocalLookupKey()));
 
     Cursor cursor = getCursorForEntity(entity);
 
@@ -277,7 +277,7 @@ public abstract class AndroidSyncModuleTestBase {
         underTest.getContentUri(),
         null, // Which columns to return
         getIdColumnForEntity() + " = ?",       // Which rows to return (all rows)
-        new String[] { entity.getLookUpKeyOnSourceDevice() },       // Selection arguments (none)
+        new String[] { entity.getLocalLookupKey() },       // Selection arguments (none)
         null        // Ordering
     );
   }

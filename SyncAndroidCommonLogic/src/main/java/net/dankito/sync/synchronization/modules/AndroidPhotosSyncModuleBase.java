@@ -56,7 +56,7 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
   protected SyncEntity mapDatabaseEntryToSyncEntity(Cursor cursor) {
     ImageFileSyncEntity entity = new ImageFileSyncEntity();
 
-    entity.setLookUpKeyOnSourceDevice(readString(cursor, MediaStore.Images.Media._ID));
+    entity.setLocalLookupKey(readString(cursor, MediaStore.Images.Media._ID));
     entity.setCreatedOnDevice(readDate(cursor, MediaStore.Images.Media.DATE_ADDED));
     entity.setLastModifiedOnDevice(readDate(cursor, MediaStore.Images.Media.DATE_MODIFIED));
     entity.setFilePath(readString(cursor, MediaStore.Images.Media.DATA));

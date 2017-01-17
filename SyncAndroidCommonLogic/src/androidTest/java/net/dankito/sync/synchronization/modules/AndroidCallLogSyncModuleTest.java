@@ -60,7 +60,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Override
   protected void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLocalLookupKey()));
 
     Cursor cursor = getCursorForEntity(entity);
 
@@ -77,7 +77,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Override
   protected void testIfEntryHasSuccessfullyBeenUpdated(SyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLocalLookupKey()));
 
     Cursor cursor = getCursorForEntity(entity);
 

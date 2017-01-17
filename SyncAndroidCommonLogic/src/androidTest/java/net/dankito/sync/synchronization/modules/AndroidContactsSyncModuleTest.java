@@ -102,7 +102,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Override
   protected void testIfEntryHasSuccessfullyBeenAdded(SyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLocalLookupKey()));
 
     testContactNames(entity);
 
@@ -162,7 +162,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @Override
   protected void testIfEntryHasSuccessfullyBeenUpdated(SyncEntity entity) {
-    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLookUpKeyOnSourceDevice()));
+    Assert.assertTrue(StringUtils.isNotNullOrEmpty(entity.getLocalLookupKey()));
 
     // comparing values makes currently no sense as Android creates a new Raw Contact when the original Raw Contact is edited too much
     testUpdatedContactNames(entity);
@@ -224,7 +224,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
         contentUri,
         null, // Which columns to return
         ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",       // Which rows to return (all rows)
-        new String[] { entity.getLookUpKeyOnSourceDevice(), mimeType },       // Selection arguments (none)
+        new String[] { entity.getLocalLookupKey(), mimeType },       // Selection arguments (none)
         null        // Ordering
     );
   }
