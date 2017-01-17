@@ -6,7 +6,7 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncEntityLocalLookUpKeys;
+import net.dankito.sync.SyncEntityLocalLookupKeys;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
@@ -109,7 +109,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     mockSynchronizeEntitiesWithDevice(testEntities);
@@ -117,7 +117,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
   @Test
@@ -131,7 +131,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     mockSynchronizeEntitiesWithDevice(testEntities);
@@ -139,7 +139,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
 
@@ -157,7 +157,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
@@ -171,7 +171,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
   @Test
@@ -188,7 +188,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
@@ -200,7 +200,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
 
@@ -218,7 +218,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     testEntities.clear();
@@ -231,7 +231,7 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookUpKeys.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
 

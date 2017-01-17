@@ -8,7 +8,7 @@ import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncEntityLocalLookUpKeys;
+import net.dankito.sync.SyncEntityLocalLookupKeys;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 
@@ -191,7 +191,7 @@ public class EntityManagerConfiguration {
         SyncConfiguration.class,
         SyncModuleConfiguration.class,
         SyncJobItem.class,
-        SyncEntityLocalLookUpKeys.class
+        SyncEntityLocalLookupKeys.class
 
     };
     

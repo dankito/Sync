@@ -151,9 +151,9 @@ public class DatabaseTableConfig {
   public static final String SYNC_JOB_ITEM_FINISH_TIME_COLUMN_NAME = "finish_time";
 
 
-  /*          SyncEntityLocalLookUpKeys Column Names        */
+  /*          SyncEntityLocalLookupKeys Column Names        */
 
-  public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_TABLE_NAME = "SyncEntityLocalLookUpKeys";
+  public static final String SYNC_ENTITY_LOCAL_LOOKUP_KEYS_TABLE_NAME = "SyncEntityLocalLookupKeys";
 
   public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_TYPE_COLUMN_NAME = "entity_type";
   public static final String SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_DATABASE_ID_COLUMN_NAME = "entity_database_id";

@@ -46,7 +46,7 @@ public class FileHandler {
 
       fileStorageService.writeToBinaryFile(jobItem.getSyncEntityData(), fileDestinationPath.getAbsolutePath());
 
-      entity.setLookUpKeyOnSourceDevice(fileDestinationPath.getAbsolutePath());
+      entity.setLocalLookupKey(fileDestinationPath.getAbsolutePath());
 
       log.info("Successfully wrote Image File " + entity + " to destination path " + fileDestinationPath.getAbsolutePath());
       return true;

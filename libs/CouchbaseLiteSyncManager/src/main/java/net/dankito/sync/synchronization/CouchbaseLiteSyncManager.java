@@ -12,7 +12,7 @@ import com.couchbase.lite.replicator.Replication;
 import net.dankito.jpa.couchbaselite.Dao;
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.LocalConfig;
-import net.dankito.sync.SyncEntityLocalLookUpKeys;
+import net.dankito.sync.SyncEntityLocalLookupKeys;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.INetworkConfigurationManager;
@@ -100,7 +100,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   private void setReplicationFilter(Database database) {
     final List<String> entitiesToFilter = new ArrayList<>();
     entitiesToFilter.add(LocalConfig.class.getName());
-    entitiesToFilter.add(SyncEntityLocalLookUpKeys.class.getName());
+    entitiesToFilter.add(SyncEntityLocalLookupKeys.class.getName());
 
     database.setFilter(FILTER_NAME, new ReplicationFilter() {
       @Override
