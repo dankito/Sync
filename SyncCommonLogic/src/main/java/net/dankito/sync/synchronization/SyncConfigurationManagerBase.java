@@ -193,20 +193,20 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected SyncEntityState shouldEntityBeSynchronized(SyncEntity entity, SyncEntityLocalLookUpKeys entityLookUpKey, List<SyncEntity> currentlySynchronizedEntities) {
     SyncEntityState type = SyncEntityState.UNCHANGED;
 
-    if(entityLookUpKey == null) { // unpersisted SyncEntity
-      if(isCurrentlySynchronizedEntity(entity, currentlySynchronizedEntities) == false) {
+    if(isCurrentlySynchronizedEntity(entity, currentlySynchronizedEntities) == false) {
+      if(entityLookUpKey == null) { // unpersisted SyncEntity
         type = SyncEntityState.CREATED;
       }
-    }
-    else {
-      SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
-
-      if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
-        type = SyncEntityState.DELETED;
-      }
       else {
-        if(hasEntityBeenUpdated(entity, entityLookUpKey)) {
-          type = SyncEntityState.UPDATED;
+        SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookUpKey.getEntityType()), entityLookUpKey.getEntityDatabaseId());
+
+        if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
+          type = SyncEntityState.DELETED;
+        }
+        else {
+          if (hasEntityBeenUpdated(entity, entityLookUpKey)) {
+            type = SyncEntityState.UPDATED;
+          }
         }
       }
     }
