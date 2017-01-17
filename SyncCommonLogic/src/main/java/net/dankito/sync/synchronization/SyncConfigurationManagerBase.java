@@ -486,6 +486,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     if(syncModule != null && syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
       entitySuccessfullySynchronized(jobItem, lookupKey, syncEntityState);
     }
+
+    syncEntitiesCurrentlyBeingSynchronized.remove(jobItem.getEntity());
   }
 
   protected void entitySuccessfullySynchronized(SyncJobItem jobItem, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
@@ -498,8 +500,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.updateEntity(jobItem);
 
     log.info("Successfully synchronized " + jobItem);
-
-    syncEntitiesCurrentlyBeingSynchronized.remove(jobItem.getEntity());
   }
 
   protected void handleLookupKeyForSuccessfullySynchronizedEntity(SyncJobItem jobItem, SyncEntityLocalLookUpKeys lookupKey, SyncEntityState syncEntityState) {
