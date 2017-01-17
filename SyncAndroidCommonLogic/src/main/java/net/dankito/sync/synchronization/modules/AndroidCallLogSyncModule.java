@@ -80,7 +80,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
     entity.setAssociatedContactName(readString(cursor, CallLog.Calls.CACHED_NAME));
     if(entity.getAssociatedContactName() != null) {
-      entity.setAssociatedContactLookUpKey(readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
+      entity.setAssociatedContactLookupKey(readString(cursor, CallLog.Calls.CACHED_LOOKUP_URI));
     }
 
     entity.setDate(readDate(cursor, CallLog.Calls.DATE));
@@ -184,7 +184,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
     values.put(CallLog.Calls.CACHED_NAME, entity.getAssociatedContactName());
     // TODO: is it that senseful to add Contact Lookup Uri? As on other Android system this uri has no meaning
-    values.put(CallLog.Calls.CACHED_LOOKUP_URI, entity.getAssociatedContactLookUpKey());
+    values.put(CallLog.Calls.CACHED_LOOKUP_URI, entity.getAssociatedContactLookupKey());
 
     return values;
   }

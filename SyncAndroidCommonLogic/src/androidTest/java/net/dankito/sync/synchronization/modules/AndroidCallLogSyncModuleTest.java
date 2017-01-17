@@ -104,7 +104,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setDurationInSeconds(TEST_DURATION_IN_SECONDS);
     entity.setType(TEST_CALL_TYPE);
     entity.setAssociatedContactName(TEST_ASSOCIATED_CONTACT_NAME);
-    entity.setAssociatedContactLookUpKey(TEST_ASSOCIATED_CONTACT_LOOKUP_KEY);
+    entity.setAssociatedContactLookupKey(TEST_ASSOCIATED_CONTACT_LOOKUP_KEY);
 
     return entity;
   }
@@ -119,7 +119,7 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setDurationInSeconds(TEST_UPDATED_DURATION_IN_SECONDS);
     entity.setType(TEST_UPDATED_CALL_TYPE);
     entity.setAssociatedContactName(TEST_UPDATED_ASSOCIATED_CONTACT_NAME);
-    entity.setAssociatedContactLookUpKey(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY);
+    entity.setAssociatedContactLookupKey(TEST_UPDATED_ASSOCIATED_CONTACT_LOOKUP_KEY);
   }
 
   @NonNull

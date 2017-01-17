@@ -22,8 +22,8 @@ public class SyncEntityLocalLookupKeys extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_DATABASE_ID_COLUMN_NAME)
   protected String entityDatabaseId;
 
-  @Column(name = DatabaseTableConfig.SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_LOCAL_LOOK_UP_KEY_COLUMN_NAME)
-  protected String entityLocalLookUpKey;
+  @Column(name = DatabaseTableConfig.SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_LOCAL_LOOKUP_KEY_COLUMN_NAME)
+  protected String entityLocalLookupKey;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = DatabaseTableConfig.SYNC_ENTITY_LOCAL_LOOK_UP_KEYS_ENTITY_LAST_MODIFIED_ON_DEVICE_COLUMN_NAME)
@@ -38,10 +38,10 @@ public class SyncEntityLocalLookupKeys extends BaseEntity {
 
   }
 
-  public SyncEntityLocalLookupKeys(String entityType, String entityDatabaseId, String entityLocalLookUpKey, Date entityLastModifiedOnDevice, SyncModuleConfiguration syncModuleConfiguration) {
+  public SyncEntityLocalLookupKeys(String entityType, String entityDatabaseId, String entityLocalLookupKey, Date entityLastModifiedOnDevice, SyncModuleConfiguration syncModuleConfiguration) {
     this.entityType = entityType;
     this.entityDatabaseId = entityDatabaseId;
-    this.entityLocalLookUpKey = entityLocalLookUpKey;
+    this.entityLocalLookupKey = entityLocalLookupKey;
     this.entityLastModifiedOnDevice = entityLastModifiedOnDevice;
     this.syncModuleConfiguration = syncModuleConfiguration;
   }
@@ -55,12 +55,12 @@ public class SyncEntityLocalLookupKeys extends BaseEntity {
     return entityDatabaseId;
   }
 
-  public String getEntityLocalLookUpKey() {
-    return entityLocalLookUpKey;
+  public String getEntityLocalLookupKey() {
+    return entityLocalLookupKey;
   }
 
-  public void setEntityLocalLookUpKey(String entityLocalLookUpKey) {
-    this.entityLocalLookUpKey = entityLocalLookUpKey;
+  public void setEntityLocalLookupKey(String entityLocalLookupKey) {
+    this.entityLocalLookupKey = entityLocalLookupKey;
   }
 
   public Date getEntityLastModifiedOnDevice() {
@@ -78,7 +78,7 @@ public class SyncEntityLocalLookupKeys extends BaseEntity {
 
   @Override
   public String toString() {
-    return getEntityType() + ": " + getEntityLocalLookUpKey();
+    return getEntityType() + ": " + getEntityLocalLookupKey();
   }
 
 }
