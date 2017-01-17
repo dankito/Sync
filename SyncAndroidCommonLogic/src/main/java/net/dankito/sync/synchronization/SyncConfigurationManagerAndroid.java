@@ -7,6 +7,7 @@ import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.AndroidCallLogSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidContactsSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidExternalPhotosSyncModule;
@@ -26,8 +27,8 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
 
 
   public SyncConfigurationManagerAndroid(Context context, IPermissionsManager permissionsManager, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                         IFileStorageService fileStorageService, IThreadPool threadPool) {
-    super(syncManager, dataManager, entityManager, devicesManager, fileStorageService, threadPool);
+                                         IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
+    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
 
     this.context = context;
     this.permissionsManager = permissionsManager;

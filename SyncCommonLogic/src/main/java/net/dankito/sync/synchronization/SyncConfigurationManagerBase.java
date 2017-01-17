@@ -17,6 +17,7 @@ import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.utils.IThreadPool;
@@ -52,6 +53,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected IDevicesManager devicesManager;
 
+  protected IDataMerger dataMerger;
+
   protected IFileStorageService fileStorageService;
 
   protected IThreadPool threadPool;
@@ -74,10 +77,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
 
   public SyncConfigurationManagerBase(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IFileStorageService fileStorageService, IThreadPool threadPool) {
+                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
     this.syncManager = syncManager;
     this.entityManager = entityManager;
     this.devicesManager = devicesManager;
+    this.dataMerger = dataMerger;
     this.fileStorageService = fileStorageService;
     this.threadPool = threadPool;
     this.localConfig = dataManager.getLocalConfig();
@@ -250,7 +254,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void mergePersistedEntityWithExtractedOne(SyncEntity persistedEntity, SyncEntity entity) {
-    // TODO
+    dataMerger.mergeEntityData(persistedEntity, entity);
+
+    entityManager.updateEntity(persistedEntity);
   }
 
   protected SyncEntityLocalLookUpKeys persistEntryLookUpKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {

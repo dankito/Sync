@@ -13,9 +13,12 @@ import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.merge.IDataMerger;
+import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.util.SyncConfigurationManagerStub;
@@ -69,6 +72,7 @@ public class SyncConfigurationManagerBaseTest {
     syncManager = Mockito.mock(ISyncManager.class);
     entityManager = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData", 1));
     devicesManager = Mockito.mock(IDevicesManager.class);
+    IDataMerger dataMerger = new JpaMetadataBasedDataMerger((CouchbaseLiteEntityManagerBase)entityManager);
 
     Device localDevice = new Device("local");
     localConfig = new LocalConfig(localDevice);
@@ -84,7 +88,7 @@ public class SyncConfigurationManagerBaseTest {
     entityManager.persistEntity(syncModuleConfiguration);
     entityManager.persistEntity(syncConfiguration);
 
-    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, new JavaFileStorageService(), new ThreadPool());
+    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, dataMerger, new JavaFileStorageService(), new ThreadPool());
   }
 
   @After
@@ -245,7 +249,7 @@ public class SyncConfigurationManagerBaseTest {
 
       @Override
       public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
-        return false;
+        return true;
       }
 
       @Override
