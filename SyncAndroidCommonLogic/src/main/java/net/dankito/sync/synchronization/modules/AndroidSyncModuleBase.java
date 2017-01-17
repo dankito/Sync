@@ -61,6 +61,8 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected abstract boolean updateEntityInLocalDatabase(SyncJobItem jobItem);
 
+  protected abstract void updateLastModifiedDate(SyncJobItem jobItem);
+
 
   /**
    * May be overwritten in sub class to return only a specific amount of columns.
@@ -139,23 +141,27 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
   protected boolean synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState) {
+    boolean result = false;
+
     if(entityState == SyncEntityState.CREATED) {
-      return addEntityToLocalDatabase(jobItem);
+      result = addEntityToLocalDatabase(jobItem);
     }
     else if(entityState == SyncEntityState.UPDATED) {
-      return updateEntityInLocalDatabase(jobItem);
+      result = updateEntityInLocalDatabase(jobItem);
     }
     else if(entityState == SyncEntityState.DELETED) {
       // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
       if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination() == false) {
-        return deleteEntityFromLocalDatabase(jobItem);
+        result = deleteEntityFromLocalDatabase(jobItem);
       }
       else { // keepDeletedEntitiesOnDestination is set to true -> keep file -> synchronization is successfully done
-        return true;
+        return true; // no updating lastModifiedOn
       }
     }
 
-    return false;
+    updateLastModifiedDate(jobItem);
+
+    return result;
   }
 
   protected boolean deleteEntityFromLocalDatabase(SyncJobItem jobItem) {

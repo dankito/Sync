@@ -441,4 +441,23 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     return values;
   }
 
+
+  protected void updateLastModifiedDate(SyncJobItem jobItem) {
+    SyncEntity syncEntity = jobItem.getEntity();
+
+    Cursor cursor = context.getContentResolver().query(
+        getContentUri(),
+        new String[] { "version" },
+        ContactsContract.RawContacts._ID + " = ? ",
+        new String[] { syncEntity.getLookUpKeyOnSourceDevice() },
+        null        // Ordering
+    );
+
+    if(cursor.moveToFirst()) {
+      syncEntity.setLastModifiedOnDevice(readDate(cursor, "version"));
+    }
+
+    cursor.close();
+  }
+
 }

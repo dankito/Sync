@@ -70,12 +70,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
 
     entity.setLookUpKeyOnSourceDevice(readString(cursor, CallLog.Calls._ID));
     entity.setCreatedOnDevice(readDate(cursor, CallLog.Calls.DATE));
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && readLong(cursor, CallLog.Calls.LAST_MODIFIED) > 0) {
-      entity.setLastModifiedOnDevice(readDate(cursor, CallLog.Calls.LAST_MODIFIED));
-    }
-    else{
-      entity.setLastModifiedOnDevice(readDate(cursor, CallLog.Calls.DATE));
-    }
+    readLastModifiedOnFromCursor(cursor, entity);
 
     entity.setNumber(readString(cursor, CallLog.Calls.NUMBER));
     entity.setNormalizedNumber(readString(cursor, CallLog.Calls.CACHED_NORMALIZED_NUMBER));
@@ -133,6 +128,39 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     }
 
     return false;
+  }
+
+
+  protected void updateLastModifiedDate(SyncJobItem jobItem) {
+    SyncEntity syncEntity = jobItem.getEntity();
+
+    String[] projection = new String[] { CallLog.Calls.DATE };
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      projection = new String[] { CallLog.Calls.DATE, CallLog.Calls.LAST_MODIFIED };
+    }
+
+    Cursor cursor = context.getContentResolver().query(
+        Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, syncEntity.getLookUpKeyOnSourceDevice()),
+        projection,
+        null,
+        null,
+        null
+    );
+
+    if(cursor.moveToFirst()) {
+      readLastModifiedOnFromCursor(cursor, syncEntity);
+    }
+
+    cursor.close();
+  }
+
+  protected void readLastModifiedOnFromCursor(Cursor cursor, SyncEntity entity) {
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && readLong(cursor, CallLog.Calls.LAST_MODIFIED) > 0) {
+      entity.setLastModifiedOnDevice(readDate(cursor, CallLog.Calls.LAST_MODIFIED));
+    }
+    else{
+      entity.setLastModifiedOnDevice(readDate(cursor, CallLog.Calls.DATE));
+    }
   }
 
 

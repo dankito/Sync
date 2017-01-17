@@ -109,6 +109,11 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
   // TODO: also implement deleting file?
 
 
+  protected void updateLastModifiedDate(SyncJobItem jobItem) {
+    // TODO
+  }
+
+
   protected void notifyAndroidSystemOfNewImageAsync(final ImageFileSyncEntity entity, final File file) {
     threadPool.runAsync(new Runnable() {
       @Override
