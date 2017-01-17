@@ -74,8 +74,6 @@ public class EntitiesSyncQueue {
     byte[] syncEntityData = null;
 
     if(entity instanceof FileSyncEntity) {
-      System.gc(); // Couchbase Lite causes too much memory consumption with attachments (all data is loaded into memory and then Base64 encoded, which consumes 33 % more space then the original
-
       String filePath = ((FileSyncEntity)entity).getFilePath(); // TODO: this is not valid on destination device -> use path from LocalLookupKey
 
       try {
@@ -86,7 +84,15 @@ public class EntitiesSyncQueue {
 
     pushSyncEntityToRemote(syncQueueItem, syncEntityData);
 
+    if(syncEntityData != null) {
+      freeMemory();
+    }
+
     waitSomeTimeBeforePushingNextLargeJobToQueue(syncEntityData);
+  }
+
+  protected void freeMemory() {
+    System.gc(); // Couchbase Lite causes too much memory consumption with attachments (all data is loaded into memory and then Base64 encoded, which consumes 33 % more space then the original
   }
 
   protected void waitSomeTimeBeforePushingNextLargeJobToQueue(byte[] syncEntityData) {
