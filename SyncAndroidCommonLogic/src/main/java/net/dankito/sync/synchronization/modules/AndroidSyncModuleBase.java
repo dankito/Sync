@@ -101,12 +101,14 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected void readAllEntitiesPermissionsGranted(ReadEntitiesCallback callback) {
     List<SyncEntity> result = new ArrayList<>();
 
-    readEntitiesFromAndroidDatabase(result, getContentUri());
+    synchronized(this) { // avoid that data gets read and written to the same time
+      readDataFromAndroidDatabase(result, getContentUri());
+    }
 
     callback.done(result);
   }
 
-  protected void readEntitiesFromAndroidDatabase(List<SyncEntity> result, Uri contentUri) {
+  protected void readDataFromAndroidDatabase(List<SyncEntity> result, Uri contentUri) {
     Cursor cursor = context.getContentResolver().query(
         contentUri,
         getColumnNamesToRetrieve(), // Which columns to return
@@ -143,23 +145,25 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected boolean synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState) {
     boolean result = false;
 
-    if(entityState == SyncEntityState.CREATED) {
-      result = addEntityToLocalDatabase(jobItem);
-    }
-    else if(entityState == SyncEntityState.UPDATED) {
-      result = updateEntityInLocalDatabase(jobItem);
-    }
-    else if(entityState == SyncEntityState.DELETED) {
-      // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
-      if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination() == false) {
-        result = deleteEntityFromLocalDatabase(jobItem);
+    synchronized(this) {  // avoid that data gets read and written to the same time
+      if(entityState == SyncEntityState.CREATED) {
+        result = addEntityToLocalDatabase(jobItem);
       }
-      else { // keepDeletedEntitiesOnDestination is set to true -> keep file -> synchronization is successfully done
-        return true; // no updating lastModifiedOn
+      else if(entityState == SyncEntityState.UPDATED) {
+        result = updateEntityInLocalDatabase(jobItem);
       }
-    }
+      else if(entityState == SyncEntityState.DELETED) {
+        // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
+        if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination() == false) {
+          result = deleteEntityFromLocalDatabase(jobItem);
+        }
+        else { // keepDeletedEntitiesOnDestination is set to true -> keep file -> synchronization is successfully done
+          return true; // no updating lastModifiedOn
+        }
+      }
 
-    updateLastModifiedDate(jobItem);
+      updateLastModifiedDate(jobItem);
+    }
 
     return result;
   }
