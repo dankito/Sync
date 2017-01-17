@@ -91,8 +91,13 @@ public class EntitiesSyncQueue {
     waitSomeTimeBeforePushingNextLargeJobToQueue(syncEntityData);
   }
 
+  /**
+   * Attachments are consuming a massive amount of memory in Couchbase Lite as they are first loaded into memory and
+   * get Base64 encoded -> it uses at least 233 % of attachment's size in memory.
+   * And i'm not sure about that but it seems for pushing it to remote it loads the whole Base64 encoded string again to memory.
+   */
   protected void freeMemory() {
-    System.gc(); // Couchbase Lite causes too much memory consumption with attachments (all data is loaded into memory and then Base64 encoded, which consumes 33 % more space then the original
+    System.gc();
   }
 
   protected void waitSomeTimeBeforePushingNextLargeJobToQueue(byte[] syncEntityData) {
