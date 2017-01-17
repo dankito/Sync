@@ -297,23 +297,23 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     }
 
 
-    boolean result = updateName(entity, rawContactId);
+    updateName(entity, rawContactId);
 
-    result &= updatePhoneNumbers(entity, rawContactId);
+    updatePhoneNumbers(entity, rawContactId);
 
-    result &= updateEmailAddresses(entity, rawContactId);
+    updateEmailAddresses(entity, rawContactId);
 
-    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+    updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
         ContactsContract.CommonDataKinds.Nickname.NAME, entity.getNickname());
 
-    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
+    updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE,
         ContactsContract.CommonDataKinds.Note.NOTE, entity.getNote());
 
-    result &= updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+    updateContactDetail(rawContactId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
         ContactsContract.CommonDataKinds.Website.URL, entity.getWebsiteUrl());
     // theoretically there's also a ContactsContract.CommonDataKinds.Website.TYPE, but it cannot be edited in UI
 
-    return result;
+    return true; // checking all updateXyz() methods return values is wrong as if there was nothing to update, int result = 0 and therefore false will be returned
   }
 
   protected boolean updateName(ContactSyncEntity entity, Long rawContactId) {
@@ -324,7 +324,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
           ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
           new String[] { "" + rawContactId, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE });
 
-      return result > 0;
+      return result > 0; // if there was nothing to update, result is 0
     } catch(Exception e) { log.error("Could not update contact names in database for entity " + entity, e); }
 
     return false;
@@ -370,7 +370,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
           ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
           new String[] { "" + rawContactId, mimeType });
 
-      return result > 0;
+      return result > 0; // if there was nothing to update, result is 0
     } catch(Exception e) { log.error("Could not update value '" + value + "' of mime type '" + mimeType + "' for raw contact " + rawContactId, e); }
 
     return false;
