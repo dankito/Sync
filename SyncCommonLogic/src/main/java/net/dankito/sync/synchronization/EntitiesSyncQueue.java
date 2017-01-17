@@ -26,7 +26,9 @@ public class EntitiesSyncQueue {
 
   protected Device localDevice;
 
-  protected AsyncProducerConsumerQueue<EntitiesSyncQueueItem> producerConsumerQueue;
+  protected AsyncProducerConsumerQueue<EntitiesSyncQueueItem> defaultSyncJobItemsQueue;
+
+  protected AsyncProducerConsumerQueue<EntitiesSyncQueueItem> largerSyncJobItemsQueue;
 
 
   public EntitiesSyncQueue(IEntityManager entityManager, IFileStorageService fileStorageService, Device localDevice) {
@@ -34,26 +36,42 @@ public class EntitiesSyncQueue {
     this.fileStorageService = fileStorageService;
     this.localDevice = localDevice;
 
-    this.producerConsumerQueue = new AsyncProducerConsumerQueue<>(1, consumerListener);
+    this.defaultSyncJobItemsQueue = new AsyncProducerConsumerQueue<>(1, defaultSyncJobItemsConsumerListener);
+    this.largerSyncJobItemsQueue = new AsyncProducerConsumerQueue<>(1, largerSyncJobItemsConsumerListener);
   }
 
   public void addEntityToPushToRemote(SyncEntity entityToPush, DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
-    producerConsumerQueue.add(new EntitiesSyncQueueItem(entityToPush, remoteDevice, syncModuleConfiguration));
+    EntitiesSyncQueueItem queueItem = new EntitiesSyncQueueItem(entityToPush, remoteDevice, syncModuleConfiguration);
+
+    if(entityToPush instanceof FileSyncEntity) {
+      largerSyncJobItemsQueue.add(queueItem);
+    }
+    else {
+      defaultSyncJobItemsQueue.add(queueItem);
+    }
   }
 
 
-  protected ConsumerListener<EntitiesSyncQueueItem> consumerListener = new ConsumerListener<EntitiesSyncQueueItem>() {
-    @Override
-    public void consumeItem(EntitiesSyncQueueItem item) {
-      pushSyncEntityToRemote(item.getEntityToPush(), item.getRemoteDevice(), item.getSyncModuleConfiguration());
-    }
-  };
+  protected void pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
+    pushSyncEntityToRemote(syncQueueItem, null);
+  }
 
-  protected void pushSyncEntityToRemote(SyncEntity entity, DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
+  protected void pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem, byte[] syncEntityData) {
+    SyncEntity entity = syncQueueItem.getEntityToPush();
+    DiscoveredDevice remoteDevice = syncQueueItem.getRemoteDevice();
     log.info("Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
 
-    SyncJobItem jobItem = new SyncJobItem(syncModuleConfiguration, entity, localDevice, remoteDevice.getDevice());
-    boolean shouldWaitSomeTimeForSynchronization = false;
+    SyncJobItem jobItem = new SyncJobItem(syncQueueItem.getSyncModuleConfiguration(), entity, localDevice, remoteDevice.getDevice());
+    jobItem.setSyncEntityData(syncEntityData);
+
+    entityManager.persistEntity(jobItem);
+
+    jobItem.setSyncEntityData(null);
+  }
+
+  protected void pushLargerSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
+    SyncEntity entity = syncQueueItem.getEntityToPush();
+    byte[] syncEntityData = null;
 
     if(entity instanceof FileSyncEntity) {
       System.gc(); // Couchbase Lite causes too much memory consumption with attachments (all data is loaded into memory and then Base64 encoded, which consumes 33 % more space then the original
@@ -61,19 +79,36 @@ public class EntitiesSyncQueue {
       String filePath = ((FileSyncEntity)entity).getFilePath(); // TODO: this is not valid on destination device -> use path from LocalLookupKey
 
       try {
-        jobItem.setSyncEntityData(fileStorageService.readFromBinaryFile(filePath));
-        log.info("Added file of length " + jobItem.getSyncEntityData().length);
-        shouldWaitSomeTimeForSynchronization = true;
+        syncEntityData = fileStorageService.readFromBinaryFile(filePath);
+        log.info("Added file of length " + (syncEntityData != null ? syncEntityData.length : 0));
       } catch(Exception e) { log.error("Could not read file for FileSyncItem " + entity, e); }
     }
 
-    entityManager.persistEntity(jobItem);
+    pushSyncEntityToRemote(syncQueueItem, syncEntityData);
 
-    jobItem.setSyncEntityData(null);
+    waitSomeTimeBeforePushingNextLargeJobToQueue(syncEntityData);
+  }
 
-    if(shouldWaitSomeTimeForSynchronization) {
-      try { Thread.sleep(30000); } catch(Exception ignored) { }
+  protected void waitSomeTimeBeforePushingNextLargeJobToQueue(byte[] syncEntityData) {
+    // TODO: make wait time configurable and dependent on syncEntityData size and device's memory size
+    if(syncEntityData != null) {
+      try { Thread.sleep(30000); } catch (Exception ignored) { }
     }
   }
+
+
+  protected ConsumerListener<EntitiesSyncQueueItem> defaultSyncJobItemsConsumerListener = new ConsumerListener<EntitiesSyncQueueItem>() {
+    @Override
+    public void consumeItem(EntitiesSyncQueueItem item) {
+      pushSyncEntityToRemote(item);
+    }
+  };
+
+  protected ConsumerListener<EntitiesSyncQueueItem> largerSyncJobItemsConsumerListener = new ConsumerListener<EntitiesSyncQueueItem>() {
+    @Override
+    public void consumeItem(EntitiesSyncQueueItem item) {
+      pushLargerSyncEntityToRemote(item);
+    }
+  };
 
 }
