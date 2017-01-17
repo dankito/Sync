@@ -39,7 +39,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class SyncConfigurationManagerBase implements ISyncConfigurationManager {
 
-  protected static final int SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY = 3 * 1000; // 3 seconds delay
+  protected static final int SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITHOUT_ENTITIES_BEING_SYNCHRONIZED = 3 * 1000; // 3 seconds delay when no entities currently are synchronized
+
+  protected static final int SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITH_ENTITIES_BEING_SYNCHRONIZED = 30 * 1000; // 30 seconds delay otherwise
 
   private static final Logger log = LoggerFactory.getLogger(SyncConfigurationManagerBase.class);
 
@@ -390,6 +392,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     final ISyncModule syncModule = syncEntityChange.getSyncModule();
     syncModulesWithEntityChanges.add(syncModule);
 
+    int delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITHOUT_ENTITIES_BEING_SYNCHRONIZED;
+    if(syncEntitiesCurrentlyBeingSynchronized.size() > 0) {
+      delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITH_ENTITIES_BEING_SYNCHRONIZED;
+    }
+
     syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -397,7 +404,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           pushModuleEntityChangesToRemoteDevices(syncModule);
         }
       }
-    }, SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY);
+    }, delay);
   }
 
   protected void pushModuleEntityChangesToRemoteDevices(final ISyncModule syncModule) {
