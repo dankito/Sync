@@ -304,13 +304,15 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
 
   protected Class<? extends BaseEntity> getEntityTypeFromDocumentChange(DocumentChange change) {
+    Class<? extends BaseEntity> entityType = null;
     String entityTypeString = (String)change.getAddedRevision().getPropertyForKey(Dao.TYPE_COLUMN_NAME);
 
-    Class<? extends BaseEntity> entityType = null;
-    try {
-      entityType = (Class<BaseEntity>)Class.forName(entityTypeString);
-    } catch(Exception e) {
-      log.error("Could not get class for entity type " + entityTypeString);
+    if(entityTypeString != null) { // sometimes there are documents without type or any other column/property except Couchbase's system properties (like _id)
+      try {
+        entityType = (Class<BaseEntity>) Class.forName(entityTypeString);
+      } catch (Exception e) {
+        log.error("Could not get class for entity type " + entityTypeString);
+      }
     }
 
     return entityType;
