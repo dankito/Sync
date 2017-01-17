@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.android.util.services.PermissionRequestCallback;
@@ -174,8 +175,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     if(StringUtils.isNotNullOrEmpty(lookupKey)) {
       try {
         ContentResolver resolver = context.getContentResolver();
-        // Unbelievable, Motorola and HTC do not support deleting entries from call log: http://android-developers.narkive.com/W63HuY7c/delete-call-log-entry-exception
-        int result = resolver.delete(Uri.withAppendedPath(getContentUri(), lookupKey), "", null);
+        int result = resolver.delete(getContentUri(), BaseColumns._ID + " = ? ", new String[] { lookupKey });
 
         return result > 0;
       } catch(Exception e) {
