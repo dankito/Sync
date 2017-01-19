@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * JavaFX Application has for Contacts, CallLog, ... no system storage as Android has
  * -> synchronizedEntityRetrieved() simply returns true as when SyncEntity reached destination device synchronization was successful.
  */
-public class SyncModuleWithoutSystemStorage extends SyncModuleBase implements ISyncModule {
+public abstract class SyncModuleWithoutSystemStorage extends SyncModuleBase implements ISyncModule {
 
 
   public SyncModuleWithoutSystemStorage(Localization localization) {
@@ -29,11 +29,6 @@ public class SyncModuleWithoutSystemStorage extends SyncModuleBase implements IS
   @Override
   public int getDisplayPriority() {
     return 0; // TODO
-  }
-
-  @Override
-  public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.Contacts.getTypeName();
   }
 
   @Override
