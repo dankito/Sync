@@ -120,6 +120,21 @@ public class Device extends BaseEntity {
   }
 
 
+  public String getDeviceDisplayName() {
+    return getOsType() == OsType.ANDROID ? getName() : getOsName();
+  }
+
+  public String getDeviceFullDisplayName() {
+    String fullDisplayName = getOsName() + " " + getOsVersion();
+
+    if(getName() != null && getName().length() > 0) {
+      fullDisplayName = getName() + " " + fullDisplayName;
+    }
+
+    return fullDisplayName;
+  }
+
+
   @Override
   public String toString() {
     String description = getOsName() + " " + getOsVersion();

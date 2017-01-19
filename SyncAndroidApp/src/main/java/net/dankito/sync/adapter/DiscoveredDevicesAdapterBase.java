@@ -13,7 +13,6 @@ import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
-import net.dankito.utils.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -80,11 +79,7 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
     imgvwOsIcon.setImageResource(getOsLogoId(device.getDevice()));
 
     TextView txtvwOsName = (TextView)convertView.findViewById(R.id.txtvwOsName);
-    String osName = device.getDevice().getOsName() + " " + device.getDevice().getOsVersion();
-    if(StringUtils.isNotNullOrEmpty(device.getDevice().getName())) {
-      osName = device.getDevice().getName() + " " + osName;
-    }
-    txtvwOsName.setText(osName);
+    txtvwOsName.setText(device.getDevice().getDeviceFullDisplayName());
 
     TextView txtvwIpAddress = (TextView)convertView.findViewById(R.id.txtvwIpAddress);
     txtvwIpAddress.setText(device.getAddress());

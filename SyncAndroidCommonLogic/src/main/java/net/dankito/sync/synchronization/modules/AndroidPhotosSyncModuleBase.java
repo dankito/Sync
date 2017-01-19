@@ -9,7 +9,6 @@ import android.provider.MediaStore;
 import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.Device;
 import net.dankito.sync.ImageFileSyncEntity;
-import net.dankito.sync.OsType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
@@ -131,7 +130,7 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
 
   protected String getDeviceName(SyncJobItem jobItem) {
     Device remoteDevice = jobItem.getSourceDevice();
-    return remoteDevice.getOsType() == OsType.ANDROID ? remoteDevice.getName() : remoteDevice.getOsName();
+    return remoteDevice.getDeviceDisplayName();
   }
 
 
