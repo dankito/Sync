@@ -12,7 +12,6 @@ import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.AndroidCallLogSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidContactsSyncModule;
 import net.dankito.sync.synchronization.modules.AndroidExternalPhotosSyncModule;
-import net.dankito.sync.synchronization.modules.AndroidInternalPhotosSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
@@ -43,7 +42,6 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
   protected List<ISyncModule> retrieveAvailableSyncModules() {
     List<ISyncModule> availableSyncModules = new ArrayList<>();
 
-    availableSyncModules.add(new AndroidInternalPhotosSyncModule(context, localization, permissionsManager, threadPool, fileStorageService));
     availableSyncModules.add(new AndroidExternalPhotosSyncModule(context, localization, permissionsManager, threadPool, fileStorageService));
     availableSyncModules.add(new AndroidContactsSyncModule(context, localization, permissionsManager, threadPool));
     availableSyncModules.add(new AndroidCallLogSyncModule(context, localization, permissionsManager, threadPool));
