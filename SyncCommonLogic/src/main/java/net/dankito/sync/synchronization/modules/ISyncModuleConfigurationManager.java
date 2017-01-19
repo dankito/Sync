@@ -8,4 +8,6 @@ public interface ISyncModuleConfigurationManager {
 
   SyncConfigurationWithDevice getSyncModuleConfigurationsForDevice(DiscoveredDevice remoteDevice);
 
+  SyncConfigurationChanges updateSyncConfiguration(SyncConfigurationWithDevice syncModuleConfigurationsForDevice);
+
 }

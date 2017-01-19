@@ -5,6 +5,7 @@ import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,11 +16,14 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
 
   protected ISyncConfigurationManager syncConfigurationManager;
 
+  protected IEntityManager entityManager;
+
   protected Device localDevice;
 
 
-  public SyncModuleConfigurationManager(ISyncConfigurationManager syncConfigurationManager, IDataManager dataManager) {
+  public SyncModuleConfigurationManager(ISyncConfigurationManager syncConfigurationManager, IEntityManager entityManager, IDataManager dataManager) {
     this.syncConfigurationManager = syncConfigurationManager;
+    this.entityManager = entityManager;
     this.localDevice = dataManager.getLocalConfig().getLocalDevice();
   }
 
@@ -39,6 +43,42 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
   }
 
 
+  @Override
+  public SyncConfigurationChanges updateSyncConfiguration(SyncConfigurationWithDevice syncModuleConfigurationsForDevice) {
+    SyncConfiguration updatedSyncConfiguration = syncModuleConfigurationsForDevice.getSyncConfiguration();
+    SyncConfigurationChanges changes = new SyncConfigurationChanges(syncModuleConfigurationsForDevice.getRemoteDevice());
+
+    for(SyncModuleSyncModuleConfigurationPair pair : syncModuleConfigurationsForDevice.getSyncModuleConfigurations()) {
+      updateSyncModuleConfiguration(updatedSyncConfiguration, pair, changes);
+    }
+
+    entityManager.updateEntity(updatedSyncConfiguration);
+
+    return changes;
+  }
+
+  protected void updateSyncModuleConfiguration(SyncConfiguration updatedSyncConfiguration, SyncModuleSyncModuleConfigurationPair pair, SyncConfigurationChanges changes) {
+    SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
+    syncModuleConfiguration.setBidirectional(pair.isBidirectional());
+
+    if(pair.isEnabled) {
+      if(updatedSyncConfiguration.getSyncModuleConfigurations().contains(syncModuleConfiguration) == false) {
+        if(entityManager.persistEntity(syncModuleConfiguration)) {
+          updatedSyncConfiguration.addSyncModuleConfiguration(syncModuleConfiguration);
+          changes.addAddedSyncModuleConfiguration(syncModuleConfiguration);
+        }
+      }
+    }
+    else {
+      if(updatedSyncConfiguration.getSyncModuleConfigurations().contains(syncModuleConfiguration)) {
+        updatedSyncConfiguration.removeSyncModuleConfiguration(syncModuleConfiguration);
+        changes.addRemovedSyncModuleConfiguration(syncModuleConfiguration);
+        entityManager.deleteEntity(syncModuleConfiguration);
+      }
+    }
+  }
+
+
   protected SyncConfiguration getPersistedSyncConfigurationForDevice(DiscoveredDevice remoteDevice, AtomicBoolean remoteDeviceIsSource) {
     SyncConfiguration persistedSyncConfiguration = null;
 
@@ -50,7 +90,7 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
       }
     }
 
-    if(persistedSyncConfiguration != null) {
+    if(persistedSyncConfiguration == null) {
       for(SyncConfiguration destinationSyncConfiguration : remoteDevice.getDevice().getDestinationSyncConfigurations()) {
         if(localDevice == destinationSyncConfiguration.getSourceDevice()) {
           persistedSyncConfiguration = destinationSyncConfiguration;
