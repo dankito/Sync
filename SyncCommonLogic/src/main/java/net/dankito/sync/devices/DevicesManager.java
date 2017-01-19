@@ -487,6 +487,16 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
+  public DiscoveredDevice getDiscoveredDeviceForId(String uniqueDeviceId) {
+    for(DiscoveredDevice device : getAllDiscoveredDevices()) {
+      if(device.getDevice().getUniqueDeviceId().equals(uniqueDeviceId)) {
+        return device;
+      }
+    }
+
+    return null;
+  }
+
   @Override
   public List<DiscoveredDevice> getAllDiscoveredDevices() {
     return new ArrayList<>(discoveredDevices.values());

@@ -33,6 +33,8 @@ public interface IDevicesManager {
   boolean removeKnownSynchronizedDevicesListener(KnownSynchronizedDevicesListener listener);
 
 
+  DiscoveredDevice getDiscoveredDeviceForId(String uniqueDeviceId);
+
   List<DiscoveredDevice> getAllDiscoveredDevices();
 
   List<DiscoveredDevice> getKnownSynchronizedDiscoveredDevices();
