@@ -29,6 +29,8 @@ import net.dankito.sync.synchronization.SyncConfigurationManagerAndroid;
 import net.dankito.sync.synchronization.SynchronizationConfig;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
+import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
+import net.dankito.sync.synchronization.modules.SyncModuleConfigurationManager;
 import net.dankito.utils.IOnUiThreadRunner;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
@@ -160,6 +162,12 @@ public class AndroidDiContainer {
   public ISyncConfigurationManager provideSyncConfigurationManager(IPermissionsManager permissionsManager, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                               IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
     return new SyncConfigurationManagerAndroid(getActivity(), permissionsManager, syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
+  }
+
+  @Provides
+  @Singleton
+  public ISyncModuleConfigurationManager provideSyncModuleConfigurationManager(ISyncConfigurationManager syncConfigurationManager, IDataManager dataManager) {
+    return new SyncModuleConfigurationManager(syncConfigurationManager, dataManager);
   }
 
 }

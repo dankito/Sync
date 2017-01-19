@@ -13,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,7 +34,12 @@ import javax.inject.Inject;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 
-  protected AndroidDiComponent component;
+  protected static AndroidDiComponent component;
+
+  public static AndroidDiComponent getComponent() {
+    return component;
+  }
+
 
   @Inject
   protected IDevicesManager devicesManager;
