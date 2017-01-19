@@ -13,6 +13,7 @@ import net.dankito.sync.adapter.SyncModuleConfigurationsAdapter;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
+import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
 
 import javax.inject.Inject;
 
@@ -29,6 +30,8 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
 
   protected DiscoveredDevice remoteDevice;
+
+  protected SyncConfigurationWithDevice syncModuleConfigurationsForDevice;
 
 
   @Override
@@ -69,7 +72,8 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     else {
       setTitle(remoteDevice.getDevice().getDeviceFullDisplayName());
 
-      lstvwSynModuleConfigurations.setAdapter(new SyncModuleConfigurationsAdapter(this, syncModuleConfigurationManager, remoteDevice));
+      this.syncModuleConfigurationsForDevice = syncModuleConfigurationManager.getSyncModuleConfigurationsForDevice(remoteDevice);
+      lstvwSynModuleConfigurations.setAdapter(new SyncModuleConfigurationsAdapter(this, syncModuleConfigurationManager, syncModuleConfigurationsForDevice));
     }
   }
 
