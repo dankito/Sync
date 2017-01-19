@@ -69,7 +69,7 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     else {
       setTitle(remoteDevice.getDevice().getDeviceFullDisplayName());
 
-      lstvwSynModuleConfigurations.setAdapter(new SyncModuleConfigurationsAdapter(this, syncModuleConfigurationManager.getSyncModuleConfigurationsForDevice(remoteDevice)));
+      lstvwSynModuleConfigurations.setAdapter(new SyncModuleConfigurationsAdapter(this, syncModuleConfigurationManager, remoteDevice));
     }
   }
 

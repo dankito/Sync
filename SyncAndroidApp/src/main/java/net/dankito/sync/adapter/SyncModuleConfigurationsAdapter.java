@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
 import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
 import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
@@ -24,14 +26,18 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
 
   protected Activity activity;
 
+  protected ISyncModuleConfigurationManager syncModuleConfigurationManager;
+
   protected SyncConfigurationWithDevice syncModuleConfigurationsForDevice;
 
   protected List<SyncModuleSyncModuleConfigurationPair> sortedSyncConfigurationModules;
 
 
-  public SyncModuleConfigurationsAdapter(Activity activity, SyncConfigurationWithDevice syncModuleConfigurationsForDevice) {
+  public SyncModuleConfigurationsAdapter(Activity activity, ISyncModuleConfigurationManager syncModuleConfigurationManager, DiscoveredDevice remoteDevice) {
     this.activity = activity;
-    this.syncModuleConfigurationsForDevice = syncModuleConfigurationsForDevice;
+    this.syncModuleConfigurationManager = syncModuleConfigurationManager;
+
+    this.syncModuleConfigurationsForDevice = syncModuleConfigurationManager.getSyncModuleConfigurationsForDevice(remoteDevice);
     this.sortedSyncConfigurationModules = new ArrayList<>(syncModuleConfigurationsForDevice.getSyncModuleConfigurations());
 
     sortSyncConfigurationModules();
