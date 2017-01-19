@@ -74,6 +74,11 @@ public abstract class BaseEntity {
   }
 
 
+  public boolean isPersisted() {
+    return getId() != null;
+  }
+
+
   @PrePersist
   protected void prePersist() {
     createdOn = new Date();
