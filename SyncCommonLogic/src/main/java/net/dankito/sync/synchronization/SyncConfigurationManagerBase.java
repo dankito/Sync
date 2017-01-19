@@ -20,6 +20,7 @@ import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
+import net.dankito.sync.synchronization.modules.SyncConfigurationChanges;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -118,6 +119,24 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected boolean shouldNotSyncModuleWithDevice(SyncConfiguration syncConfiguration, SyncModuleConfiguration syncModuleConfiguration, DiscoveredDevice remoteDevice) {
     return syncModuleConfiguration.isBidirectional() == false && syncConfiguration.getSourceDevice() == remoteDevice.getDevice();
   }
+
+
+  @Override
+  public void syncConfigurationHasBeenUpdated(SyncConfiguration syncConfiguration, SyncConfigurationChanges changes) {
+    DiscoveredDevice remoteDevice = changes.getRemoteDevice();
+
+    for(SyncModuleConfiguration removedSyncModuleConfiguration : changes.getRemovedSyncModuleConfigurations()) {
+      ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(removedSyncModuleConfiguration);
+      removeSyncEntityChangeListener(remoteDevice, syncModule);
+    }
+
+    for(SyncModuleConfiguration addedSyncModuleConfiguration : changes.getAddedSyncModuleConfigurations()) {
+      if(shouldNotSyncModuleWithDevice(syncConfiguration, addedSyncModuleConfiguration, remoteDevice) == false) {
+        startContinuouslySynchronizationForModule(remoteDevice, addedSyncModuleConfiguration);
+      }
+    }
+  }
+
 
   protected void startContinuouslySynchronizationForModule(final DiscoveredDevice remoteDevice, final SyncModuleConfiguration syncModuleConfiguration) {
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
