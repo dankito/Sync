@@ -536,6 +536,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
     }
 
+    // check for added SyncModuleConfiguration that aren't activated on this side yet
+    for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+      ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+      if(activatedSyncModules.containsKey(syncModule) == false) {
+        changes.addAddedSyncModuleConfiguration(syncModuleConfiguration);
+      }
+    }
+
     return changes;
   }
 
