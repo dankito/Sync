@@ -336,7 +336,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return syncConfiguration;
   }
 
-  protected ISyncModule getSyncModuleForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
+  @Override
+  public ISyncModule getSyncModuleForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
     getAvailableSyncModules(); // ensure availableSyncModules are loaded
     return availableSyncModules.get(syncModuleConfiguration.getSyncModuleType());
   }
