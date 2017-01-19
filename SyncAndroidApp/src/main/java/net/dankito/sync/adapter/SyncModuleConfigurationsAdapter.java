@@ -97,8 +97,7 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
     CheckBox chkbxBidirectional = (CheckBox)convertView.findViewById(R.id.chkbxBidirectional);
     chkbxBidirectional.setChecked(syncModuleConfiguration.isBiDirectional());
 
-    txtvwSyncModuleName.setEnabled(pair.isEnabled());
-    chkbxBidirectional.setEnabled(pair.isEnabled());
+    setControlsEnabledState(pair, txtvwSyncModuleName, chkbxBidirectional);
 
     return convertView;
   }
@@ -112,12 +111,20 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
 
       ViewGroup parentLayout = (ViewGroup)buttonView.getParent();
 
-      TextView txtvwSyncModuleName = (TextView)parentLayout.findViewById(R.id.txtvwSyncModuleName);
-      CheckBox chkbxBidirectional = (CheckBox)parentLayout.findViewById(R.id.chkbxBidirectional);
-
-      txtvwSyncModuleName.setEnabled(pair.isEnabled());
-      chkbxBidirectional.setEnabled(pair.isEnabled());
+      setControlsEnabledState(pair, parentLayout);
     }
   };
+
+  protected void setControlsEnabledState(SyncModuleSyncModuleConfigurationPair pair, ViewGroup parentLayout) {
+    TextView txtvwSyncModuleName = (TextView)parentLayout.findViewById(R.id.txtvwSyncModuleName);
+    CheckBox chkbxBidirectional = (CheckBox)parentLayout.findViewById(R.id.chkbxBidirectional);
+
+    setControlsEnabledState(pair, txtvwSyncModuleName, chkbxBidirectional);
+  }
+
+  protected void setControlsEnabledState(SyncModuleSyncModuleConfigurationPair pair, TextView txtvwSyncModuleName, CheckBox chkbxBidirectional) {
+    txtvwSyncModuleName.setEnabled(pair.isEnabled());
+    chkbxBidirectional.setEnabled(pair.isEnabled());
+  }
 
 }
