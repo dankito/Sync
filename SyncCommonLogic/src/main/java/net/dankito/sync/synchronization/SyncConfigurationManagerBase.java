@@ -109,6 +109,16 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
   }
 
+  protected void disconnectedFromSynchronizedDevice(DiscoveredDevice disconnectedDevice) {
+    connectedSynchronizedDevices.remove(disconnectedDevice);
+
+    for(ISyncModule activeSyncModule : activatedSyncModules.keySet()) {
+      if(activatedSyncModules.get(activeSyncModule).contains(disconnectedDevice)) {
+        removeSyncEntityChangeListener(disconnectedDevice, activeSyncModule);
+      }
+    }
+  }
+
   protected void startContinuouslySynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
     for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
       if(shouldNotSyncModuleWithDevice(syncConfiguration, syncModuleConfiguration, remoteDevice) == false) {
@@ -676,7 +686,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     @Override
     public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
-
+      if(connectedSynchronizedDevices.contains(disconnectedDevice)) {
+        disconnectedFromSynchronizedDevice(disconnectedDevice);
+      }
     }
   };
 
