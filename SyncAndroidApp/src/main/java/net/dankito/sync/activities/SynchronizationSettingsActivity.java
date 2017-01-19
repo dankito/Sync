@@ -86,11 +86,15 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     else {
       setTitle(remoteDevice.getDevice().getDeviceFullDisplayName());
 
+      this.syncModuleConfigurationsForDevice = syncModuleConfigurationManager.getSyncModuleConfigurationsForDevice(remoteDevice);
+      lstvwSynModuleConfigurations.setAdapter(new SyncModuleConfigurationsAdapter(this, syncModuleConfigurationManager, syncModuleConfigurationsForDevice));
+
       btnStartSynchronizingWithDevice.setEnabled(true);
       btnStartSynchronizingWithDevice.setOnClickListener(btnStartSynchronizingWithDeviceClickListener);
 
-      this.syncModuleConfigurationsForDevice = syncModuleConfigurationManager.getSyncModuleConfigurationsForDevice(remoteDevice);
-      lstvwSynModuleConfigurations.setAdapter(new SyncModuleConfigurationsAdapter(this, syncModuleConfigurationManager, syncModuleConfigurationsForDevice));
+      if(syncModuleConfigurationsForDevice.isSyncConfigurationPersisted()) {
+        btnStartSynchronizingWithDevice.setText(R.string.update_synchronization_settings);
+      }
     }
   }
 

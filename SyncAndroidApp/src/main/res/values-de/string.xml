@@ -18,6 +18,7 @@
     <string name="synchronize_with_device">Sync</string>
     <string name="stop_synchronizing_with_device">Stop Sync</string>
     <string name="change_synchronization_settings">Einstellungen ändern</string>
+    <string name="update_synchronization_settings">Ändern</string>
     <string name="show_synchronization_log">Sync Log</string>
 
     <!-- When getting remote device from Intent fails -->
