@@ -14,6 +14,11 @@ import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
 import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 
 public class SyncModuleConfigurationsAdapter extends BaseAdapter {
 
@@ -21,21 +26,44 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
 
   protected SyncConfigurationWithDevice syncModuleConfigurationsForDevice;
 
+  protected List<SyncModuleSyncModuleConfigurationPair> sortedSyncConfigurationModules;
+
 
   public SyncModuleConfigurationsAdapter(Activity activity, SyncConfigurationWithDevice syncModuleConfigurationsForDevice) {
     this.activity = activity;
     this.syncModuleConfigurationsForDevice = syncModuleConfigurationsForDevice;
+    this.sortedSyncConfigurationModules = new ArrayList<>(syncModuleConfigurationsForDevice.getSyncModuleConfigurations());
+
+    sortSyncConfigurationModules();
+  }
+
+  private void sortSyncConfigurationModules() {
+    Collections.sort(sortedSyncConfigurationModules, new Comparator<SyncModuleSyncModuleConfigurationPair>() {
+      @Override
+      public int compare(SyncModuleSyncModuleConfigurationPair o1, SyncModuleSyncModuleConfigurationPair o2) {
+        int displayPriority1 = o1.getSyncModule().getDisplayPriority();
+        int displayPriority2 = o2.getSyncModule().getDisplayPriority();
+
+        if(displayPriority1 > displayPriority2) {
+          return 1;
+        }
+        if(displayPriority1 == displayPriority2) {
+          return 0;
+        }
+        return -1;
+      }
+    });
   }
 
 
   @Override
   public int getCount() {
-    return syncModuleConfigurationsForDevice.getSyncModuleConfigurations().size();
+    return sortedSyncConfigurationModules.size();
   }
 
   @Override
   public Object getItem(int position) {
-    return syncModuleConfigurationsForDevice.getSyncModuleConfigurations().get(position);
+    return sortedSyncConfigurationModules.get(position);
   }
 
   @Override
@@ -53,7 +81,7 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
     SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
 
     TextView txtvwSyncModuleName = (TextView)convertView.findViewById(R.id.txtvwSyncModuleName);
-    txtvwSyncModuleName.setText(pair.getSyncModule().getSyncEntityTypesItCanHandle()[0]);
+    txtvwSyncModuleName.setText(pair.getSyncModule().getName());
 
     Switch swtchEnableSyncModule = (Switch)convertView.findViewById(R.id.swtchEnableSyncModule);
     swtchEnableSyncModule.setChecked(pair.isEnabled());
