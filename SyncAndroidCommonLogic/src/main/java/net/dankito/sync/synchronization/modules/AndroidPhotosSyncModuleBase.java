@@ -37,7 +37,7 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
 
   @Override
   protected String getNameStringResourceKey() {
-    return "sync.module.name.photos";
+    return "sync.module.name.android_photos";
   }
 
   @Override
