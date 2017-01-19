@@ -524,17 +524,17 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     SyncConfigurationChanges changes = new SyncConfigurationChanges(remoteDevice);
 
     for(ISyncModule syncModule : activatedSyncModules.keySet()) {
-      boolean remoteDeviceWasOnThisModule = remoteDeviceWasOnThisModule(syncModule, remoteDevice);
+      boolean remoteDeviceHadThisModuleActive = remoteDeviceHadThisModuleActive(syncModule, remoteDevice);
 
-      AtomicBoolean shouldRemoteDeviceNowBeOnThisModule = new AtomicBoolean(false);
-      SyncModuleConfiguration syncModuleConfigurationDeviceShouldBeNowOn =
-          shouldRemoteDeviceNowBeOnThisModule(syncConfiguration, syncModule, shouldRemoteDeviceNowBeOnThisModule);
+      AtomicBoolean remoteDeviceHasThisModuleNowActive = new AtomicBoolean(false);
+      SyncModuleConfiguration syncModuleConfigurationDeviceHasNowActive =
+          remoteDeviceHasThisModuleNowActive(syncConfiguration, syncModule, remoteDeviceHasThisModuleNowActive);
 
-      if(remoteDeviceWasOnThisModule == false && shouldRemoteDeviceNowBeOnThisModule.get() == true) {
-        changes.addAddedSyncModuleConfiguration(syncModuleConfigurationDeviceShouldBeNowOn);
+      if(remoteDeviceHadThisModuleActive == false && remoteDeviceHasThisModuleNowActive.get() == true) {
+        changes.addAddedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
       }
-      else if(remoteDeviceWasOnThisModule == true && shouldRemoteDeviceNowBeOnThisModule.get() == false) {
-        changes.addRemovedSyncModuleConfiguration(syncModuleConfigurationDeviceShouldBeNowOn);
+      else if(remoteDeviceHadThisModuleActive == true && remoteDeviceHasThisModuleNowActive.get() == false) {
+        changes.addRemovedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
       }
     }
 
@@ -549,34 +549,34 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return changes;
   }
 
-  protected boolean remoteDeviceWasOnThisModule(ISyncModule syncModule, DiscoveredDevice discoveredRemoteDevice) {
-    boolean remoteDeviceWasOnThisModule = false;
+  protected boolean remoteDeviceHadThisModuleActive(ISyncModule syncModule, DiscoveredDevice discoveredRemoteDevice) {
+    boolean remoteDeviceHadThisModuleActive = false;
 
     List<DiscoveredDevice> devicesOnThatModules = activatedSyncModules.get(syncModule);
     if(devicesOnThatModules != null) {
       for(DiscoveredDevice device : devicesOnThatModules) {
         if(device == discoveredRemoteDevice) {
-          remoteDeviceWasOnThisModule = true;
+          remoteDeviceHadThisModuleActive = true;
           break;
         }
       }
     }
 
-    return remoteDeviceWasOnThisModule;
+    return remoteDeviceHadThisModuleActive;
   }
 
-  protected SyncModuleConfiguration shouldRemoteDeviceNowBeOnThisModule(SyncConfiguration syncConfiguration, ISyncModule syncModule, AtomicBoolean shouldRemoteDeviceNowBeOnThisModule) {
-    SyncModuleConfiguration syncModuleConfigurationDeviceShouldBeNowOn = null;
+  protected SyncModuleConfiguration remoteDeviceHasThisModuleNowActive(SyncConfiguration syncConfiguration, ISyncModule syncModule, AtomicBoolean remoteDeviceHasThisModuleNowActive) {
+    SyncModuleConfiguration syncModuleConfigurationDeviceHasNowActive = null;
 
     for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
       if(syncModule == getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration)) {
-        shouldRemoteDeviceNowBeOnThisModule.set(true);
-        syncModuleConfigurationDeviceShouldBeNowOn = syncModuleConfiguration;
+        remoteDeviceHasThisModuleNowActive.set(true);
+        syncModuleConfigurationDeviceHasNowActive = syncModuleConfiguration;
         break;
       }
     }
 
-    return syncModuleConfigurationDeviceShouldBeNowOn;
+    return syncModuleConfigurationDeviceHasNowActive;
   }
 
   protected void remoteDeviceStartedSynchronizingWithUs(final SyncConfiguration syncConfiguration) {
