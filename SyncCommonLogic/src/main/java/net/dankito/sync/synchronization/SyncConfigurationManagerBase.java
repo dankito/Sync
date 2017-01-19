@@ -506,15 +506,17 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     Device remoteDevice = syncConfiguration.getSourceDevice() == localConfig.getLocalDevice() ? syncConfiguration.getDestinationDevice() : syncConfiguration.getSourceDevice();
     DiscoveredDevice discoveredRemoteDevice = devicesManager.getDiscoveredDeviceForId(remoteDevice.getUniqueDeviceId());
 
-    if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(discoveredRemoteDevice) == false) {
-      remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
-    }
-    else if(syncConfiguration.isDeleted()) {
-      devicesManager.stopSynchronizingWithDevice(discoveredRemoteDevice);
-    }
-    else {
-      SyncConfigurationChanges changes = getSyncConfigurationChanges(syncConfiguration, discoveredRemoteDevice);
-      syncConfigurationHasBeenUpdated(syncConfiguration, changes);
+    if(discoveredRemoteDevice != null) {
+      if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(discoveredRemoteDevice) == false) {
+        remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
+      }
+      else if(syncConfiguration.isDeleted()) {
+        devicesManager.stopSynchronizingWithDevice(discoveredRemoteDevice);
+      }
+      else {
+        SyncConfigurationChanges changes = getSyncConfigurationChanges(syncConfiguration, discoveredRemoteDevice);
+        syncConfigurationHasBeenUpdated(syncConfiguration, changes);
+      }
     }
   }
 
