@@ -24,7 +24,7 @@ public class ContactsJavaEndpointSyncModule extends SyncModuleWithoutSystemStora
 
   @Override
   public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.Contacts.getTypeName();
+    return SyncModuleDefaultTypes.CONTACTS.getTypeName();
   }
 
 }

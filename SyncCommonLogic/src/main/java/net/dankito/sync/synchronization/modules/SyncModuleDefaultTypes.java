@@ -3,10 +3,10 @@ package net.dankito.sync.synchronization.modules;
 
 public enum SyncModuleDefaultTypes {
 
-  Contacts("Contacts"),
-  CallLog("CallLog"),
-  AndroidInternalPhotos("AndroidInternalPhotos"),
-  AndroidExternalPhotos("AndroidExternalPhotos");
+  CONTACTS("Contacts"),
+  CALL_LOG("CallLog"),
+  ANDROID_INTERNAL_PHOTOS("AndroidInternalPhotos"),
+  ANDROID_EXTERNAL_PHOTOS("AndroidExternalPhotos");
 
 
   private String typeName;

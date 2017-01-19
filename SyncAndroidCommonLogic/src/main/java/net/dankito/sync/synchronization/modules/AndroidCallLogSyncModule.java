@@ -45,7 +45,7 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   }
 
   public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.CallLog.getTypeName();
+    return SyncModuleDefaultTypes.CALL_LOG.getTypeName();
   }
 
 

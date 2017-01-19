@@ -19,7 +19,7 @@ public class AndroidInternalPhotosSyncModule extends AndroidPhotosSyncModuleBase
 
 
   public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.AndroidInternalPhotos.getTypeName();
+    return SyncModuleDefaultTypes.ANDROID_INTERNAL_PHOTOS.getTypeName();
   }
 
 

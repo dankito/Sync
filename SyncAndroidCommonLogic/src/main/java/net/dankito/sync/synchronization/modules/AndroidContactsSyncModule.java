@@ -46,7 +46,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.Contacts.getTypeName();
+    return SyncModuleDefaultTypes.CONTACTS.getTypeName();
   }
 
 

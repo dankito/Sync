@@ -24,7 +24,7 @@ public class AndroidPhotosJavaEndpointFileSyncModule extends FileSyncModule {
 
   @Override
   public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName();
+    return SyncModuleDefaultTypes.ANDROID_EXTERNAL_PHOTOS.getTypeName();
   }
 
 }
