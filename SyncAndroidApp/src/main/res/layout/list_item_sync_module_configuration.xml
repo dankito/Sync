@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/list_item_sync_module_configuration_height">
+
+    <LinearLayout
+        android:id="@+id/lnlytSyncModuleName"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/list_item_sync_module_configuration_name_height"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/swtchEnableSyncModule"
+        android:layout_marginTop="@dimen/list_item_sync_module_configuration_name_margin_top"
+        >
+
+        <TextView
+            android:id="@+id/txtvwSyncModuleName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            style="@android:style/TextAppearance.Medium"
+        />
+
+        <TextView
+            android:id="@+id/txtvwSyncModuleConfigurationChanged"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            style="@android:style/TextAppearance.Medium"
+            android:layout_marginLeft="@dimen/list_item_sync_module_configuration_changed_margin_left"
+            android:text="(*)"
+            android:visibility="invisible"
+        />
+
+    </LinearLayout>
+
+    <Switch
+        android:id="@+id/swtchEnableSyncModule"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/list_item_sync_module_configuration_name_height"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/list_item_sync_module_configuration_name_margin_top"
+    />
+
+    <RelativeLayout
+        android:id="@+id/rlytSyncModuleDetailSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/lnlytSyncModuleName"
+        android:layout_marginTop="@dimen/list_item_sync_module_configuration_details_margin_top"
+        android:layout_marginBottom="@dimen/list_item_sync_module_configuration_details_margin_bottom"
+        android:enabled="false"
+        >
+
+        <CheckBox
+            android:id="@+id/chkbxBidirectional"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/list_item_sync_module_configuration_bidirectional_margin_left"
+            android:text="@string/bidirectional"
+        />
+
+    </RelativeLayout>
+
+</RelativeLayout>

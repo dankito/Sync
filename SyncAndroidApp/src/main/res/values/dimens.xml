@@ -28,4 +28,13 @@
     <dimen name="list_item_known_synchronized_discovered_device_buttons_text_size">14sp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_buttons_right_margin">6dp</dimen>
 
+    <dimen name="list_item_sync_module_configuration_height">76dp</dimen>
+    <dimen name="list_item_sync_module_configuration_name_height">34dp</dimen>
+    <dimen name="list_item_sync_module_configuration_name_margin_top">6dp</dimen>
+    <dimen name="list_item_sync_module_configuration_changed_margin_left">6dp</dimen>
+    <dimen name="list_item_sync_module_configuration_bidirectional_height">30dp</dimen>
+    <dimen name="list_item_sync_module_configuration_details_margin_top">6dp</dimen>
+    <dimen name="list_item_sync_module_configuration_details_margin_bottom">6dp</dimen>
+    <dimen name="list_item_sync_module_configuration_bidirectional_margin_left">-6dp</dimen>
+
 </resources>

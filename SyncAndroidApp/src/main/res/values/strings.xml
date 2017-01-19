@@ -17,4 +17,6 @@
     <string name="stop_synchronizing_with_device">Stop sync</string>
     <string name="show_synchronization_log">Sync Log</string>
 
+    <string name="bidirectional">Bidirectional</string>
+
 </resources>
