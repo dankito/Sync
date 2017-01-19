@@ -11,15 +11,19 @@ public class SyncModuleSyncModuleConfigurationPair {
 
   protected boolean isEnabled;
 
+  protected boolean originalIsEnabled;
+
 
   public SyncModuleSyncModuleConfigurationPair(ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration) {
-    this.syncModule = syncModule;
-    this.syncModuleConfiguration = syncModuleConfiguration;
+    this(syncModule, syncModuleConfiguration, true);
   }
 
   public SyncModuleSyncModuleConfigurationPair(ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration, boolean isEnabled) {
-    this(syncModule, syncModuleConfiguration);
+    this.syncModule = syncModule;
+    this.syncModuleConfiguration = syncModuleConfiguration;
     this.isEnabled = isEnabled;
+
+    this.originalIsEnabled = isEnabled;
   }
 
   public ISyncModule getSyncModule() {
@@ -36,6 +40,11 @@ public class SyncModuleSyncModuleConfigurationPair {
 
   public void setEnabled(boolean enabled) {
     isEnabled = enabled;
+  }
+
+
+  public boolean didConfigurationChange() {
+    return isEnabled != originalIsEnabled;
   }
 
 

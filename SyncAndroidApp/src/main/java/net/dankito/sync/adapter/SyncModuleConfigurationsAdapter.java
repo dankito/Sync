@@ -111,6 +111,9 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
 
       ViewGroup parentLayout = (ViewGroup)buttonView.getParent();
 
+      TextView txtvwSyncModuleConfigurationChanged = (TextView)parentLayout.findViewById(R.id.txtvwSyncModuleConfigurationChanged);
+      txtvwSyncModuleConfigurationChanged.setVisibility(pair.didConfigurationChange() ? View.VISIBLE : View.INVISIBLE);
+
       setControlsEnabledState(pair, parentLayout);
     }
   };
