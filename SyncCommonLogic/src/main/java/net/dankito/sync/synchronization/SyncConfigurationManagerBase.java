@@ -114,7 +114,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected boolean shouldNotSyncModuleWithDevice(SyncConfiguration syncConfiguration, SyncModuleConfiguration syncModuleConfiguration, DiscoveredDevice remoteDevice) {
-    return syncModuleConfiguration.isBiDirectional() == false && syncConfiguration.getSourceDevice() == remoteDevice.getDevice();
+    return syncModuleConfiguration.isBidirectional() == false && syncConfiguration.getSourceDevice() == remoteDevice.getDevice();
   }
 
   protected void startContinuouslySynchronizationForModule(final DiscoveredDevice remoteDevice, final SyncModuleConfiguration syncModuleConfiguration) {

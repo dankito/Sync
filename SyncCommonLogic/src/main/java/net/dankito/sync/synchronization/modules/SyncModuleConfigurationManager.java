@@ -121,7 +121,7 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
 
     syncModuleConfiguration.setSourcePath(syncModule.getRootFolder());
     syncModuleConfiguration.setDestinationPath(destinationPath + "/" + syncEntityType.replace("Android", ""));
-    syncModuleConfiguration.setBiDirectional(false);
+    syncModuleConfiguration.setBidirectional(false);
     syncModuleConfiguration.setKeepDeletedEntitiesOnDestination(true);
   }
 
