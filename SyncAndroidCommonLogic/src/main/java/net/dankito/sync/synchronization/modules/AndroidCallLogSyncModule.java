@@ -16,6 +16,7 @@ import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
+import net.dankito.sync.localization.Localization;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.StringUtils;
 
@@ -28,10 +29,20 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   private static final Logger log = LoggerFactory.getLogger(AndroidCallLogSyncModule.class);
 
 
-  public AndroidCallLogSyncModule(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    super(context, permissionsManager, threadPool);
+  public AndroidCallLogSyncModule(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+    super(context, localization, permissionsManager, threadPool);
   }
 
+
+  @Override
+  protected String getNameStringResourceKey() {
+    return "sync.module.name.call_log";
+  }
+
+  @Override
+  public int getDisplayPriority() {
+    return DISPLAY_PRIORITY_LOW;
+  }
 
   public String[] getSyncEntityTypesItCanHandle() {
     return new String[] { SyncModuleDefaultTypes.CallLog.getTypeName() };

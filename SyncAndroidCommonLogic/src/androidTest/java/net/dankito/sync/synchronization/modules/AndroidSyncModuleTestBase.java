@@ -14,6 +14,7 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.persistence.EntityManagerStub;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
@@ -79,7 +80,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     IPermissionsManager permissionsManager = new PermissionsManagerStub();
 
-    underTest = createSyncModuleToTest(appContext, permissionsManager, threadPool);
+    underTest = createSyncModuleToTest(appContext, new Localization(), permissionsManager, threadPool);
 
     syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypesItCanHandle()[0]);
   }
@@ -98,7 +99,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @NonNull
-  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool);
+  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool);
 
   @NonNull
   protected abstract SyncEntity createTestEntity();

@@ -17,6 +17,7 @@ import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.INetworkConfigurationManager;
 import net.dankito.sync.devices.NetworkConfigurationManager;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerAndroid;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
@@ -61,6 +62,12 @@ public class AndroidDiContainer {
     return activity;
   }
 
+
+  @Provides
+  @Singleton
+  public Localization provideLocalization() {
+    return new Localization();
+  }
 
   @Provides
   @Singleton
@@ -159,9 +166,10 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public ISyncConfigurationManager provideSyncConfigurationManager(IPermissionsManager permissionsManager, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                              IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
-    return new SyncConfigurationManagerAndroid(getActivity(), permissionsManager, syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
+  public ISyncConfigurationManager provideSyncConfigurationManager(IPermissionsManager permissionsManager, Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+                                                                   IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
+    return new SyncConfigurationManagerAndroid(getActivity(), localization, permissionsManager, syncManager, dataManager, entityManager, devicesManager, dataMerger,
+        fileStorageService, threadPool);
   }
 
   @Provides

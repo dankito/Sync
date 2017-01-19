@@ -13,6 +13,7 @@ import net.dankito.android.util.services.PermissionRequestCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.utils.IThreadPool;
@@ -41,7 +42,9 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
 
 
-  public AndroidSyncModuleBase(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+  public AndroidSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+    super(localization);
+
     this.context = context;
     this.permissionsManager = permissionsManager;
     this.threadPool = threadPool;

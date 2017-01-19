@@ -4,6 +4,7 @@ package net.dankito.sync.synchronization.modules;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -11,13 +12,27 @@ import java.util.ArrayList;
 
 public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFileSyncModule {
 
+  protected Localization localization;
+
   protected FileHandler fileHandler;
 
 
-  public FileSyncModule(IFileStorageService fileStorageService) {
+  public FileSyncModule(Localization localization, IFileStorageService fileStorageService) {
+    super(localization);
+
     this.fileHandler = new FileHandler(fileStorageService);
   }
 
+
+  @Override
+  protected String getNameStringResourceKey() {
+    return "sync.module.name.files";
+  }
+
+  @Override
+  public int getDisplayPriority() {
+    return DISPLAY_PRIORITY_LOW;
+  }
 
   @Override
   public String[] getSyncEntityTypesItCanHandle() {

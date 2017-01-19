@@ -16,6 +16,7 @@ import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
+import net.dankito.sync.localization.Localization;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
@@ -29,10 +30,20 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
-  public AndroidContactsSyncModule(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    super(context, permissionsManager, threadPool);
+  public AndroidContactsSyncModule(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+    super(context, localization, permissionsManager, threadPool);
   }
 
+
+  @Override
+  protected String getNameStringResourceKey() {
+    return "sync.module.name.contacts";
+  }
+
+  @Override
+  public int getDisplayPriority() {
+    return DISPLAY_PRIORITY_HIGH;
+  }
 
   public String[] getSyncEntityTypesItCanHandle() {
     return new String[] { SyncModuleDefaultTypes.Contacts.getTypeName() };

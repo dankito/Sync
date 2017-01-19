@@ -2,6 +2,7 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.FileSyncModule;
@@ -19,9 +20,14 @@ import javax.inject.Named;
 @Named
 public class SyncConfigurationManagerJava extends SyncConfigurationManagerBase {
 
-  public SyncConfigurationManagerJava(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+  protected Localization localization;
+
+
+  public SyncConfigurationManagerJava(Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                       IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
     super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
+
+    this.localization = localization;
   }
 
 
@@ -29,8 +35,8 @@ public class SyncConfigurationManagerJava extends SyncConfigurationManagerBase {
   protected List<ISyncModule> retrieveAvailableSyncModules() {
     List<ISyncModule> availableSyncModules = new ArrayList<>();
 
-    availableSyncModules.add(new FileSyncModule(fileStorageService));
-    availableSyncModules.add(new SyncModuleWithoutSystemStorage());
+    availableSyncModules.add(new FileSyncModule(localization, fileStorageService));
+    availableSyncModules.add(new SyncModuleWithoutSystemStorage(localization));
 
     return availableSyncModules;
   }

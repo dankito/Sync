@@ -12,6 +12,7 @@ import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
+import net.dankito.sync.localization.Localization;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -28,12 +29,21 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
   protected FileHandler fileHandler;
 
 
-  public AndroidPhotosSyncModuleBase(Context context, IPermissionsManager permissionsManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
-    super(context, permissionsManager, threadPool);
+  public AndroidPhotosSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
+    super(context, localization, permissionsManager, threadPool);
 
     this.fileHandler = new FileHandler(fileStorageService);
   }
 
+  @Override
+  protected String getNameStringResourceKey() {
+    return "sync.module.name.photos";
+  }
+
+  @Override
+  public int getDisplayPriority() {
+    return DISPLAY_PRIORITY_HIGHEST;
+  }
 
   @Override
   protected String getPermissionToReadEntities() {

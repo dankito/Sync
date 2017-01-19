@@ -4,6 +4,7 @@ package net.dankito.sync.synchronization.modules;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 import java.util.ArrayList;
@@ -13,6 +14,22 @@ import java.util.ArrayList;
  * -> synchronizedEntityRetrieved() simply returns true as when SyncEntity reached destination device synchronization was successful.
  */
 public class SyncModuleWithoutSystemStorage extends SyncModuleBase implements ISyncModule {
+
+
+  public SyncModuleWithoutSystemStorage(Localization localization) {
+    super(localization);
+  }
+
+
+  @Override
+  protected String getNameStringResourceKey() {
+    return null; // TODO
+  }
+
+  @Override
+  public int getDisplayPriority() {
+    return 0; // TODO
+  }
 
   @Override
   public String[] getSyncEntityTypesItCanHandle() {

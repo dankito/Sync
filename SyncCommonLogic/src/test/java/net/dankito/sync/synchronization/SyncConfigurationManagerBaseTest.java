@@ -21,6 +21,7 @@ import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
+import net.dankito.sync.synchronization.modules.SyncModuleBase;
 import net.dankito.sync.synchronization.util.SyncConfigurationManagerStub;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
@@ -237,6 +238,16 @@ public class SyncConfigurationManagerBaseTest {
 
   protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
     ISyncModule testSyncModule = new ISyncModule() {
+      @Override
+      public String getName() {
+        return "Mock";
+      }
+
+      @Override
+      public int getDisplayPriority() {
+        return SyncModuleBase.DISPLAY_PRIORITY_LOWEST;
+      }
+
       @Override
       public String[] getSyncEntityTypesItCanHandle() {
         return new String[] { TEST_SYNC_MODULE_TYPE };

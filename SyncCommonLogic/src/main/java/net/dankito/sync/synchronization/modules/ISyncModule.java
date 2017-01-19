@@ -10,6 +10,10 @@ import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 public interface ISyncModule {
 
+  String getName();
+
+  int getDisplayPriority();
+
   String[] getSyncEntityTypesItCanHandle();
 
   void readAllEntitiesAsync(ReadEntitiesCallback callback);
