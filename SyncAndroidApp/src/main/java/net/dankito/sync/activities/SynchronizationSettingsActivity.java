@@ -15,7 +15,9 @@ import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.adapter.SyncModuleConfigurationsAdapter;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.synchronization.ISyncConfigurationManager;
 import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
+import net.dankito.sync.synchronization.modules.SyncConfigurationChanges;
 import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
 import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
@@ -31,6 +33,9 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
   @Inject
   protected ISyncModuleConfigurationManager syncModuleConfigurationManager;
+
+  @Inject
+  protected ISyncConfigurationManager syncConfigurationManager;
 
   @Inject
   protected IDevicesManager devicesManager;
@@ -95,10 +100,15 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     int itemId = item.getItemId();
 
     if (itemId == android.R.id.home) {
-      finish();
+      closeActivity();
     }
 
     return super.onOptionsItemSelected(item);
+  }
+
+
+  protected void closeActivity() {
+    finish();
   }
 
 
@@ -116,6 +126,12 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     devicesManager.startSynchronizingWithDevice(remoteDevice, syncModuleConfigurations);
   }
 
+  protected void updateSyncConfiguration() {
+    SyncConfigurationChanges changes = syncModuleConfigurationManager.updateSyncConfiguration(syncModuleConfigurationsForDevice);
+
+    syncConfigurationManager.syncConfigurationHasBeenUpdated(syncModuleConfigurationsForDevice.getSyncConfiguration(), changes);
+  }
+
 
   protected View.OnClickListener btnStartSynchronizingWithDeviceClickListener = new View.OnClickListener() {
     @Override
@@ -123,6 +139,11 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
       if(syncModuleConfigurationsForDevice.isSyncConfigurationPersisted() == false) {
         startSynchronizingWithDevice();
       }
+      else {
+        updateSyncConfiguration();
+      }
+
+      closeActivity();
     }
   };
 

@@ -174,8 +174,8 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public ISyncModuleConfigurationManager provideSyncModuleConfigurationManager(ISyncConfigurationManager syncConfigurationManager, IDataManager dataManager) {
-    return new SyncModuleConfigurationManager(syncConfigurationManager, dataManager);
+  public ISyncModuleConfigurationManager provideSyncModuleConfigurationManager(ISyncConfigurationManager syncConfigurationManager, IEntityManager entityManager, IDataManager dataManager) {
+    return new SyncModuleConfigurationManager(syncConfigurationManager, entityManager, dataManager);
   }
 
 }
