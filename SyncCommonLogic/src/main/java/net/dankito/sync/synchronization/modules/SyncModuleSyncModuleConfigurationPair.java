@@ -58,7 +58,8 @@ public class SyncModuleSyncModuleConfigurationPair {
 
 
   public boolean didConfigurationChange() {
-    return isEnabled != originalIsEnabled || isBidirectional != originalIsBidirectional;
+    return syncModuleConfiguration.isPersisted() &&
+        (isEnabled != originalIsEnabled || isBidirectional != originalIsBidirectional);
   }
 
 
