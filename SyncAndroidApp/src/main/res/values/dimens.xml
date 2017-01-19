@@ -3,8 +3,8 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin">10dp</dimen>
+    <dimen name="activity_vertical_margin">6dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="main_activity_list_view_unknown_discovered_devices_margin_bottom">24dp</dimen>
@@ -27,6 +27,9 @@
     <dimen name="list_item_known_synchronized_discovered_device_buttons_height">30dp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_buttons_text_size">14sp</dimen>
     <dimen name="list_item_known_synchronized_discovered_device_buttons_right_margin">6dp</dimen>
+
+    <dimen name="activity_synchronization_setting_button_start_syncing_width">180dp</dimen>
+    <dimen name="activity_synchronization_setting_button_start_syncing_height">50dp</dimen>
 
     <dimen name="list_item_sync_module_configuration_height">76dp</dimen>
     <dimen name="list_item_sync_module_configuration_name_height">34dp</dimen>

@@ -17,6 +17,8 @@
     <string name="stop_synchronizing_with_device">Stop sync</string>
     <string name="show_synchronization_log">Sync Log</string>
 
+    <!-- When getting remote device from Intent fails -->
+    <string name="title_activity_synchronization_settings">Error occurred</string>
     <string name="bidirectional">Bidirectional</string>
 
 </resources>
