@@ -107,10 +107,12 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
     for(SyncModuleSyncModuleConfigurationPair pair : syncModuleConfigurationsForDevice.getSyncModuleConfigurations()) {
       if(pair.isEnabled()) {
-        syncModuleConfigurations.add(pair.getSyncModuleConfiguration());
+        SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
+        syncModuleConfiguration.setBidirectional(pair.isBidirectional());
+        syncModuleConfigurations.add(syncModuleConfiguration);
       }
     }
-    
+
     devicesManager.startSynchronizingWithDevice(remoteDevice, syncModuleConfigurations);
   }
 
