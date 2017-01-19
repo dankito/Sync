@@ -36,7 +36,7 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFile
 
   @Override
   public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.AndroidInternalPhotos.getTypeName(), SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName() };
+    return new String[] { SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName() };
   }
 
   @Override
