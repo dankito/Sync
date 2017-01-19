@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization;
 
 import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
 import com.couchbase.lite.DocumentChange;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.ReplicationFilter;
@@ -285,7 +286,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
         handleChange(change, entityType);
       }
       else if(isEntityDeleted(change)) {
-
+        handleDeletedEntity(change);
       }
     }
   }
@@ -306,13 +307,63 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   }
 
 
+  protected void handleDeletedEntity(DocumentChange change) {
+    String id = change.getDocumentId();
+    Document document = entityManager.getDatabase().getDocument(id);
+    if(document != null) {
+      SavedRevision lastUndeletedRevision = findLastUndeletedRevision(document);
+
+      if(lastUndeletedRevision != null) {
+        Class entityType = getEntityTypeFromRevision(lastUndeletedRevision);
+        if(entityType != null) {
+          BaseEntity deletedEntity = entityManager.getEntityById(entityType, id);
+          if(deletedEntity != null) {
+            // TODO: handle deleted entity
+          }
+        }
+      }
+    }
+  }
+
+  protected SavedRevision findLastUndeletedRevision(Document document) {
+    try {
+      List<SavedRevision> leafRevisions = document.getLeafRevisions();
+      if(leafRevisions.size() > 0) {
+        String parentId = leafRevisions.get(0).getParentId();
+
+        while(parentId != null) {
+          SavedRevision parentRevision = document.getRevision(parentId);
+
+          if(parentRevision.isDeletion() == false) {
+            return parentRevision;
+          }
+
+          parentId = parentRevision.getParentId();
+        }
+      }
+    } catch(Exception e) { log.error("Could not get Revision History for deleted Document with id " + document.getId(), e); }
+
+    return null;
+  }
+
   protected boolean isEntityDeleted(DocumentChange change) {
-    return change.getAddedRevision().getPropertyForKey(Dao.ID_SYSTEM_COLUMN_NAME);
+    return change.getAddedRevision().isDeleted();
+  }
+
+  protected Class<? extends BaseEntity> getEntityTypeFromRevision(SavedRevision revision) {
+    String entityTypeString = (String)revision.getProperty(Dao.TYPE_COLUMN_NAME);
+
+    return getEntityTypeFromEntityTypeString(entityTypeString);
   }
 
   protected Class<? extends BaseEntity> getEntityTypeFromDocumentChange(DocumentChange change) {
-    Class<? extends BaseEntity> entityType = null;
     String entityTypeString = (String)change.getAddedRevision().getPropertyForKey(Dao.TYPE_COLUMN_NAME);
+
+    return getEntityTypeFromEntityTypeString(entityTypeString);
+  }
+
+  protected Class<? extends BaseEntity> getEntityTypeFromEntityTypeString(String entityTypeString) {
+    Class<? extends BaseEntity> entityType = null;
 
     if(entityTypeString != null) { // sometimes there are documents without type or any other column/property except Couchbase's system properties (like _id)
       try {
