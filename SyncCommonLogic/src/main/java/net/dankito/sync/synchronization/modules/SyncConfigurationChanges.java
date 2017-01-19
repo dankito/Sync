@@ -16,6 +16,8 @@ public class SyncConfigurationChanges {
 
   protected List<SyncModuleConfiguration> removedSyncModuleConfigurations = new ArrayList<>();
 
+  protected List<ISyncModule> deactivatedSyncModules = new ArrayList<>();
+
 
   public SyncConfigurationChanges(DiscoveredDevice remoteDevice) {
     this.remoteDevice = remoteDevice;
@@ -40,6 +42,14 @@ public class SyncConfigurationChanges {
 
   public boolean addRemovedSyncModuleConfiguration(SyncModuleConfiguration removedSyncModuleConfiguration) {
     return removedSyncModuleConfigurations.add(removedSyncModuleConfiguration);
+  }
+
+  public List<ISyncModule> getDeactivatedSyncModules() {
+    return deactivatedSyncModules;
+  }
+
+  public boolean addDeactivatedSyncModule(ISyncModule deactivatedSyncModule) {
+    return deactivatedSyncModules.add(deactivatedSyncModule);
   }
 
 }

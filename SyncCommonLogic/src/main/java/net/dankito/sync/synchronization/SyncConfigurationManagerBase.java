@@ -126,9 +126,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   public void syncConfigurationHasBeenUpdated(SyncConfiguration syncConfiguration, SyncConfigurationChanges changes) {
     DiscoveredDevice remoteDevice = changes.getRemoteDevice();
 
-    for(SyncModuleConfiguration removedSyncModuleConfiguration : changes.getRemovedSyncModuleConfigurations()) {
-      ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(removedSyncModuleConfiguration);
-      removeSyncEntityChangeListener(remoteDevice, syncModule);
+    for(ISyncModule deactivatedSyncModule : changes.getDeactivatedSyncModules()) {
+      removeSyncEntityChangeListener(remoteDevice, deactivatedSyncModule);
     }
 
     for(SyncModuleConfiguration addedSyncModuleConfiguration : changes.getAddedSyncModuleConfigurations()) {
@@ -534,7 +533,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         changes.addAddedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
       }
       else if(remoteDeviceHadThisModuleActive == true && remoteDeviceHasThisModuleNowActive.get() == false) {
-        changes.addRemovedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
+        changes.addDeactivatedSyncModule(syncModule);
       }
     }
 
