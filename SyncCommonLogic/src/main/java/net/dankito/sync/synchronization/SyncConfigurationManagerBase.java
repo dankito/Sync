@@ -75,6 +75,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
 
+  protected Map<ISyncModule, List<DiscoveredDevice>> activatedSyncModules = new ConcurrentHashMap<>();
+
 
   public SyncConfigurationManagerBase(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                       IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
@@ -119,6 +121,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void startContinuouslySynchronizationForModule(final DiscoveredDevice remoteDevice, final SyncModuleConfiguration syncModuleConfiguration) {
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+
+    addSyncEntityChangeListener(remoteDevice, syncModule);
+
     if(syncModule != null) {
       syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
         @Override
@@ -372,9 +377,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           for(String syncEntityType : syncModule.getSyncEntityTypesItCanHandle()) {
             availableSyncModules.put(syncEntityType, syncModule);
           }
-
-          // TODO: only add SyncEntityChangeListener if ISyncModule gets activated
-          syncModule.addSyncEntityChangeListener(syncEntityChangeListener);
         }
       }
     }
@@ -382,6 +384,33 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return new ArrayList<>(availableSyncModules.values());
   }
 
+
+  protected synchronized void addSyncEntityChangeListener(DiscoveredDevice remoteDevice, ISyncModule syncModule) {
+    if(activatedSyncModules.containsKey(syncModule)) {
+      activatedSyncModules.get(syncModule).add(remoteDevice);
+    }
+    else {
+      List<DiscoveredDevice> devicesThatActivatedThatModule = new ArrayList<>();
+      devicesThatActivatedThatModule.add(remoteDevice);
+
+      activatedSyncModules.put(syncModule, devicesThatActivatedThatModule);
+
+      syncModule.addSyncEntityChangeListener(syncEntityChangeListener);
+    }
+  }
+
+  protected synchronized void removeSyncEntityChangeListener(DiscoveredDevice remoteDevice, ISyncModule syncModule) {
+    if(activatedSyncModules.containsKey(syncModule)) {
+      List<DiscoveredDevice> devicesThatActivatedThatModule = activatedSyncModules.get(syncModule);
+      devicesThatActivatedThatModule.remove(remoteDevice);
+
+      if(devicesThatActivatedThatModule.size() == 0) {
+        activatedSyncModules.remove(syncModule);
+
+        syncModule.removeSyncEntityChangeListener(syncEntityChangeListener);
+      }
+    }
+  }
 
   protected SyncEntityChangeListener syncEntityChangeListener = new SyncEntityChangeListener() {
     @Override
