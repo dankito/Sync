@@ -362,21 +362,20 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void stopSynchronizingWithDevice(DiscoveredDevice device) {
-    if(localConfig.removeSynchronizedDevice(device.getDevice())) {
-      if(entityManager.updateEntity(localConfig)) {
-        deleteSyncConfigurationForStoppedSynchronizedDevice(device);
+    localConfig.removeSynchronizedDevice(device.getDevice());
+    if(entityManager.updateEntity(localConfig)) {
+      deleteSyncConfigurationForStoppedSynchronizedDevice(device);
 
-        String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
-        knownSynchronizedDevices.remove(deviceInfo);
-        unknownDevices.put(deviceInfo, device);
+      String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+      knownSynchronizedDevices.remove(deviceInfo);
+      unknownDevices.put(deviceInfo, device);
 
-        removeFromSourceAndDestinationSyncConfigurationOnDevices(device.getDevice());
+      removeFromSourceAndDestinationSyncConfigurationOnDevices(device.getDevice());
 
-        callKnownSynchronizedDeviceDisconnected(device);
+      callKnownSynchronizedDeviceDisconnected(device);
 
-        callDiscoveredDeviceDisconnectedListeners(device);
-        callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.UNKNOWN_DEVICE);
-      }
+      callDiscoveredDeviceDisconnectedListeners(device);
+      callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.UNKNOWN_DEVICE);
     }
   }
 
