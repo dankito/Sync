@@ -10,7 +10,7 @@ import net.dankito.utils.services.IFileStorageService;
 
 import java.util.ArrayList;
 
-public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFileSyncModule {
+public abstract class FileSyncModule extends SyncModuleBase implements ISyncModule, IFileSyncModule {
 
   protected Localization localization;
 
@@ -32,11 +32,6 @@ public class FileSyncModule extends SyncModuleBase implements ISyncModule, IFile
   @Override
   public int getDisplayPriority() {
     return DISPLAY_PRIORITY_LOW;
-  }
-
-  @Override
-  public String getSyncEntityTypeItCanHandle() {
-    return SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName();
   }
 
   @Override
