@@ -70,4 +70,10 @@ public class SyncModuleConfiguration extends BaseEntity {
     this.keepDeletedEntitiesOnDestination = keepDeletedEntitiesOnDestination;
   }
 
+
+  @Override
+  public String toString() {
+    return getSyncModuleType();
+  }
+
 }
