@@ -284,6 +284,9 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
       if(entityType != null) {
         handleChange(change, entityType);
       }
+      else if(isEntityDeleted(change)) {
+
+      }
     }
   }
 
@@ -302,6 +305,10 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     }
   }
 
+
+  protected boolean isEntityDeleted(DocumentChange change) {
+    return change.getAddedRevision().getPropertyForKey(Dao.ID_SYSTEM_COLUMN_NAME);
+  }
 
   protected Class<? extends BaseEntity> getEntityTypeFromDocumentChange(DocumentChange change) {
     Class<? extends BaseEntity> entityType = null;
