@@ -38,6 +38,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SyncConfigurationManagerBase implements ISyncConfigurationManager {
 
@@ -506,9 +507,70 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void syncConfigurationUpdated(SyncConfiguration syncConfiguration) {
-    if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(syncConfiguration.getSourceDevice()) == false) {
+    Device remoteDevice = syncConfiguration.getSourceDevice() == localConfig.getLocalDevice() ? syncConfiguration.getDestinationDevice() : syncConfiguration.getSourceDevice();
+    DiscoveredDevice discoveredRemoteDevice = devicesManager.getDiscoveredDeviceForId(remoteDevice.getUniqueDeviceId());
+
+    if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(discoveredRemoteDevice) == false) {
       remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
     }
+    else if(syncConfiguration.isDeleted()) {
+      devicesManager.stopSynchronizingWithDevice(discoveredRemoteDevice);
+    }
+    else {
+      SyncConfigurationChanges changes = getSyncConfigurationChanges(syncConfiguration, discoveredRemoteDevice);
+      syncConfigurationHasBeenUpdated(syncConfiguration, changes);
+    }
+  }
+
+  protected SyncConfigurationChanges getSyncConfigurationChanges(SyncConfiguration syncConfiguration, DiscoveredDevice remoteDevice) {
+    SyncConfigurationChanges changes = new SyncConfigurationChanges(remoteDevice);
+
+    for(ISyncModule syncModule : activatedSyncModules.keySet()) {
+      boolean remoteDeviceWasOnThisModule = remoteDeviceWasOnThisModule(syncModule, remoteDevice);
+
+      AtomicBoolean shouldRemoteDeviceNowBeOnThisModule = new AtomicBoolean(false);
+      SyncModuleConfiguration syncModuleConfigurationDeviceShouldBeNowOn =
+          shouldRemoteDeviceNowBeOnThisModule(syncConfiguration, syncModule, shouldRemoteDeviceNowBeOnThisModule);
+
+      if(remoteDeviceWasOnThisModule == false && shouldRemoteDeviceNowBeOnThisModule.get() == true) {
+        changes.addAddedSyncModuleConfiguration(syncModuleConfigurationDeviceShouldBeNowOn);
+      }
+      else if(remoteDeviceWasOnThisModule == true && shouldRemoteDeviceNowBeOnThisModule.get() == false) {
+        changes.addRemovedSyncModuleConfiguration(syncModuleConfigurationDeviceShouldBeNowOn);
+      }
+    }
+
+    return changes;
+  }
+
+  protected boolean remoteDeviceWasOnThisModule(ISyncModule syncModule, DiscoveredDevice discoveredRemoteDevice) {
+    boolean remoteDeviceWasOnThisModule = false;
+
+    List<DiscoveredDevice> devicesOnThatModules = activatedSyncModules.get(syncModule);
+    if(devicesOnThatModules != null) {
+      for(DiscoveredDevice device : devicesOnThatModules) {
+        if(device == discoveredRemoteDevice) {
+          remoteDeviceWasOnThisModule = true;
+          break;
+        }
+      }
+    }
+
+    return remoteDeviceWasOnThisModule;
+  }
+
+  protected SyncModuleConfiguration shouldRemoteDeviceNowBeOnThisModule(SyncConfiguration syncConfiguration, ISyncModule syncModule, AtomicBoolean shouldRemoteDeviceNowBeOnThisModule) {
+    SyncModuleConfiguration syncModuleConfigurationDeviceShouldBeNowOn = null;
+
+    for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+      if(syncModule == getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration)) {
+        shouldRemoteDeviceNowBeOnThisModule.set(true);
+        syncModuleConfigurationDeviceShouldBeNowOn = syncModuleConfiguration;
+        break;
+      }
+    }
+
+    return syncModuleConfigurationDeviceShouldBeNowOn;
   }
 
   protected void remoteDeviceStartedSynchronizingWithUs(final SyncConfiguration syncConfiguration) {
