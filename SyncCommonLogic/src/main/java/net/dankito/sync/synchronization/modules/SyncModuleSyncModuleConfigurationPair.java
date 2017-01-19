@@ -13,6 +13,10 @@ public class SyncModuleSyncModuleConfigurationPair {
 
   protected boolean originalIsEnabled;
 
+  protected boolean isBidirectional;
+
+  protected boolean originalIsBidirectional;
+
 
   public SyncModuleSyncModuleConfigurationPair(ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration) {
     this(syncModule, syncModuleConfiguration, true);
@@ -24,6 +28,8 @@ public class SyncModuleSyncModuleConfigurationPair {
     this.isEnabled = isEnabled;
 
     this.originalIsEnabled = isEnabled;
+    this.isBidirectional = syncModuleConfiguration.isBidirectional();
+    this.originalIsBidirectional = syncModuleConfiguration.isBidirectional();
   }
 
   public ISyncModule getSyncModule() {
@@ -42,9 +48,17 @@ public class SyncModuleSyncModuleConfigurationPair {
     isEnabled = enabled;
   }
 
+  public boolean isBidirectional() {
+    return isBidirectional;
+  }
+
+  public void setBidirectional(boolean bidirectional) {
+    isBidirectional = bidirectional;
+  }
+
 
   public boolean didConfigurationChange() {
-    return isEnabled != originalIsEnabled;
+    return isEnabled != originalIsEnabled || isBidirectional != originalIsBidirectional;
   }
 
 

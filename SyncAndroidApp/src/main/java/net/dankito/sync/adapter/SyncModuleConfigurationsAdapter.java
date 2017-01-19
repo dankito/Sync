@@ -90,33 +90,20 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
     txtvwSyncModuleName.setText(pair.getSyncModule().getName());
 
     Switch swtchEnableSyncModule = (Switch)convertView.findViewById(R.id.swtchEnableSyncModule);
-    swtchEnableSyncModule.setChecked(pair.isEnabled());
     swtchEnableSyncModule.setTag(pair);
+    swtchEnableSyncModule.setChecked(pair.isEnabled());
     swtchEnableSyncModule.setOnCheckedChangeListener(swtchEnableSyncModuleCheckedChangeListener);
 
     CheckBox chkbxBidirectional = (CheckBox)convertView.findViewById(R.id.chkbxBidirectional);
-    chkbxBidirectional.setChecked(syncModuleConfiguration.isBiDirectional());
+    chkbxBidirectional.setTag(pair);
+    chkbxBidirectional.setChecked(pair.isBidirectional());
+    chkbxBidirectional.setOnCheckedChangeListener(chkbxBidirectionalCheckedChangeListener);
 
     setControlsEnabledState(pair, txtvwSyncModuleName, chkbxBidirectional);
 
     return convertView;
   }
 
-
-  protected CompoundButton.OnCheckedChangeListener swtchEnableSyncModuleCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-      SyncModuleSyncModuleConfigurationPair pair = (SyncModuleSyncModuleConfigurationPair)buttonView.getTag();
-      pair.setEnabled(isChecked);
-
-      ViewGroup parentLayout = (ViewGroup)buttonView.getParent();
-
-      TextView txtvwSyncModuleConfigurationChanged = (TextView)parentLayout.findViewById(R.id.txtvwSyncModuleConfigurationChanged);
-      txtvwSyncModuleConfigurationChanged.setVisibility(pair.didConfigurationChange() ? View.VISIBLE : View.INVISIBLE);
-
-      setControlsEnabledState(pair, parentLayout);
-    }
-  };
 
   protected void setControlsEnabledState(SyncModuleSyncModuleConfigurationPair pair, ViewGroup parentLayout) {
     TextView txtvwSyncModuleName = (TextView)parentLayout.findViewById(R.id.txtvwSyncModuleName);
@@ -129,5 +116,37 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
     txtvwSyncModuleName.setEnabled(pair.isEnabled());
     chkbxBidirectional.setEnabled(pair.isEnabled());
   }
+
+  protected void showIfSyncModuleConfigurationChanged(SyncModuleSyncModuleConfigurationPair pair, ViewGroup parentLayout) {
+    TextView txtvwSyncModuleConfigurationChanged = (TextView)parentLayout.findViewById(R.id.txtvwSyncModuleConfigurationChanged);
+    txtvwSyncModuleConfigurationChanged.setVisibility(pair.didConfigurationChange() ? View.VISIBLE : View.INVISIBLE);
+  }
+
+
+  protected CompoundButton.OnCheckedChangeListener swtchEnableSyncModuleCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+      SyncModuleSyncModuleConfigurationPair pair = (SyncModuleSyncModuleConfigurationPair)buttonView.getTag();
+      pair.setEnabled(isChecked);
+
+      ViewGroup parentLayout = (ViewGroup)buttonView.getParent();
+
+      setControlsEnabledState(pair, parentLayout);
+
+      showIfSyncModuleConfigurationChanged(pair, parentLayout);
+    }
+  };
+
+  protected CompoundButton.OnCheckedChangeListener chkbxBidirectionalCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+      SyncModuleSyncModuleConfigurationPair pair = (SyncModuleSyncModuleConfigurationPair)buttonView.getTag();
+      pair.setBidirectional(isChecked);
+
+      ViewGroup parentLayout = (ViewGroup)buttonView.getParent().getParent();
+
+      showIfSyncModuleConfigurationChanged(pair, parentLayout);
+    }
+  };
 
 }
