@@ -45,8 +45,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     return DISPLAY_PRIORITY_HIGH;
   }
 
-  public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.Contacts.getTypeName() };
+  public String getSyncEntityTypeItCanHandle() {
+    return SyncModuleDefaultTypes.Contacts.getTypeName();
   }
 
 

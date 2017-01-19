@@ -82,7 +82,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest = createSyncModuleToTest(appContext, new Localization(), permissionsManager, threadPool);
 
-    syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypesItCanHandle()[0]);
+    syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypeItCanHandle());
   }
 
   @After

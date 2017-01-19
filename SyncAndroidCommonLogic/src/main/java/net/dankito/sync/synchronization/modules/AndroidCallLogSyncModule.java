@@ -44,8 +44,8 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
     return DISPLAY_PRIORITY_LOW;
   }
 
-  public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.CallLog.getTypeName() };
+  public String getSyncEntityTypeItCanHandle() {
+    return SyncModuleDefaultTypes.CallLog.getTypeName();
   }
 
 

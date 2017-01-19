@@ -18,8 +18,8 @@ public class AndroidExternalPhotosSyncModule extends AndroidPhotosSyncModuleBase
   }
 
 
-  public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName() };
+  public String getSyncEntityTypeItCanHandle() {
+    return SyncModuleDefaultTypes.AndroidExternalPhotos.getTypeName();
   }
 
 

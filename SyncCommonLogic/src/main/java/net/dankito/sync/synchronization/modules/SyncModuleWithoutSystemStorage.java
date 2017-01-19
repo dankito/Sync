@@ -32,8 +32,8 @@ public class SyncModuleWithoutSystemStorage extends SyncModuleBase implements IS
   }
 
   @Override
-  public String[] getSyncEntityTypesItCanHandle() {
-    return new String[] { SyncModuleDefaultTypes.Contacts.getTypeName(), SyncModuleDefaultTypes.CallLog.getTypeName() };
+  public String getSyncEntityTypeItCanHandle() {
+    return SyncModuleDefaultTypes.Contacts.getTypeName();
   }
 
   @Override

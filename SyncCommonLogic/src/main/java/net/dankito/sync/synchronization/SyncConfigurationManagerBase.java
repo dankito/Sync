@@ -394,9 +394,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         availableSyncModules = new HashMap<>();
 
         for(ISyncModule syncModule : retrieveAvailableSyncModules()) {
-          for(String syncEntityType : syncModule.getSyncEntityTypesItCanHandle()) {
-            availableSyncModules.put(syncEntityType, syncModule);
-          }
+          availableSyncModules.put(syncModule.getSyncEntityTypeItCanHandle(), syncModule);
         }
       }
     }
@@ -471,10 +469,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
           if(syncConfiguration != null) {
             for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-              for(String syncModuleType : syncModule.getSyncEntityTypesItCanHandle()) {
-                if(syncModuleType.equals(syncModuleConfiguration.getSyncModuleType())) {
-                  getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
-                }
+              if(syncModule.getSyncEntityTypeItCanHandle().equals(syncModuleConfiguration.getSyncModuleType())) {
+                getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
               }
             }
           }

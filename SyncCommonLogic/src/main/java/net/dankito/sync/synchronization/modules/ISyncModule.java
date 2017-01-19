@@ -14,7 +14,7 @@ public interface ISyncModule {
 
   int getDisplayPriority();
 
-  String[] getSyncEntityTypesItCanHandle();
+  String getSyncEntityTypeItCanHandle();
 
   void readAllEntitiesAsync(ReadEntitiesCallback callback);
 

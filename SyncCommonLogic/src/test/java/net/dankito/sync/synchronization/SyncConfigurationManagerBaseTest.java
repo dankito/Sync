@@ -249,8 +249,8 @@ public class SyncConfigurationManagerBaseTest {
       }
 
       @Override
-      public String[] getSyncEntityTypesItCanHandle() {
-        return new String[] { TEST_SYNC_MODULE_TYPE };
+      public String getSyncEntityTypeItCanHandle() {
+        return TEST_SYNC_MODULE_TYPE;
       }
 
       @Override
