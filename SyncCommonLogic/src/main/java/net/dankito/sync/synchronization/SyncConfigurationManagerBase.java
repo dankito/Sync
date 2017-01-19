@@ -494,8 +494,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
       else if(entity instanceof SyncConfiguration) {
         SyncConfiguration syncConfiguration = (SyncConfiguration)entity;
-        if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice()) {
-          remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
+        if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() || syncConfiguration.getSourceDevice() == localConfig.getLocalDevice()) {
+          syncConfigurationUpdated(syncConfiguration);
         }
       }
     }
@@ -503,6 +503,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected boolean isInitializedSyncJobForUs(SyncJobItem syncJobItem) {
     return syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED;
+  }
+
+  protected void syncConfigurationUpdated(SyncConfiguration syncConfiguration) {
+    if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(syncConfiguration.getSourceDevice()) == false) {
+      remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
+    }
   }
 
   protected void remoteDeviceStartedSynchronizingWithUs(final SyncConfiguration syncConfiguration) {
