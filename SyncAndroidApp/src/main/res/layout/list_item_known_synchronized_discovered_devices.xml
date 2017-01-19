@@ -60,13 +60,12 @@
         />
 
         <Button
-            android:id="@+id/btnViewSynchronizationLog"
+            android:id="@+id/btnChangeSynchronizationConfiguration"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:textSize="@dimen/list_item_known_synchronized_discovered_device_buttons_text_size"
-            android:text="@string/show_synchronization_log"
-            android:enabled="false"
+            android:text="@string/change_synchronization_settings"
         />
 
     </LinearLayout>

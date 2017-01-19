@@ -33,9 +33,9 @@ public class KnownSynchronizedDiscoveredDevicesAdapter extends DiscoveredDevices
     btnStopSynchronizingWithDevice.setTag(device);
     btnStopSynchronizingWithDevice.setOnClickListener(btnStopSynchronizingWithDeviceClickListener);
 
-    Button btnViewSynchronizationLog = (Button)convertView.findViewById(R.id.btnViewSynchronizationLog);
-    btnViewSynchronizationLog.setTag(device);
-    btnViewSynchronizationLog.setOnClickListener(btnViewSynchronizationLogClickListener);
+    Button btnChangeSynchronizationConfiguration = (Button)convertView.findViewById(R.id.btnChangeSynchronizationConfiguration);
+    btnChangeSynchronizationConfiguration.setTag(device);
+    btnChangeSynchronizationConfiguration.setOnClickListener(btnChangeSynchronizationConfigurationClickListener);
   }
 
 
@@ -50,10 +50,12 @@ public class KnownSynchronizedDiscoveredDevicesAdapter extends DiscoveredDevices
   };
 
 
-  protected View.OnClickListener btnViewSynchronizationLogClickListener = new View.OnClickListener() {
+  protected View.OnClickListener btnChangeSynchronizationConfigurationClickListener = new View.OnClickListener() {
     @Override
     public void onClick(View view) {
+      DiscoveredDevice device = (DiscoveredDevice)view.getTag();
 
+      showSynchronizationSettingsActivity(device);
     }
   };
 
