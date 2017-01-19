@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   protected ISyncConfigurationManager syncConfigurationManager;
 
   @Inject
-  protected IPermissionsManager IPermissionsManager;
+  protected IPermissionsManager permissionsManager;
 
 
   protected LinearLayout linlytUnknownDiscoveredDevices;
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    IPermissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
