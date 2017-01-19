@@ -10,10 +10,12 @@ import com.couchbase.lite.listener.Credentials;
 import com.couchbase.lite.listener.LiteListener;
 import com.couchbase.lite.replicator.Replication;
 
+import net.dankito.jpa.annotationreader.config.PropertyConfig;
 import net.dankito.jpa.couchbaselite.Dao;
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
+import net.dankito.sync.config.DatabaseTableConfig;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.INetworkConfigurationManager;
@@ -318,8 +320,26 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
         if(entityType != null) {
           BaseEntity deletedEntity = entityManager.getEntityById(entityType, id);
           if(deletedEntity != null) {
-            // TODO: handle deleted entity
+            setDeletedProperty(deletedEntity, entityType);
+
+            callEntitySynchronizedListeners(deletedEntity);
           }
+        }
+      }
+    }
+  }
+
+  protected void setDeletedProperty(BaseEntity deletedEntity, Class entityType) {
+    Dao dao = entityManager.getDaoForClass(entityType);
+
+    if(dao != null) {
+      for(PropertyConfig property : dao.getEntityConfig().getProperties()) {
+        if(DatabaseTableConfig.BASE_ENTITY_DELETED_COLUMN_NAME.equals(property.getColumnName())) {
+          try {
+            dao.setValueOnObject(deletedEntity, property, true);
+          } catch (Exception e) { log.error("Could not set deleted property on deleted entity " + deletedEntity, e); }
+
+          break;
         }
       }
     }
