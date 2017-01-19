@@ -64,7 +64,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginRight="@dimen/list_item_unknown_discovered_device_buttons_right_margin"
             android:textSize="@dimen/list_item_unknown_discovered_device_buttons_text_size"
             android:text="@string/synchronize_with_device"
         />
