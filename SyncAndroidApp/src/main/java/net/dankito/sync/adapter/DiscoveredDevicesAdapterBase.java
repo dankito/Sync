@@ -1,6 +1,7 @@
 package net.dankito.sync.adapter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import net.dankito.sync.Device;
 import net.dankito.sync.R;
+import net.dankito.sync.activities.SynchronizationSettingsActivity;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
@@ -101,6 +103,13 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
       return R.drawable.sun_solaris_logo;
 
     return 0; // TODO: create a placeholder logo
+  }
+
+
+  protected void showSynchronizationSettingsActivity(DiscoveredDevice device) {
+    Intent intent = new Intent(context, SynchronizationSettingsActivity.class);
+    intent.putExtra(SynchronizationSettingsActivity.REMOTE_DEVICE_UNIQUE_ID_EXTRA_NAME, device.getDevice().getUniqueDeviceId());
+    context.startActivity(intent);
   }
 
 

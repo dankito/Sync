@@ -1,12 +1,10 @@
 package net.dankito.sync.adapter;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 
 import net.dankito.sync.R;
-import net.dankito.sync.activities.SynchronizationSettingsActivity;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
@@ -63,9 +61,7 @@ public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBas
     public void onClick(View view) {
       DiscoveredDevice device = (DiscoveredDevice)view.getTag();
 
-      Intent intent = new Intent(context, SynchronizationSettingsActivity.class);
-      intent.putExtra(SynchronizationSettingsActivity.REMOTE_DEVICE_UNIQUE_ID_EXTRA_NAME, device.getDevice().getUniqueDeviceId());
-      context.startActivity(intent);
+      showSynchronizationSettingsActivity(device);
     }
   };
 
