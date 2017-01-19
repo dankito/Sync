@@ -32,4 +32,10 @@ public abstract class SyncModuleBase implements ISyncModule {
     return localization.getLocalizedString(getNameStringResourceKey());
   }
 
+
+  @Override
+  public String toString() {
+    return getName();
+  }
+
 }
