@@ -2,13 +2,14 @@ package net.dankito.sync.synchronization.modules;
 
 
 import net.dankito.sync.localization.Localization;
+import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.utils.services.IFileStorageService;
 
 public class AndroidPhotosJavaEndpointFileSyncModule extends FileSyncModule {
 
 
-  public AndroidPhotosJavaEndpointFileSyncModule(Localization localization, IFileStorageService fileStorageService) {
-    super(localization, fileStorageService);
+  public AndroidPhotosJavaEndpointFileSyncModule(Localization localization, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
+    super(localization, fileSyncService, fileStorageService);
   }
 
 

@@ -6,20 +6,31 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.sync.synchronization.files.FileSyncListener;
+import net.dankito.sync.synchronization.files.FileSyncService;
+import net.dankito.sync.synchronization.files.RetrievedFile;
 import net.dankito.utils.services.IFileStorageService;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class FileSyncModule extends SyncModuleBase implements ISyncModule, IFileSyncModule {
 
   protected Localization localization;
 
+  protected FileSyncService fileSyncService;
+
   protected FileHandler fileHandler;
 
+  protected Map<SyncJobItem, HandleRetrievedSynchronizedEntityCallback> pendingCallbacks = new ConcurrentHashMap<>();
 
-  public FileSyncModule(Localization localization, IFileStorageService fileStorageService) {
+
+  public FileSyncModule(Localization localization, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
     super(localization);
 
+    this.fileSyncService = fileSyncService;
+    fileSyncService.addFileSyncListener(fileSyncListener);
     this.fileHandler = new FileHandler(fileStorageService);
   }
 
@@ -41,13 +52,11 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
 
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
-    boolean isSuccessful = false;
-
     if(entityState == SyncEntityState.CREATED) {
-      isSuccessful = createOrUpdateFile(jobItem);
+      createOrUpdateFile(jobItem, callback);
     }
     else if(entityState == SyncEntityState.UPDATED) {
-      isSuccessful = createOrUpdateFile(jobItem); // TODO: first check if file data really got updated (or only file metadata)
+      createOrUpdateFile(jobItem, callback); // TODO: first check if file data really got updated (or only file metadata)
     }
     else if(entityState == SyncEntityState.DELETED) {
       // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
@@ -55,16 +64,18 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
         callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
       }
       else {
-        isSuccessful = fileHandler.deleteFile(jobItem);
+        boolean isSuccessful = fileHandler.deleteFile(jobItem);
+        callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
       }
     }
-
-    callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
   }
 
 
-  protected boolean createOrUpdateFile(SyncJobItem jobItem) {
-    return fileHandler.writeFileToDestinationPath(jobItem);
+  protected void createOrUpdateFile(SyncJobItem jobItem, HandleRetrievedSynchronizedEntityCallback callback) {
+    pendingCallbacks.put(jobItem, callback);
+
+    fileSyncService.start();
+    fileSyncService.fileSyncJobItemRetrieved(jobItem);
   }
 
 
@@ -82,6 +93,21 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
   @Override
   public String getRootFolder() {
     return null;
+  }
+
+
+  protected FileSyncListener fileSyncListener = new FileSyncListener() {
+    @Override
+    public void fileRetrieved(RetrievedFile retrievedFile) {
+      retrievedFile(retrievedFile);
+    }
+  };
+
+  protected void retrievedFile(RetrievedFile retrievedFile) {
+    HandleRetrievedSynchronizedEntityCallback callback = pendingCallbacks.remove(retrievedFile.getJobItem());
+    if(callback != null) {
+      callback.done(new HandleRetrievedSynchronizedEntityResult(retrievedFile.getJobItem(), true));
+    }
   }
 
 }
