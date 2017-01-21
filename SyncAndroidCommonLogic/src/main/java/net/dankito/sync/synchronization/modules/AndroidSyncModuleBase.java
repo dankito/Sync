@@ -140,37 +140,37 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
     // TODO: find better architecture. Yes, permission has been requested before, when reading all entities, but we should re-request it here
     if(permissionsManager.isPermissionGranted(getPermissionToWriteEntities())) {
-      boolean isSuccessful = synchronizedEntityRetrievedPermissionGranted(jobItem, entityState);
-      callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
+      synchronizedEntityRetrievedPermissionGranted(jobItem, entityState, callback);
     }
-
-    callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, false, false));
+    else {
+      callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, false, false));
+    }
   }
 
-  protected boolean synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState) {
-    boolean result = false;
+  protected void synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
+    boolean isSuccessful = false;
 
-    synchronized(this) {  // avoid that data gets read and written to the same time
+    synchronized(this) {  // avoid that data gets read and written at the same time
       if(entityState == SyncEntityState.CREATED) {
-        result = addEntityToLocalDatabase(jobItem);
+        isSuccessful = addEntityToLocalDatabase(jobItem);
       }
       else if(entityState == SyncEntityState.UPDATED) {
-        result = updateEntityInLocalDatabase(jobItem);
+        isSuccessful = updateEntityInLocalDatabase(jobItem);
       }
       else if(entityState == SyncEntityState.DELETED) {
         // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
         if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination() == false) {
-          result = deleteEntityFromLocalDatabase(jobItem);
+          isSuccessful = deleteEntityFromLocalDatabase(jobItem);
         }
         else { // keepDeletedEntitiesOnDestination is set to true -> keep file -> synchronization is successfully done
-          return true; // no updating lastModifiedOn
+          return; // no updating lastModifiedOn
         }
       }
 
       updateLastModifiedDate(jobItem);
     }
 
-    return result;
+    callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
   }
 
   protected boolean deleteEntityFromLocalDatabase(SyncJobItem jobItem) {
