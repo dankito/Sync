@@ -1,7 +1,9 @@
 package net.dankito.sync.synchronization.files;
 
 
+import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.utils.AsyncProducerConsumerQueue;
 import net.dankito.utils.ConsumerListener;
 
@@ -124,8 +126,11 @@ public class FileSyncService {
       String syncJobItemId = clientDataInputStream.readUTF();
       SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
 
+      File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
+      destinationFile.getParentFile().mkdirs();
+
       if(jobItem != null) {
-        receiveFile(clientDataInputStream, syncJobItemId, clientSocket);
+        receiveFile(clientDataInputStream, destinationFile, clientSocket);
 
         removeFileSyncJobItem(jobItem);
       }
@@ -137,10 +142,9 @@ public class FileSyncService {
     }
   }
 
-  protected void receiveFile(DataInputStream clientDataInputStream, String syncJobItemId, Socket clientSocket) throws IOException {
+  protected void receiveFile(DataInputStream clientDataInputStream, File destinationFile, Socket clientSocket) throws IOException {
     long startTime = System.currentTimeMillis();
 
-    String destinationFile = getDestinationFilePathForSyncJobItem(syncJobItemId);
     OutputStream output = new FileOutputStream(destinationFile);
 
     byte[] buffer = new byte[bufferSize];
@@ -156,8 +160,36 @@ public class FileSyncService {
     log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
   }
 
-  protected String getDestinationFilePathForSyncJobItem(String syncJobItemId) throws IOException {
-    return File.createTempFile("received_file_" + syncJobItemId, ".tmp").getAbsolutePath();
+
+  protected File getFileDestinationPathForSyncJobItem(SyncJobItem jobItem) {
+    FileSyncEntity fileSyncEntity = (FileSyncEntity)jobItem.getEntity();
+    SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
+
+    return getFileDestinationPath(syncModuleConfiguration.getSourcePath(), syncModuleConfiguration.getDestinationPath(), fileSyncEntity.getFilePath());
+  }
+
+  protected File getFileDestinationPath(String synchronizationSourceRootFolder, String synchronizationDestinationRootFolder, String entitySourcePathString) {
+    File entityRelativeSourcePath = getFileRelativePath(synchronizationSourceRootFolder, entitySourcePathString);
+
+    return new File(synchronizationDestinationRootFolder, entityRelativeSourcePath.getPath());
+  }
+
+  protected File getFileRelativePath(String rootFolderString, String filePathString) {
+    File rootFolder = new File(rootFolderString);
+    File filePath = new File(filePathString);
+
+    File fileRelativePath = new File(filePath.getName());
+
+    File parent = filePath.getParentFile();
+
+    while(parent != null && rootFolder.compareTo(parent) < 0) {
+      fileRelativePath = new File(parent.getName(), fileRelativePath.getPath());
+      parent = parent.getParentFile();
+    }
+
+    log.info("Determined relative path for " + filePathString + " in folder " + rootFolderString + " is " + fileRelativePath);
+
+    return fileRelativePath;
   }
 
 
