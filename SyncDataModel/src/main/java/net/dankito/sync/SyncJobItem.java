@@ -52,6 +52,9 @@ public class SyncJobItem extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_JOB_ITEM_FINISH_TIME_COLUMN_NAME)
   protected Date finishTime;
 
+  @Column(name = DatabaseTableConfig.SYNC_JOB_ITEM_DATA_SIZE_COLUMN_NAME)
+  protected long dataSize;
+
 
   protected SyncJobItem() { // for reflection
 
@@ -118,6 +121,14 @@ public class SyncJobItem extends BaseEntity {
 
   public void setFinishTime(Date finishTime) {
     this.finishTime = finishTime;
+  }
+
+  public long getDataSize() {
+    return dataSize;
+  }
+
+  public void setDataSize(long dataSize) {
+    this.dataSize = dataSize;
   }
 
 
