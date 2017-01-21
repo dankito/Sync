@@ -82,14 +82,16 @@ public class FileSyncService {
   }
 
   protected void startListenerSocketInNewThread() {
-    listenerThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        startListenerSocket();
-      }
-    });
+    if(listenerThread == null) {
+      listenerThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          startListenerSocket();
+        }
+      });
 
-    listenerThread.start();
+      listenerThread.start();
+    }
   }
 
   protected void startListenerSocket() {
