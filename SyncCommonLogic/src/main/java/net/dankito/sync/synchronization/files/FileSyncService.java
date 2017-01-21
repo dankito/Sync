@@ -137,9 +137,13 @@ public class FileSyncService {
         File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
         destinationFile.getParentFile().mkdirs();
 
-        if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) { // TODO: what to do when receiving file fails?
+        if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) {
           removeFileSyncJobItem(jobItem);
           callFileRetrievedListeners(jobItem, destinationFile);
+        }
+        else { // TODO: what to do when receiving file fails?
+          log.error("Failed receiving file for SyncJobItem " + jobItem + " and writing it to " + destinationFile);
+          try { destinationFile.delete(); } catch(Exception e) { log.error("Could not deleted failed file " + destinationFile, e); }
         }
       }
     } catch(Exception e) {
