@@ -118,8 +118,6 @@ public class FileSyncService {
 
   protected void receiveFileFromClient(Socket clientSocket) {
     try {
-      long startTime = System.currentTimeMillis();
-
       InputStream clientInputStream = clientSocket.getInputStream();
       DataInputStream clientDataInputStream = new DataInputStream(clientInputStream);
 
@@ -127,10 +125,7 @@ public class FileSyncService {
       SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
 
       if(jobItem != null) {
-        int totalRead = receiveFile(clientDataInputStream, syncJobItemId);
-
-        long endTime = System.currentTimeMillis();
-        log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
+        receiveFile(clientDataInputStream, syncJobItemId, clientSocket);
 
         removeFileSyncJobItem(jobItem);
       }
@@ -142,7 +137,9 @@ public class FileSyncService {
     }
   }
 
-  protected int receiveFile(DataInputStream clientDataInputStream, String syncJobItemId) throws IOException {
+  protected void receiveFile(DataInputStream clientDataInputStream, String syncJobItemId, Socket clientSocket) throws IOException {
+    long startTime = System.currentTimeMillis();
+
     String destinationFile = getDestinationFilePathForSyncJobItem(syncJobItemId);
     OutputStream output = new FileOutputStream(destinationFile);
 
@@ -155,7 +152,8 @@ public class FileSyncService {
       totalRead += read;
     }
 
-    return totalRead;
+    long endTime = System.currentTimeMillis();
+    log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
   }
 
   protected String getDestinationFilePathForSyncJobItem(String syncJobItemId) throws IOException {

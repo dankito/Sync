@@ -39,7 +39,6 @@ public class FileSender {
 
   protected void sendFile(FileSyncJobItem jobItem) {
     try {
-      long startTime = System.currentTimeMillis();
       FileInputStream fileInputStream = new FileInputStream(jobItem.getFilePath());
 
       Socket socket = new Socket(jobItem.getDestinationAddress(), jobItem.getDestinationPort());
@@ -48,10 +47,7 @@ public class FileSender {
       DataOutputStream dos = new DataOutputStream(socketOutputStream);
       dos.writeUTF(jobItem.getSyncJobItem().getId());
 
-      int sendTotal = sendFileToDestination(fileInputStream, socketOutputStream);
-
-      long endTime = System.currentTimeMillis();
-      log.info(sendTotal + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
+      sendFileToDestination(fileInputStream, socketOutputStream, jobItem);
 
       socketOutputStream.close();
       fileInputStream.close();
@@ -61,7 +57,9 @@ public class FileSender {
     }
   }
 
-  protected int sendFileToDestination(FileInputStream fileInputStream, OutputStream socketOutputStream) throws IOException {
+  protected void sendFileToDestination(FileInputStream fileInputStream, OutputStream socketOutputStream, FileSyncJobItem jobItem) throws IOException {
+    long startTime = System.currentTimeMillis();
+
     byte[] buffer = new byte[bufferSize];
     int read;
     int sendTotal = 0;
@@ -71,7 +69,8 @@ public class FileSender {
       sendTotal += read;
     }
 
-    return sendTotal;
+    long endTime = System.currentTimeMillis();
+    log.info(sendTotal + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
   }
 
 }
