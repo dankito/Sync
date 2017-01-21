@@ -516,6 +516,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     DiscoveredDevice discoveredRemoteDevice = devicesManager.getDiscoveredDeviceForId(remoteDevice.getUniqueDeviceId());
 
     if(discoveredRemoteDevice != null) {
+      // TODO: here's a Bug. Sometimes a remote device stops syncing, but remote device is not in connectedSynchronizedDevices
       if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(discoveredRemoteDevice) == false) {
         remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
       }
