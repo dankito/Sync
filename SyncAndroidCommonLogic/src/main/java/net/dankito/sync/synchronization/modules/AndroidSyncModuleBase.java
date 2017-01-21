@@ -137,13 +137,14 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
 
   @Override
-  public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
+  public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
     // TODO: find better architecture. Yes, permission has been requested before, when reading all entities, but we should re-request it here
     if(permissionsManager.isPermissionGranted(getPermissionToWriteEntities())) {
-      return synchronizedEntityRetrievedPermissionGranted(jobItem, entityState);
+      boolean isSuccessful = synchronizedEntityRetrievedPermissionGranted(jobItem, entityState);
+      callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
     }
 
-    return false;
+    callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, false, false));
   }
 
   protected boolean synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState) {

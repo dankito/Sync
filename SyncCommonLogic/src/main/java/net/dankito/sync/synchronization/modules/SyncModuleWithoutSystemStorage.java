@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 /**
  * JavaFX Application has for Contacts, CallLog, ... no system storage as Android has
- * -> synchronizedEntityRetrieved() simply returns true as when SyncEntity reached destination device synchronization was successful.
+ * -> handleRetrievedSynchronizedEntityAsync() simply returns true as when SyncEntity reached destination device synchronization was successful.
  */
 public abstract class SyncModuleWithoutSystemStorage extends SyncModuleBase implements ISyncModule {
 
@@ -37,8 +37,8 @@ public abstract class SyncModuleWithoutSystemStorage extends SyncModuleBase impl
   }
 
   @Override
-  public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
-    return true;
+  public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
+    callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
   }
 
   @Override

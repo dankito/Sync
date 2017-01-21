@@ -18,6 +18,8 @@ import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.merge.IDataMerger;
+import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityCallback;
+import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityResult;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.modules.SyncConfigurationChanges;
@@ -599,7 +601,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }, 3000);
   }
 
-  protected void remoteEntitySynchronized(SyncJobItem jobItem) {
+  protected void remoteEntitySynchronized(final SyncJobItem jobItem) {
     jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
     entityManager.updateEntity(jobItem);
 
@@ -607,7 +609,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
 
-    SyncEntityState syncEntityState;
+    final SyncEntityState syncEntityState;
     SyncEntityLocalLookupKeys lookupKey = getLookupKeyForSyncEntityByDatabaseId(syncModuleConfiguration, entity);
     if(lookupKey == null) {
       lookupKey = persistEntryLookupKey(syncModuleConfiguration, entity);
@@ -618,12 +620,21 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     setSyncEntityLocalValuesFromLookupKey(entity, lookupKey, syncEntityState);
-    syncEntitiesCurrentlyBeingSynchronized.add(entity); // when calling synchronizedEntityRetrieved() shortly after syncEntityChangeListener gets called, but its local lookup key hasn't been stored yet to database at this point
+    syncEntitiesCurrentlyBeingSynchronized.add(entity); // when calling handleRetrievedSynchronizedEntityAsync() shortly after syncEntityChangeListener gets called, but its local lookup key hasn't been stored yet to database at this point
 
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
 
-    if(syncModule != null && syncModule.synchronizedEntityRetrieved(jobItem, syncEntityState)) {
-      entitySuccessfullySynchronized(jobItem, lookupKey, syncEntityState);
+    if(syncModule != null) {
+      final SyncEntityLocalLookupKeys finalLookupKey = lookupKey;
+
+      syncModule.handleRetrievedSynchronizedEntityAsync(jobItem, syncEntityState, new HandleRetrievedSynchronizedEntityCallback() {
+        @Override
+        public void done(HandleRetrievedSynchronizedEntityResult result) {
+          if(result.isSuccessful()) { // TODO: what to do in error case?
+            entitySuccessfullySynchronized(jobItem, finalLookupKey, syncEntityState);
+          }
+        }
+      });
     }
 
     syncEntitiesCurrentlyBeingSynchronized.remove(jobItem.getEntity());

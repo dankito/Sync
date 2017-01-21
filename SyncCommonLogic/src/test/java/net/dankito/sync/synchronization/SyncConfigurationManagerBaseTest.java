@@ -19,6 +19,8 @@ import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
+import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityCallback;
+import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityResult;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.modules.SyncModuleBase;
@@ -259,8 +261,8 @@ public class SyncConfigurationManagerBaseTest {
       }
 
       @Override
-      public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
-        return true;
+      public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
+        callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
       }
 
       @Override

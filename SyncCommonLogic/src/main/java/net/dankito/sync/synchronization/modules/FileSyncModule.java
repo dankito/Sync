@@ -40,24 +40,26 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
   }
 
   @Override
-  public boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState) {
+  public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
+    boolean isSuccessful = false;
+
     if(entityState == SyncEntityState.CREATED) {
-      return createOrUpdateFile(jobItem);
+      isSuccessful = createOrUpdateFile(jobItem);
     }
     else if(entityState == SyncEntityState.UPDATED) {
-      return createOrUpdateFile(jobItem); // TODO: first check if file data really got updated (or only file metadata)
+      isSuccessful = createOrUpdateFile(jobItem); // TODO: first check if file data really got updated (or only file metadata)
     }
     else if(entityState == SyncEntityState.DELETED) {
       // TODO: what about bidirectional sync modules: entities deleted on destination won't in this way deleted from source
       if(jobItem.getSyncModuleConfiguration().isKeepDeletedEntitiesOnDestination()) {
-        return true;
+        callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
       }
       else {
-        return fileHandler.deleteFile(jobItem);
+        isSuccessful = fileHandler.deleteFile(jobItem);
       }
     }
 
-    return false;
+    callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
   }
 
 

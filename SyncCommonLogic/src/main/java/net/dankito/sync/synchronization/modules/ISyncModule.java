@@ -18,7 +18,7 @@ public interface ISyncModule {
 
   void readAllEntitiesAsync(ReadEntitiesCallback callback);
 
-  boolean synchronizedEntityRetrieved(SyncJobItem jobItem, SyncEntityState entityState);
+  void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback);
 
   void addSyncEntityChangeListener(SyncEntityChangeListener listener);
   void removeSyncEntityChangeListener(SyncEntityChangeListener listener);
