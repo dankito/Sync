@@ -130,14 +130,14 @@ public class FileSyncService {
       String syncJobItemId = clientDataInputStream.readUTF();
       SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
 
-      File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
-      destinationFile.getParentFile().mkdirs();
-
       if(jobItem != null) {
-        receiveFile(clientDataInputStream, destinationFile, clientSocket);
+        File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
+        destinationFile.getParentFile().mkdirs();
 
-        removeFileSyncJobItem(jobItem);
-        callFileRetrievedListeners(jobItem, destinationFile);
+        if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) { // TODO: what to do when receiving file fails?
+          removeFileSyncJobItem(jobItem);
+          callFileRetrievedListeners(jobItem, destinationFile);
+        }
       }
 
       clientInputStream.close();
@@ -147,7 +147,7 @@ public class FileSyncService {
     }
   }
 
-  protected void receiveFile(DataInputStream clientDataInputStream, File destinationFile, Socket clientSocket) throws IOException {
+  protected boolean receiveFile(DataInputStream clientDataInputStream, File destinationFile, SyncJobItem jobItem, Socket clientSocket) throws IOException {
     long startTime = System.currentTimeMillis();
 
     OutputStream output = new FileOutputStream(destinationFile);
@@ -163,6 +163,8 @@ public class FileSyncService {
 
     long endTime = System.currentTimeMillis();
     log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
+
+    return totalRead == jobItem.getDataSize();
   }
 
 

@@ -57,7 +57,7 @@ public class FileSender {
     }
   }
 
-  protected void sendFileToDestination(FileInputStream fileInputStream, OutputStream socketOutputStream, FileSyncJobItem jobItem) throws IOException {
+  protected boolean sendFileToDestination(FileInputStream fileInputStream, OutputStream socketOutputStream, FileSyncJobItem jobItem) throws IOException {
     long startTime = System.currentTimeMillis();
 
     byte[] buffer = new byte[bufferSize];
@@ -71,6 +71,8 @@ public class FileSender {
 
     long endTime = System.currentTimeMillis();
     log.info(sendTotal + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
+
+    return sendTotal == jobItem.getSyncJobItem().getDataSize();
   }
 
 }
