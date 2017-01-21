@@ -15,6 +15,8 @@ import net.dankito.utils.services.IFileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 public class EntitiesSyncQueue {
 
   private static final Logger log = LoggerFactory.getLogger(EntitiesSyncQueue.class);
@@ -63,6 +65,11 @@ public class EntitiesSyncQueue {
 
     SyncJobItem jobItem = new SyncJobItem(syncQueueItem.getSyncModuleConfiguration(), entity, localDevice, remoteDevice.getDevice());
     jobItem.setSyncEntityData(syncEntityData);
+    if(entity instanceof FileSyncEntity) {
+      try {
+        jobItem.setDataSize(new File(((FileSyncEntity) entity).getFilePath()).length());
+      } catch(Exception e) { log.error("Could not set dataSize on FileSyncEntity " + entity); }
+    }
 
     entityManager.persistEntity(jobItem);
 
