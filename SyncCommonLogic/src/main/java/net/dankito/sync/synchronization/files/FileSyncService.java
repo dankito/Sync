@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.files;
 
 
+import net.dankito.sync.SyncJobItem;
 import net.dankito.utils.AsyncProducerConsumerQueue;
 import net.dankito.utils.ConsumerListener;
 
@@ -16,6 +17,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class FileSyncService {
@@ -32,6 +35,8 @@ public class FileSyncService {
   protected int listenerPort = FileSyncServiceDefaultConfig.FILE_SYNC_SERVICE_DEFAULT_LISTENER_PORT;
 
   protected int bufferSize = FileSyncServiceDefaultConfig.DEFAULT_BUFFER_SIZE;
+
+  protected Map<String, SyncJobItem> currentFileSyncJobItems = new ConcurrentHashMap<>();
 
   protected AsyncProducerConsumerQueue<Socket> connectedClients;
 
@@ -119,11 +124,16 @@ public class FileSyncService {
       DataInputStream clientDataInputStream = new DataInputStream(clientInputStream);
 
       String syncJobItemId = clientDataInputStream.readUTF();
+      SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
 
-      int totalRead = receiveFile(clientDataInputStream, syncJobItemId);
+      if(jobItem != null) {
+        int totalRead = receiveFile(clientDataInputStream, syncJobItemId);
 
-      long endTime = System.currentTimeMillis();
-      log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
+        long endTime = System.currentTimeMillis();
+        log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
+
+        removeFileSyncJobItem(jobItem);
+      }
 
       clientInputStream.close();
       clientSocket.close();
@@ -150,6 +160,19 @@ public class FileSyncService {
 
   protected String getDestinationFilePathForSyncJobItem(String syncJobItemId) throws IOException {
     return File.createTempFile("received_file_" + syncJobItemId, ".tmp").getAbsolutePath();
+  }
+
+
+  public void fileSyncJobItemRetrieved(SyncJobItem jobItem) {
+    currentFileSyncJobItems.put(jobItem.getId(), jobItem);
+  }
+
+  protected void removeFileSyncJobItem(SyncJobItem jobItem) {
+    currentFileSyncJobItems.remove(jobItem.getId());
+  }
+
+  public SyncJobItem getFileSyncJobItemForId(String syncJobItemId) {
+    return currentFileSyncJobItems.get(syncJobItemId);
   }
 
 }
