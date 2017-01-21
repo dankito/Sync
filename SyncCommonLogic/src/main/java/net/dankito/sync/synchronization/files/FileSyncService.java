@@ -49,7 +49,6 @@ public class FileSyncService {
 
   public FileSyncService() {
     connectedClients = new AsyncProducerConsumerQueue<Socket>(1, connectedClientsListener);
-    startListenerSocketInNewThread();
   }
 
 
@@ -72,6 +71,11 @@ public class FileSyncService {
     }
 
     connectedClients.stop();
+  }
+
+
+  public void start() {
+    startListenerSocketInNewThread();
   }
 
   protected void startListenerSocketInNewThread() {
