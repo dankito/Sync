@@ -19,8 +19,10 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class FileSyncService {
@@ -39,6 +41,8 @@ public class FileSyncService {
   protected int bufferSize = FileSyncServiceDefaultConfig.DEFAULT_BUFFER_SIZE;
 
   protected Map<String, SyncJobItem> currentFileSyncJobItems = new ConcurrentHashMap<>();
+
+  protected List<FileSyncListener> fileSyncListeners = new CopyOnWriteArrayList<>();
 
   protected AsyncProducerConsumerQueue<Socket> connectedClients;
 
@@ -133,6 +137,7 @@ public class FileSyncService {
         receiveFile(clientDataInputStream, destinationFile, clientSocket);
 
         removeFileSyncJobItem(jobItem);
+        callFileRetrievedListeners(jobItem, destinationFile);
       }
 
       clientInputStream.close();
@@ -203,6 +208,23 @@ public class FileSyncService {
 
   public SyncJobItem getFileSyncJobItemForId(String syncJobItemId) {
     return currentFileSyncJobItems.get(syncJobItemId);
+  }
+
+
+  public boolean addFileSyncListener(FileSyncListener listener) {
+    return fileSyncListeners.add(listener);
+  }
+
+  public boolean removeFileSyncListener(FileSyncListener listener) {
+    return fileSyncListeners.remove(listener);
+  }
+
+  protected void callFileRetrievedListeners(SyncJobItem jobItem, File destinationFile) {
+    RetrievedFile retrievedFile = new RetrievedFile(jobItem, destinationFile);
+
+    for(FileSyncListener listener : fileSyncListeners) {
+      listener.fileRetrieved(retrievedFile);
+    }
   }
 
 }
