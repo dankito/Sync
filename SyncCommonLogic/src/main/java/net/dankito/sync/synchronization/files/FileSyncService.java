@@ -24,7 +24,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.inject.Named;
 
+
+@Named
 public class FileSyncService {
 
   private static final Logger log = LoggerFactory.getLogger(FileSyncService.class);
