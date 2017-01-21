@@ -123,9 +123,12 @@ public class FileSyncService {
   };
 
   protected void receiveFileFromClient(Socket clientSocket) {
+    InputStream clientInputStream = null;
+    DataInputStream clientDataInputStream = null;
+
     try {
-      InputStream clientInputStream = clientSocket.getInputStream();
-      DataInputStream clientDataInputStream = new DataInputStream(clientInputStream);
+      clientInputStream = clientSocket.getInputStream();
+      clientDataInputStream = new DataInputStream(clientInputStream);
 
       String syncJobItemId = clientDataInputStream.readUTF();
       SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
@@ -139,11 +142,11 @@ public class FileSyncService {
           callFileRetrievedListeners(jobItem, destinationFile);
         }
       }
-
-      clientInputStream.close();
-      clientSocket.close();
     } catch(Exception e) {
       log.error("Could not receive file from client " + (clientSocket != null ? clientSocket.getInetAddress() : ""), e);
+    }
+    finally {
+      closeSocketAndStreams(clientSocket, clientInputStream, clientDataInputStream);
     }
   }
 
@@ -165,6 +168,18 @@ public class FileSyncService {
     log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
 
     return totalRead == jobItem.getDataSize();
+  }
+
+  protected void closeSocketAndStreams(Socket clientSocket, InputStream clientInputStream, DataInputStream clientDataInputStream) {
+    if(clientDataInputStream != null) {
+      try { clientDataInputStream.close(); } catch(Exception e) { log.warn("Could not close clientDataInputStream", e); }
+    }
+
+    if(clientInputStream != null) {
+      try { clientInputStream.close(); } catch(Exception e) { log.warn("Could not close clientInputStream", e); }
+    }
+
+    try { clientSocket.close(); } catch(Exception e) { log.warn("Could not close clientSocket", e); }
   }
 
 

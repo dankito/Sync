@@ -38,14 +38,19 @@ public class FileSender {
   }
 
   protected void sendFile(FileSyncJobItem jobItem) {
+    FileInputStream fileInputStream = null;
+    Socket socket = null;
+    OutputStream socketOutputStream = null;
+    DataOutputStream dataOutputStream = null;
+
     try {
-      FileInputStream fileInputStream = new FileInputStream(jobItem.getFilePath());
+      fileInputStream = new FileInputStream(jobItem.getFilePath());
 
-      Socket socket = new Socket(jobItem.getDestinationAddress(), jobItem.getDestinationPort());
-      OutputStream socketOutputStream = socket.getOutputStream();
+      socket = new Socket(jobItem.getDestinationAddress(), jobItem.getDestinationPort());
+      socketOutputStream = socket.getOutputStream();
 
-      DataOutputStream dos = new DataOutputStream(socketOutputStream);
-      dos.writeUTF(jobItem.getSyncJobItem().getId());
+      dataOutputStream = new DataOutputStream(socketOutputStream);
+      dataOutputStream.writeUTF(jobItem.getSyncJobItem().getId());
 
       sendFileToDestination(fileInputStream, socketOutputStream, jobItem);
 
@@ -54,6 +59,9 @@ public class FileSender {
       socket.close();
     } catch (Exception e) {
       log.error("Could not send file " + jobItem.getFilePath() + " to " + jobItem.getDestinationAddress() + " on port " + jobItem.getDestinationPort(), e);
+    }
+    finally {
+      closeSocketAndStreams(socket, fileInputStream, socketOutputStream, dataOutputStream);
     }
   }
 
@@ -73,6 +81,22 @@ public class FileSender {
     log.info(sendTotal + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
 
     return sendTotal == jobItem.getSyncJobItem().getDataSize();
+  }
+
+  protected void closeSocketAndStreams(Socket socket, FileInputStream fileInputStream, OutputStream socketOutputStream, DataOutputStream dataOutputStream) {
+    if(fileInputStream != null) {
+      try { fileInputStream.close(); } catch(Exception e) { log.warn("Could not close fileInputStream", e); }
+    }
+
+    if(dataOutputStream != null) {
+      try { dataOutputStream.close(); } catch(Exception e) { log.warn("Could not close dataOutputStream", e); }
+    }
+
+    if(socketOutputStream != null) {
+      try { socketOutputStream.close(); } catch(Exception e) { log.warn("Could not close socketOutputStream", e); }
+    }
+
+    try { socket.close(); } catch(Exception e) { log.warn("Could not close socket", e); }
   }
 
 }
