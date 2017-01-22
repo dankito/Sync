@@ -282,6 +282,6 @@ public class SyncConfigurationManagerBaseTest {
     mockedAvailableSyncModules.add(testSyncModule);
     syncConfigurationManagerStub.setMockedAvailableSyncModules(mockedAvailableSyncModules);
 
-    syncConfigurationManagerStub.startContinuouslySynchronizationWithDevice(new DiscoveredDevice(remoteDevice, "1-1-Love"), syncConfiguration);
+    syncConfigurationManagerStub.startContinuousSynchronizationWithDevice(new DiscoveredDevice(remoteDevice, "1-1-Love"), syncConfiguration);
   }
 }

@@ -43,8 +43,8 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
   }
 
 
-  public void startContinuouslySynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
-    super.startContinuouslySynchronizationWithDevice(remoteDevice, syncConfiguration);
+  public void startContinuousSynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
+    super.startContinuousSynchronizationWithDevice(remoteDevice, syncConfiguration);
   }
 
 }

@@ -114,7 +114,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(remoteDevice.getDevice());
     if(syncConfiguration != null) {
-      startContinuouslySynchronizationWithDevice(remoteDevice, syncConfiguration);
+      startContinuousSynchronizationWithDevice(remoteDevice, syncConfiguration);
     }
   }
 
@@ -128,16 +128,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
   }
 
-  protected void startContinuouslySynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
+  protected void startContinuousSynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
     for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-      if(shouldNotSyncModuleWithDevice(syncConfiguration, syncModuleConfiguration, remoteDevice) == false) {
-        startContinuouslySynchronizationForModule(remoteDevice, syncModuleConfiguration);
-      }
+      setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, syncModuleConfiguration);
     }
-  }
-
-  protected boolean shouldNotSyncModuleWithDevice(SyncConfiguration syncConfiguration, SyncModuleConfiguration syncModuleConfiguration, DiscoveredDevice remoteDevice) {
-    return syncModuleConfiguration.isBidirectional() == false && syncConfiguration.getSourceDevice() == remoteDevice.getDevice();
   }
 
 
@@ -150,26 +144,37 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     for(SyncModuleConfiguration addedSyncModuleConfiguration : changes.getAddedSyncModuleConfigurations()) {
-      if(shouldNotSyncModuleWithDevice(syncConfiguration, addedSyncModuleConfiguration, remoteDevice) == false) {
-        startContinuouslySynchronizationForModule(remoteDevice, addedSyncModuleConfiguration);
+      if(isSyncingForModuleEnabled(syncConfiguration, addedSyncModuleConfiguration, remoteDevice) == false) {
+        setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, addedSyncModuleConfiguration);
       }
     }
   }
 
 
-  protected void startContinuouslySynchronizationForModule(final DiscoveredDevice remoteDevice, final SyncModuleConfiguration syncModuleConfiguration) {
+  protected void setSynchronizedDeviceSyncModuleSettings(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration, SyncModuleConfiguration syncModuleConfiguration) {
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+    if(syncModule != null) {
+      syncModule.configureLocalSynchronizationSettings(remoteDevice, syncModuleConfiguration);
 
+      if(isSyncingForModuleEnabled(syncConfiguration, syncModuleConfiguration, remoteDevice)) {
+        startContinuousSynchronizationForModule(remoteDevice, syncModule, syncModuleConfiguration);
+      }
+    }
+  }
+
+  protected boolean isSyncingForModuleEnabled(SyncConfiguration syncConfiguration, SyncModuleConfiguration syncModuleConfiguration, DiscoveredDevice remoteDevice) {
+    return syncModuleConfiguration.isBidirectional() == true || remoteDevice.getDevice() == syncConfiguration.getDestinationDevice();
+  }
+
+  protected void startContinuousSynchronizationForModule(final DiscoveredDevice remoteDevice, ISyncModule syncModule, final SyncModuleConfiguration syncModuleConfiguration) {
     addSyncEntityChangeListener(remoteDevice, syncModule);
 
-    if(syncModule != null) {
-      syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
-        @Override
-        public void done(List<SyncEntity> entities) {
-          getSyncEntityChangesAndPushToRemote(remoteDevice, syncModuleConfiguration, entities);
-        }
-      });
-    }
+    syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
+      @Override
+      public void done(List<SyncEntity> entities) {
+        getSyncEntityChangesAndPushToRemote(remoteDevice, syncModuleConfiguration, entities);
+      }
+    });
   }
 
   protected void getSyncEntityChangesAndPushToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
@@ -508,7 +513,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         }
         else if(areWeSourceOfSyncJobItem(syncJobItem)) {
           if(syncJobItem.getEntity() instanceof FileSyncEntity) {
-            fileSyncJobItemUpdated(syncJobItem);
+            remoteRetrievedOurFileSyncJobItem(syncJobItem);
           }
         }
       }
@@ -705,7 +710,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
-  protected void fileSyncJobItemUpdated(SyncJobItem syncJobItem) {
+  protected void remoteRetrievedOurFileSyncJobItem(SyncJobItem syncJobItem) {
     FileSyncEntity fileSyncEntity = (FileSyncEntity)syncJobItem.getEntity();
     DiscoveredDevice remoteDevice = devicesManager.getDiscoveredDeviceForId(syncJobItem.getDestinationDevice().getUniqueDeviceId());
 
