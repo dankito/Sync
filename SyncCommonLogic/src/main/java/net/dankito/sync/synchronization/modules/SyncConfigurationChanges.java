@@ -14,6 +14,8 @@ public class SyncConfigurationChanges {
 
   protected List<SyncModuleConfiguration> addedSyncModuleConfigurations = new ArrayList<>();
 
+  protected List<SyncModuleConfiguration> updatedSyncModuleConfigurations = new ArrayList<>();
+
   protected List<SyncModuleConfiguration> removedSyncModuleConfigurations = new ArrayList<>();
 
   protected List<ISyncModule> deactivatedSyncModules = new ArrayList<>();
@@ -34,6 +36,14 @@ public class SyncConfigurationChanges {
 
   public boolean addAddedSyncModuleConfiguration(SyncModuleConfiguration addedSyncModuleConfiguration) {
     return addedSyncModuleConfigurations.add(addedSyncModuleConfiguration);
+  }
+
+  public List<SyncModuleConfiguration> getUpdatedSyncModuleConfigurations() {
+    return updatedSyncModuleConfigurations;
+  }
+
+  public boolean addUpdatedSyncModuleConfiguration(SyncModuleConfiguration updatedSyncModuleConfiguration) {
+    return updatedSyncModuleConfigurations.add(updatedSyncModuleConfiguration);
   }
 
   public List<SyncModuleConfiguration> getRemovedSyncModuleConfigurations() {

@@ -60,12 +60,14 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
   protected void updateSyncModuleConfiguration(SyncConfiguration updatedSyncConfiguration, SyncModuleSyncModuleConfigurationPair pair, SyncConfigurationChanges changes) {
     SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
     syncModuleConfiguration.setBidirectional(pair.isBidirectional());
+    boolean moduleAddedOrRemoved = false;
 
     if(pair.isEnabled) {
       if(updatedSyncConfiguration.getSyncModuleConfigurations().contains(syncModuleConfiguration) == false) {
         if(entityManager.persistEntity(syncModuleConfiguration)) {
           updatedSyncConfiguration.addSyncModuleConfiguration(syncModuleConfiguration);
           changes.addAddedSyncModuleConfiguration(syncModuleConfiguration);
+          moduleAddedOrRemoved = true;
         }
       }
     }
@@ -74,6 +76,13 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
         updatedSyncConfiguration.removeSyncModuleConfiguration(syncModuleConfiguration);
         changes.addRemovedSyncModuleConfiguration(syncModuleConfiguration);
         entityManager.deleteEntity(syncModuleConfiguration);
+        moduleAddedOrRemoved = true;
+      }
+    }
+
+    if(moduleAddedOrRemoved == false && pair.didConfigurationChange()) {
+      if(entityManager.updateEntity(syncModuleConfiguration)) {
+        changes.addUpdatedSyncModuleConfiguration(syncModuleConfiguration);
       }
     }
   }
