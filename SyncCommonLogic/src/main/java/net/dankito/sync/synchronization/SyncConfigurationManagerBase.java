@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.Device;
+import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
@@ -17,6 +18,9 @@ import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.files.FileSender;
+import net.dankito.sync.synchronization.files.FileSyncJobItem;
+import net.dankito.sync.synchronization.files.FileSyncServiceDefaultConfig;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityCallback;
 import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityResult;
@@ -65,6 +69,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected LocalConfig localConfig;
 
+  protected FileSender fileSender;
+
   protected EntitiesSyncQueue syncQueue;
 
   protected Map<String, ISyncModule> availableSyncModules = null;
@@ -92,6 +98,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     this.threadPool = threadPool;
     this.localConfig = dataManager.getLocalConfig();
 
+    this.fileSender = new FileSender(threadPool);
     this.syncQueue = new EntitiesSyncQueue(entityManager, fileStorageService, localConfig.getLocalDevice());
 
     syncManager.addSynchronizationListener(synchronizationListener);
@@ -499,6 +506,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         if(isInitializedSyncJobForUs(syncJobItem)) {
           remoteEntitySynchronized((SyncJobItem) entity);
         }
+        else if(areWeSourceOfSyncJobItem(syncJobItem)) {
+          if(syncJobItem.getEntity() instanceof FileSyncEntity) {
+            fileSyncJobItemUpdated(syncJobItem);
+          }
+        }
       }
       else if(entity instanceof SyncConfiguration) {
         SyncConfiguration syncConfiguration = (SyncConfiguration)entity;
@@ -512,6 +524,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected boolean isInitializedSyncJobForUs(SyncJobItem syncJobItem) {
     return syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED;
   }
+
+  protected boolean areWeSourceOfSyncJobItem(SyncJobItem syncJobItem) {
+    return syncJobItem.getSourceDevice() == localConfig.getLocalDevice();
+  }
+
 
   protected void syncConfigurationUpdated(SyncConfiguration syncConfiguration) {
     Device remoteDevice = syncConfiguration.getSourceDevice() == localConfig.getLocalDevice() ? syncConfiguration.getDestinationDevice() : syncConfiguration.getSourceDevice();
@@ -601,6 +618,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }, 3000);
   }
 
+
   protected void remoteEntitySynchronized(final SyncJobItem jobItem) {
     jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
     entityManager.updateEntity(jobItem);
@@ -645,7 +663,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     jobItem.setState(SyncState.DONE);
     jobItem.setFinishTime(new Date());
-    jobItem.setSyncEntityData(null);
 
     entityManager.updateEntity(jobItem);
 
@@ -684,6 +701,19 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     if(syncEntityState == SyncEntityState.UPDATED || syncEntityState == SyncEntityState.DELETED) {
       entity.setLocalLookupKey(lookupKey.getEntityLocalLookupKey());
       entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
+    }
+  }
+
+
+  protected void fileSyncJobItemUpdated(SyncJobItem syncJobItem) {
+    FileSyncEntity fileSyncEntity = (FileSyncEntity)syncJobItem.getEntity();
+    DiscoveredDevice remoteDevice = devicesManager.getDiscoveredDeviceForId(syncJobItem.getDestinationDevice().getUniqueDeviceId());
+
+    if(remoteDevice != null) {
+      FileSyncJobItem fileSyncJobItem = new FileSyncJobItem(syncJobItem, fileSyncEntity.getFilePath(), remoteDevice.getAddress(),
+          FileSyncServiceDefaultConfig.FILE_SYNC_SERVICE_DEFAULT_LISTENER_PORT); // TODO: get actual remote's file service port
+
+      fileSender.sendFileAsync(fileSyncJobItem);
     }
   }
 
