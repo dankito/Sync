@@ -518,7 +518,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           remoteEntitySynchronized((SyncJobItem) entity);
         }
         else if(areWeSourceOfSyncJobItem(syncJobItem)) {
-          if(syncJobItem.getEntity() instanceof FileSyncEntity) {
+          if(syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRED_TO_DESTINATION_DEVICE) {
             remoteRetrievedOurFileSyncJobItem(syncJobItem);
           }
         }
