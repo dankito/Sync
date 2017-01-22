@@ -11,6 +11,7 @@ import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.synchronization.files.FileSyncListener;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.files.RetrievedFile;
+import net.dankito.utils.StringUtils;
 import net.dankito.utils.services.IFileStorageService;
 
 import java.io.File;
@@ -78,9 +79,11 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
   public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
     super.configureLocalSynchronizationSettings(remoteDevice, syncModuleConfiguration);
 
-    File destinationFolder = new File("data", remoteDevice.getDevice().getDeviceDisplayName() + "_" + remoteDevice.getDevice().getUniqueDeviceId());
+    if(StringUtils.isNullOrEmpty(syncModuleConfiguration.getDestinationPath())) {
+      File destinationFolder = new File("data", remoteDevice.getDevice().getDeviceDisplayName() + "_" + remoteDevice.getDevice().getUniqueDeviceId());
 
-    syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
+      syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
+    }
   }
 
   protected void createOrUpdateFile(SyncJobItem jobItem, HandleRetrievedSynchronizedEntityCallback callback) {
