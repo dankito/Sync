@@ -19,6 +19,8 @@ import java.io.File;
 
 public class EntitiesSyncQueue {
 
+  protected static final int WAIT_TIME_DIVISOR_BEFORE_PUSH_NEXT_FILE = 1024 * 1024;
+
   private static final Logger log = LoggerFactory.getLogger(EntitiesSyncQueue.class);
 
 
@@ -54,17 +56,13 @@ public class EntitiesSyncQueue {
   }
 
 
-  protected void pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
-    pushSyncEntityToRemote(syncQueueItem, null);
-  }
-
-  protected void pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem, byte[] syncEntityData) {
+  protected SyncJobItem pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
     SyncEntity entity = syncQueueItem.getEntityToPush();
     DiscoveredDevice remoteDevice = syncQueueItem.getRemoteDevice();
     log.info("Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
 
     SyncJobItem jobItem = new SyncJobItem(syncQueueItem.getSyncModuleConfiguration(), entity, localDevice, remoteDevice.getDevice());
-    jobItem.setSyncEntityData(syncEntityData);
+
     if(entity instanceof FileSyncEntity) {
       try {
         jobItem.setDataSize(new File(((FileSyncEntity) entity).getFilePath()).length());
@@ -73,45 +71,17 @@ public class EntitiesSyncQueue {
 
     entityManager.persistEntity(jobItem);
 
-    jobItem.setSyncEntityData(null);
+    return jobItem;
   }
 
   protected void pushLargerSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
-    SyncEntity entity = syncQueueItem.getEntityToPush();
-    byte[] syncEntityData = null;
+    SyncJobItem jobItem = pushSyncEntityToRemote(syncQueueItem);
 
-    if(entity instanceof FileSyncEntity) {
-      String filePath = ((FileSyncEntity)entity).getFilePath(); // TODO: this is not valid on destination device -> use path from LocalLookupKey
-
-      try {
-        syncEntityData = fileStorageService.readFromBinaryFile(filePath);
-        log.info("Added file of length " + (syncEntityData != null ? syncEntityData.length : 0));
-      } catch(Exception e) { log.error("Could not read file for FileSyncItem " + entity, e); }
-    }
-
-    pushSyncEntityToRemote(syncQueueItem, syncEntityData);
-
-    if(syncEntityData != null) {
-      freeMemory();
-    }
-
-    waitSomeTimeBeforePushingNextLargeJobToQueue(syncEntityData);
+    waitSomeTimeBeforePushingNextLargeJobToQueue(jobItem);
   }
 
-  /**
-   * Attachments are consuming a massive amount of memory in Couchbase Lite as they are first loaded into memory and
-   * get Base64 encoded -> it uses at least 233 % of attachment's size in memory.
-   * And i'm not sure about that but it seems for pushing it to remote it loads the whole Base64 encoded string again to memory.
-   */
-  protected void freeMemory() {
-    System.gc();
-  }
-
-  protected void waitSomeTimeBeforePushingNextLargeJobToQueue(byte[] syncEntityData) {
-    // TODO: make wait time configurable and dependent on syncEntityData size and device's memory size
-    if(syncEntityData != null) {
-      try { Thread.sleep(30000); } catch (Exception ignored) { }
-    }
+  protected void waitSomeTimeBeforePushingNextLargeJobToQueue(SyncJobItem jobItem) {
+    try { Thread.sleep(jobItem.getDataSize() / WAIT_TIME_DIVISOR_BEFORE_PUSH_NEXT_FILE); } catch (Exception ignored) { }
   }
 
 
