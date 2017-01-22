@@ -43,6 +43,10 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public abstract class AndroidSyncModuleTestBase {
 
+  protected static final String SYNC_JOB_ITEM_ID_START = "SyncJobItem_";
+
+  protected static int nextSyncJobItemId = 0;
+
 
   protected AndroidSyncModuleBase underTest;
 
@@ -83,6 +87,8 @@ public abstract class AndroidSyncModuleTestBase {
     underTest = createSyncModuleToTest(appContext, new Localization(), permissionsManager, threadPool);
 
     syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypeItCanHandle());
+    syncModuleConfiguration.setSourcePath("");
+    syncModuleConfiguration.setDestinationPath("");
   }
 
   @After
@@ -95,7 +101,12 @@ public abstract class AndroidSyncModuleTestBase {
 
   @NonNull
   protected SyncJobItem createSyncJobItem(SyncEntity entity) {
-    return new SyncJobItem(syncModuleConfiguration, entity, localDevice, remoteDevice, getSyncEntityData(entity));
+    return new SyncJobItem(syncModuleConfiguration, entity, localDevice, remoteDevice, getSyncEntityData(entity)) {
+      @Override
+      public String getId() {
+        return SYNC_JOB_ITEM_ID_START + ++nextSyncJobItemId;
+      }
+    };
   }
 
 

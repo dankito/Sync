@@ -4,6 +4,7 @@ import android.content.Context;
 
 import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.localization.Localization;
+import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
 
@@ -15,7 +16,7 @@ public class AndroidExternalPhotosSyncModuleTest extends AndroidPhotosSyncModule
 
   @Override
   protected AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    return new AndroidExternalPhotosSyncModule(context, localization, permissionsManager, threadPool, new JavaFileStorageService());
+    return new AndroidExternalPhotosSyncModule(context, localization, permissionsManager, threadPool, new FileSyncService(), new JavaFileStorageService());
   }
 
 }

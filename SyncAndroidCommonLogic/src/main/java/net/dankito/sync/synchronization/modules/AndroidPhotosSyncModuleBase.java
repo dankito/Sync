@@ -1,39 +1,26 @@
 package net.dankito.sync.synchronization.modules;
 
-import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
-import android.media.MediaScannerConnection;
 import android.provider.MediaStore;
 
 import net.dankito.android.util.services.IPermissionsManager;
-import net.dankito.sync.Device;
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
-import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
 import net.dankito.sync.localization.Localization;
+import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-
-public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase implements ISyncModule, IFileSyncModule {
-
-  private static final Logger log = LoggerFactory.getLogger(AndroidPhotosSyncModuleBase.class);
+public abstract class AndroidPhotosSyncModuleBase extends AndroidFileSyncModuleBase implements ISyncModule, IFileSyncModule {
 
 
-  protected FileHandler fileHandler;
 
-
-  public AndroidPhotosSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool, IFileStorageService fileStorageService) {
-    super(context, localization, permissionsManager, threadPool);
-
-    this.fileHandler = new FileHandler(fileStorageService);
+  public AndroidPhotosSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
+    super(context, localization, permissionsManager, threadPool, fileSyncService, fileStorageService);
   }
+
 
   @Override
   protected String getNameStringResourceKey() {
@@ -43,16 +30,6 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
   @Override
   public int getDisplayPriority() {
     return DISPLAY_PRIORITY_HIGHEST;
-  }
-
-  @Override
-  protected String getPermissionToReadEntities() {
-    return Manifest.permission.READ_EXTERNAL_STORAGE;
-  }
-
-  @Override
-  protected String getPermissionToWriteEntities() {
-    return Manifest.permission.WRITE_EXTERNAL_STORAGE;
   }
 
   @Override
@@ -86,64 +63,5 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidSyncModuleBase 
 
     return entity;
   }
-
-
-  @Override
-  protected boolean addEntityToLocalDatabase(SyncJobItem jobItem) {
-    ImageFileSyncEntity entity = (ImageFileSyncEntity)jobItem.getEntity();
-
-    String deviceName = getDeviceName(jobItem);
-    File directory = new File(getRootFolder(), deviceName);
-    String fileName = entity.getName() != null ? entity.getName() : "file_" + System.currentTimeMillis() + ".jpg";
-    File fileDestinationPath = new File(directory, fileName);
-
-    if(fileHandler.writeFileToDestinationPath(jobItem, fileDestinationPath)) {
-      notifyAndroidSystemOfNewImageAsync(entity, fileDestinationPath);
-
-      return true;
-    }
-
-    return false;
-  }
-
-  @Override
-  protected boolean updateEntityInLocalDatabase(SyncJobItem jobItem) {
-    // TODO
-    // first get File instance for previously saved file
-    // if name changed, move previously saved file
-    // if syncEntityData != null, write to file
-    return false;
-  }
-
-  // TODO: also implement deleting file?
-
-
-  protected void updateLastModifiedDate(SyncJobItem jobItem) {
-    // TODO
-  }
-
-
-  protected void notifyAndroidSystemOfNewImageAsync(final ImageFileSyncEntity entity, final File file) {
-    threadPool.runAsync(new Runnable() {
-      @Override
-      public void run() {
-        notifyAndroidSystemOfChangedOrAddedImage(entity, file);
-      }
-    });
-  }
-
-  protected void notifyAndroidSystemOfChangedOrAddedImage(ImageFileSyncEntity entity, File file) {
-    try {
-      MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath()}, new String[] { entity.getMimeType() }, null);
-    } catch(Exception e) { log.error("Could not start MediaScanner for inserted image file " + file.getAbsolutePath(), e); }
-  }
-
-  protected String getDeviceName(SyncJobItem jobItem) {
-    Device remoteDevice = jobItem.getSourceDevice();
-    return remoteDevice.getDeviceDisplayName();
-  }
-
-
-//    Cursor cursor = context.getContentResolver().query(uri, null, null, null, "date_added DESC");
 
 }
