@@ -89,8 +89,8 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
   protected void createOrUpdateFile(SyncJobItem jobItem, HandleRetrievedSynchronizedEntityCallback callback) {
     pendingCallbacks.put(jobItem, callback);
 
-    fileSyncService.start();
     fileSyncService.fileSyncJobItemRetrieved(jobItem);
+    fileSyncService.start();
   }
 
 
