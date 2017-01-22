@@ -148,6 +148,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, addedSyncModuleConfiguration);
       }
     }
+
+    for(SyncModuleConfiguration updatedSyncModuleConfiguration : changes.getUpdatedSyncModuleConfigurations()) {
+      if(isSyncingForModuleEnabled(syncConfiguration, updatedSyncModuleConfiguration, remoteDevice) == false) {
+        setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, updatedSyncModuleConfiguration);
+      }
+    }
   }
 
 
@@ -567,8 +573,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       if(remoteDeviceHadThisModuleActive == false && remoteDeviceHasThisModuleNowActive.get() == true) {
         changes.addAddedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
       }
-      else if(remoteDeviceHadThisModuleActive == true && remoteDeviceHasThisModuleNowActive.get() == false) {
-        changes.addDeactivatedSyncModule(syncModule);
+      else if(remoteDeviceHadThisModuleActive == true) {
+        if(remoteDeviceHasThisModuleNowActive.get() == false) {
+          changes.addDeactivatedSyncModule(syncModule);
+        }
+        else {
+          changes.addUpdatedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
+        }
       }
     }
 
