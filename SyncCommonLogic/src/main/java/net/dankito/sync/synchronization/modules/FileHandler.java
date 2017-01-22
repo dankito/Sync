@@ -29,33 +29,6 @@ public class FileHandler {
   }
 
 
-  public boolean writeFileToDestinationPath(SyncJobItem jobItem) {
-    FileSyncEntity entity = (FileSyncEntity)jobItem.getEntity();
-    SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
-
-    File fileDestinationPath = getFileDestinationPath(syncModuleConfiguration.getSourcePath(), syncModuleConfiguration.getDestinationPath(), entity.getFilePath());
-
-    return writeFileToDestinationPath(jobItem, fileDestinationPath);
-  }
-
-  public boolean writeFileToDestinationPath(SyncJobItem jobItem, File fileDestinationPath) {
-    try {
-      FileSyncEntity entity = (FileSyncEntity)jobItem.getEntity();
-
-      fileDestinationPath.getParentFile().mkdirs();
-
-      fileStorageService.writeToBinaryFile(jobItem.getSyncEntityData(), fileDestinationPath.getAbsolutePath());
-
-      entity.setLocalLookupKey(fileDestinationPath.getAbsolutePath());
-
-      log.info("Successfully wrote Image File " + entity + " to destination path " + fileDestinationPath.getAbsolutePath());
-      return true;
-    } catch(Exception e) { log.error("Could not write " + jobItem + " to destination path " + fileDestinationPath.getAbsolutePath(), e); }
-
-    return false;
-  }
-
-
   protected boolean deleteFile(SyncJobItem jobItem) {
     try {
       FileSyncEntity entity = (FileSyncEntity) jobItem.getEntity();
