@@ -51,7 +51,7 @@ public class FileSyncService {
 
 
   public FileSyncService() {
-    connectedClients = new AsyncProducerConsumerQueue<Socket>(1, connectedClientsListener);
+    connectedClients = new AsyncProducerConsumerQueue<Socket>(FileSyncServiceDefaultConfig.COUNT_PARALLEL_FILE_TRANSFERS, connectedClientsListener);
   }
 
 
