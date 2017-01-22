@@ -17,6 +17,7 @@ import net.dankito.sync.synchronization.files.FileSyncListener;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.files.RetrievedFile;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.StringUtils;
 import net.dankito.utils.services.IFileStorageService;
 
 import org.slf4j.Logger;
@@ -63,9 +64,11 @@ public abstract class AndroidFileSyncModuleBase extends AndroidSyncModuleBase im
   public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
     super.configureLocalSynchronizationSettings(remoteDevice, syncModuleConfiguration);
 
-    File destinationFolder = new File(getRootFolderForStoreRemoteDeviceData(), remoteDevice.getDevice().getDeviceDisplayName());
+    if(StringUtils.isNullOrEmpty(syncModuleConfiguration.getDestinationPath())) {
+      File destinationFolder = new File(getRootFolderForStoreRemoteDeviceData(), remoteDevice.getDevice().getDeviceDisplayName());
 
-    syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
+      syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
+    }
 
     permissionsManager.checkPermission(getPermissionToWriteEntities(), getPermissionRationaleResourceId(), new PermissionRequestCallback() {
       @Override
