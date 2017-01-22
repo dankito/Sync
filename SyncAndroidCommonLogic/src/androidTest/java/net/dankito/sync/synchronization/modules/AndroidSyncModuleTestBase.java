@@ -101,7 +101,7 @@ public abstract class AndroidSyncModuleTestBase {
 
   @NonNull
   protected SyncJobItem createSyncJobItem(SyncEntity entity) {
-    return new SyncJobItem(syncModuleConfiguration, entity, localDevice, remoteDevice, getSyncEntityData(entity)) {
+    return new SyncJobItem(syncModuleConfiguration, entity, localDevice, remoteDevice) {
       @Override
       public String getId() {
         return SYNC_JOB_ITEM_ID_START + ++nextSyncJobItemId;
@@ -127,11 +127,6 @@ public abstract class AndroidSyncModuleTestBase {
 
   @NonNull
   protected abstract String getIdColumnForEntity();
-
-
-  protected byte[] getSyncEntityData(SyncEntity entity) {
-    return null; // may be overwritten in sub classes (for FileSyncEntities)
-  }
 
 
   @Test

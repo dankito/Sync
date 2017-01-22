@@ -10,7 +10,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -27,10 +26,6 @@ public class SyncJobItem extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = DatabaseTableConfig.SYNC_JOB_ITEM_SYNC_ENTITY_JOIN_COLUMN_NAME)
   protected SyncEntity entity;
-
-  @Lob
-  @Column(name = DatabaseTableConfig.SYNC_JOB_ITEM_SYNC_ENTITY_DATA_COLUMN_NAME)
-  protected byte[] syncEntityData;
 
   @Enumerated(EnumType.ORDINAL)
   @Column(name = DatabaseTableConfig.SYNC_JOB_ITEM_STATE_COLUMN_NAME)
@@ -70,10 +65,6 @@ public class SyncJobItem extends BaseEntity {
     this.state = SyncState.INITIALIZED;
   }
 
-  public SyncJobItem(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, Device sourceDevice, Device destinationDevice, byte[] syncEntityData) {
-    this(syncModuleConfiguration, entity, sourceDevice, destinationDevice);
-    this.syncEntityData = syncEntityData;
-  }
 
   public SyncModuleConfiguration getSyncModuleConfiguration() {
     return syncModuleConfiguration;
@@ -81,14 +72,6 @@ public class SyncJobItem extends BaseEntity {
 
   public SyncEntity getEntity() {
     return entity;
-  }
-
-  public byte[] getSyncEntityData() {
-    return syncEntityData;
-  }
-
-  public void setSyncEntityData(byte[] syncEntityData) {
-    this.syncEntityData = syncEntityData;
   }
 
   public SyncState getState() {
