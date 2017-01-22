@@ -147,6 +147,7 @@ public class FileSyncService {
         destinationFile.getParentFile().mkdirs();
 
         if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) {
+          jobItem.getEntity().setLocalLookupKey(destinationFile.getAbsolutePath());
           removeFileSyncJobItem(jobItem);
           callFileRetrievedListeners(jobItem, destinationFile);
         }
