@@ -127,7 +127,7 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
 
       boolean isSyncModuleEnabled = syncModuleConfigurationToSyncModule != null;
       if(syncModuleConfigurationToSyncModule == null) {
-        syncModuleConfigurationToSyncModule = createDefaultSyncModuleConfiguration(availableSyncModule, availableSyncModule.getSyncEntityTypeItCanHandle(), syncConfigurationWithDevice.getRemoteDevice());
+        syncModuleConfigurationToSyncModule = createDefaultSyncModuleConfiguration(availableSyncModule, availableSyncModule.getSyncEntityTypeItCanHandle());
       }
 
       addSyncModuleConfiguration(syncConfigurationWithDevice, availableSyncModule, syncModuleConfigurationToSyncModule, isSyncModuleEnabled);
@@ -143,7 +143,7 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
     SyncConfigurationWithDevice syncConfigurationWithDevice = new SyncConfigurationWithDevice(remoteDevice, false, syncConfiguration, false);
 
     for(ISyncModule syncModule : syncConfigurationManager.getAvailableSyncModules()) {
-      SyncModuleConfiguration syncModuleConfiguration = createDefaultSyncModuleConfiguration(syncModule, syncModule.getSyncEntityTypeItCanHandle(), remoteDevice);
+      SyncModuleConfiguration syncModuleConfiguration = createDefaultSyncModuleConfiguration(syncModule, syncModule.getSyncEntityTypeItCanHandle());
 
       syncConfigurationWithDevice.addSyncModuleConfiguration(new SyncModuleSyncModuleConfigurationPair(syncModule, syncModuleConfiguration, true));
     }
@@ -151,27 +151,20 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
     return syncConfigurationWithDevice;
   }
 
-  protected SyncModuleConfiguration createDefaultSyncModuleConfiguration(ISyncModule syncModule, String syncEntityType, DiscoveredDevice remoteDevice) {
+  protected SyncModuleConfiguration createDefaultSyncModuleConfiguration(ISyncModule syncModule, String syncEntityType) {
     SyncModuleConfiguration syncModuleConfiguration = new SyncModuleConfiguration(syncEntityType);
 
     if(syncModule instanceof IFileSyncModule) {
-      setSyncModuleConfigurationForFileSyncModule(syncModuleConfiguration, (IFileSyncModule) syncModule, syncEntityType);
+      setSyncModuleConfigurationForFileSyncModule(syncModuleConfiguration, (IFileSyncModule) syncModule);
     }
 
     return syncModuleConfiguration;
   }
 
-  protected void setSyncModuleConfigurationForFileSyncModule(SyncModuleConfiguration syncModuleConfiguration, IFileSyncModule syncModule, String syncEntityType) {
-    String destinationPath = getDefaultDestinationPath();
-
+  protected void setSyncModuleConfigurationForFileSyncModule(SyncModuleConfiguration syncModuleConfiguration, IFileSyncModule syncModule) {
     syncModuleConfiguration.setSourcePath(syncModule.getRootFolder());
-    syncModuleConfiguration.setDestinationPath(destinationPath + "/" + syncEntityType.replace("Android", ""));
     syncModuleConfiguration.setBidirectional(false);
     syncModuleConfiguration.setKeepDeletedEntitiesOnDestination(true);
-  }
-
-  protected String getDefaultDestinationPath() {
-    return "data/" + localDevice.getName()+ "_" + localDevice.getUniqueDeviceId();
   }
 
 }
