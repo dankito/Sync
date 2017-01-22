@@ -4,6 +4,8 @@ package net.dankito.sync.synchronization.modules;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.synchronization.files.FileSyncListener;
@@ -11,6 +13,7 @@ import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.files.RetrievedFile;
 import net.dankito.utils.services.IFileStorageService;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,6 +73,15 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
     }
   }
 
+
+  @Override
+  public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
+    super.configureLocalSynchronizationSettings(remoteDevice, syncModuleConfiguration);
+
+    File destinationFolder = new File("data", remoteDevice.getDevice().getDeviceDisplayName() + "_" + remoteDevice.getDevice().getUniqueDeviceId());
+
+    syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
+  }
 
   protected void createOrUpdateFile(SyncJobItem jobItem, HandleRetrievedSynchronizedEntityCallback callback) {
     pendingCallbacks.put(jobItem, callback);

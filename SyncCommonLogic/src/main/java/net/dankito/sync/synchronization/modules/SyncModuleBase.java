@@ -1,6 +1,8 @@
 package net.dankito.sync.synchronization.modules;
 
 
+import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
 
 
@@ -30,6 +32,12 @@ public abstract class SyncModuleBase implements ISyncModule {
 
   public String getName() {
     return localization.getLocalizedString(getNameStringResourceKey());
+  }
+
+
+  @Override
+  public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
+    // nothing to do more most SyncModules
   }
 
 

@@ -3,11 +3,15 @@ package net.dankito.sync.synchronization.modules;
 import android.Manifest;
 import android.content.Context;
 import android.media.MediaScannerConnection;
+import android.os.Environment;
 
 import net.dankito.android.util.services.IPermissionsManager;
+import net.dankito.android.util.services.PermissionRequestCallback;
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.files.FileSyncListener;
 import net.dankito.sync.synchronization.files.FileSyncService;
@@ -52,6 +56,27 @@ public abstract class AndroidFileSyncModuleBase extends AndroidSyncModuleBase im
   @Override
   protected String getPermissionToWriteEntities() {
     return Manifest.permission.WRITE_EXTERNAL_STORAGE;
+  }
+
+
+  @Override
+  public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
+    super.configureLocalSynchronizationSettings(remoteDevice, syncModuleConfiguration);
+
+    File destinationFolder = new File(getRootFolderForStoreRemoteDeviceData(), remoteDevice.getDevice().getDeviceDisplayName());
+
+    syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
+
+    permissionsManager.checkPermission(getPermissionToWriteEntities(), getPermissionRationaleResourceId(), new PermissionRequestCallback() {
+      @Override
+      public void permissionCheckDone(String permission, boolean isGranted) {
+
+      }
+    });
+  }
+
+  protected File getRootFolderForStoreRemoteDeviceData() {
+    return Environment.getExternalStorageDirectory();
   }
 
 

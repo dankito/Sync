@@ -270,6 +270,11 @@ public class SyncConfigurationManagerBaseTest {
 
       @Override
       public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) { }
+
+      @Override
+      public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
+
+      }
     };
 
     SyncConfigurationManagerStub syncConfigurationManagerStub = (SyncConfigurationManagerStub)underTest;

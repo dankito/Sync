@@ -2,6 +2,8 @@ package net.dankito.sync.synchronization.modules;
 
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 /**
@@ -22,5 +24,7 @@ public interface ISyncModule {
 
   void addSyncEntityChangeListener(SyncEntityChangeListener listener);
   void removeSyncEntityChangeListener(SyncEntityChangeListener listener);
+
+  void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration);
 
 }
