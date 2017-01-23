@@ -33,7 +33,7 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidFileSyncModuleB
   }
 
   @Override
-  protected int getPermissionRationaleResourceId() {
+  public int getPermissionRationaleResourceId() {
     return R.string.rational_for_accessing_external_storage_permission;
   }
 

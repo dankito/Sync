@@ -50,12 +50,12 @@ public abstract class AndroidFileSyncModuleBase extends AndroidSyncModuleBase im
 
 
   @Override
-  protected String getPermissionToReadEntities() {
+  public String getPermissionToReadEntities() {
     return Manifest.permission.READ_EXTERNAL_STORAGE;
   }
 
   @Override
-  protected String getPermissionToWriteEntities() {
+  public String getPermissionToWriteEntities() {
     return Manifest.permission.WRITE_EXTERNAL_STORAGE;
   }
 

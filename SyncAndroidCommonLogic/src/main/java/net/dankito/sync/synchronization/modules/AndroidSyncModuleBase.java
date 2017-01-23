@@ -55,11 +55,11 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected abstract Uri getContentUriForContentObserver();
 
-  protected abstract String getPermissionToReadEntities();
+  public abstract String getPermissionToReadEntities();
 
-  protected abstract String getPermissionToWriteEntities();
+  public abstract String getPermissionToWriteEntities();
 
-  protected abstract int getPermissionRationaleResourceId();
+  public abstract int getPermissionRationaleResourceId();
 
   protected abstract boolean addEntityToLocalDatabase(SyncJobItem jobItem);
 

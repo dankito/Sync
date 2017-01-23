@@ -61,17 +61,17 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @Override
-  protected String getPermissionToReadEntities() {
+  public String getPermissionToReadEntities() {
     return Manifest.permission.READ_CONTACTS;
   }
 
   @Override
-  protected String getPermissionToWriteEntities() {
+  public String getPermissionToWriteEntities() {
     return Manifest.permission.WRITE_CONTACTS;
   }
 
   @Override
-  protected int getPermissionRationaleResourceId() {
+  public int getPermissionRationaleResourceId() {
     return R.string.rational_for_accessing_contacts_permission;
   }
 

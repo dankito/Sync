@@ -60,17 +60,17 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   }
 
   @Override
-  protected String getPermissionToReadEntities() {
+  public String getPermissionToReadEntities() {
     return Manifest.permission.READ_CALL_LOG;
   }
 
   @Override
-  protected String getPermissionToWriteEntities() {
+  public String getPermissionToWriteEntities() {
     return Manifest.permission.WRITE_CALL_LOG;
   }
 
   @Override
-  protected int getPermissionRationaleResourceId() {
+  public int getPermissionRationaleResourceId() {
     return R.string.rational_for_accessing_call_log_permission;
   }
 
