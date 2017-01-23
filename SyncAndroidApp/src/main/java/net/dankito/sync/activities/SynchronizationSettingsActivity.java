@@ -2,6 +2,7 @@ package net.dankito.sync.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -9,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
+import net.dankito.android.util.services.IPermissionsManager;
+import net.dankito.android.util.services.MultiplePermissionsRequestCallback;
 import net.dankito.sync.MainActivity;
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
@@ -16,6 +19,8 @@ import net.dankito.sync.adapter.SyncModuleConfigurationsAdapter;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
+import net.dankito.sync.synchronization.modules.AndroidSyncModuleBase;
+import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
 import net.dankito.sync.synchronization.modules.SyncConfigurationChanges;
 import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
@@ -23,6 +28,7 @@ import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfiguratio
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -39,6 +45,9 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
   @Inject
   protected IDevicesManager devicesManager;
+
+  @Inject
+  protected IPermissionsManager permissionsManager;
 
 
   protected DiscoveredDevice remoteDevice;
@@ -117,25 +126,59 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
 
   protected void startSynchronizingWithDevice() {
-    List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<>();
+    final List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<>();
 
     for(SyncModuleSyncModuleConfigurationPair pair : syncModuleConfigurationsForDevice.getSyncModuleConfigurations()) {
-      if(pair.isEnabled()) {
-        SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
-        syncModuleConfiguration.setBidirectional(pair.isBidirectional());
-        syncModuleConfigurations.add(syncModuleConfiguration);
-      }
+      SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
+      syncModuleConfiguration.setEnabled(pair.isEnabled());
+      syncModuleConfiguration.setBidirectional(pair.isBidirectional());
+      syncModuleConfigurations.add(syncModuleConfiguration);
     }
 
-    devicesManager.startSynchronizingWithDevice(remoteDevice, syncModuleConfigurations);
+    checkPermissions(syncModuleConfigurations, new MultiplePermissionsRequestCallback() {
+      @Override
+      public void permissionsCheckDone(Map<String, Boolean> checkPermissionsResult) {
+        devicesManager.startSynchronizingWithDevice(remoteDevice, syncModuleConfigurations);
+      }
+    });
   }
 
   protected void updateSyncConfiguration() {
-    SyncConfigurationChanges changes = syncModuleConfigurationManager.updateSyncConfiguration(syncModuleConfigurationsForDevice);
+    final SyncConfigurationChanges changes = syncModuleConfigurationManager.updateSyncConfiguration(syncModuleConfigurationsForDevice);
 
-    syncConfigurationManager.syncConfigurationHasBeenUpdated(syncModuleConfigurationsForDevice.getSyncConfiguration(), changes);
+    checkPermissions(syncModuleConfigurationsForDevice.getSyncConfiguration().getSyncModuleConfigurations(), new MultiplePermissionsRequestCallback() {
+      @Override
+      public void permissionsCheckDone(Map<String, Boolean> checkPermissionsResult) {
+        syncConfigurationManager.syncConfigurationHasBeenUpdated(syncModuleConfigurationsForDevice.getSyncConfiguration(), changes);
+      }
+    });
   }
 
+
+  protected void checkPermissions(List<SyncModuleConfiguration> syncModuleConfigurations, MultiplePermissionsRequestCallback callback) {
+    List<String> permissions = new ArrayList<>(syncModuleConfigurations.size());
+    List<String> rationalsToShow = new ArrayList<>(syncModuleConfigurations.size());
+
+    for(int i = 0; i < syncModuleConfigurations.size(); i++) {
+      SyncModuleConfiguration syncModuleConfiguration = syncModuleConfigurations.get(i);
+      ISyncModule syncModule = syncConfigurationManager.getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+
+      if(syncModule instanceof AndroidSyncModuleBase && syncModuleConfiguration.isEnabled()) {
+        AndroidSyncModuleBase androidSyncModule = (AndroidSyncModuleBase)syncModule;
+        permissions.add(androidSyncModule.getPermissionToReadEntities());
+        rationalsToShow.add(getString(androidSyncModule.getPermissionRationaleResourceId()));
+      }
+    }
+
+    permissionsManager.checkPermissions(permissions.toArray(new String[permissions.size()]), rationalsToShow.toArray(new String[rationalsToShow.size()]), callback);
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+  }
 
   protected View.OnClickListener btnStartSynchronizingWithDeviceClickListener = new View.OnClickListener() {
     @Override
