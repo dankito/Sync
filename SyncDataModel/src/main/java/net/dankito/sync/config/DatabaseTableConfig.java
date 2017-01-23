@@ -131,6 +131,7 @@ public class DatabaseTableConfig {
   public static final String SYNC_MODULE_CONFIGURATION_TABLE_NAME = "SyncModuleConfiguration";
 
   public static final String SYNC_MODULE_CONFIGURATION_SYNC_MODULE_TYPE_COLUMN_NAME = "sync_module_type";
+  public static final String SYNC_MODULE_CONFIGURATION_IS_ENABLED_COLUMN_NAME = "is_enabled";
   public static final String SYNC_MODULE_CONFIGURATION_IS_BIDIRECTIONAL_COLUMN_NAME = "is_bidirectional";
   public static final String SYNC_MODULE_CONFIGURATION_SOURCE_PATH_COLUMN_NAME = "source_path";
   public static final String SYNC_MODULE_CONFIGURATION_DESTINATION_PATH_COLUMN_NAME = "destination_path";

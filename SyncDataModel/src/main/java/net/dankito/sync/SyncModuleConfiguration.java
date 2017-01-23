@@ -12,6 +12,9 @@ public class SyncModuleConfiguration extends BaseEntity {
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_SYNC_MODULE_TYPE_COLUMN_NAME)
   protected String syncModuleType;
 
+  @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_IS_ENABLED_COLUMN_NAME)
+  protected boolean isEnabled = true;
+
   @Column(name = DatabaseTableConfig.SYNC_MODULE_CONFIGURATION_IS_BIDIRECTIONAL_COLUMN_NAME)
   protected boolean isBidirectional = true;
 
@@ -36,6 +39,14 @@ public class SyncModuleConfiguration extends BaseEntity {
 
   public String getSyncModuleType() {
     return syncModuleType;
+  }
+
+  public boolean isEnabled() {
+    return isEnabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    isEnabled = enabled;
   }
 
   public boolean isBidirectional() {
