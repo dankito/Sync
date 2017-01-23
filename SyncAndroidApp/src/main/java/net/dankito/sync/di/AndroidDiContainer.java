@@ -128,8 +128,8 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public FileSyncService provideFileSyncService() {
-    return new FileSyncService();
+  public FileSyncService provideFileSyncService(IEntityManager entityManager) {
+    return new FileSyncService(entityManager);
   }
 
   @Provides

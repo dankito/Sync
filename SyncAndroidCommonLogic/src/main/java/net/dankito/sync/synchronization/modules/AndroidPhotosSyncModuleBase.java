@@ -13,6 +13,9 @@ import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class AndroidPhotosSyncModuleBase extends AndroidFileSyncModuleBase implements ISyncModule, IFileSyncModule {
 
 
@@ -57,11 +60,18 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidFileSyncModuleB
     entity.setImageTakenOn(readDate(cursor, MediaStore.Images.Media.DATE_TAKEN));
     entity.setOrientation(readInteger(cursor, MediaStore.Images.Media.ORIENTATION)); //  Only degrees 0, 90, 180, 270 will work.
 
-//    Object bucketDisplayName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
-//    Object bucketId = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID));
-//    Object title = readString(cursor, MediaStore.Images.Media.TITLE);
+    String bucketDisplayName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
+    bucketNames.add(bucketDisplayName);
+    String bucketId = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID));
+    bucketIds.add(bucketId);
+    Object title = readString(cursor, MediaStore.Images.Media.TITLE);
+
+    entity.setLocalLookupKey(entity.getFilePath());
 
     return entity;
   }
+
+  protected Set<String> bucketIds = new HashSet<>();
+  protected Set<String> bucketNames = new HashSet<>();
 
 }

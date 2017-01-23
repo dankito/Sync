@@ -16,7 +16,7 @@ public class AndroidInternalPhotosSyncModuleTest extends AndroidPhotosSyncModule
 
   @Override
   protected AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    return new AndroidInternalPhotosSyncModule(context, localization, permissionsManager, threadPool, new FileSyncService(), new JavaFileStorageService());
+    return new AndroidInternalPhotosSyncModule(context, localization, permissionsManager, threadPool, new FileSyncService(entityManager), new JavaFileStorageService());
   }
 
 }
