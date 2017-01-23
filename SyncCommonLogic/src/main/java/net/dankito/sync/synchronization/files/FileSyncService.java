@@ -54,9 +54,6 @@ public class FileSyncService {
   protected AsyncProducerConsumerQueue<Socket> connectedClients;
 
 
-  protected int socketsConnected = 0;
-  protected int socketsHandled = 0;
-
 
   public FileSyncService(IEntityManager entityManager) {
     this.entityManager = entityManager;
@@ -123,7 +120,6 @@ public class FileSyncService {
     while(isReceivingFilesEnabled) {
       try {
         Socket clientSocket = listenerSocket.accept();
-        log.info("[" + ++socketsConnected + "] Got a connection on port " + listenerPort + " from " + clientSocket.getInetAddress());
 
         clientSocket.setSoTimeout(0);
         connectedClients.add(clientSocket); // get them off this thread read so that listenerSocket won't be blocked during receiving file
@@ -152,29 +148,25 @@ public class FileSyncService {
 
       String syncJobItemId = clientDataInputStream.readUTF();
       SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
-      log.info("syncJobItemId = " + syncJobItemId + ", jobItem = " + jobItem);
 
       if(jobItem != null) {
-        log.info("Starting retrieving file for job " + jobItem);
         File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
         destinationFile.getParentFile().mkdirs();
 
         if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) {
-          log.info("Successfully retrieving file for job " + jobItem);
           jobItem.getEntity().setLocalLookupKey(destinationFile.getAbsolutePath());
           removeFileSyncJobItem(jobItem);
           callFileRetrievedListeners(jobItem, destinationFile);
         }
         else { // TODO: what to do when receiving file fails?
           log.error("Failed receiving file for SyncJobItem " + jobItem + " and writing it to " + destinationFile);
-//          try { destinationFile.delete(); } catch(Exception e) { log.error("Could not deleted failed file " + destinationFile, e); }
+          try { destinationFile.delete(); } catch(Exception e) { log.error("Could not deleted failed file " + destinationFile, e); }
         }
       }
     } catch(Exception e) {
       log.error("Could not receive file from client " + (clientSocket != null ? clientSocket.getInetAddress() : ""), e);
     }
     finally {
-      log.info("[" + ++socketsHandled + "] socket handled");
       closeSocketAndStreams(clientSocket, clientInputStream, clientDataInputStream);
     }
   }
