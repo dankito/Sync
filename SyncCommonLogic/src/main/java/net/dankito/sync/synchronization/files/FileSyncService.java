@@ -4,6 +4,8 @@ package net.dankito.sync.synchronization.files;
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncState;
+import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.utils.AsyncProducerConsumerQueue;
 import net.dankito.utils.ConsumerListener;
 
@@ -33,6 +35,8 @@ public class FileSyncService {
   private static final Logger log = LoggerFactory.getLogger(FileSyncService.class);
 
 
+  protected IEntityManager entityManager;
+
   protected Thread listenerThread;
 
   protected ServerSocket listenerSocket;
@@ -50,7 +54,13 @@ public class FileSyncService {
   protected AsyncProducerConsumerQueue<Socket> connectedClients;
 
 
-  public FileSyncService() {
+  protected int socketsConnected = 0;
+  protected int socketsHandled = 0;
+
+
+  public FileSyncService(IEntityManager entityManager) {
+    this.entityManager = entityManager;
+
     connectedClients = new AsyncProducerConsumerQueue<Socket>(FileSyncServiceDefaultConfig.COUNT_PARALLEL_FILE_TRANSFERS, connectedClientsListener);
   }
 
@@ -113,8 +123,9 @@ public class FileSyncService {
     while(isReceivingFilesEnabled) {
       try {
         Socket clientSocket = listenerSocket.accept();
-        System.out.println("Got a connection on port " + listenerPort + " from " + clientSocket.getInetAddress());
+        log.info("[" + ++socketsConnected + "] Got a connection on port " + listenerPort + " from " + clientSocket.getInetAddress());
 
+        clientSocket.setSoTimeout(0);
         connectedClients.add(clientSocket); // get them off this thread read so that listenerSocket won't be blocked during receiving file
       }
       catch (Exception e) {
@@ -141,25 +152,29 @@ public class FileSyncService {
 
       String syncJobItemId = clientDataInputStream.readUTF();
       SyncJobItem jobItem = getFileSyncJobItemForId(syncJobItemId);
+      log.info("syncJobItemId = " + syncJobItemId + ", jobItem = " + jobItem);
 
       if(jobItem != null) {
+        log.info("Starting retrieving file for job " + jobItem);
         File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
         destinationFile.getParentFile().mkdirs();
 
         if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) {
+          log.info("Successfully retrieving file for job " + jobItem);
           jobItem.getEntity().setLocalLookupKey(destinationFile.getAbsolutePath());
           removeFileSyncJobItem(jobItem);
           callFileRetrievedListeners(jobItem, destinationFile);
         }
         else { // TODO: what to do when receiving file fails?
           log.error("Failed receiving file for SyncJobItem " + jobItem + " and writing it to " + destinationFile);
-          try { destinationFile.delete(); } catch(Exception e) { log.error("Could not deleted failed file " + destinationFile, e); }
+//          try { destinationFile.delete(); } catch(Exception e) { log.error("Could not deleted failed file " + destinationFile, e); }
         }
       }
     } catch(Exception e) {
       log.error("Could not receive file from client " + (clientSocket != null ? clientSocket.getInetAddress() : ""), e);
     }
     finally {
+      log.info("[" + ++socketsHandled + "] socket handled");
       closeSocketAndStreams(clientSocket, clientInputStream, clientDataInputStream);
     }
   }
@@ -179,7 +194,7 @@ public class FileSyncService {
     }
 
     long endTime = System.currentTimeMillis();
-    log.info(totalRead + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
+    log.info(totalRead + " of " + jobItem.getDataSize() + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
 
     return totalRead == jobItem.getDataSize();
   }
@@ -231,6 +246,9 @@ public class FileSyncService {
 
   public void fileSyncJobItemRetrieved(SyncJobItem jobItem) {
     currentFileSyncJobItems.put(jobItem.getId(), jobItem);
+
+    jobItem.setState(SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE); // TODO: this is actually bad architecture setting state outside SyncConfigurationManager
+    entityManager.updateEntity(jobItem);
   }
 
   protected void removeFileSyncJobItem(SyncJobItem jobItem) {

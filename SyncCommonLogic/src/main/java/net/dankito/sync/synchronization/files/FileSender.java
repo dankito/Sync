@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 
@@ -46,7 +47,8 @@ public class FileSender {
     try {
       fileInputStream = new FileInputStream(jobItem.getFilePath());
 
-      socket = new Socket(jobItem.getDestinationAddress(), jobItem.getDestinationPort());
+      socket = new Socket();
+      socket.connect(new InetSocketAddress(jobItem.getDestinationAddress(), jobItem.getDestinationPort()), 0);
       socketOutputStream = socket.getOutputStream();
 
       dataOutputStream = new DataOutputStream(socketOutputStream);
@@ -78,7 +80,7 @@ public class FileSender {
     }
 
     long endTime = System.currentTimeMillis();
-    log.info(sendTotal + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
+    log.info(sendTotal + " of " + jobItem.getSyncJobItem().getDataSize() + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
 
     return sendTotal == jobItem.getSyncJobItem().getDataSize();
   }
