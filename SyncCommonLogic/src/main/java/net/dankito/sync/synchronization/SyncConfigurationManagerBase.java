@@ -81,6 +81,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected Set<ISyncModule> syncModulesWithEntityChanges = new HashSet<>();
 
+  protected Set<ISyncModule> syncModulesCurrentlyReadingAllEntities = new HashSet<>();
+
   protected Timer syncModulesWithEntityUpdatesTimer = new Timer("SyncModulesWithEntityUpdatesTimer");
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
@@ -172,19 +174,26 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return syncModuleConfiguration.isBidirectional() == true || remoteDevice.getDevice() == syncConfiguration.getDestinationDevice();
   }
 
-  protected void startContinuousSynchronizationForModule(final DiscoveredDevice remoteDevice, ISyncModule syncModule, final SyncModuleConfiguration syncModuleConfiguration) {
+  protected void startContinuousSynchronizationForModule(final DiscoveredDevice remoteDevice, final ISyncModule syncModule, final SyncModuleConfiguration syncModuleConfiguration) {
     addSyncEntityChangeListener(remoteDevice, syncModule);
+    syncModulesCurrentlyReadingAllEntities.add(syncModule);
 
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(List<SyncEntity> entities) {
-        getSyncEntityChangesAndPushToRemote(remoteDevice, syncModuleConfiguration, entities);
+        determineEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
+
+        readingAllEntitiesDoneForModule(syncModule);
       }
     });
   }
 
-  protected void getSyncEntityChangesAndPushToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
-    determineEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
+  protected void readingAllEntitiesDoneForModule(ISyncModule syncModule) {
+    syncEntitiesCurrentlyBeingSynchronized.remove(syncModule);
+
+    if(syncModulesWithEntityChanges.remove(syncModule)) { // while reading all entities changes occurred -> now re-read all entities
+      pushModuleEntityChangesToRemoteDevices(syncModule);
+    }
   }
 
 
@@ -475,22 +484,26 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     final ISyncModule syncModule = syncEntityChange.getSyncModule();
     syncModulesWithEntityChanges.add(syncModule);
 
-    int delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITHOUT_ENTITIES_BEING_SYNCHRONIZED;
-    if(syncEntitiesCurrentlyBeingSynchronized.size() > 0) {
-      delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITH_ENTITIES_BEING_SYNCHRONIZED;
-    }
-
-    syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        if(syncModulesWithEntityChanges.remove(syncModule)) { // if syncModule hasn't been removed (and therefore processed) yet
-          pushModuleEntityChangesToRemoteDevices(syncModule);
-        }
+    if(syncModulesCurrentlyReadingAllEntities.contains(syncModule) == false) { // avoid that while all entities are read readAllEntities is called again for that SyncModule
+      int delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITHOUT_ENTITIES_BEING_SYNCHRONIZED;
+      if(syncEntitiesCurrentlyBeingSynchronized.size() > 0) {
+        delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITH_ENTITIES_BEING_SYNCHRONIZED;
       }
-    }, delay);
+
+      syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+          if(syncModulesWithEntityChanges.remove(syncModule)) { // if syncModule hasn't been removed (and therefore processed) yet
+            pushModuleEntityChangesToRemoteDevices(syncModule);
+          }
+        }
+      }, delay);
+    }
   }
 
   protected void pushModuleEntityChangesToRemoteDevices(final ISyncModule syncModule) {
+    syncModulesCurrentlyReadingAllEntities.add(syncModule);
+
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(List<SyncEntity> entities) {
@@ -499,11 +512,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           if(syncConfiguration != null) {
             for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
               if(syncModule.getSyncEntityTypeItCanHandle().equals(syncModuleConfiguration.getSyncModuleType())) {
-                getSyncEntityChangesAndPushToRemote(connectedDevice, syncModuleConfiguration, entities);
+                determineEntitiesToSynchronize(connectedDevice, syncModuleConfiguration, entities);
               }
             }
           }
         }
+
+        readingAllEntitiesDoneForModule(syncModule);
       }
     });
   }
