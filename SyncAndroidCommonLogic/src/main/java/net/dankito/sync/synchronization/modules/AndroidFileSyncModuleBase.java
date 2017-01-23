@@ -6,7 +6,6 @@ import android.media.MediaScannerConnection;
 import android.os.Environment;
 
 import net.dankito.android.util.services.IPermissionsManager;
-import net.dankito.android.util.services.PermissionRequestCallback;
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -69,13 +68,6 @@ public abstract class AndroidFileSyncModuleBase extends AndroidSyncModuleBase im
 
       syncModuleConfiguration.setDestinationPath(destinationFolder.getAbsolutePath());
     }
-
-    permissionsManager.checkPermission(getPermissionToWriteEntities(), getPermissionRationaleResourceId(), new PermissionRequestCallback() {
-      @Override
-      public void permissionCheckDone(String permission, boolean isGranted) {
-
-      }
-    });
   }
 
   protected File getRootFolderForStoreRemoteDeviceData() {

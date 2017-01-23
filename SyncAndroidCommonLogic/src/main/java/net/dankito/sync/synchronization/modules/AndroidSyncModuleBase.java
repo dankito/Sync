@@ -3,13 +3,14 @@ package net.dankito.sync.synchronization.modules;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.v4.app.ActivityCompat;
 
 import net.dankito.android.util.services.IPermissionsManager;
-import net.dankito.android.util.services.PermissionRequestCallback;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -35,8 +36,6 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   protected Context context;
 
-  protected IPermissionsManager permissionsManager;
-
   protected IThreadPool threadPool;
 
   protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
@@ -46,7 +45,6 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     super(localization);
 
     this.context = context;
-    this.permissionsManager = permissionsManager;
     this.threadPool = threadPool;
   }
 
@@ -88,18 +86,13 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
   protected void readAllEntities(final ReadEntitiesCallback callback) {
-    permissionsManager.checkPermission(getPermissionToReadEntities(), getPermissionRationaleResourceId(), new PermissionRequestCallback() {
-      @Override
-      public void permissionCheckDone(String permission, boolean isGranted) {
-        if(isGranted) {
-          readAllEntitiesPermissionsGranted(callback);
-        }
-        else {
-          log.error("User didn't give Permission " + getPermissionToReadEntities() + ", cannot read entities therefore");
-          callback.done(new ArrayList<SyncEntity>());
-        }
-      }
-    });
+    if(isPermissionGranted(getPermissionToReadEntities())) {
+      readAllEntitiesPermissionsGranted(callback);
+    }
+    else {
+      log.error("User didn't give Permission " + getPermissionToReadEntities() + ", cannot read entities therefore");
+      callback.done(new ArrayList<SyncEntity>());
+    }
   }
 
   protected void readAllEntitiesPermissionsGranted(ReadEntitiesCallback callback) {
@@ -139,10 +132,11 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
     // TODO: find better architecture. Yes, permission has been requested before, when reading all entities, but we should re-request it here
-    if(permissionsManager.isPermissionGranted(getPermissionToWriteEntities())) {
+    if(isPermissionGranted(getPermissionToWriteEntities())) {
       synchronizedEntityRetrievedPermissionGranted(jobItem, entityState, callback);
     }
     else {
+      log.error("Permission " + getPermissionToWriteEntities() + " is denied, cannot handle " + jobItem + " though");
       callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, false, false));
     }
   }
@@ -188,6 +182,10 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     }
 
     return false;
+  }
+
+  protected boolean isPermissionGranted(String permission) {
+    return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(context, permission);
   }
 
 
