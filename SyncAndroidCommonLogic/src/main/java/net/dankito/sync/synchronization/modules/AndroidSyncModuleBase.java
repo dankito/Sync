@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.support.v4.app.ActivityCompat;
 
-import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -41,7 +40,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
 
 
-  public AndroidSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
+  public AndroidSyncModuleBase(Context context, Localization localization, IThreadPool threadPool) {
     super(localization);
 
     this.context = context;

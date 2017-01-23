@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 
-import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
@@ -30,8 +29,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
-  public AndroidContactsSyncModule(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    super(context, localization, permissionsManager, threadPool);
+  public AndroidContactsSyncModule(Context context, Localization localization, IThreadPool threadPool) {
+    super(context, localization, threadPool);
   }
 
 

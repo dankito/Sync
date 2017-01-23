@@ -29,8 +29,8 @@ public class AndroidCallLogSyncModule extends AndroidSyncModuleBase implements I
   private static final Logger log = LoggerFactory.getLogger(AndroidCallLogSyncModule.class);
 
 
-  public AndroidCallLogSyncModule(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    super(context, localization, permissionsManager, threadPool);
+  public AndroidCallLogSyncModule(Context context, Localization localization, IThreadPool threadPool) {
+    super(context, localization, threadPool);
   }
 
 

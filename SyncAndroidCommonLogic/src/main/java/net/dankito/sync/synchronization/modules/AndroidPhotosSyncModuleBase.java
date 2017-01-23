@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
-import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.android.common.R;
@@ -17,8 +16,8 @@ public abstract class AndroidPhotosSyncModuleBase extends AndroidFileSyncModuleB
 
 
 
-  public AndroidPhotosSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
-    super(context, localization, permissionsManager, threadPool, fileSyncService, fileStorageService);
+  public AndroidPhotosSyncModuleBase(Context context, Localization localization, IThreadPool threadPool, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
+    super(context, localization, threadPool, fileSyncService, fileStorageService);
   }
 
 

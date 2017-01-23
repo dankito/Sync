@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 
-import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.localization.Localization;
@@ -47,8 +46,8 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
   @NonNull
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    return new AndroidContactsSyncModule(context, localization, permissionsManager, threadPool);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IThreadPool threadPool) {
+    return new AndroidContactsSyncModule(context, localization, threadPool);
   }
 
   @NonNull

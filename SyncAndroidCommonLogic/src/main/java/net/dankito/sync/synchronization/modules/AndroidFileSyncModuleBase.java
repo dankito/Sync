@@ -5,7 +5,6 @@ import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
 
-import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -39,8 +38,8 @@ public abstract class AndroidFileSyncModuleBase extends AndroidSyncModuleBase im
   protected Map<SyncJobItem, HandleRetrievedSynchronizedEntityCallback> pendingCallbacks = new ConcurrentHashMap<>();
 
 
-  public AndroidFileSyncModuleBase(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
-    super(context, localization, permissionsManager, threadPool);
+  public AndroidFileSyncModuleBase(Context context, Localization localization, IThreadPool threadPool, FileSyncService fileSyncService, IFileStorageService fileStorageService) {
+    super(context, localization, threadPool);
 
     this.fileSyncService = fileSyncService;
     fileSyncService.addFileSyncListener(fileSyncListener);

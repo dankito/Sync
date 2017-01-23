@@ -84,7 +84,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     IPermissionsManager permissionsManager = new PermissionsManagerStub();
 
-    underTest = createSyncModuleToTest(appContext, new Localization(), permissionsManager, threadPool);
+    underTest = createSyncModuleToTest(appContext, new Localization(), threadPool);
 
     syncModuleConfiguration = new SyncModuleConfiguration(underTest.getSyncEntityTypeItCanHandle());
     syncModuleConfiguration.setSourcePath("");
@@ -111,7 +111,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @NonNull
-  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool);
+  protected abstract AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IThreadPool threadPool);
 
   @NonNull
   protected abstract SyncEntity createTestEntity();

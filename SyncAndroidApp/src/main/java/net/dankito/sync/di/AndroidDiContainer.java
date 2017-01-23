@@ -173,9 +173,9 @@ public class AndroidDiContainer {
 
   @Provides
   @Singleton
-  public ISyncConfigurationManager provideSyncConfigurationManager(IPermissionsManager permissionsManager, Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
+  public ISyncConfigurationManager provideSyncConfigurationManager(Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                                                    IDataMerger dataMerger, FileSyncService fileSyncService, IFileStorageService fileStorageService, IThreadPool threadPool) {
-    return new SyncConfigurationManagerAndroid(getActivity(), localization, permissionsManager, syncManager, dataManager, entityManager, devicesManager, dataMerger,
+    return new SyncConfigurationManagerAndroid(getActivity(), localization, syncManager, dataManager, entityManager, devicesManager, dataMerger,
         fileSyncService, fileStorageService, threadPool);
   }
 

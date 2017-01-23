@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.provider.CallLog;
 import android.support.annotation.NonNull;
 
-import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.CallType;
 import net.dankito.sync.SyncEntity;
@@ -41,8 +40,8 @@ public class AndroidCallLogSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   @Override
-  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IPermissionsManager permissionsManager, IThreadPool threadPool) {
-    return new AndroidCallLogSyncModule(context, localization, permissionsManager, threadPool);
+  protected AndroidSyncModuleBase createSyncModuleToTest(Context context, Localization localization, IThreadPool threadPool) {
+    return new AndroidCallLogSyncModule(context, localization, threadPool);
   }
 
   @Override
