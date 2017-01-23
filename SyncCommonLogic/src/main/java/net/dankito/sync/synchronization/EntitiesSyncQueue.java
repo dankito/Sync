@@ -40,7 +40,7 @@ public class EntitiesSyncQueue {
     this.fileStorageService = fileStorageService;
     this.localDevice = localDevice;
 
-    this.defaultSyncJobItemsQueue = new AsyncProducerConsumerQueue<>(1, defaultSyncJobItemsConsumerListener);
+    this.defaultSyncJobItemsQueue = new AsyncProducerConsumerQueue<>(3, defaultSyncJobItemsConsumerListener);
     this.largerSyncJobItemsQueue = new AsyncProducerConsumerQueue<>(1, largerSyncJobItemsConsumerListener);
   }
 
