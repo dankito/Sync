@@ -533,7 +533,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           remoteEntitySynchronized((SyncJobItem) entity);
         }
         else if(areWeSourceOfSyncJobItem(syncJobItem)) {
-          if(syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRED_TO_DESTINATION_DEVICE) {
+          if(syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE) {
             remoteRetrievedOurFileSyncJobItem(syncJobItem);
           }
         }
@@ -651,10 +651,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
 
   protected void remoteEntitySynchronized(final SyncJobItem jobItem) {
-    jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
-    entityManager.updateEntity(jobItem);
-
     SyncEntity entity = jobItem.getEntity();
+    if(entity instanceof FileSyncEntity == false) {
+      jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
+      entityManager.updateEntity(jobItem);
+    }
+
     SyncModuleConfiguration syncModuleConfiguration = jobItem.getSyncModuleConfiguration();
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
 
