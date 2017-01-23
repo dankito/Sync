@@ -132,7 +132,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void startContinuousSynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
     for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-      setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, syncModuleConfiguration);
+      if(syncModuleConfiguration.isEnabled()) {
+        setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, syncModuleConfiguration);
+      }
     }
   }
 
@@ -145,14 +147,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       removeSyncEntityChangeListener(remoteDevice, deactivatedSyncModule);
     }
 
-    for(SyncModuleConfiguration addedSyncModuleConfiguration : changes.getAddedSyncModuleConfigurations()) {
-      if(isSyncingForModuleEnabled(syncConfiguration, addedSyncModuleConfiguration, remoteDevice) == false) {
-        setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, addedSyncModuleConfiguration);
+    for(SyncModuleConfiguration activatedSyncModuleConfiguration : changes.getActivatedSyncModuleConfigurations()) {
+      if(isSyncingForModuleEnabled(syncConfiguration, activatedSyncModuleConfiguration, remoteDevice)) {
+        setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, activatedSyncModuleConfiguration);
       }
     }
 
     for(SyncModuleConfiguration updatedSyncModuleConfiguration : changes.getUpdatedSyncModuleConfigurations()) {
-      if(isSyncingForModuleEnabled(syncConfiguration, updatedSyncModuleConfiguration, remoteDevice) == false) {
+      if(isSyncingForModuleEnabled(syncConfiguration, updatedSyncModuleConfiguration, remoteDevice)) {
         setSynchronizedDeviceSyncModuleSettings(remoteDevice, syncConfiguration, updatedSyncModuleConfiguration);
       }
     }
@@ -512,8 +514,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
           if(syncConfiguration != null) {
             for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-              if(syncModule.getSyncEntityTypeItCanHandle().equals(syncModuleConfiguration.getSyncModuleType())) {
-                determineEntitiesToSynchronize(connectedDevice, syncModuleConfiguration, entities);
+              if(syncModuleConfiguration.isEnabled()) {
+                if(syncModule.getSyncEntityTypeItCanHandle().equals(syncModuleConfiguration.getSyncModuleType())) {
+                  determineEntitiesToSynchronize(connectedDevice, syncModuleConfiguration, entities);
+                }
               }
             }
           }
@@ -587,7 +591,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           remoteDeviceHasThisModuleNowActive(syncConfiguration, syncModule, remoteDeviceHasThisModuleNowActive);
 
       if(remoteDeviceHadThisModuleActive == false && remoteDeviceHasThisModuleNowActive.get() == true) {
-        changes.addAddedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
+        changes.addActivatedSyncModuleConfiguration(syncModuleConfigurationDeviceHasNowActive);
       }
       else if(remoteDeviceHadThisModuleActive == true) {
         if(remoteDeviceHasThisModuleNowActive.get() == false) {
@@ -603,7 +607,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
       ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
       if(activatedSyncModules.containsKey(syncModule) == false) {
-        changes.addAddedSyncModuleConfiguration(syncModuleConfiguration);
+        changes.addActivatedSyncModuleConfiguration(syncModuleConfiguration);
       }
     }
 
@@ -631,8 +635,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
       if(syncModule == getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration)) {
-        remoteDeviceHasThisModuleNowActive.set(true);
-        syncModuleConfigurationDeviceHasNowActive = syncModuleConfiguration;
+        if(syncModuleConfiguration.isEnabled()) {
+          remoteDeviceHasThisModuleNowActive.set(true);
+          syncModuleConfigurationDeviceHasNowActive = syncModuleConfiguration;
+        }
         break;
       }
     }

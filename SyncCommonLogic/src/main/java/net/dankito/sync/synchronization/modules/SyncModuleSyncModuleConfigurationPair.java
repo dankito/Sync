@@ -48,12 +48,20 @@ public class SyncModuleSyncModuleConfigurationPair {
     isEnabled = enabled;
   }
 
+  public boolean originalIsEnabled() {
+    return originalIsEnabled;
+  }
+
   public boolean isBidirectional() {
     return isBidirectional;
   }
 
   public void setBidirectional(boolean bidirectional) {
     isBidirectional = bidirectional;
+  }
+
+  public boolean originalIsBidirectional() {
+    return originalIsBidirectional;
   }
 
 

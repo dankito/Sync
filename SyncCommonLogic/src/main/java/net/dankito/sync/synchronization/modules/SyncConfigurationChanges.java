@@ -12,11 +12,9 @@ public class SyncConfigurationChanges {
 
   protected DiscoveredDevice remoteDevice;
 
-  protected List<SyncModuleConfiguration> addedSyncModuleConfigurations = new ArrayList<>();
+  protected List<SyncModuleConfiguration> activatedSyncModuleConfigurations = new ArrayList<>();
 
   protected List<SyncModuleConfiguration> updatedSyncModuleConfigurations = new ArrayList<>();
-
-  protected List<SyncModuleConfiguration> removedSyncModuleConfigurations = new ArrayList<>();
 
   protected List<ISyncModule> deactivatedSyncModules = new ArrayList<>();
 
@@ -30,12 +28,12 @@ public class SyncConfigurationChanges {
     return remoteDevice;
   }
 
-  public List<SyncModuleConfiguration> getAddedSyncModuleConfigurations() {
-    return addedSyncModuleConfigurations;
+  public List<SyncModuleConfiguration> getActivatedSyncModuleConfigurations() {
+    return activatedSyncModuleConfigurations;
   }
 
-  public boolean addAddedSyncModuleConfiguration(SyncModuleConfiguration addedSyncModuleConfiguration) {
-    return addedSyncModuleConfigurations.add(addedSyncModuleConfiguration);
+  public boolean addActivatedSyncModuleConfiguration(SyncModuleConfiguration activatedSyncModuleConfiguration) {
+    return activatedSyncModuleConfigurations.add(activatedSyncModuleConfiguration);
   }
 
   public List<SyncModuleConfiguration> getUpdatedSyncModuleConfigurations() {
@@ -44,14 +42,6 @@ public class SyncConfigurationChanges {
 
   public boolean addUpdatedSyncModuleConfiguration(SyncModuleConfiguration updatedSyncModuleConfiguration) {
     return updatedSyncModuleConfigurations.add(updatedSyncModuleConfiguration);
-  }
-
-  public List<SyncModuleConfiguration> getRemovedSyncModuleConfigurations() {
-    return removedSyncModuleConfigurations;
-  }
-
-  public boolean addRemovedSyncModuleConfiguration(SyncModuleConfiguration removedSyncModuleConfiguration) {
-    return removedSyncModuleConfigurations.add(removedSyncModuleConfiguration);
   }
 
   public List<ISyncModule> getDeactivatedSyncModules() {

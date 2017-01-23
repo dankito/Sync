@@ -49,7 +49,7 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
     SyncConfigurationChanges changes = new SyncConfigurationChanges(syncModuleConfigurationsForDevice.getRemoteDevice());
 
     for(SyncModuleSyncModuleConfigurationPair pair : syncModuleConfigurationsForDevice.getSyncModuleConfigurations()) {
-      updateSyncModuleConfiguration(updatedSyncConfiguration, pair, changes);
+      updateSyncModuleConfiguration(pair, changes);
     }
 
     entityManager.updateEntity(updatedSyncConfiguration);
@@ -57,30 +57,25 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
     return changes;
   }
 
-  protected void updateSyncModuleConfiguration(SyncConfiguration updatedSyncConfiguration, SyncModuleSyncModuleConfigurationPair pair, SyncConfigurationChanges changes) {
+  protected void updateSyncModuleConfiguration(SyncModuleSyncModuleConfigurationPair pair, SyncConfigurationChanges changes) {
     SyncModuleConfiguration syncModuleConfiguration = pair.getSyncModuleConfiguration();
+    syncModuleConfiguration.setEnabled(pair.isEnabled());
     syncModuleConfiguration.setBidirectional(pair.isBidirectional());
     boolean moduleAddedOrRemoved = false;
 
-    if(pair.isEnabled) {
-      if(updatedSyncConfiguration.getSyncModuleConfigurations().contains(syncModuleConfiguration) == false) {
-        if(entityManager.persistEntity(syncModuleConfiguration)) {
-          updatedSyncConfiguration.addSyncModuleConfiguration(syncModuleConfiguration);
-          changes.addAddedSyncModuleConfiguration(syncModuleConfiguration);
-          moduleAddedOrRemoved = true;
-        }
-      }
+    if(pair.isEnabled() == true && pair.originalIsEnabled() == false) {
+      changes.addActivatedSyncModuleConfiguration(syncModuleConfiguration);
+      moduleAddedOrRemoved = true;
     }
-    else {
-      if(updatedSyncConfiguration.getSyncModuleConfigurations().contains(syncModuleConfiguration)) {
-        updatedSyncConfiguration.removeSyncModuleConfiguration(syncModuleConfiguration);
-        changes.addRemovedSyncModuleConfiguration(syncModuleConfiguration);
-        entityManager.deleteEntity(syncModuleConfiguration);
-        moduleAddedOrRemoved = true;
-      }
+    else if(pair.isEnabled() == false && pair.originalIsEnabled() == true) {
+      changes.addDeactivatedSyncModule(pair.getSyncModule());
+      moduleAddedOrRemoved = true;
     }
 
-    if(moduleAddedOrRemoved == false && pair.didConfigurationChange()) {
+    if(moduleAddedOrRemoved) {
+      entityManager.updateEntity(syncModuleConfiguration);
+    }
+    else if(moduleAddedOrRemoved == false && pair.didConfigurationChange()) {
       if(entityManager.updateEntity(syncModuleConfiguration)) {
         changes.addUpdatedSyncModuleConfiguration(syncModuleConfiguration);
       }
@@ -125,17 +120,16 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
         }
       }
 
-      boolean isSyncModuleEnabled = syncModuleConfigurationToSyncModule != null;
-      if(syncModuleConfigurationToSyncModule == null) {
+      if(syncModuleConfigurationToSyncModule == null) { // a new SyncModule added
         syncModuleConfigurationToSyncModule = createDefaultSyncModuleConfiguration(availableSyncModule, availableSyncModule.getSyncEntityTypeItCanHandle());
       }
 
-      addSyncModuleConfiguration(syncConfigurationWithDevice, availableSyncModule, syncModuleConfigurationToSyncModule, isSyncModuleEnabled);
+      addSyncModuleConfiguration(syncConfigurationWithDevice, availableSyncModule, syncModuleConfigurationToSyncModule);
     }
   }
 
-  protected void addSyncModuleConfiguration(SyncConfigurationWithDevice syncConfigurationWithDevice, ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration, boolean isSyncModuleEnabled) {
-    syncConfigurationWithDevice.addSyncModuleConfiguration(new SyncModuleSyncModuleConfigurationPair(syncModule, syncModuleConfiguration, isSyncModuleEnabled));
+  protected void addSyncModuleConfiguration(SyncConfigurationWithDevice syncConfigurationWithDevice, ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration) {
+    syncConfigurationWithDevice.addSyncModuleConfiguration(new SyncModuleSyncModuleConfigurationPair(syncModule, syncModuleConfiguration, syncModuleConfiguration.isEnabled()));
   }
 
   protected SyncConfigurationWithDevice createDefaultConfiguration(DiscoveredDevice remoteDevice) {
