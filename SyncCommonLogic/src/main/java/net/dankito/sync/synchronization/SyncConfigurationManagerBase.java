@@ -294,6 +294,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected SyncEntity handleEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey) {
     if(entityLookupKey == null) { // unpersisted SyncEntity
+      entity.setSourceDevice(localConfig.getLocalDevice());
       entityManager.persistEntity(entity);
       persistEntryLookupKey(syncModuleConfiguration, entity);
 

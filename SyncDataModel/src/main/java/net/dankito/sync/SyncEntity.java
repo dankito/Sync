@@ -45,6 +45,10 @@ public abstract class SyncEntity extends BaseEntity {
     return sourceDevice;
   }
 
+  public void setSourceDevice(Device sourceDevice) {
+    this.sourceDevice = sourceDevice;
+  }
+
   public String getLocalLookupKey() {
     return localLookupKey;
   }
