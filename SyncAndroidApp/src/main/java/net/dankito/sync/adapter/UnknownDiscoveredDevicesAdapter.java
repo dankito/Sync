@@ -7,7 +7,6 @@ import android.widget.Button;
 import net.dankito.sync.R;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
-import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
 import java.util.List;
 
@@ -15,13 +14,8 @@ import java.util.List;
 public class UnknownDiscoveredDevicesAdapter extends DiscoveredDevicesAdapterBase {
 
 
-  protected ISyncConfigurationManager syncConfigurationManager;
-
-
-  public UnknownDiscoveredDevicesAdapter(Activity context, IDevicesManager devicesManager, ISyncConfigurationManager syncConfigurationManager) {
+  public UnknownDiscoveredDevicesAdapter(Activity context, IDevicesManager devicesManager) {
     super(context, devicesManager);
-
-    this.syncConfigurationManager = syncConfigurationManager;
   }
 
 
