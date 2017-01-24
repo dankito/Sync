@@ -7,8 +7,8 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Process;
 import android.provider.BaseColumns;
-import android.support.v4.app.ActivityCompat;
 
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
@@ -184,7 +184,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
   protected boolean isPermissionGranted(String permission) {
-    return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(context, permission);
+    return PackageManager.PERMISSION_GRANTED == context.checkPermission(permission, android.os.Process.myPid(), Process.myUid());
   }
 
 
