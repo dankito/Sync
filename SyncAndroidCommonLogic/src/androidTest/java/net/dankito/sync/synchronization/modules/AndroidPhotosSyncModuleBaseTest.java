@@ -41,11 +41,6 @@ public abstract class AndroidPhotosSyncModuleBaseTest extends AndroidSyncModuleT
   protected static final int TEST_ORIENTATION = 90;
 
 
-  @Override
-  protected byte[] getSyncEntityData(SyncEntity entity) {
-    return TEST_IMAGE_DATA;
-  }
-
   @NonNull
   @Override
   protected SyncEntity createTestEntity() {
