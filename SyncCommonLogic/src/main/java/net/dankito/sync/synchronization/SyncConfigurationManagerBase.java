@@ -183,6 +183,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(List<SyncEntity> entities) {
+        syncModulesCurrentlyReadingAllEntities.remove(syncModule);
+
         determineEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
 
         readingAllEntitiesDoneForModule(syncModule);
@@ -510,6 +512,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(List<SyncEntity> entities) {
+        syncModulesCurrentlyReadingAllEntities.remove(syncModule);
+
         for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
           SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
           if(syncConfiguration != null) {
