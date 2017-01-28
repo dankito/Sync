@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Process;
 import android.provider.BaseColumns;
 
 import net.dankito.sync.SyncEntity;
@@ -184,7 +183,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   }
 
   protected boolean isPermissionGranted(String permission) {
-    return PackageManager.PERMISSION_GRANTED == context.checkPermission(permission, android.os.Process.myPid(), Process.myUid());
+    return PackageManager.PERMISSION_GRANTED == context.checkPermission(permission, android.os.Process.myPid(), android.os.Process.myUid());
   }
 
 
