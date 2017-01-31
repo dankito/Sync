@@ -486,6 +486,10 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
+  public DiscoveredDevice getDiscoveredDeviceForDevice(Device device) {
+    return getDiscoveredDeviceForId(device.getUniqueDeviceId());
+  }
+
   public DiscoveredDevice getDiscoveredDeviceForId(String uniqueDeviceId) {
     for(DiscoveredDevice device : getAllDiscoveredDevices()) {
       if(device.getDevice().getUniqueDeviceId().equals(uniqueDeviceId)) {
