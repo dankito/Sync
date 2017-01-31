@@ -246,13 +246,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
    * @param entity
    * @return
    */
-  protected SyncEntityLocalLookupKeys getLookupKeyForSyncEntityByDatabaseId(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+  protected SyncEntityLocalLookupKeys setLocalLookupKeyOnSyncEntity(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     String entityId = entity.getId();
     List<SyncEntityLocalLookupKeys> allLookupKeys = entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class);
 
     for(SyncEntityLocalLookupKeys lookupKey : allLookupKeys) {
       if(syncModuleConfiguration == lookupKey.getSyncModuleConfiguration()) {
         if(entityId.equals(lookupKey.getEntityDatabaseId())) {
+          setSyncEntityLocalValuesFromLookupKey(entity, lookupKey);
           return lookupKey;
         }
       }
@@ -275,7 +276,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           type = SyncEntityState.DELETED;
         }
         else {
-          if (hasEntityBeenUpdated(entity, entityLookupKey)) {
+          if(hasEntityBeenUpdated(entity, entityLookupKey)) {
             type = SyncEntityState.UPDATED;
           }
         }
@@ -672,16 +673,15 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
 
     final SyncEntityState syncEntityState;
-    SyncEntityLocalLookupKeys lookupKey = getLookupKeyForSyncEntityByDatabaseId(syncModuleConfiguration, entity);
+    SyncEntityLocalLookupKeys lookupKey = setLocalLookupKeyOnSyncEntity(syncModuleConfiguration, entity);
     if(lookupKey == null) {
-      lookupKey = persistEntryLookupKey(syncModuleConfiguration, entity);
+      lookupKey = persistEntryLookupKey(syncModuleConfiguration, entity); // TODO: really persist here as SyncEntity doesn't have a local lookup key yet
       syncEntityState = SyncEntityState.CREATED;
     }
     else {
       syncEntityState = getSyncEntityState(jobItem.getEntity(), lookupKey);
     }
 
-    setSyncEntityLocalValuesFromLookupKey(entity, lookupKey, syncEntityState);
     syncEntitiesCurrentlyBeingSynchronized.add(entity); // when calling handleRetrievedSynchronizedEntityAsync() shortly after syncEntityChangeListener gets called, but its local lookup key hasn't been stored yet to database at this point
 
     log.info("Retrieved synchronized entity " + jobItem.getEntity() + " of SyncEntityState " + syncEntityState);
@@ -741,8 +741,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
   }
 
-  protected void setSyncEntityLocalValuesFromLookupKey(SyncEntity entity, SyncEntityLocalLookupKeys lookupKey, SyncEntityState syncEntityState) {
-    if(syncEntityState == SyncEntityState.UPDATED || syncEntityState == SyncEntityState.DELETED) {
+  protected void setSyncEntityLocalValuesFromLookupKey(SyncEntity entity, SyncEntityLocalLookupKeys lookupKey) {
+    if(lookupKey != null) {
       entity.setLocalLookupKey(lookupKey.getEntityLocalLookupKey());
       entity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
     }
