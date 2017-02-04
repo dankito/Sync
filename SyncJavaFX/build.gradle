@@ -15,10 +15,13 @@ defaultTasks 'run'
 
 dependencies {
     compile project(':SyncJavaCommonLogic')
+
+    compile 'ch.qos.logback:logback-classic:1.1.3'
+    compile 'ch.qos.logback:logback-core:1.1.3'
 }
 
 
-mainClassName = 'net.dankito.sync.SyncJavaFx'
+mainClassName = 'net.dankito.sync.SyncJavaFX'
 
 def version = '1.0 Beta'
 def title = 'Sync'
