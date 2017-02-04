@@ -20,16 +20,16 @@ public class Localization {
 
 
 
-  protected Locale LanguageLocale = Locale.getDefault();
+  protected Locale languageLocale = Locale.getDefault();
 
-  protected ResourceBundle StringsResourceBundle = null;
+  protected ResourceBundle stringsResourceBundle = null;
 
 //  protected List<LanguageChangedListener> languageChangedListeners = new ArrayList<>();
 
 
   public Localization() {
     try {
-      StringsResourceBundle = ResourceBundle.getBundle(StringsResourceBundleName, LanguageLocale, new UTF8Control());
+      stringsResourceBundle = ResourceBundle.getBundle(StringsResourceBundleName, languageLocale, new UTF8Control());
     } catch(Exception ex) {
       log.error("Could not load " + StringsResourceBundleName + ". No Strings will now be translated, only their resource keys will be displayed.", ex);
     }
@@ -37,13 +37,13 @@ public class Localization {
 
 
   public Locale getLanguageLocale() {
-    return LanguageLocale;
+    return languageLocale;
   }
 
   public void setLanguageLocale(Locale languageLocale) {
-    LanguageLocale = languageLocale;
+    languageLocale = languageLocale;
     Locale.setDefault(languageLocale);
-    StringsResourceBundle = ResourceBundle.getBundle(StringsResourceBundleName, LanguageLocale, new UTF8Control());
+    stringsResourceBundle = ResourceBundle.getBundle(StringsResourceBundleName, languageLocale, new UTF8Control());
   }
 
 //  public void setLanguage(ApplicationLanguage language) {
@@ -63,7 +63,7 @@ public class Localization {
 //  }
 
   public ResourceBundle getStringsResourceBundle() {
-    return StringsResourceBundle;
+    return stringsResourceBundle;
   }
 
 
