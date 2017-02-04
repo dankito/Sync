@@ -24,8 +24,6 @@ public class Localization {
 
   protected ResourceBundle stringsResourceBundle = null;
 
-//  protected List<LanguageChangedListener> languageChangedListeners = new ArrayList<>();
-
 
   public Localization() {
     try {
@@ -45,22 +43,6 @@ public class Localization {
     Locale.setDefault(languageLocale);
     stringsResourceBundle = ResourceBundle.getBundle(StringsResourceBundleName, languageLocale, new UTF8Control());
   }
-
-//  public void setLanguage(ApplicationLanguage language) {
-//    try {
-//      if(hasLanguageChanged(language)) {
-//        setLanguageLocale(new Locale(language.getLanguageKey())); // Locale.forLanguageTag(language.getLanguageKey()) crashes on older Androids
-//
-//        callLanguageChangeListeners(language);
-//      }
-//    } catch(Exception ex) {
-//      log.error("Could not find Locale for ApplicationLanguage's LanguageKey " + language.getLanguageKey() + " of ApplicationLanguage " + language.getName(), ex);
-//    }
-//  }
-//
-//  protected boolean hasLanguageChanged(ApplicationLanguage language) {
-//    return language != null && language.getLanguageKey().equals(LanguageLocale.getLanguage()) == false;
-//  }
 
   public ResourceBundle getStringsResourceBundle() {
     return stringsResourceBundle;
@@ -82,19 +64,4 @@ public class Localization {
     return String.format(getLocalizedString(resourceKey), formatArguments);
   }
 
-
-
-//  public boolean addLanguageChangedListener(LanguageChangedListener listener) {
-//    return languageChangedListeners.add(listener);
-//  }
-//
-//  public boolean removeLanguageChangedListener(LanguageChangedListener listener) {
-//    return languageChangedListeners.remove(listener);
-//  }
-//
-//  protected void callLanguageChangeListeners(ApplicationLanguage newLanguage) {
-//    for(LanguageChangedListener listener : languageChangedListeners) {
-//      listener.languageChanged(newLanguage);
-//    }
-//  }
 }
