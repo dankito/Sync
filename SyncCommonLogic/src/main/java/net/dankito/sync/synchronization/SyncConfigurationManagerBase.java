@@ -652,6 +652,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void remoteDeviceStartedSynchronizingWithUs(final SyncConfiguration syncConfiguration) {
+    configureLocalSyncModuleSettings(syncConfiguration, getDiscoveredDeviceForDevice(syncConfiguration.getSourceDevice()));
+
+    // TODO: what is this timer good for?
     Timer timer = new Timer();
     timer.schedule(new TimerTask() {
       @Override
@@ -659,6 +662,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
       }
     }, 3000);
+  }
+
+  protected void configureLocalSyncModuleSettings(SyncConfiguration syncConfiguration, DiscoveredDevice remoteDevice) {
+    for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+      ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+      syncModule.configureLocalSynchronizationSettings(remoteDevice, syncModuleConfiguration);
+    }
   }
 
 
