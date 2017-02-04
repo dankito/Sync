@@ -23,6 +23,13 @@ dependencies {
 
     compile 'ch.qos.logback:logback-classic:1.1.8'
     compile 'ch.qos.logback:logback-core:1.1.8'
+
+    testCompile "org.testfx:testfx-core:4.0.+"
+    testCompile "org.testfx:testfx-junit:4.0.+"
+
+    // if you have Java 8_u20 installed you can use Monocle from Maven
+//    testCompile "org.testfx:openjfx-monocle:1.8.0_20"
+    // otherwise it has to be compiled manually as View introduced a new abstract method
 }
 
 
