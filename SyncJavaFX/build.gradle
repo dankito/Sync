@@ -10,6 +10,11 @@ sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
 apply plugin:'application'
 
 
+processResources {
+    from '../SyncCommonLogic/src/main/resources'
+}
+
+
 defaultTasks 'run'
 
 
