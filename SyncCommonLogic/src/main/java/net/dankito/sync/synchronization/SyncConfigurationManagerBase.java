@@ -568,7 +568,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void syncConfigurationUpdated(SyncConfiguration syncConfiguration) {
     Device remoteDevice = syncConfiguration.getSourceDevice() == localConfig.getLocalDevice() ? syncConfiguration.getDestinationDevice() : syncConfiguration.getSourceDevice();
-    DiscoveredDevice discoveredRemoteDevice = devicesManager.getDiscoveredDeviceForId(remoteDevice.getUniqueDeviceId());
+    DiscoveredDevice discoveredRemoteDevice = getDiscoveredDeviceForDevice(remoteDevice);
 
     if(discoveredRemoteDevice != null) {
       // TODO: here's a Bug. Sometimes a remote device stops syncing, but remote device is not in connectedSynchronizedDevices
@@ -751,7 +751,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void remoteRetrievedOurFileSyncJobItem(SyncJobItem syncJobItem) {
     FileSyncEntity fileSyncEntity = (FileSyncEntity)syncJobItem.getEntity();
-    DiscoveredDevice remoteDevice = devicesManager.getDiscoveredDeviceForId(syncJobItem.getDestinationDevice().getUniqueDeviceId());
+    DiscoveredDevice remoteDevice = getDiscoveredDeviceForDevice(syncJobItem.getDestinationDevice());
 
     if(remoteDevice != null) {
       FileSyncJobItem fileSyncJobItem = new FileSyncJobItem(syncJobItem, fileSyncEntity.getFilePath(), remoteDevice.getAddress(),
@@ -759,6 +759,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
       fileSender.sendFileAsync(fileSyncJobItem);
     }
+  }
+
+
+  protected DiscoveredDevice getDiscoveredDeviceForDevice(Device device) {
+    return devicesManager.getDiscoveredDeviceForDevice(device);
   }
 
 
