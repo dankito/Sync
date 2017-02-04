@@ -1,7 +1,15 @@
+import com.sun.org.apache.xalan.internal.xsltc.cmdline.Compile
+
 apply plugin: 'java'
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+// set encoding on all tasks that compile code as otherwise OS' default encoding is used (e.g. on Windows Cp1252 which cannot process default Languages
+// code copied from http://mrhaki.blogspot.de/2012/06/gradle-goodness-set-java-compiler.html
+tasks.withType(Compile) {
+    options.encoding = 'UTF-8'
+}
 
 
 dependencies {
