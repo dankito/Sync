@@ -33,20 +33,14 @@ dependencies {
 }
 
 
+apply plugin: "org.springframework.boot"
+
+
 mainClassName = 'net.dankito.sync.SyncJavaFX'
 
 def version = '1.0 Beta'
 def title = 'Sync'
 
-
-// create a single Jar with all dependencies. Taken from: http://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': title,
-                'Implementation-Version': version,
-                'Main-Class': mainClassName
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+springBoot {
+    mainClass = mainClassName
 }
