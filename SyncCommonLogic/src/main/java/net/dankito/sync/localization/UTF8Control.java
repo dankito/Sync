@@ -37,7 +37,7 @@ public class UTF8Control extends ResourceBundle.Control {
       }
     }
     else {
-      stream = getClass().getClassLoader().getResourceAsStream(resourceName);
+      stream = Localization.class.getClassLoader().getResourceAsStream(resourceName);
     }
 
     if(stream != null) {
