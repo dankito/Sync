@@ -1,14 +1,13 @@
 package net.dankito.sync;
 
 import net.dankito.sync.javafx.controller.MainWindowController;
+import net.dankito.sync.javafx.localization.JavaFxLocalization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-
-import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.application.HostServices;
@@ -42,15 +41,18 @@ public class SyncJavaFX extends Application {
   public void start(Stage stage) throws Exception {
     try {
       ApplicationContext context = SpringApplication.run(SyncJavaFX.class);
+      JavaFxLocalization localization = context.getBean(JavaFxLocalization.class);
 
       FXMLLoader loader = new FXMLLoader();
-      loader.setResources(ResourceBundle.getBundle("Strings"));
+      loader.setResources(localization.getStringsResourceBundle());
       loader.setLocation(getClass().getClassLoader().getResource("dialogs/MainWindow.fxml"));
       Parent root = (Parent)loader.load();
+      localization.resolveResourceKeys(root);
 
       Scene scene = new Scene(root);
 
       stage.setScene(scene);
+      localization.bindStageTitle(stage, "main.window.title");
 
       MainWindowController controller = (MainWindowController)loader.getController();
       controller.init(context, stage);
