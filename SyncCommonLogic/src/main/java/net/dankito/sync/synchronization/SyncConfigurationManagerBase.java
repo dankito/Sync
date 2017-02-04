@@ -100,7 +100,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     this.threadPool = threadPool;
     this.localConfig = dataManager.getLocalConfig();
 
-    this.fileSender = new FileSender(threadPool);
+    this.fileSender = new FileSender();
     this.syncQueue = new EntitiesSyncQueue(entityManager, fileStorageService, localConfig.getLocalDevice());
 
     syncManager.addSynchronizationListener(synchronizationListener);

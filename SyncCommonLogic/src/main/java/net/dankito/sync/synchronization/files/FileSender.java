@@ -1,6 +1,8 @@
 package net.dankito.sync.synchronization.files;
 
 
+import net.dankito.utils.AsyncProducerConsumerQueue;
+import net.dankito.utils.ConsumerListener;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
@@ -21,21 +23,25 @@ public class FileSender {
 
   protected IThreadPool threadPool;
 
+  protected AsyncProducerConsumerQueue<FileSyncJobItem> queuedJobs;
+
   protected int bufferSize = FileSyncServiceDefaultConfig.DEFAULT_BUFFER_SIZE;
 
 
-  public FileSender(IThreadPool threadPool) {
-    this.threadPool = threadPool;
+  public FileSender() {
+    this.queuedJobs = new AsyncProducerConsumerQueue<>(FileSyncServiceDefaultConfig.COUNT_PARALLEL_FILE_TRANSFERS, Integer.MAX_VALUE, fileSyncJobItemConsumerListener);
   }
 
 
+  protected ConsumerListener fileSyncJobItemConsumerListener = new ConsumerListener<FileSyncJobItem>() {
+    @Override
+    public void consumeItem(FileSyncJobItem item) {
+      sendFile(item);
+    }
+  };
+
   public void sendFileAsync(final FileSyncJobItem jobItem) {
-    threadPool.runAsync(new Runnable() {
-      @Override
-      public void run() {
-        sendFile(jobItem);
-      }
-    });
+    queuedJobs.add(jobItem);
   }
 
   protected void sendFile(FileSyncJobItem jobItem) {
