@@ -286,7 +286,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean savePhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
-    boolean result = entity.getPhoneNumbers().size() > 0;
+    boolean result = true;
 
     for(PhoneNumberSyncEntity phoneNumber : entity.getPhoneNumbers()) {
       result &= savePhoneNumber(phoneNumber, rawContactId);
@@ -312,7 +312,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean saveEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
-    boolean result = entity.getEmailAddresses().size() > 0;
+    boolean result = true;
 
     for(EmailSyncEntity email : entity.getEmailAddresses()) {
       result &= saveEmailAddress(email, rawContactId);
@@ -388,7 +388,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean updatePhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
-    boolean result = entity.getPhoneNumbers().size() > 0;
+    boolean result = true;
 
     for(PhoneNumberSyncEntity phoneNumber : entity.getPhoneNumbers()) {
       result &= updatePhoneNumber(phoneNumber, rawContactId);
@@ -413,7 +413,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean updateEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
-    boolean result = entity.getEmailAddresses().size() > 0;
+    boolean result = true;
 
     for(EmailSyncEntity email : entity.getEmailAddresses()) {
       result &= updateEmailAddress(email, rawContactId);
