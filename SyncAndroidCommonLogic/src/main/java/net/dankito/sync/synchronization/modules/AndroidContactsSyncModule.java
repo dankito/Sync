@@ -555,6 +555,29 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     }
   }
 
+  protected boolean deletePhoneNumber(ContactSyncEntity contact, PhoneNumberSyncEntity phoneNumber) {
+    ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+    String selectPhone = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " +
+        ContactsContract.Data.MIMETYPE + " = ? AND " +
+        ContactsContract.CommonDataKinds.Phone._ID + " = ?";
+    String[] phoneArgs = new String[] { contact.getLocalLookupKey(),
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+        phoneNumber.getLocalLookupKey()};
+
+    ops.add(ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+        .withSelection(selectPhone, phoneArgs).build());
+
+    try {
+      ContentProviderResult[] results = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+      return results != null && results.length > 0 && wasInsertSuccessful(results[0].uri);
+    } catch (Exception e) {
+      log.error("Could not deleted phone number " + phoneNumber + " of " + contact);
+    }
+
+    return false;
+  }
+
 
   protected void updateLastModifiedDate(SyncJobItem jobItem) {
     SyncEntity syncEntity = jobItem.getEntity();
