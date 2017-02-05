@@ -12,6 +12,8 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.EmailSyncEntity;
+import net.dankito.sync.EmailType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
@@ -140,18 +142,27 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         null, null);
 
     if(emails.moveToFirst()) {
-      entity.setEmailAddress(readString(emails, ContactsContract.CommonDataKinds.Email.DATA));
-      int emailType = readInteger(emails, ContactsContract.CommonDataKinds.Email.TYPE); // ContactsContract.CommonDataKinds.Email.TYPE_HOME etc.
+      EmailSyncEntity email = parseEmailSyncEntityFromCursor(emails);
+
+      entity.setEmailAddress(email.getAddress());
 
       while (emails.moveToNext()) { // TODO: store additional email addresses
         // This would allow you get several email addresses
-        String emailAddress = emails.getString(
-            emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-        if(emailAddress != null) { }
+        email = parseEmailSyncEntityFromCursor(emails);
+        if(email != null) { }
       }
     }
 
     emails.close();
+  }
+
+  @NonNull
+  protected EmailSyncEntity parseEmailSyncEntityFromCursor(Cursor emails) {
+    EmailSyncEntity email = new EmailSyncEntity();
+    email.setAddress(readString(emails, ContactsContract.CommonDataKinds.Email.ADDRESS));
+    email.setType(parseEmailType(readInteger(emails, ContactsContract.CommonDataKinds.Email.TYPE)));
+    email.setLabel(readString(emails, ContactsContract.CommonDataKinds.Email.LABEL));
+    return email;
   }
 
   protected void readContactNameDetails(ContactSyncEntity entity, Long rawContactId) {
@@ -449,6 +460,20 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     values.put(valueColumnName, value);
 
     return values;
+  }
+
+
+  protected EmailType parseEmailType(int emailTypeOrdinal) {
+    switch(emailTypeOrdinal) {
+      case ContactsContract.CommonDataKinds.Email.TYPE_HOME:
+        return EmailType.HOME;
+      case ContactsContract.CommonDataKinds.Email.TYPE_WORK:
+        return EmailType.WORK;
+      case ContactsContract.CommonDataKinds.Email.TYPE_MOBILE:
+        return EmailType.MOBILE;
+      default:
+        return EmailType.OTHER;
+    }
   }
 
 
