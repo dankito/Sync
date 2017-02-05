@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -126,12 +127,11 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
     if(phones.moveToFirst()) {
       PhoneNumberSyncEntity phoneNumber = parsePhoneNumberSyncEntityFromCursor(phones);
+      entity.addPhoneNumber(phoneNumber);
 
-      entity.setPhoneNumber(phoneNumber.getNumber());
-
-      while (phones.moveToNext()) { // TODO: store additional phone numbers
+      while (phones.moveToNext()) {
         phoneNumber = parsePhoneNumberSyncEntityFromCursor(phones);
-        if(phoneNumber != null) { }
+        entity.addPhoneNumber(phoneNumber);
       }
     }
 
@@ -141,6 +141,8 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   @NonNull
   protected PhoneNumberSyncEntity parsePhoneNumberSyncEntityFromCursor(Cursor phones) {
     PhoneNumberSyncEntity phoneNumber = new PhoneNumberSyncEntity();
+
+    phoneNumber.setLocalLookupKey(readString(phones,ContactsContract.CommonDataKinds.Phone._ID));
 
     phoneNumber.setNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NUMBER));
     phoneNumber.setNormalizedNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
@@ -286,14 +288,27 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean savePhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
-    // TODO: save all phone numbers
+    boolean result = entity.getPhoneNumbers().size() > 0;
 
+    for(PhoneNumberSyncEntity phoneNumber : entity.getPhoneNumbers()) {
+      result &= savePhoneNumber(phoneNumber, rawContactId);
+    }
+
+    return result;
+  }
+
+  protected boolean savePhoneNumber(PhoneNumberSyncEntity phoneNumber, Long rawContactId) {
     try {
-      ContentValues values = mapEntityToPhoneNumberContentValues(entity, rawContactId);
+      ContentValues values = mapEntityToPhoneNumberContentValues(phoneNumber, rawContactId);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+
+      long newPhoneNumberId = ContentUris.parseId(uri);
+      phoneNumber.setLocalLookupKey("" + newPhoneNumberId);
+
+      // TODO: update normalized phone number
       return wasInsertSuccessful(uri);
-    } catch(Exception e) { log.error("Could not insert phone number into database for entity " + entity, e); }
+    } catch(Exception e) { log.error("Could not insert phone number into database for entity " + phoneNumber, e); }
 
     return false;
   }
@@ -367,17 +382,26 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean updatePhoneNumbers(ContactSyncEntity entity, Long rawContactId) {
-    // TODO: save all phone numbers
+    boolean result = entity.getPhoneNumbers().size() > 0;
 
+    for(PhoneNumberSyncEntity phoneNumber : entity.getPhoneNumbers()) {
+      result &= updatePhoneNumber(phoneNumber, rawContactId);
+    }
+
+    return result;
+  }
+
+  protected boolean updatePhoneNumber(PhoneNumberSyncEntity phoneNumber, Long rawContactId) {
     try {
-      ContentValues values = mapEntityToPhoneNumberContentValues(entity, rawContactId);
+      ContentValues values = mapEntityToPhoneNumberContentValues(phoneNumber, rawContactId);
 
       int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
-          ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
-          new String[] { "" + rawContactId, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE });
+          ContactsContract.CommonDataKinds.Phone._ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
+          new String[] { phoneNumber.getLocalLookupKey(), ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE });
 
+      // TODO: update normalized phone number
       return result > 0;
-    } catch(Exception e) { log.error("Could not update phone number in database for entity " + entity, e); }
+    } catch(Exception e) { log.error("Could not update phone number in database for entity " + phoneNumber, e); }
 
     return false;
   }
@@ -433,16 +457,17 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @NonNull
-  protected ContentValues mapEntityToPhoneNumberContentValues(ContactSyncEntity entity, Long rawContactId) {
+  protected ContentValues mapEntityToPhoneNumberContentValues(PhoneNumberSyncEntity phoneNumber, Long rawContactId) {
     ContentValues values = new ContentValues();
 
+    values.put(ContactsContract.CommonDataKinds.Phone._ID, phoneNumber.getLocalLookupKey());
     values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
     values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
 
-    values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, entity.getPhoneNumber());
-    values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-    // TODO: add custom type label
-//    values.put(ContactsContract.CommonDataKinds.Phone.LABEL, entity.);
+    values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber.getNumber());
+    values.put(ContactsContract.CommonDataKinds.Phone.TYPE, mapPhoneNumberTypeToAndroidPhoneNumberType(phoneNumber.getType()));
+    values.put(ContactsContract.CommonDataKinds.Phone.LABEL, phoneNumber.getLabel());
+
     return values;
   }
 
@@ -491,6 +516,19 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     }
   }
 
+  protected int mapEmailTypeToAndroidEmailType(EmailType type) {
+    switch(type) {
+      case HOME:
+        return ContactsContract.CommonDataKinds.Email.TYPE_HOME;
+      case MOBILE:
+        return ContactsContract.CommonDataKinds.Email.TYPE_MOBILE;
+      case WORK:
+        return ContactsContract.CommonDataKinds.Email.TYPE_WORK;
+      default:
+        return ContactsContract.CommonDataKinds.Email.TYPE_OTHER;
+    }
+  }
+
   protected PhoneNumberType parsePhoneNumberType(int phoneNumberTypeOrdinal) {
     switch(phoneNumberTypeOrdinal) {
       case ContactsContract.CommonDataKinds.Phone.TYPE_HOME:
@@ -501,6 +539,19 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         return PhoneNumberType.WORK;
       default:
         return PhoneNumberType.OTHER;
+    }
+  }
+
+  protected int mapPhoneNumberTypeToAndroidPhoneNumberType(PhoneNumberType type) {
+    switch(type) {
+      case HOME:
+        return ContactsContract.CommonDataKinds.Phone.TYPE_HOME;
+      case MOBILE:
+        return ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
+      case WORK:
+        return ContactsContract.CommonDataKinds.Phone.TYPE_WORK;
+      default:
+        return ContactsContract.CommonDataKinds.Phone.TYPE_OTHER;
     }
   }
 

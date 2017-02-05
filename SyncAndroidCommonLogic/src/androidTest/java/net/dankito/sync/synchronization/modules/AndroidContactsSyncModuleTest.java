@@ -7,6 +7,8 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.PhoneNumberSyncEntity;
+import net.dankito.sync.PhoneNumberType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.localization.Localization;
 import net.dankito.utils.IThreadPool;
@@ -25,7 +27,8 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
   protected static final String TEST_PHONETIC_GIVEN_NAME = "Nelson Phonetic";
   protected static final String TEST_PHONETIC_MIDDLE_NAME = "Rolihlahla Phonetic";
   protected static final String TEST_PHONETIC_FAMILY_NAME = "Mandela Phonetic";
-  protected static final String TEST_PHONE = "+27 (0)11 547 5600";
+  protected static final String TEST_PHONE_NUMBER = "+27 (0)11 547 5600";
+  protected static final PhoneNumberType TEST_PHONE_NUMBER_TYPE = PhoneNumberType.MOBILE;
   protected static final String TEST_EMAIL_ADDRESS = "nelson@nelsonmandela.org";
   protected static final String TEST_NOTE = "One of my heroes";
   protected static final String TEST_WEBSITE_URL = "https://www.nelsonmandela.org";
@@ -38,7 +41,8 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
   protected static final String TEST_UPDATED_PHONETIC_GIVEN_NAME = "Nelson Phonetic ";
   protected static final String TEST_UPDATED_PHONETIC_MIDDLE_NAME = "Rolihlahla Phonetic ";
   protected static final String TEST_UPDATED_PHONETIC_FAMILY_NAME = "Mandela Phonetic ";
-  protected static final String TEST_UPDATED_PHONE = "+27 (0)11 547 5601";
+  protected static final String TEST_UPDATED_PHONE_NUMBER = "+27 (0)11 547 5601";
+  protected static final PhoneNumberType TEST_UPDATED_PHONE_NUMBER_TYPE = PhoneNumberType.MOBILE;
   protected static final String TEST_UPDATED_EMAIL_ADDRESS = "nelson_updated@nelsonmandela.org";
   protected static final String TEST_UPDATED_NOTE = "One of my heroes Updated";
   protected static final String TEST_UPDATED_WEBSITE_URL = "https://www.nelsonmandela.net";
@@ -63,7 +67,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setPhoneticGivenName(TEST_PHONETIC_GIVEN_NAME);
     entity.setPhoneticMiddleName(TEST_PHONETIC_MIDDLE_NAME);
     entity.setPhoneticFamilyName(TEST_PHONETIC_FAMILY_NAME);
-    entity.setPhoneNumber(TEST_PHONE);
+    entity.addPhoneNumber(new PhoneNumberSyncEntity(TEST_PHONE_NUMBER, TEST_PHONE_NUMBER_TYPE));
     entity.setEmailAddress(TEST_EMAIL_ADDRESS);
     entity.setNote(TEST_NOTE);
     entity.setWebsiteUrl(TEST_WEBSITE_URL);
@@ -83,8 +87,12 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
     entity.setPhoneticGivenName(TEST_UPDATED_PHONETIC_GIVEN_NAME);
     entity.setPhoneticMiddleName(TEST_UPDATED_PHONETIC_MIDDLE_NAME);
     entity.setPhoneticFamilyName(TEST_UPDATED_PHONETIC_FAMILY_NAME);
-    entity.setPhoneNumber(TEST_UPDATED_PHONE);
+
+    PhoneNumberSyncEntity phoneNumber = entity.getPhoneNumbers().get(0);
+    phoneNumber.setNumber(TEST_UPDATED_PHONE_NUMBER);
+    phoneNumber.setType(TEST_UPDATED_PHONE_NUMBER_TYPE);
     entity.setEmailAddress(TEST_UPDATED_EMAIL_ADDRESS);
+
     entity.setNote(TEST_UPDATED_NOTE);
     entity.setWebsiteUrl(TEST_UPDATED_WEBSITE_URL);
   }
@@ -97,7 +105,12 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
     ContactSyncEntity entity = (ContactSyncEntity)entityToTest;
 
     Assert.assertNotNull(entity.getDisplayName());
-    Assert.assertNotNull(entity.getPhoneNumber());
+
+    Assert.assertNotEquals(0, entity.getPhoneNumbers());
+    for(PhoneNumberSyncEntity phoneNumber : entity.getPhoneNumbers()) {
+      Assert.assertNotNull(phoneNumber.getNumber());
+      Assert.assertNotNull(phoneNumber.getType());
+    }
   }
 
   @Override
@@ -138,7 +151,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
     Assert.assertTrue(cursor.moveToFirst());
 
-    Assert.assertEquals(TEST_PHONE, underTest.readString(cursor, ContactsContract.CommonDataKinds.Phone.NUMBER));
+    Assert.assertEquals(TEST_PHONE_NUMBER, underTest.readString(cursor, ContactsContract.CommonDataKinds.Phone.NUMBER));
     Assert.assertEquals(ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE, underTest.readInteger(cursor, ContactsContract.CommonDataKinds.Phone.TYPE));
   }
 
@@ -199,7 +212,7 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
     Assert.assertTrue(cursor.moveToFirst());
 
-    Assert.assertEquals(TEST_UPDATED_PHONE, underTest.readString(cursor, ContactsContract.CommonDataKinds.Phone.NUMBER));
+    Assert.assertEquals(TEST_UPDATED_PHONE_NUMBER, underTest.readString(cursor, ContactsContract.CommonDataKinds.Phone.NUMBER));
     Assert.assertEquals(ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE, underTest.readInteger(cursor, ContactsContract.CommonDataKinds.Phone.TYPE));
   }
 
