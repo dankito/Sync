@@ -363,20 +363,21 @@ public class DevicesManager implements IDevicesManager {
   @Override
   public void stopSynchronizingWithDevice(DiscoveredDevice device) {
     localConfig.removeSynchronizedDevice(device.getDevice());
-    if(entityManager.updateEntity(localConfig)) {
-      deleteSyncConfigurationForStoppedSynchronizedDevice(device);
 
-      String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
-      knownSynchronizedDevices.remove(deviceInfo);
-      unknownDevices.put(deviceInfo, device);
+    String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+    knownSynchronizedDevices.remove(deviceInfo);
+    unknownDevices.put(deviceInfo, device);
 
-      removeFromSourceAndDestinationSyncConfigurationOnDevices(device.getDevice());
+    removeFromSourceAndDestinationSyncConfigurationOnDevices(device.getDevice());
 
-      callKnownSynchronizedDeviceDisconnected(device);
+    deleteSyncConfigurationForStoppedSynchronizedDevice(device);
 
-      callDiscoveredDeviceDisconnectedListeners(device);
-      callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.UNKNOWN_DEVICE);
-    }
+    entityManager.updateEntity(localConfig);
+
+    callKnownSynchronizedDeviceDisconnected(device);
+
+    callDiscoveredDeviceDisconnectedListeners(device);
+    callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.UNKNOWN_DEVICE);
   }
 
   protected void removeFromSourceAndDestinationSyncConfigurationOnDevices(Device remoteDevice) {
@@ -386,6 +387,9 @@ public class DevicesManager implements IDevicesManager {
       if(syncConfiguration.getDestinationDevice() == remoteDevice) {
         localDevice.removeSourceSyncConfiguration(syncConfiguration);
         remoteDevice.removeDestinationSyncConfiguration(syncConfiguration);
+
+        entityManager.updateEntity(localDevice);
+        entityManager.updateEntity(remoteDevice);
 
         break;
       }
