@@ -3,9 +3,13 @@ package net.dankito.sync;
 
 import net.dankito.sync.config.DatabaseTableConfig;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 
 
 @Entity(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_TABLE_NAME)
@@ -36,8 +40,8 @@ public class ContactSyncEntity extends SyncEntity {
   @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_PHONETIC_FAMILY_NAME_COLUMN_NAME)
   protected String phoneticFamilyName;
 
-  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_PHONE_NUMBER_COLUMN_NAME)
-  protected String phoneNumber;
+  @OneToMany
+  protected List<PhoneNumberSyncEntity> phoneNumbers = new ArrayList<>();
 
   @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_EMAIL_ADDRESS_COLUMN_NAME)
   protected String emailAddress;
@@ -118,12 +122,16 @@ public class ContactSyncEntity extends SyncEntity {
     this.phoneticFamilyName = phoneticFamilyName;
   }
 
-  public String getPhoneNumber() {
-    return phoneNumber;
+  public List<PhoneNumberSyncEntity> getPhoneNumbers() {
+    return phoneNumbers;
   }
 
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
+  public boolean addPhoneNumber(PhoneNumberSyncEntity phoneNumber) {
+    return phoneNumbers.add(phoneNumber);
+  }
+
+  public boolean removePhoneNumber(PhoneNumberSyncEntity phoneNumber) {
+    return phoneNumbers.remove(phoneNumber);
   }
 
   public String getEmailAddress() {

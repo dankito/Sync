@@ -87,7 +87,6 @@ public class DatabaseTableConfig {
   public static final String CONTACT_SYNC_ENTITY_PHONETIC_GIVEN_NAME_COLUMN_NAME = "phonetic_given_name";
   public static final String CONTACT_SYNC_ENTITY_PHONETIC_MIDDLE_NAME_COLUMN_NAME = "phonetic_middle_name";
   public static final String CONTACT_SYNC_ENTITY_PHONETIC_FAMILY_NAME_COLUMN_NAME = "phonetic_family_name";
-  public static final String CONTACT_SYNC_ENTITY_PHONE_NUMBER_COLUMN_NAME = "phone_number";
   public static final String CONTACT_SYNC_ENTITY_EMAIL_ADDRESS_COLUMN_NAME = "email_address";
   public static final String CONTACT_SYNC_ENTITY_WEBSITE_URL_COLUMN_NAME = "website_url";
   public static final String CONTACT_SYNC_ENTITY_NOTE_COLUMN_NAME = "note";
