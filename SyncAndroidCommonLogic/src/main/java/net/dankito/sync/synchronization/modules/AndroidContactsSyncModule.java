@@ -14,6 +14,8 @@ import android.support.annotation.NonNull;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.EmailSyncEntity;
 import net.dankito.sync.EmailType;
+import net.dankito.sync.PhoneNumberSyncEntity;
+import net.dankito.sync.PhoneNumberType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
@@ -123,16 +125,29 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         null, null);
 
     if(phones.moveToFirst()) {
-      entity.setPhoneNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NUMBER));
-      int phoneType = readInteger(phones, ContactsContract.CommonDataKinds.Phone.TYPE); // ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE etc.
+      PhoneNumberSyncEntity phoneNumber = parsePhoneNumberSyncEntityFromCursor(phones);
+
+      entity.setPhoneNumber(phoneNumber.getNumber());
 
       while (phones.moveToNext()) { // TODO: store additional phone numbers
-        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+        phoneNumber = parsePhoneNumberSyncEntityFromCursor(phones);
         if(phoneNumber != null) { }
       }
     }
 
     phones.close();
+  }
+
+  @NonNull
+  protected PhoneNumberSyncEntity parsePhoneNumberSyncEntityFromCursor(Cursor phones) {
+    PhoneNumberSyncEntity phoneNumber = new PhoneNumberSyncEntity();
+
+    phoneNumber.setNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NUMBER));
+    phoneNumber.setNormalizedNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
+    phoneNumber.setType(parsePhoneNumberType(readInteger(phones, ContactsContract.CommonDataKinds.Phone.TYPE)));
+    phoneNumber.setLabel(readString(phones, ContactsContract.CommonDataKinds.Phone.LABEL));
+
+    return phoneNumber;
   }
 
   protected void readEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
@@ -473,6 +488,19 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         return EmailType.MOBILE;
       default:
         return EmailType.OTHER;
+    }
+  }
+
+  protected PhoneNumberType parsePhoneNumberType(int phoneNumberTypeOrdinal) {
+    switch(phoneNumberTypeOrdinal) {
+      case ContactsContract.CommonDataKinds.Phone.TYPE_HOME:
+        return PhoneNumberType.HOME;
+      case ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE:
+        return PhoneNumberType.MOBILE;
+      case ContactsContract.CommonDataKinds.Phone.TYPE_WORK:
+        return PhoneNumberType.WORK;
+      default:
+        return PhoneNumberType.OTHER;
     }
   }
 
