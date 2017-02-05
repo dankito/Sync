@@ -47,4 +47,9 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
     super.startContinuousSynchronizationWithDevice(remoteDevice, syncConfiguration);
   }
 
+  @Override
+  protected int getDelayBeforePushingEntityChangesToRemote() {
+    return 0;
+  }
+
 }
