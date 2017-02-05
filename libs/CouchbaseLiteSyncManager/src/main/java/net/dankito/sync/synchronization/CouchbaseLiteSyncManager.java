@@ -78,7 +78,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
   @Inject
   public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkConfigurationManager configurationManager, IDevicesManager devicesManager, IThreadPool threadPool) {
-    this(entityManager, configurationManager, devicesManager, threadPool, SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, true);
+    this(entityManager, configurationManager, devicesManager, threadPool, SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
   }
 
   public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkConfigurationManager configurationManager, IDevicesManager devicesManager,
