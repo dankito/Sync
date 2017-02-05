@@ -43,8 +43,8 @@ public class ContactSyncEntity extends SyncEntity {
   @OneToMany
   protected List<PhoneNumberSyncEntity> phoneNumbers = new ArrayList<>();
 
-  @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_EMAIL_ADDRESS_COLUMN_NAME)
-  protected String emailAddress;
+  @OneToMany
+  protected List<EmailSyncEntity> emailAddresses = new ArrayList<>();
 
   @Column(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_WEBSITE_URL_COLUMN_NAME)
   protected String websiteUrl;
@@ -134,12 +134,16 @@ public class ContactSyncEntity extends SyncEntity {
     return phoneNumbers.remove(phoneNumber);
   }
 
-  public String getEmailAddress() {
-    return emailAddress;
+  public List<EmailSyncEntity> getEmailAddresses() {
+    return emailAddresses;
   }
 
-  public void setEmailAddress(String emailAddress) {
-    this.emailAddress = emailAddress;
+  public boolean addEmailAddress(EmailSyncEntity email) {
+    return emailAddresses.add(email);
+  }
+
+  public boolean removeEmailAddress(EmailSyncEntity email) {
+    return emailAddresses.remove(email);
   }
 
   public String getWebsiteUrl() {
