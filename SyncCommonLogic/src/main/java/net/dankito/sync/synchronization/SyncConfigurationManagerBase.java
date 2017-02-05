@@ -408,7 +408,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected void updateContactSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity persistedContact, ContactSyncEntity contact,
                                                    Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
     for(PhoneNumberSyncEntity phoneNumber : new ArrayList<>(persistedContact.getPhoneNumbers())) {
-      updatePersistedPhoneNumber(syncModuleConfiguration, persistedContact, phoneNumber, entityPropertiesLookupKeys, allLookupKeys);
+      updatePersistedPhoneNumber(syncModuleConfiguration, persistedContact, phoneNumber, contact, entityPropertiesLookupKeys, allLookupKeys);
     }
 
     for(PhoneNumberSyncEntity phoneNumber : new ArrayList<>(contact.getPhoneNumbers())) {
@@ -416,7 +416,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     for(EmailSyncEntity email : new ArrayList<>(persistedContact.getEmailAddresses())) {
-      updatePersistedEmail(syncModuleConfiguration, persistedContact, email, entityPropertiesLookupKeys, allLookupKeys);
+      updatePersistedEmail(syncModuleConfiguration, persistedContact, email, contact, entityPropertiesLookupKeys, allLookupKeys);
     }
 
     for(EmailSyncEntity email : new ArrayList<>(contact.getEmailAddresses())) {
@@ -424,7 +424,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
   }
 
-  protected void updatePersistedPhoneNumber(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity persistedContact, PhoneNumberSyncEntity phoneNumber, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+  protected void updatePersistedPhoneNumber(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity persistedContact, PhoneNumberSyncEntity phoneNumber,
+                                            ContactSyncEntity unpersistedContact, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
     SyncEntityLocalLookupKeys lookupKey = entityPropertiesLookupKeys.get(phoneNumber.getLocalLookupKey());
 
     if(lookupKey == null) { // property has been removed
@@ -433,10 +434,17 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
       handleDeletedSyncEntityProperty(syncModuleConfiguration, persistedContact, phoneNumber, lookupKey);
     }
+    else {
+      PhoneNumberSyncEntity matchingPhoneNumber = getMatchingPhoneNumber(phoneNumber, unpersistedContact);
+      if(matchingPhoneNumber != null && hasPhoneNumberBeenUpdated(phoneNumber, matchingPhoneNumber)) {
+        dataMerger.mergeEntityData(phoneNumber, matchingPhoneNumber);
+        entityManager.updateEntity(phoneNumber);
+      }
+    }
   }
 
   protected void updatePersistedEmail(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity persistedContact, EmailSyncEntity email,
-                                      Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+                                      ContactSyncEntity unpersistedContact, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
     SyncEntityLocalLookupKeys lookupKey = entityPropertiesLookupKeys.get(email.getLocalLookupKey());
 
     if(lookupKey == null) { // property has been removed
@@ -444,6 +452,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       lookupKey = allLookupKeys.remove(email.getLocalLookupKey());
 
       handleDeletedSyncEntityProperty(syncModuleConfiguration, persistedContact, email, lookupKey);
+    }
+    else {
+      EmailSyncEntity matchingEmail = getMatchingEmail(email, unpersistedContact);
+      if(matchingEmail != null && hasEmailBeenUpdated(email, matchingEmail)) {
+        dataMerger.mergeEntityData(email, matchingEmail);
+        entityManager.updateEntity(email);
+      }
     }
   }
 
