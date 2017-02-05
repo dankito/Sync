@@ -26,6 +26,20 @@ public class EmailSyncEntity extends SyncEntity {
   protected String label;
 
 
+  public EmailSyncEntity() {
+
+  }
+
+  public EmailSyncEntity(String address, EmailType type) {
+    this.address = address;
+    this.type = type;
+  }
+
+  public EmailSyncEntity(String address, String label) {
+    this.address = address;
+    this.label = label;
+  }
+
 
   public String getAddress() {
     return address;
