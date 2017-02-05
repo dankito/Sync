@@ -17,7 +17,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
-@SpringBootApplication(scanBasePackages = { "net.dankito", "net.dankito.utils", "net.dankito.devicediscovery" })
+@SpringBootApplication(scanBasePackages = { "net.dankito.sync", "net.dankito.utils", "net.dankito.devicediscovery" })
 public class SyncJavaFX extends Application {
 
   private final static Logger log = LoggerFactory.getLogger(SyncJavaFX.class);
@@ -50,6 +50,8 @@ public class SyncJavaFX extends Application {
       localization.resolveResourceKeys(root);
 
       Scene scene = new Scene(root);
+//    String mainDocumentCss = getClass().getResource("/MainDocument.css").toExternalForm();
+//    scene.getStylesheets().add(mainDocumentCss);
 
       stage.setScene(scene);
       localization.bindStageTitle(stage, "main.window.title");
