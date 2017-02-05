@@ -102,6 +102,16 @@ public class DatabaseTableConfig {
   public static final String EMAIL_SYNC_ENTITY_LABEL_COLUMN_NAME = "label";
 
 
+  /*          PhoneNumberSyncEntity Column Names        */
+
+  public static final String PHONE_NUMBER_SYNC_ENTITY_TABLE_NAME = "PhoneNumberSyncEntity";
+
+  public static final String PHONE_NUMBER_SYNC_ENTITY_NUMBER_COLUMN_NAME = "number";
+  public static final String PHONE_NUMBER_SYNC_ENTITY_NORMALIZED_NUMBER_COLUMN_NAME = "normalized_number";
+  public static final String PHONE_NUMBER_SYNC_ENTITY_TYPE_COLUMN_NAME = "type";
+  public static final String PHONE_NUMBER_SYNC_ENTITY_LABEL_COLUMN_NAME = "label";
+
+
   /*          FileSyncEntity Column Names        */
 
   public static final String FILE_SYNC_ENTITY_TABLE_NAME = "FileSyncEntity";
