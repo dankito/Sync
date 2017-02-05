@@ -93,6 +93,15 @@ public class DatabaseTableConfig {
   public static final String CONTACT_SYNC_ENTITY_NOTE_COLUMN_NAME = "note";
 
 
+  /*          EmailSyncEntity Column Names        */
+
+  public static final String EMAIL_SYNC_ENTITY_TABLE_NAME = "EmailSyncEntity";
+
+  public static final String EMAIL_SYNC_ENTITY_ADDRESS_COLUMN_NAME = "address";
+  public static final String EMAIL_SYNC_ENTITY_TYPE_COLUMN_NAME = "type";
+  public static final String EMAIL_SYNC_ENTITY_LABEL_COLUMN_NAME = "label";
+
+
   /*          FileSyncEntity Column Names        */
 
   public static final String FILE_SYNC_ENTITY_TABLE_NAME = "FileSyncEntity";
