@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization.modules;
 
 
+import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
@@ -34,6 +35,11 @@ public abstract class SyncModuleBase implements ISyncModule {
     return localization.getLocalizedString(getNameStringResourceKey());
   }
 
+
+  @Override
+  public boolean deleteSyncEntityProperty(SyncEntity entity, SyncEntity property) {
+    return false; // true for most SyncModules
+  }
 
   @Override
   public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {

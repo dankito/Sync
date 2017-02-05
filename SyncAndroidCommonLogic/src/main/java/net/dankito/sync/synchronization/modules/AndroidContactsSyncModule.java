@@ -437,6 +437,16 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
 
+  @Override
+  public boolean deleteSyncEntityProperty(SyncEntity entity, SyncEntity property) {
+    if(property instanceof PhoneNumberSyncEntity) {
+      return deletePhoneNumber((ContactSyncEntity)entity, (PhoneNumberSyncEntity)property);
+    }
+    else {
+      return super.deleteSyncEntityProperty(entity, property);
+    }
+  }
+
   protected ContentValues mapEntityToNameContentValues(ContactSyncEntity entity, Long rawContactId) {
     ContentValues values = new ContentValues();
 

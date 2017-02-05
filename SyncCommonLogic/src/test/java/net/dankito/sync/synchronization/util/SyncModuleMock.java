@@ -57,6 +57,11 @@ public class SyncModuleMock implements ISyncModule {
   }
 
   @Override
+  public boolean deleteSyncEntityProperty(SyncEntity entity, SyncEntity property) {
+    return false;
+  }
+
+  @Override
   public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
     listeners.add(listener);
   }
