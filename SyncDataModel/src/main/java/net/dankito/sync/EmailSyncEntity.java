@@ -4,10 +4,12 @@ package net.dankito.sync;
 import net.dankito.sync.config.DatabaseTableConfig;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 
+@Entity(name = DatabaseTableConfig.EMAIL_SYNC_ENTITY_TABLE_NAME)
 public class EmailSyncEntity extends SyncEntity {
 
   @Column(name = DatabaseTableConfig.EMAIL_SYNC_ENTITY_ADDRESS_COLUMN_NAME)
