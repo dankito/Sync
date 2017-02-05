@@ -3,6 +3,8 @@ package net.dankito.sync.synchronization.merge;
 import com.couchbase.lite.CouchbaseLiteException;
 
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.PhoneNumberSyncEntity;
+import net.dankito.sync.PhoneNumberType;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
@@ -26,7 +28,8 @@ public class JpaMetadataBasedDataMergerTest {
   protected static final String TEST_UPDATED_PHONETIC_GIVEN_NAME = "Nelson Phonetic ";
   protected static final String TEST_UPDATED_PHONETIC_MIDDLE_NAME = "Rolihlahla Phonetic ";
   protected static final String TEST_UPDATED_PHONETIC_FAMILY_NAME = "Mandela Phonetic ";
-  protected static final String TEST_UPDATED_PHONE = "+27 (0)11 547 5601";
+  protected static final String TEST_UPDATED_PHONE_NUMBER = "+27 (0)11 547 5601";
+  protected static final PhoneNumberType TEST_UPDATED_PHONE_NUMBER_TYPE = PhoneNumberType.WORK;
   protected static final String TEST_UPDATED_EMAIL_ADDRESS = "nelson_updated@nelsonmandela.org";
   protected static final String TEST_UPDATED_NOTE = "One of my heroes Updated";
   protected static final String TEST_UPDATED_WEBSITE_URL = "https://www.nelsonmandela.net";
@@ -81,7 +84,10 @@ public class JpaMetadataBasedDataMergerTest {
     Assert.assertEquals(TEST_UPDATED_PHONETIC_MIDDLE_NAME, updateSink.getPhoneticMiddleName());
     Assert.assertEquals(TEST_UPDATED_PHONETIC_FAMILY_NAME, updateSink.getPhoneticFamilyName());
 
-    Assert.assertEquals(TEST_UPDATED_PHONE, updateSink.getPhoneNumber());
+    Assert.assertEquals(1, updateSink.getPhoneNumbers().size());
+    Assert.assertEquals(TEST_UPDATED_PHONE_NUMBER, updateSink.getPhoneNumbers().get(0).getNumber());
+    Assert.assertEquals(TEST_UPDATED_PHONE_NUMBER_TYPE, updateSink.getPhoneNumbers().get(0).getType());
+
     Assert.assertEquals(TEST_UPDATED_EMAIL_ADDRESS, updateSink.getEmailAddress());
 
     Assert.assertEquals(TEST_UPDATED_NOTE, updateSink.getNote());
@@ -102,7 +108,7 @@ public class JpaMetadataBasedDataMergerTest {
     sourceEntity.setPhoneticMiddleName(TEST_UPDATED_PHONETIC_MIDDLE_NAME);
     sourceEntity.setPhoneticFamilyName(TEST_UPDATED_PHONETIC_FAMILY_NAME);
 
-    sourceEntity.setPhoneNumber(TEST_UPDATED_PHONE);
+    sourceEntity.addPhoneNumber(new PhoneNumberSyncEntity(TEST_UPDATED_PHONE_NUMBER, TEST_UPDATED_PHONE_NUMBER_TYPE));
     sourceEntity.setEmailAddress(TEST_UPDATED_EMAIL_ADDRESS);
 
     sourceEntity.setNote(TEST_UPDATED_NOTE);
