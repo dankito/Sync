@@ -623,19 +623,30 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     syncModulesWithEntityChanges.add(syncModule);
 
     if(syncModulesCurrentlyReadingAllEntities.contains(syncModule) == false) { // avoid that while all entities are read readAllEntities is called again for that SyncModule
-      int delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITHOUT_ENTITIES_BEING_SYNCHRONIZED;
-      if(syncEntitiesCurrentlyBeingSynchronized.size() > 0) {
-        delay = SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITH_ENTITIES_BEING_SYNCHRONIZED;
-      }
+      int delay = getDelayBeforePushingEntityChangesToRemote();
 
-      syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
-        @Override
-        public void run() {
-          if(syncModulesWithEntityChanges.remove(syncModule)) { // if syncModule hasn't been removed (and therefore processed) yet
-            pushModuleEntityChangesToRemoteDevices(syncModule);
+      if(delay <= 0) {
+        pushModuleEntityChangesToRemoteDevices(syncModule);
+      }
+      else {
+        syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            if(syncModulesWithEntityChanges.remove(syncModule)) { // if syncModule hasn't been removed (and therefore processed) yet
+              pushModuleEntityChangesToRemoteDevices(syncModule);
+            }
           }
-        }
-      }, delay);
+        }, delay);
+      }
+    }
+  }
+
+  protected int getDelayBeforePushingEntityChangesToRemote() {
+    if(syncEntitiesCurrentlyBeingSynchronized.size() > 0) {
+      return SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITH_ENTITIES_BEING_SYNCHRONIZED;
+    }
+    else {
+      return SYNC_MODULES_WITH_ENTITY_UPDATES_TIMER_DELAY_WITHOUT_ENTITIES_BEING_SYNCHRONIZED;
     }
   }
 
@@ -666,11 +677,22 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
+  int countRemoteFilesRetrieved = 0;
+
+  int countFilesTransferredToDestination = 0;
+
   protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
     @Override
     public void entitySynchronized(BaseEntity entity) {
       if(entity instanceof SyncJobItem) {
         SyncJobItem syncJobItem = (SyncJobItem)entity;
+        if(syncJobItem.getEntity() instanceof FileSyncEntity) {
+          if(syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED)
+            log.info("[" + countRemoteFilesRetrieved++ + "] Retrieved remote file");
+          else if(syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE)
+            log.info("[" + countFilesTransferredToDestination++ + "] Transferred file to destination");
+        }
+
         if(isInitializedSyncJobForUs(syncJobItem)) {
           remoteEntitySynchronized((SyncJobItem) entity);
         }
