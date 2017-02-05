@@ -132,6 +132,7 @@ public class SyncConfigurationManagerBaseTest {
     List<SyncEntity> testEntities = new ArrayList<>();
 
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
+    testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     testEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
     testEntity01.addPhoneNumber(createTestPhoneNumber("1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
@@ -139,6 +140,7 @@ public class SyncConfigurationManagerBaseTest {
     testEntities.add(testEntity01);
 
     ContactSyncEntity testEntity02 = new ContactSyncEntity();
+    testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
     testEntity02.addPhoneNumber(createTestPhoneNumber("2", TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01));
     testEntities.add(testEntity02);
@@ -172,7 +174,9 @@ public class SyncConfigurationManagerBaseTest {
   public void syncPersistedButUnsyncedEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
     SyncEntity testEntity01 = new ContactSyncEntity();
+    testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     SyncEntity testEntity02 = new ContactSyncEntity();
+    testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntities.add(testEntity01);
     testEntities.add(testEntity02);
     entityManager.persistEntity(testEntity01);
