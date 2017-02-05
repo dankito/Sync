@@ -48,7 +48,7 @@ public class SyncModuleMock implements ISyncModule {
 
   @Override
   public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
-    callback.done(entitiesToReturnFromReadAllEntitiesAsync);
+    callback.done(new ArrayList<SyncEntity>(entitiesToReturnFromReadAllEntitiesAsync));
   }
 
   @Override
