@@ -22,14 +22,15 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
 
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
-    this(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool, new ArrayList<ISyncModule>());
+                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool, DiscoveredDevice remoteDevice) {
+    this(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool, new ArrayList<ISyncModule>(), remoteDevice);
   }
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool, List<ISyncModule> mockedAvailableSyncModules) {
+                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool, List<ISyncModule> mockedAvailableSyncModules, DiscoveredDevice remoteDevice) {
     super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
+    connectedSynchronizedDevices.add(remoteDevice);
   }
 
 
