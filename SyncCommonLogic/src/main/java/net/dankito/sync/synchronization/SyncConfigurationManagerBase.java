@@ -212,20 +212,25 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     for(int i = entities.size() - 1; i >= 0; i--) {
       SyncEntity entity = entities.remove(i);
-      SyncEntityLocalLookupKeys entityLookupKey = lookupKeys.remove(entity.getLocalLookupKey()); // remove from lookupKeys so that in the end only deleted entities remain in  lookupKeys
-      Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys = getSyncEntityPropertiesLookupKeys(entity, lookupKeys);
-      SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookupKey, entityPropertiesLookupKeys, currentlySynchronizedEntities);
-
-      if(type != SyncEntityState.UNCHANGED) {
-        log.info("Entity " + entity + " has SyncEntityState of " + type);
-        SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookupKey, entityPropertiesLookupKeys, lookupKeys);
-        syncQueue.addEntityToPushToRemote(persistedEntity, remoteDevice, syncModuleConfiguration);
-      }
+      determineIfEntityShouldBeSynchronized(entity, remoteDevice, syncModuleConfiguration, currentlySynchronizedEntities, lookupKeys);
     }
 
     List<SyncEntity> deletedEntities = getDeletedEntities(lookupKeys, currentlySynchronizedEntities); // SyncEntities still remaining in lookupKeys have been deleted
     for(SyncEntity deletedEntity : deletedEntities) {
       syncQueue.addEntityToPushToRemote(deletedEntity, remoteDevice, syncModuleConfiguration);
+    }
+  }
+
+  protected void determineIfEntityShouldBeSynchronized(SyncEntity entity, DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> currentlySynchronizedEntities, Map<String, SyncEntityLocalLookupKeys> lookupKeys) {
+    SyncEntityLocalLookupKeys entityLookupKey = lookupKeys.remove(entity.getLocalLookupKey()); // remove from lookupKeys so that in the end only deleted entities remain in  lookupKeys
+    Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys = getSyncEntityPropertiesLookupKeys(entity, lookupKeys);
+
+    SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookupKey, entityPropertiesLookupKeys, currentlySynchronizedEntities);
+
+    if(type != SyncEntityState.UNCHANGED) {
+      log.info("Entity " + entity + " has SyncEntityState of " + type);
+      SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookupKey, entityPropertiesLookupKeys, lookupKeys);
+      syncQueue.addEntityToPushToRemote(persistedEntity, remoteDevice, syncModuleConfiguration);
     }
   }
 
