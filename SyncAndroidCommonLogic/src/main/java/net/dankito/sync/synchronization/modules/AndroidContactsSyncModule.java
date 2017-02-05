@@ -327,6 +327,10 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       ContentValues values = mapEntityToEmailAddressContentValues(email, rawContactId);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+
+      long newEmailId = ContentUris.parseId(uri);
+      email.setLocalLookupKey("" + newEmailId);
+
       return wasInsertSuccessful(uri);
     } catch(Exception e) { log.error("Could not insert email address into database " + email, e); }
 
