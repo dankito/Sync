@@ -2,9 +2,11 @@ package net.dankito.sync.synchronization;
 
 
 import net.dankito.sync.BaseEntity;
+import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.PhoneNumberSyncEntity;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
@@ -34,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -209,11 +212,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     for(int i = entities.size() - 1; i >= 0; i--) {
       SyncEntity entity = entities.remove(i);
       SyncEntityLocalLookupKeys entityLookupKey = lookupKeys.remove(entity.getLocalLookupKey()); // remove from lookupKeys so that in the end only deleted entities remain in  lookupKeys
-      SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookupKey, currentlySynchronizedEntities);
+      Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys = getSyncEntityPropertiesLookupKeys(entity, lookupKeys);
+      SyncEntityState type = shouldEntityBeSynchronized(entity, entityLookupKey, entityPropertiesLookupKeys, currentlySynchronizedEntities);
 
       if(type != SyncEntityState.UNCHANGED) {
         log.info("Entity " + entity + " has SyncEntityState of " + type);
-        SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookupKey);
+        SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookupKey, entityPropertiesLookupKeys, lookupKeys);
         syncQueue.addEntityToPushToRemote(persistedEntity, remoteDevice, syncModuleConfiguration);
       }
     }
@@ -240,6 +244,27 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return syncModuleConfigurationLookupKeys;
   }
 
+  protected Map<String, SyncEntityLocalLookupKeys> getSyncEntityPropertiesLookupKeys(SyncEntity entity, Map<String, SyncEntityLocalLookupKeys> lookupKeys) {
+    if(entity instanceof ContactSyncEntity) {
+      return getContactSyncEntityPropertiesLookupKeys((ContactSyncEntity)entity, lookupKeys);
+    }
+
+    return new HashMap<>();
+  }
+
+  protected Map<String, SyncEntityLocalLookupKeys> getContactSyncEntityPropertiesLookupKeys(ContactSyncEntity contact, Map<String, SyncEntityLocalLookupKeys> lookupKeys) {
+    Map<String, SyncEntityLocalLookupKeys> propertiesLookupKeys = new HashMap<>();
+
+    for(PhoneNumberSyncEntity phoneNumber : contact.getPhoneNumbers()) {
+      SyncEntityLocalLookupKeys lookupKey = lookupKeys.remove(phoneNumber.getLocalLookupKey());
+      if(lookupKey != null) {
+        propertiesLookupKeys.put(phoneNumber.getLocalLookupKey(), lookupKey);
+      }
+    }
+
+    return propertiesLookupKeys;
+  }
+
   /**
    * SyncEntity's database id has to be set to be able to find its SyncEntityLocalLookupKeys
    * @param syncModuleConfiguration
@@ -262,7 +287,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return null;
   }
 
-  protected SyncEntityState shouldEntityBeSynchronized(SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey, List<SyncEntity> currentlySynchronizedEntities) {
+  protected SyncEntityState shouldEntityBeSynchronized(SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, List<SyncEntity> currentlySynchronizedEntities) {
     SyncEntityState type = SyncEntityState.UNCHANGED;
 
     if(isCurrentlySynchronizedEntity(entity, currentlySynchronizedEntities) == false) {
@@ -276,7 +301,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           type = SyncEntityState.DELETED;
         }
         else {
-          if(hasEntityBeenUpdated(entity, entityLookupKey)) {
+          if(hasEntityBeenUpdated(entity, entityLookupKey, entityPropertiesLookupKeys)) {
             type = SyncEntityState.UPDATED;
           }
         }
@@ -297,11 +322,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return false;
   }
 
-  protected SyncEntity handleEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey) {
+  protected SyncEntity handleEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey,
+                                                    Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
     if(entityLookupKey == null) { // unpersisted SyncEntity
-      entity.setSourceDevice(localConfig.getLocalDevice());
-      entityManager.persistEntity(entity);
-      persistEntryLookupKey(syncModuleConfiguration, entity);
+      persistSyncEntityProperties(syncModuleConfiguration, entity);
+
+      persistSyncEntity(syncModuleConfiguration, entity);
 
       return entity;
     }
@@ -310,10 +336,15 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
       if(persistedEntity.isDeleted()) {
         deleteEntryLookupKey(entityLookupKey);
+        for(SyncEntityLocalLookupKeys propertyLookupKey : entityPropertiesLookupKeys.values()) {
+          deleteEntryLookupKey(propertyLookupKey);
+        }
       }
       else {
         entityLookupKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
         entityManager.updateEntity(entityLookupKey);
+
+        updateSyncEntityProperties(syncModuleConfiguration, persistedEntity, entity, entityPropertiesLookupKeys, allLookupKeys);
 
         mergePersistedEntityWithExtractedOne(persistedEntity, entity);
       }
@@ -328,6 +359,26 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.updateEntity(persistedEntity);
   }
 
+  protected void persistSyncEntity(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+    entity.setSourceDevice(localConfig.getLocalDevice());
+
+    entityManager.persistEntity(entity);
+
+    persistEntryLookupKey(syncModuleConfiguration, entity);
+  }
+
+  protected void persistSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+    if(entity instanceof ContactSyncEntity) {
+      persistContactSyncEntityProperties(syncModuleConfiguration, (ContactSyncEntity)entity);
+    }
+  }
+
+  protected void persistContactSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity contact) {
+    for(PhoneNumberSyncEntity phoneNumber : contact.getPhoneNumbers()) {
+      persistSyncEntity(syncModuleConfiguration, phoneNumber);
+    }
+  }
+
   protected SyncEntityLocalLookupKeys persistEntryLookupKey(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
     SyncEntityLocalLookupKeys lookupKeyEntry = new SyncEntityLocalLookupKeys(getSyncEntityType(entity), entity.getId(),
                                                                 entity.getLocalLookupKey(), entity.getLastModifiedOnDevice(), syncModuleConfiguration);
@@ -336,8 +387,89 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return lookupKeyEntry;
   }
 
+  protected void updateSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, SyncEntity persistedEntity, SyncEntity entity,
+                                            Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+    if(entity instanceof ContactSyncEntity) {
+      updateContactSyncEntityProperties(syncModuleConfiguration, (ContactSyncEntity) persistedEntity, (ContactSyncEntity)entity, entityPropertiesLookupKeys, allLookupKeys);
+    }
+  }
+
+  protected void updateContactSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity persistedContact, ContactSyncEntity contact,
+                                                   Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+    for(PhoneNumberSyncEntity phoneNumber : new ArrayList<>(persistedContact.getPhoneNumbers())) {
+      updatePersistedPhoneNumber(persistedContact, phoneNumber, entityPropertiesLookupKeys, allLookupKeys);
+    }
+
+    for(PhoneNumberSyncEntity phoneNumber : new ArrayList<>(contact.getPhoneNumbers())) {
+      handleUnpersistedPhoneNumbers(syncModuleConfiguration, persistedContact, phoneNumber);
+    }
+  }
+
+  protected void updatePersistedPhoneNumber(ContactSyncEntity persistedContact, PhoneNumberSyncEntity phoneNumber, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+    SyncEntityLocalLookupKeys lookupKey = entityPropertiesLookupKeys.get(phoneNumber.getLocalLookupKey());
+    if(lookupKey == null) { // property has been removed
+      persistedContact.removePhoneNumber(phoneNumber);
+      handleDeletedSyncEntityProperty(phoneNumber, allLookupKeys);
+    }
+    else {
+      // TODO: should we merge entities?
+    }
+  }
+
+  protected void handleDeletedSyncEntityProperty(SyncEntity entity, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+    entityManager.deleteEntity(entity);
+
+    SyncEntityLocalLookupKeys persistedLookupKey = allLookupKeys.remove(entity.getLocalLookupKey());
+    if(persistedLookupKey != null) {
+      entityManager.deleteEntity(persistedLookupKey);
+    }
+  }
+
+  protected void handleUnpersistedPhoneNumbers(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity persistedContact, PhoneNumberSyncEntity phoneNumber) {
+    boolean isPersisted = isSyncEntityPropertyPersisted(phoneNumber.getLocalLookupKey(), new ArrayList<SyncEntity>(persistedContact.getPhoneNumbers()));
+
+    if(isPersisted == false) {
+      entityManager.persistEntity(phoneNumber);
+      persistedContact.addPhoneNumber(phoneNumber);
+      persistEntryLookupKey(syncModuleConfiguration, phoneNumber);
+    }
+  }
+
+  protected boolean isSyncEntityPropertyPersisted(String unpersistedEntityLookupKey, Collection<SyncEntity> persistedSyncEntityCollection) {
+    boolean isPersisted = false;
+
+    for(SyncEntity persistedEntity : persistedSyncEntityCollection) {
+      if(unpersistedEntityLookupKey.equals(persistedEntity.getLocalLookupKey())) {
+        isPersisted = true;
+        break;
+      }
+    }
+    return isPersisted;
+  }
+
   protected void deleteEntryLookupKey(SyncEntityLocalLookupKeys lookupKey) {
     entityManager.deleteEntity(lookupKey);
+  }
+
+  protected boolean hasEntityBeenUpdated(SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+    if(hasEntityBeenUpdated(entity, entityLookupKey)) {
+      return true;
+    }
+    else {
+      return hasEntityPropertyBeenUpdated(entity, entityPropertiesLookupKeys);
+    }
+  }
+
+  protected boolean hasEntityPropertyBeenUpdated(SyncEntity entity, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+    if(entity instanceof ContactSyncEntity) {
+      return hasContactPropertyBeenUpdated((ContactSyncEntity)entity, entityPropertiesLookupKeys);
+    }
+
+    return false;
+  }
+
+  protected boolean hasContactPropertyBeenUpdated(ContactSyncEntity contact, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+    return false; // TODO
   }
 
   protected boolean hasEntityBeenUpdated(SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey) {
