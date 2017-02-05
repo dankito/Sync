@@ -22,6 +22,7 @@ import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.android.common.R;
 import net.dankito.sync.localization.Localization;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -391,7 +392,12 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     boolean result = true;
 
     for(PhoneNumberSyncEntity phoneNumber : entity.getPhoneNumbers()) {
-      result &= updatePhoneNumber(phoneNumber, rawContactId);
+      if(StringUtils.isNotNullOrEmpty(phoneNumber.getLocalLookupKey())) {
+        result &= updatePhoneNumber(phoneNumber, rawContactId);
+      }
+      else {
+        result &= savePhoneNumber(phoneNumber, rawContactId);
+      }
     }
 
     return result;
@@ -416,7 +422,12 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     boolean result = true;
 
     for(EmailSyncEntity email : entity.getEmailAddresses()) {
-      result &= updateEmailAddress(email, rawContactId);
+      if(StringUtils.isNotNullOrEmpty(email.getLocalLookupKey())) {
+        result &= updateEmailAddress(email, rawContactId);
+      }
+      else {
+        result &= saveEmailAddress(email, rawContactId);
+      }
     }
 
     return result;
