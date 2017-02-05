@@ -4,10 +4,11 @@ package net.dankito.sync.synchronization;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.PhoneNumberSyncEntity;
+import net.dankito.sync.PhoneNumberType;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
-import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.data.IDataManager;
@@ -19,12 +20,9 @@ import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
-import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityCallback;
-import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityResult;
 import net.dankito.sync.synchronization.modules.ISyncModule;
-import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
-import net.dankito.sync.synchronization.modules.SyncModuleBase;
 import net.dankito.sync.synchronization.util.SyncConfigurationManagerStub;
+import net.dankito.sync.synchronization.util.SyncModuleMock;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
 
@@ -41,13 +39,15 @@ import java.util.List;
 
 public class SyncConfigurationManagerBaseTest {
 
-  protected static final String TEST_SYNC_MODULE_TYPE = "TestSyncModule";
-
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID = "01";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME = "Mandela";
+  protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER = "0123456789";
+  protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE = PhoneNumberType.MOBILE;
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID = "02";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME = "Gandhi";
+  protected static final String TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER = "0987654321";
+  protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE = PhoneNumberType.WORK;
 
 
   protected SyncConfigurationManagerBase underTest;
@@ -69,6 +69,10 @@ public class SyncConfigurationManagerBaseTest {
 
   protected SyncModuleConfiguration syncModuleConfiguration;
 
+  protected List<SyncEntity> entitiesToReturnFromReadAllEntitiesAsync = new ArrayList<>();
+
+  protected SyncModuleMock syncModuleMock;
+
 
   @Before
   public void setUp() throws Exception {
@@ -84,14 +88,30 @@ public class SyncConfigurationManagerBaseTest {
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
 
     remoteDevice = new Device("remote");
+    DiscoveredDevice discoveredRemoteDevice = new DiscoveredDevice(remoteDevice, "1.1.1.1");
 
-    syncModuleConfiguration = new SyncModuleConfiguration(TEST_SYNC_MODULE_TYPE);
+    syncModuleMock = new SyncModuleMock(entitiesToReturnFromReadAllEntitiesAsync);
+
+    syncModuleConfiguration = new SyncModuleConfiguration(syncModuleMock.getSyncEntityTypeItCanHandle());
     syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), remoteDevice,
         Arrays.asList(new SyncModuleConfiguration[] {  syncModuleConfiguration }));
     entityManager.persistEntity(syncModuleConfiguration);
     entityManager.persistEntity(syncConfiguration);
 
-    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, dataMerger, new JavaFileStorageService(), new ThreadPool());
+    localDevice.addSourceSyncConfiguration(syncConfiguration);
+    remoteDevice.addDestinationSyncConfiguration(syncConfiguration);
+    entityManager.persistEntity(localDevice);
+    entityManager.persistEntity(remoteDevice);
+
+    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, dataMerger, new JavaFileStorageService(), new ThreadPool(), discoveredRemoteDevice);
+
+
+    SyncConfigurationManagerStub syncConfigurationManagerStub = (SyncConfigurationManagerStub)underTest;
+    List<ISyncModule> mockedAvailableSyncModules = new ArrayList<>();
+    mockedAvailableSyncModules.add(syncModuleMock);
+    syncConfigurationManagerStub.setMockedAvailableSyncModules(mockedAvailableSyncModules);
+
+    syncConfigurationManagerStub.startContinuousSynchronizationWithDevice(new DiscoveredDevice(remoteDevice, "1-1-Love"), syncConfiguration);
   }
 
   @After
@@ -105,12 +125,15 @@ public class SyncConfigurationManagerBaseTest {
   @Test
   public void syncNewEntities() {
     List<SyncEntity> testEntities = new ArrayList<>();
-    SyncEntity testEntity01 = new ContactSyncEntity();
-    SyncEntity testEntity02 = new ContactSyncEntity();
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
+    testEntity01.addPhoneNumber(createTestPhoneNumber("1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE));
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
+    testEntity02.addPhoneNumber(createTestPhoneNumber("2", TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE));
     testEntities.add(testEntity01);
     testEntities.add(testEntity02);
 
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
@@ -119,8 +142,9 @@ public class SyncConfigurationManagerBaseTest {
 
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+    Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
   @Test
@@ -159,22 +183,51 @@ public class SyncConfigurationManagerBaseTest {
     mockSynchronizeEntitiesWithDevice(testEntities);
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
-    testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    testEntity01.setLastModifiedOnDevice(new Date());
-    testEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
-    testEntity02.setLastModifiedOnDevice(new Date());
+    testEntities.clear();
+
+    ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
+    updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE));
+    updatedTestEntity01.setLastModifiedOnDevice(new Date());
+    testEntities.add(updatedTestEntity01);
+
+    ContactSyncEntity updatedTestEntity02 = new ContactSyncEntity();
+    updatedTestEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    updatedTestEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
+    updatedTestEntity02.addPhoneNumber(createTestPhoneNumber("2", TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE));
+    updatedTestEntity02.setLastModifiedOnDevice(new Date());
+    testEntities.add(updatedTestEntity02);
 
 
     mockSynchronizeEntitiesWithDevice(testEntities);
 
 
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
     Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+    Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+
+    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+
+    for(ContactSyncEntity retrievedContact : contacts) {
+      Assert.assertNotEquals(0, retrievedContact.getPhoneNumbers().size());
+      PhoneNumberSyncEntity retrievedPhoneNumber = retrievedContact.getPhoneNumbers().get(0);
+
+      if(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME.equals(retrievedContact.getDisplayName())) {
+        Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER, retrievedPhoneNumber.getNumber());
+        Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE, retrievedPhoneNumber.getType());
+      }
+      else {
+        Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER, retrievedPhoneNumber.getNumber());
+        Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE, retrievedPhoneNumber.getType());
+      }
+    }
   }
 
   @Test
@@ -238,50 +291,18 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
-  protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
-    ISyncModule testSyncModule = new ISyncModule() {
-      @Override
-      public String getName() {
-        return "Mock";
-      }
 
-      @Override
-      public int getDisplayPriority() {
-        return SyncModuleBase.DISPLAY_PRIORITY_LOWEST;
-      }
+  protected PhoneNumberSyncEntity createTestPhoneNumber(String lookupKey, String phoneNumber, PhoneNumberType phoneNumberType) {
+    PhoneNumberSyncEntity entity = new PhoneNumberSyncEntity(phoneNumber, phoneNumberType);
 
-      @Override
-      public String getSyncEntityTypeItCanHandle() {
-        return TEST_SYNC_MODULE_TYPE;
-      }
+    entity.setLocalLookupKey(lookupKey);
 
-      @Override
-      public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
-        callback.done(testEntities);
-      }
-
-      @Override
-      public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
-        callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
-      }
-
-      @Override
-      public void addSyncEntityChangeListener(SyncEntityChangeListener listener) { }
-
-      @Override
-      public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) { }
-
-      @Override
-      public void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
-
-      }
-    };
-
-    SyncConfigurationManagerStub syncConfigurationManagerStub = (SyncConfigurationManagerStub)underTest;
-    List<ISyncModule> mockedAvailableSyncModules = new ArrayList<>();
-    mockedAvailableSyncModules.add(testSyncModule);
-    syncConfigurationManagerStub.setMockedAvailableSyncModules(mockedAvailableSyncModules);
-
-    syncConfigurationManagerStub.startContinuousSynchronizationWithDevice(new DiscoveredDevice(remoteDevice, "1-1-Love"), syncConfiguration);
+    return entity;
   }
+
+
+  protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
+    syncModuleMock.callEntityChangedListeners(testEntities);
+  }
+
 }
