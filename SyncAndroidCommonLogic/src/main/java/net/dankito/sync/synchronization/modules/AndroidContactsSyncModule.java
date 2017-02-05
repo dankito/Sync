@@ -175,9 +175,13 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   @NonNull
   protected EmailSyncEntity parseEmailSyncEntityFromCursor(Cursor emails) {
     EmailSyncEntity email = new EmailSyncEntity();
+
+    email.setLocalLookupKey(readString(emails,ContactsContract.CommonDataKinds.Email._ID));
+
     email.setAddress(readString(emails, ContactsContract.CommonDataKinds.Email.ADDRESS));
     email.setType(parseEmailType(readInteger(emails, ContactsContract.CommonDataKinds.Email.TYPE)));
     email.setLabel(readString(emails, ContactsContract.CommonDataKinds.Email.LABEL));
+
     return email;
   }
 
