@@ -160,13 +160,11 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
     if(emails.moveToFirst()) {
       EmailSyncEntity email = parseEmailSyncEntityFromCursor(emails);
+      entity.addEmailAddress(email);
 
-      entity.setEmailAddress(email.getAddress());
-
-      while (emails.moveToNext()) { // TODO: store additional email addresses
-        // This would allow you get several email addresses
+      while(emails.moveToNext()) {
         email = parseEmailSyncEntityFromCursor(emails);
-        if(email != null) { }
+        entity.addEmailAddress(email);
       }
     }
 
@@ -314,14 +312,22 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean saveEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
-    // TODO: save all email addresses
+    boolean result = entity.getEmailAddresses().size() > 0;
 
+    for(EmailSyncEntity email : entity.getEmailAddresses()) {
+      result &= saveEmailAddress(email, rawContactId);
+    }
+
+    return result;
+  }
+
+  protected boolean saveEmailAddress(EmailSyncEntity email, Long rawContactId) {
     try {
-      ContentValues values = mapEntityToEmailAddressContentValues(entity, rawContactId);
+      ContentValues values = mapEntityToEmailAddressContentValues(email, rawContactId);
 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
       return wasInsertSuccessful(uri);
-    } catch(Exception e) { log.error("Could not insert email address into database for entity " + entity, e); }
+    } catch(Exception e) { log.error("Could not insert email address into database " + email, e); }
 
     return false;
   }
@@ -407,17 +413,25 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   protected boolean updateEmailAddresses(ContactSyncEntity entity, Long rawContactId) {
-    // TODO: save all email addresses
+    boolean result = entity.getEmailAddresses().size() > 0;
 
+    for(EmailSyncEntity email : entity.getEmailAddresses()) {
+      result &= updateEmailAddress(email, rawContactId);
+    }
+
+    return result;
+  }
+
+  protected boolean updateEmailAddress(EmailSyncEntity email, Long rawContactId) {
     try {
-      ContentValues values = mapEntityToEmailAddressContentValues(entity, rawContactId);
+      ContentValues values = mapEntityToEmailAddressContentValues(email, rawContactId);
 
       int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
           ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
           new String[] { "" + rawContactId, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE });
 
       return result > 0;
-    } catch(Exception e) { log.error("Could not update email address in database for entity " + entity, e); }
+    } catch(Exception e) { log.error("Could not update email address in database " + email, e); }
 
     return false;
   }
@@ -482,16 +496,15 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   }
 
   @NonNull
-  protected ContentValues mapEntityToEmailAddressContentValues(ContactSyncEntity entity, Long rawContactId) {
+  protected ContentValues mapEntityToEmailAddressContentValues(EmailSyncEntity entity, Long rawContactId) {
     ContentValues values = new ContentValues();
 
     values.put(ContactsContract.CommonDataKinds.Email.RAW_CONTACT_ID, rawContactId);
     values.put(ContactsContract.CommonDataKinds.Email.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
 
-    values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, entity.getEmailAddress());
-    values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME);
-    // TODO: add custom type label
-//    values.put(ContactsContract.CommonDataKinds.Email.LABEL, entity.);
+    values.put(ContactsContract.CommonDataKinds.Email.ADDRESS, entity.getAddress());
+    values.put(ContactsContract.CommonDataKinds.Email.TYPE, mapEmailTypeToAndroidEmailType(entity.getType()));
+    values.put(ContactsContract.CommonDataKinds.Email.LABEL, entity.getLabel());
     return values;
   }
 

@@ -3,6 +3,8 @@ package net.dankito.sync.synchronization.merge;
 import com.couchbase.lite.CouchbaseLiteException;
 
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.EmailSyncEntity;
+import net.dankito.sync.EmailType;
 import net.dankito.sync.PhoneNumberSyncEntity;
 import net.dankito.sync.PhoneNumberType;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
@@ -31,6 +33,7 @@ public class JpaMetadataBasedDataMergerTest {
   protected static final String TEST_UPDATED_PHONE_NUMBER = "+27 (0)11 547 5601";
   protected static final PhoneNumberType TEST_UPDATED_PHONE_NUMBER_TYPE = PhoneNumberType.WORK;
   protected static final String TEST_UPDATED_EMAIL_ADDRESS = "nelson_updated@nelsonmandela.org";
+  protected static final EmailType TEST_UPDATED_EMAIL_ADDRESS_TYPE = EmailType.MOBILE;
   protected static final String TEST_UPDATED_NOTE = "One of my heroes Updated";
   protected static final String TEST_UPDATED_WEBSITE_URL = "https://www.nelsonmandela.net";
 
@@ -88,7 +91,8 @@ public class JpaMetadataBasedDataMergerTest {
     Assert.assertEquals(TEST_UPDATED_PHONE_NUMBER, updateSink.getPhoneNumbers().get(0).getNumber());
     Assert.assertEquals(TEST_UPDATED_PHONE_NUMBER_TYPE, updateSink.getPhoneNumbers().get(0).getType());
 
-    Assert.assertEquals(TEST_UPDATED_EMAIL_ADDRESS, updateSink.getEmailAddress());
+    Assert.assertEquals(TEST_UPDATED_EMAIL_ADDRESS, updateSink.getEmailAddresses().get(0).getAddress());
+    Assert.assertEquals(TEST_UPDATED_EMAIL_ADDRESS_TYPE, updateSink.getEmailAddresses().get(0).getType());
 
     Assert.assertEquals(TEST_UPDATED_NOTE, updateSink.getNote());
     Assert.assertEquals(TEST_UPDATED_WEBSITE_URL, updateSink.getWebsiteUrl());
@@ -109,7 +113,7 @@ public class JpaMetadataBasedDataMergerTest {
     sourceEntity.setPhoneticFamilyName(TEST_UPDATED_PHONETIC_FAMILY_NAME);
 
     sourceEntity.addPhoneNumber(new PhoneNumberSyncEntity(TEST_UPDATED_PHONE_NUMBER, TEST_UPDATED_PHONE_NUMBER_TYPE));
-    sourceEntity.setEmailAddress(TEST_UPDATED_EMAIL_ADDRESS);
+    sourceEntity.addEmailAddress(new EmailSyncEntity(TEST_UPDATED_EMAIL_ADDRESS, TEST_UPDATED_EMAIL_ADDRESS_TYPE));
 
     sourceEntity.setNote(TEST_UPDATED_NOTE);
     sourceEntity.setWebsiteUrl(TEST_UPDATED_WEBSITE_URL);
