@@ -23,6 +23,21 @@ public class PhoneNumberSyncEntity extends SyncEntity {
   protected String label;
 
 
+  public PhoneNumberSyncEntity() {
+
+  }
+
+  public PhoneNumberSyncEntity(String number, PhoneNumberType type) {
+    this.number = number;
+    this.type = type;
+  }
+
+  public PhoneNumberSyncEntity(String number, String label) {
+    this.number = number;
+    this.label = label;
+  }
+
+
   public String getNumber() {
     return number;
   }
