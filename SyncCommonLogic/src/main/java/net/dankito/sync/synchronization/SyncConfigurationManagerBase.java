@@ -620,7 +620,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
    */
   protected void pushModuleEntityChangesToRemoteDevicesAfterADelay(SyncEntityChange syncEntityChange) {
     final ISyncModule syncModule = syncEntityChange.getSyncModule();
-    syncModulesWithEntityChanges.add(syncModule);
 
     if(syncModulesCurrentlyReadingAllEntities.contains(syncModule) == false) { // avoid that while all entities are read readAllEntities is called again for that SyncModule
       int delay = getDelayBeforePushingEntityChangesToRemote();
@@ -638,6 +637,9 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           }
         }, delay);
       }
+    }
+    else {
+      syncModulesWithEntityChanges.add(syncModule);
     }
   }
 
@@ -677,21 +679,11 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
-  int countRemoteFilesRetrieved = 0;
-
-  int countFilesTransferredToDestination = 0;
-
   protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
     @Override
     public void entitySynchronized(BaseEntity entity) {
       if(entity instanceof SyncJobItem) {
         SyncJobItem syncJobItem = (SyncJobItem)entity;
-        if(syncJobItem.getEntity() instanceof FileSyncEntity) {
-          if(syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED)
-            log.info("[" + countRemoteFilesRetrieved++ + "] Retrieved remote file");
-          else if(syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE)
-            log.info("[" + countFilesTransferredToDestination++ + "] Transferred file to destination");
-        }
 
         if(isInitializedSyncJobForUs(syncJobItem)) {
           remoteEntitySynchronized((SyncJobItem) entity);
