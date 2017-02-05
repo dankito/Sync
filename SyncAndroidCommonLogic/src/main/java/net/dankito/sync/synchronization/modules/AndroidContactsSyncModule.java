@@ -453,12 +453,35 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   @Override
   public boolean deleteSyncEntityProperty(SyncEntity entity, SyncEntity property) {
-    if(property instanceof PhoneNumberSyncEntity) {
-      return deletePhoneNumber((ContactSyncEntity)entity, (PhoneNumberSyncEntity)property);
+    if(property instanceof PhoneNumberSyncEntity || property instanceof EmailSyncEntity) {
+      return deleteSyncEntityProperty((ContactSyncEntity)entity, property);
     }
     else {
       return super.deleteSyncEntityProperty(entity, property);
     }
+  }
+
+  protected boolean deleteSyncEntityProperty(ContactSyncEntity entity, SyncEntity property) {
+    ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+    String selectPhone = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " +
+        ContactsContract.Data.MIMETYPE + " = ? AND " +
+        ContactsContract.CommonDataKinds.Phone._ID + " = ?";
+    String[] phoneArgs = new String[] { entity.getLocalLookupKey(),
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+        property.getLocalLookupKey()};
+
+    ops.add(ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+        .withSelection(selectPhone, phoneArgs).build());
+
+    try {
+      ContentProviderResult[] results = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+      return results != null && results.length > 0 && wasInsertSuccessful(results[0].uri);
+    } catch (Exception e) {
+      log.error("Could not deleted phone number " + property + " of " + entity);
+    }
+
+    return false;
   }
 
   protected ContentValues mapEntityToNameContentValues(ContactSyncEntity entity, Long rawContactId) {
@@ -576,29 +599,6 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       default:
         return ContactsContract.CommonDataKinds.Phone.TYPE_OTHER;
     }
-  }
-
-  protected boolean deletePhoneNumber(ContactSyncEntity contact, PhoneNumberSyncEntity phoneNumber) {
-    ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-
-    String selectPhone = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " +
-        ContactsContract.Data.MIMETYPE + " = ? AND " +
-        ContactsContract.CommonDataKinds.Phone._ID + " = ?";
-    String[] phoneArgs = new String[] { contact.getLocalLookupKey(),
-        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
-        phoneNumber.getLocalLookupKey()};
-
-    ops.add(ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
-        .withSelection(selectPhone, phoneArgs).build());
-
-    try {
-      ContentProviderResult[] results = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-      return results != null && results.length > 0 && wasInsertSuccessful(results[0].uri);
-    } catch (Exception e) {
-      log.error("Could not deleted phone number " + phoneNumber + " of " + contact);
-    }
-
-    return false;
   }
 
 
