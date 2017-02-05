@@ -301,7 +301,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           type = SyncEntityState.DELETED;
         }
         else {
-          if(hasEntityBeenUpdated(entity, entityLookupKey, entityPropertiesLookupKeys)) {
+          if(hasEntityBeenUpdated(persistedEntity, entity, entityLookupKey, entityPropertiesLookupKeys)) {
             type = SyncEntityState.UPDATED;
           }
         }
@@ -451,25 +451,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.deleteEntity(lookupKey);
   }
 
-  protected boolean hasEntityBeenUpdated(SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+  protected boolean hasEntityBeenUpdated(SyncEntity persistedEntity, SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
     if(hasEntityBeenUpdated(entity, entityLookupKey)) {
       return true;
     }
     else {
-      return hasEntityPropertyBeenUpdated(entity, entityPropertiesLookupKeys);
+      return hasEntityPropertyBeenUpdated(persistedEntity, entity, entityPropertiesLookupKeys);
     }
-  }
-
-  protected boolean hasEntityPropertyBeenUpdated(SyncEntity entity, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
-    if(entity instanceof ContactSyncEntity) {
-      return hasContactPropertyBeenUpdated((ContactSyncEntity)entity, entityPropertiesLookupKeys);
-    }
-
-    return false;
-  }
-
-  protected boolean hasContactPropertyBeenUpdated(ContactSyncEntity contact, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
-    return false; // TODO
   }
 
   protected boolean hasEntityBeenUpdated(SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey) {
@@ -478,6 +466,68 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     return entity.getLastModifiedOnDevice().equals(entityLookupKey.getEntityLastModifiedOnDevice()) == false;
+  }
+
+  protected boolean hasEntityPropertyBeenUpdated(SyncEntity persistedEntity, SyncEntity entity, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+    if(entity instanceof ContactSyncEntity) {
+      return hasContactPropertyBeenUpdated((ContactSyncEntity)persistedEntity, (ContactSyncEntity)entity, entityPropertiesLookupKeys);
+    }
+
+    return false;
+  }
+
+  protected boolean hasContactPropertyBeenUpdated(ContactSyncEntity persistedEntity, ContactSyncEntity contact, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+    if(persistedEntity.getPhoneNumbers().size() != contact.getPhoneNumbers().size()) {
+      return true;
+    }
+
+    for(PhoneNumberSyncEntity phoneNumber : persistedEntity.getPhoneNumbers()) {
+      PhoneNumberSyncEntity matchingPhoneNumber = getMatchingPhoneNumber(phoneNumber, contact);
+      if(matchingPhoneNumber == null) { // this phone number has been deleted
+        return true;
+      }
+      else {
+        if(hasPhoneNumberBeenUpdated(phoneNumber, matchingPhoneNumber)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  protected PhoneNumberSyncEntity getMatchingPhoneNumber(PhoneNumberSyncEntity persistedPhoneNumber, ContactSyncEntity unpersistedContact) {
+    for(PhoneNumberSyncEntity unpersistedPhoneNumber : unpersistedContact.getPhoneNumbers()) {
+      if(persistedPhoneNumber.getLocalLookupKey().equals(unpersistedPhoneNumber.getLocalLookupKey())) {
+        return unpersistedPhoneNumber;
+      }
+    }
+
+    return null;
+  }
+
+  protected boolean hasPhoneNumberBeenUpdated(PhoneNumberSyncEntity persistedPhoneNumber, PhoneNumberSyncEntity unpersistedMatchingPhoneNumber) {
+    if(persistedPhoneNumber.getNumber() != null && persistedPhoneNumber.getNumber().equals(unpersistedMatchingPhoneNumber.getNumber()) == false) {
+      return true;
+    }
+    else if(persistedPhoneNumber.getNumber() == null && unpersistedMatchingPhoneNumber.getNumber() != null) {
+      return true;
+    }
+    if(persistedPhoneNumber.getType() != null && persistedPhoneNumber.getType().equals(unpersistedMatchingPhoneNumber.getType()) == false) {
+      return true;
+    }
+    else if(persistedPhoneNumber.getType() == null && unpersistedMatchingPhoneNumber.getType() != null) {
+      return true;
+    }
+
+    if(persistedPhoneNumber.getLabel() != null && persistedPhoneNumber.getLabel().equals(unpersistedMatchingPhoneNumber.getLabel()) == false) {
+      return true;
+    }
+    else if(persistedPhoneNumber.getLabel() == null && unpersistedMatchingPhoneNumber.getLabel() != null) {
+      return true;
+    }
+
+    return false;
   }
 
   protected List<SyncEntity> getDeletedEntities(Map<String, SyncEntityLocalLookupKeys> lookupKeys, List<SyncEntity> currentlySynchronizedEntities) {
