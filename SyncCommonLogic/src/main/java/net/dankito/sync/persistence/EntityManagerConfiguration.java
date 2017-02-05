@@ -3,9 +3,11 @@ package net.dankito.sync.persistence;
 import net.dankito.sync.CallLogSyncEntity;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
+import net.dankito.sync.EmailSyncEntity;
 import net.dankito.sync.FileSyncEntity;
 import net.dankito.sync.ImageFileSyncEntity;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.PhoneNumberSyncEntity;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
@@ -185,6 +187,8 @@ public class EntityManagerConfiguration {
         SyncEntity.class,
         CallLogSyncEntity.class,
         ContactSyncEntity.class,
+        EmailSyncEntity.class,
+        PhoneNumberSyncEntity.class,
         FileSyncEntity.class,
         ImageFileSyncEntity.class,
 
