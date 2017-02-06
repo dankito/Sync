@@ -41,7 +41,7 @@
                   <TreeView fx:id="trvwKnownSynchronizedDevices" prefHeight="200.0" prefWidth="200.0" />
                </items>
             </SplitPane>
-            <ScrollPane fx:id="scrpnDeviceDetails" prefHeight="200.0" prefWidth="200.0" />
+            <ScrollPane fx:id="scrpnDeviceDetails" fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
          </items>
       </SplitPane>
    </center>
