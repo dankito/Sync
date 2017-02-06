@@ -5,13 +5,13 @@ import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfiguratio
 import javafx.scene.control.TreeItem;
 
 
-public class SyncModuleConfigurationTreeItem extends TreeItem<SyncModuleSyncModuleConfigurationPair> {
+public class SynchronizedDeviceSyncModuleConfigurationTreeItem extends TreeItem<SyncModuleSyncModuleConfigurationPair> {
 
 
   protected SyncModuleSyncModuleConfigurationPair SyncModuleSyncModuleConfigurationPair;
 
 
-  public SyncModuleConfigurationTreeItem(SyncModuleSyncModuleConfigurationPair pair) {
+  public SynchronizedDeviceSyncModuleConfigurationTreeItem(SyncModuleSyncModuleConfigurationPair pair) {
     super(pair);
     this.SyncModuleSyncModuleConfigurationPair = pair;
   }
