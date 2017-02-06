@@ -11,7 +11,7 @@ import dagger.Component;
  * Created by ganymed on 03/11/16.
  */
 @Singleton
-@Component(modules = { AndroidDiContainer.class } )
+@Component(modules = { AndroidDiContainer.class, AndroidServiceDiContainer.class } )
 public interface AndroidDiComponent {
 
   // to update the fields in your activities
