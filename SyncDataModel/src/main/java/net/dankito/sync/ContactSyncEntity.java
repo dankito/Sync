@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 
 @Entity(name = DatabaseTableConfig.CONTACT_SYNC_ENTITY_TABLE_NAME)
@@ -122,6 +123,11 @@ public class ContactSyncEntity extends SyncEntity {
     this.phoneticFamilyName = phoneticFamilyName;
   }
 
+  @Transient
+  public boolean hasPhoneNumbers() {
+    return getPhoneNumbers().size() > 0;
+  }
+
   public List<PhoneNumberSyncEntity> getPhoneNumbers() {
     return phoneNumbers;
   }
@@ -132,6 +138,11 @@ public class ContactSyncEntity extends SyncEntity {
 
   public boolean removePhoneNumber(PhoneNumberSyncEntity phoneNumber) {
     return phoneNumbers.remove(phoneNumber);
+  }
+
+  @Transient
+  public boolean hasEmailAddresses() {
+    return getEmailAddresses().size() > 0;
   }
 
   public List<EmailSyncEntity> getEmailAddresses() {
