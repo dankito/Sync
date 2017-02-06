@@ -1,16 +1,14 @@
 package net.dankito.sync.javafx.controller;
 
 
-import net.dankito.sync.ContactSyncEntity;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.javafx.FXUtils;
-import net.dankito.sync.javafx.controls.content.ContactsContentPane;
 import net.dankito.sync.javafx.controls.cells.DeviceOrSyncModuleConfigurationTreeCell;
+import net.dankito.sync.javafx.controls.content.ContactsContentPane;
 import net.dankito.sync.javafx.controls.treeitems.DeviceRootTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceTreeItem;
@@ -23,7 +21,6 @@ import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfiguratio
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -160,7 +157,7 @@ public class MainWindowController {
     if(selectedValue instanceof SyncModuleSyncModuleConfigurationPair) {
       SyncModuleSyncModuleConfigurationPair pair = (SyncModuleSyncModuleConfigurationPair)selectedValue;
       if(pair.getSyncModule() instanceof ContactsJavaEndpointSyncModule) {
-        showContactsContentPane(pair.getSyncModuleConfiguration());
+        showContactsContentPane();
       }
       else {
         showUnselectedNodeContentPane();
@@ -184,10 +181,7 @@ public class MainWindowController {
     setContent(unselectedNodeContentPane);
   }
 
-  protected void showContactsContentPane(SyncModuleConfiguration syncModuleConfiguration) {
-    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
-    contactsContentPane.setContacts(contacts);
-
+  protected void showContactsContentPane() {
     setContent(contactsContentPane);
   }
 

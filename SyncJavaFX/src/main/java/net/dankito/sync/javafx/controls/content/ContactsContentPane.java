@@ -6,6 +6,7 @@ import net.dankito.sync.javafx.controls.Initializable;
 import net.dankito.sync.javafx.controls.cells.contacts.ContactEmailAddressTableCell;
 import net.dankito.sync.javafx.controls.cells.contacts.ContactPhoneNumberTableCell;
 import net.dankito.sync.javafx.localization.JavaFxLocalization;
+import net.dankito.sync.persistence.IEntityManager;
 
 import java.util.List;
 
@@ -25,6 +26,9 @@ public class ContactsContentPane extends VBox implements Initializable {
   @Inject
   protected JavaFxLocalization localization;
 
+  @Inject
+  protected IEntityManager entityManager;
+
 
   protected TableView<ContactSyncEntity> tbvwContacts;
 
@@ -43,6 +47,8 @@ public class ContactsContentPane extends VBox implements Initializable {
   @Override
   public void init() {
     setupControls();
+
+    setupLogic();
   }
 
 
@@ -78,7 +84,13 @@ public class ContactsContentPane extends VBox implements Initializable {
   }
 
 
-  public void setContacts(List<ContactSyncEntity> contacts) {
+  protected void setupLogic() {
+    updateContacts();
+  }
+
+  protected void updateContacts() {
+    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+
     tbvwContacts.setItems(FXCollections.observableArrayList(contacts));
   }
 
