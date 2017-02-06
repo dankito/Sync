@@ -186,7 +186,7 @@ public class MainWindowController {
       showContactsContentPane(remoteDevice, pair);
     }
     else if(pair.getSyncModule() instanceof CallLogJavaEndpointSyncModule) {
-      showCallLogContentPane();
+      showCallLogContentPane(remoteDevice, pair);
     }
     else {
       showUnselectedNodeContentPane();
@@ -198,7 +198,8 @@ public class MainWindowController {
     setContent(contactsContentPane);
   }
 
-  protected void showCallLogContentPane() {
+  protected void showCallLogContentPane(DiscoveredDevice remoteDevice, SyncModuleSyncModuleConfigurationPair pair) {
+    callLogContentPane.showCallLogForDevice(remoteDevice, pair);
     setContent(callLogContentPane);
   }
 

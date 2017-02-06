@@ -3,6 +3,9 @@ package net.dankito.sync.javafx.controls.content;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.CallLogSyncEntity;
+import net.dankito.sync.Device;
+import net.dankito.sync.data.IDataManager;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.javafx.FXUtils;
 import net.dankito.sync.javafx.controls.Initializable;
 import net.dankito.sync.javafx.controls.cells.call_log.CallLogDateTableCell;
@@ -12,7 +15,9 @@ import net.dankito.sync.javafx.localization.JavaFxLocalization;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SynchronizationListener;
+import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -37,6 +42,12 @@ public class CallLogContentPane extends VBox implements Initializable {
 
   @Inject
   protected IEntityManager entityManager;
+
+  @Inject
+  protected IDataManager dataManager;
+
+
+  protected DiscoveredDevice selectedRemoteDevice;
 
 
   protected TableView<CallLogSyncEntity> tbvwCallLog;
@@ -97,12 +108,38 @@ public class CallLogContentPane extends VBox implements Initializable {
     updateCallLog();
   }
 
+  public void showCallLogForDevice(DiscoveredDevice remoteDevice, SyncModuleSyncModuleConfigurationPair pair) {
+    this.selectedRemoteDevice = remoteDevice;
+
+    updateCallLog(remoteDevice);
+  }
+
   protected void updateCallLog() {
-    List<CallLogSyncEntity> callLog = entityManager.getAllEntitiesOfType(CallLogSyncEntity.class);
+    if(selectedRemoteDevice != null) {
+      updateCallLog(selectedRemoteDevice);
+    }
+  }
+
+  protected void updateCallLog(DiscoveredDevice selectedRemoveDevice) {
+    List<CallLogSyncEntity> callLog = getSynchronizedCallLogsForRemoteDevice(selectedRemoveDevice);
 
     ObservableList<CallLogSyncEntity> items = FXCollections.observableArrayList(callLog);
     FXCollections.sort(items, callLogComparator);
     tbvwCallLog.setItems(items);
+  }
+
+  protected List<CallLogSyncEntity> getSynchronizedCallLogsForRemoteDevice(DiscoveredDevice remoteDevice) {
+    List<CallLogSyncEntity> callLogsForDevice = new ArrayList<>();
+    Device localDevice = dataManager.getLocalConfig().getLocalDevice();
+
+    List<CallLogSyncEntity> allCallLogs = entityManager.getAllEntitiesOfType(CallLogSyncEntity.class);
+    for(CallLogSyncEntity callLog : allCallLogs) {
+      if(callLog.getSourceDevice() == remoteDevice.getDevice() || callLog.getSourceDevice() == localDevice) {
+        callLogsForDevice.add(callLog);
+      }
+    }
+
+    return callLogsForDevice;
   }
 
 
