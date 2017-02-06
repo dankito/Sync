@@ -1,12 +1,16 @@
 package net.dankito.sync.javafx.controls.content;
 
 
+import net.dankito.sync.BaseEntity;
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.javafx.FXUtils;
 import net.dankito.sync.javafx.controls.Initializable;
 import net.dankito.sync.javafx.controls.cells.contacts.ContactEmailAddressTableCell;
 import net.dankito.sync.javafx.controls.cells.contacts.ContactPhoneNumberTableCell;
 import net.dankito.sync.javafx.localization.JavaFxLocalization;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.ISyncManager;
+import net.dankito.sync.synchronization.SynchronizationListener;
 
 import java.util.List;
 
@@ -25,6 +29,9 @@ public class ContactsContentPane extends VBox implements Initializable {
 
   @Inject
   protected JavaFxLocalization localization;
+
+  @Inject
+  protected ISyncManager syncManager;
 
   @Inject
   protected IEntityManager entityManager;
@@ -85,6 +92,8 @@ public class ContactsContentPane extends VBox implements Initializable {
 
 
   protected void setupLogic() {
+    syncManager.addSynchronizationListener(synchronizationListener);
+
     updateContacts();
   }
 
@@ -93,5 +102,15 @@ public class ContactsContentPane extends VBox implements Initializable {
 
     tbvwContacts.setItems(FXCollections.observableArrayList(contacts));
   }
+
+
+  protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
+    @Override
+    public void entitySynchronized(BaseEntity entity) {
+      if(entity instanceof ContactSyncEntity) {
+        FXUtils.runOnUiThread(() -> updateContacts() );
+      }
+    }
+  };
 
 }
