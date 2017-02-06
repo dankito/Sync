@@ -32,7 +32,7 @@ public class SynchronizedDeviceTreeItem extends DeviceTreeItem {
   }
 
   protected void addSyncModuleConfigurationChild(SyncModuleSyncModuleConfigurationPair pair) {
-    SynchronizedDeviceSyncModuleConfigurationTreeItem child = new SynchronizedDeviceSyncModuleConfigurationTreeItem(pair);
+    SynchronizedDeviceSyncModuleConfigurationTreeItem child = new SynchronizedDeviceSyncModuleConfigurationTreeItem(remoteDevice, pair);
 
     getChildren().add(child);
   }
