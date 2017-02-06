@@ -46,6 +46,37 @@ public class AndroidServiceDiContainer {
   protected final Context context;
 
 
+  protected Localization localization = null;
+
+  protected IThreadPool threadPool = null;
+
+  protected IPlatformConfigurationReader platformConfigurationReader = null;
+
+  protected IDataManager dataManager = null;
+
+  protected IDevicesDiscoverer devicesDiscoverer = null;
+
+  protected IDevicesManager devicesManager = null;
+
+  protected IDataMerger dataMerger = null;
+
+  protected FileSyncService fileSyncService = null;
+
+  protected IFileStorageService fileStorageService = null;
+
+  protected INetworkConfigurationManager networkConfigurationManager = null;
+
+  protected EntityManagerConfiguration entityManagerConfiguration = null;
+
+  protected IEntityManager entityManager = null;
+
+  protected ISyncManager syncManager = null;
+
+  protected ISyncConfigurationManager syncConfigurationManager = null;
+
+  protected ISyncModuleConfigurationManager syncModuleConfigurationManager = null;
+
+
   public AndroidServiceDiContainer(Context context) {
     this.context = context;
   }
@@ -60,26 +91,42 @@ public class AndroidServiceDiContainer {
   @Provides
   @Singleton
   public Localization provideLocalization() {
-    return new Localization();
+    if(localization == null) {
+      localization = new Localization();
+    }
+
+    return localization;
   }
 
   @Provides
   @Singleton
   public IThreadPool provideThreadPool() {
-    return new ThreadPool();
+    if(threadPool == null) {
+      threadPool = new ThreadPool();
+    }
+
+    return threadPool;
   }
 
 
   @Provides
   @Singleton
   public IPlatformConfigurationReader providePlatformConfigurationReader() {
-    return new AndroidPlatformConfigurationReader();
+    if(platformConfigurationReader == null) {
+      platformConfigurationReader = new AndroidPlatformConfigurationReader();
+    }
+
+    return platformConfigurationReader;
   }
 
   @Provides
   @Singleton
   public IDataManager provideDataManager(IEntityManager entityManager, IPlatformConfigurationReader platformConfigurationReader) {
-    return new DataManager(entityManager, platformConfigurationReader);
+    if(dataManager == null) {
+      dataManager = new DataManager(entityManager, platformConfigurationReader);
+    }
+
+    return dataManager;
   }
 
   @Provides
@@ -92,78 +139,120 @@ public class AndroidServiceDiContainer {
   @Provides
   @Singleton
   public IDevicesDiscoverer provideDevicesDiscoverer(IThreadPool threadPool) {
-    return new UdpDevicesDiscovererAndroid(getContext(), threadPool);
+    if(devicesDiscoverer == null) {
+      devicesDiscoverer = new UdpDevicesDiscovererAndroid(getContext(), threadPool);
+    }
+
+    return devicesDiscoverer;
   }
 
   @Provides
   @Singleton
   public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, IDataManager dataManager, IEntityManager entityManager) {
-    return new DevicesManager(devicesDiscoverer, dataManager, entityManager);
+    if(devicesManager == null) {
+      devicesManager = new DevicesManager(devicesDiscoverer, dataManager, entityManager);
+    }
+
+    return devicesManager;
   }
 
   @Provides
   @Singleton
   public IDataMerger provideDataMerger(IEntityManager entityManager) {
-    return new JpaMetadataBasedDataMerger((CouchbaseLiteEntityManagerBase)entityManager);
+    if(dataMerger == null) {
+      dataMerger = new JpaMetadataBasedDataMerger((CouchbaseLiteEntityManagerBase)entityManager);
+    }
+
+    return dataMerger;
   }
 
   @Provides
   @Singleton
   public FileSyncService provideFileSyncService(IEntityManager entityManager) {
-    return new FileSyncService(entityManager);
+    if(fileSyncService == null) {
+      fileSyncService = new FileSyncService(entityManager);
+    }
+
+    return fileSyncService;
   }
 
   @Provides
   @Singleton
   public IFileStorageService provideFileStorageService() {
-    return new JavaFileStorageService();
+    if(fileStorageService == null) {
+      fileStorageService = new JavaFileStorageService();
+    }
+
+    return fileStorageService;
   }
 
   @Provides
   @Singleton
   public INetworkConfigurationManager provideNetworkConfigurationManager() {
-    return new NetworkConfigurationManager();
+    if(networkConfigurationManager == null) {
+      networkConfigurationManager = new NetworkConfigurationManager();
+    }
+
+    return networkConfigurationManager;
   }
 
 
   @Provides
   @Singleton
   public EntityManagerConfiguration provideEntityManagerConfiguration() {
-    return new EntityManagerConfiguration(EntityManagerDefaultConfiguration.DEFAULT_DATA_FOLDER, EntityManagerDefaultConfiguration.APPLICATION_DATA_MODEL_VERSION);
+    if(entityManagerConfiguration == null) {
+      entityManagerConfiguration = new EntityManagerConfiguration(EntityManagerDefaultConfiguration.DEFAULT_DATA_FOLDER, EntityManagerDefaultConfiguration.APPLICATION_DATA_MODEL_VERSION);
+    }
+
+    return entityManagerConfiguration;
   }
 
   @Provides
   @Singleton
   public IEntityManager provideEntityManager(EntityManagerConfiguration configuration) throws RuntimeException {
-    try {
-      return new CouchbaseLiteEntityManagerAndroid(getContext(), configuration);
-    } catch(Exception e) {
-      // TODO: what to do in error case? (should actually never occur, but if?)
+    if(entityManager == null) {
+      try {
+          entityManager = new CouchbaseLiteEntityManagerAndroid(getContext(), configuration);
+      } catch(Exception e) {
+        // TODO: what to do in error case? (should actually never occur, but if?)
+      }
     }
 
-    return null;
+    return entityManager;
   }
 
 
   @Provides
   @Singleton
   public ISyncManager provideSyncManager(IEntityManager entityManager, INetworkConfigurationManager networkConfigurationManager, IDevicesManager devicesManager, IThreadPool threadPool) {
-    return new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkConfigurationManager, devicesManager, threadPool,
-        SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
+    if(syncManager == null) {
+      syncManager = new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkConfigurationManager, devicesManager, threadPool,
+          SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
+    }
+
+    return syncManager;
   }
 
   @Provides
   @Singleton
   public ISyncConfigurationManager provideSyncConfigurationManager(Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                                                    IDataMerger dataMerger, FileSyncService fileSyncService, IFileStorageService fileStorageService, IThreadPool threadPool) {
-    return new SyncConfigurationManagerAndroid(getContext(), localization, syncManager, dataManager, entityManager, devicesManager, dataMerger,
-        fileSyncService, fileStorageService, threadPool);
+    if(syncConfigurationManager == null) {
+      syncConfigurationManager = new SyncConfigurationManagerAndroid(getContext(), localization, syncManager, dataManager, entityManager, devicesManager, dataMerger,
+          fileSyncService, fileStorageService, threadPool);
+    }
+
+    return syncConfigurationManager;
   }
 
   @Provides
   @Singleton
   public ISyncModuleConfigurationManager provideSyncModuleConfigurationManager(ISyncConfigurationManager syncConfigurationManager, IEntityManager entityManager, IDataManager dataManager) {
-    return new SyncModuleConfigurationManager(syncConfigurationManager, entityManager, dataManager);
+    if(syncModuleConfigurationManager == null) {
+      syncModuleConfigurationManager = new SyncModuleConfigurationManager(syncConfigurationManager, entityManager, dataManager);
+    }
+
+    return syncModuleConfigurationManager;
   }
 
 }
