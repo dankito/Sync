@@ -8,12 +8,14 @@ import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.javafx.FXUtils;
 import net.dankito.sync.javafx.controls.cells.DeviceOrSyncModuleConfigurationTreeCell;
+import net.dankito.sync.javafx.controls.content.CallLogContentPane;
 import net.dankito.sync.javafx.controls.content.ContactsContentPane;
 import net.dankito.sync.javafx.controls.treeitems.DeviceRootTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceTreeItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
+import net.dankito.sync.synchronization.modules.CallLogJavaEndpointSyncModule;
 import net.dankito.sync.synchronization.modules.ContactsJavaEndpointSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
 import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
@@ -83,6 +85,9 @@ public class MainWindowController {
 
   @Inject
   protected ContactsContentPane contactsContentPane;
+
+  @Inject
+  protected CallLogContentPane callLogContentPane;
 
 
   public void init(ApplicationContext context, Stage stage) {
@@ -155,13 +160,7 @@ public class MainWindowController {
 
   protected void selectedKnownSynchronizedDevicesTreeNodeChanged(Object selectedValue) {
     if(selectedValue instanceof SyncModuleSyncModuleConfigurationPair) {
-      SyncModuleSyncModuleConfigurationPair pair = (SyncModuleSyncModuleConfigurationPair)selectedValue;
-      if(pair.getSyncModule() instanceof ContactsJavaEndpointSyncModule) {
-        showContactsContentPane();
-      }
-      else {
-        showUnselectedNodeContentPane();
-      }
+      showContentPaneForSyncModule((SyncModuleSyncModuleConfigurationPair) selectedValue);
     }
     else {
       showUnselectedNodeContentPane();
@@ -174,15 +173,35 @@ public class MainWindowController {
 
     contactsContentPane = context.getBean(ContactsContentPane.class);
     contactsContentPane.init();
+
+    callLogContentPane = context.getBean(CallLogContentPane.class);
+    callLogContentPane.init();
   }
 
 
-  protected void showUnselectedNodeContentPane() {
-    setContent(unselectedNodeContentPane);
+  protected void showContentPaneForSyncModule(SyncModuleSyncModuleConfigurationPair selectedValue) {
+    SyncModuleSyncModuleConfigurationPair pair = selectedValue;
+    if(pair.getSyncModule() instanceof ContactsJavaEndpointSyncModule) {
+      showContactsContentPane();
+    }
+    else if(pair.getSyncModule() instanceof CallLogJavaEndpointSyncModule) {
+      showCallLogContentPane();
+    }
+    else {
+      showUnselectedNodeContentPane();
+    }
   }
 
   protected void showContactsContentPane() {
     setContent(contactsContentPane);
+  }
+
+  protected void showCallLogContentPane() {
+    setContent(callLogContentPane);
+  }
+
+  protected void showUnselectedNodeContentPane() {
+    setContent(unselectedNodeContentPane);
   }
 
   protected void setContent(Node contentPane) {
