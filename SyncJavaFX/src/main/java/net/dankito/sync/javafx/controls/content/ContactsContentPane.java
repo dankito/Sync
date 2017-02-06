@@ -15,14 +15,17 @@ import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SynchronizationListener;
 import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
+import net.dankito.utils.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -121,7 +124,9 @@ public class ContactsContentPane extends VBox implements Initializable {
   protected void updateContacts(DiscoveredDevice selectedRemoteDevice) {
     List<ContactSyncEntity> contacts = getSynchronizedContactsForRemoteDevice(selectedRemoteDevice);
 
-    tbvwContacts.setItems(FXCollections.observableArrayList(contacts));
+    ObservableList<ContactSyncEntity> items = FXCollections.observableArrayList(contacts);
+    FXCollections.sort(items, contactsComparator);
+    tbvwContacts.setItems(items);
   }
 
   protected List<ContactSyncEntity> getSynchronizedContactsForRemoteDevice(DiscoveredDevice remoteDevice) {
@@ -137,6 +142,21 @@ public class ContactsContentPane extends VBox implements Initializable {
 
     return contactsForDevice;
   }
+
+
+  protected Comparator<ContactSyncEntity> contactsComparator = new Comparator<ContactSyncEntity>() {
+    @Override
+    public int compare(ContactSyncEntity o1, ContactSyncEntity o2) {
+      if(StringUtils.isNullOrEmpty(o1.getDisplayName()) && StringUtils.isNotNullOrEmpty(o2.getDisplayName())) {
+        return 1;
+      }
+      else if(StringUtils.isNotNullOrEmpty(o1.getDisplayName()) && StringUtils.isNullOrEmpty(o2.getDisplayName())) {
+        return -1;
+      }
+
+      return o1.getDisplayName().compareTo(o2.getDisplayName());
+    }
+  };
 
 
   protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
