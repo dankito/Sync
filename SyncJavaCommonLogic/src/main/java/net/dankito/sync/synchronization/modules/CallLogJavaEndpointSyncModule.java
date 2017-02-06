@@ -19,7 +19,7 @@ public class CallLogJavaEndpointSyncModule extends SyncModuleWithoutSystemStorag
 
   @Override
   public int getDisplayPriority() {
-    return DISPLAY_PRIORITY_HIGHEST;
+    return DISPLAY_PRIORITY_LOW;
   }
 
   @Override

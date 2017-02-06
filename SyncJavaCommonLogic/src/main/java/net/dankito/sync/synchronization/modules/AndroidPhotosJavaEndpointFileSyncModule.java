@@ -20,7 +20,7 @@ public class AndroidPhotosJavaEndpointFileSyncModule extends FileSyncModule {
 
   @Override
   public int getDisplayPriority() {
-    return DISPLAY_PRIORITY_LOW;
+    return DISPLAY_PRIORITY_HIGHEST;
   }
 
   @Override
