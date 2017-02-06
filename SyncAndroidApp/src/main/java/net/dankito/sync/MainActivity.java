@@ -29,9 +29,9 @@ import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
-import net.dankito.sync.di.AndroidDiComponent;
-import net.dankito.sync.di.AndroidDiContainer;
-import net.dankito.sync.di.DaggerAndroidDiComponent;
+import net.dankito.sync.di.AndroidActivityDiComponent;
+import net.dankito.sync.di.AndroidActivityDiContainer;
+import net.dankito.sync.di.DaggerAndroidActivityDiComponent;
 import net.dankito.sync.service.SyncBackgroundService;
 import net.dankito.sync.service.SyncBackgroundServiceBinder;
 
@@ -40,9 +40,9 @@ import javax.inject.Inject;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 
-  protected static AndroidDiComponent component;
+  protected static AndroidActivityDiComponent component;
 
-  public static AndroidDiComponent getComponent() {
+  public static AndroidActivityDiComponent getComponent() {
     return component;
   }
 
@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   }
 
   protected void setupDependencyInjection() {
-    component = DaggerAndroidDiComponent.builder()
-        .androidDiContainer(new AndroidDiContainer(this))
+    component = DaggerAndroidActivityDiComponent.builder()
+        .androidActivityDiContainer(new AndroidActivityDiContainer(this))
         .androidServiceDiContainer(syncBackgroundService.getDiContainer())
         .build();
 

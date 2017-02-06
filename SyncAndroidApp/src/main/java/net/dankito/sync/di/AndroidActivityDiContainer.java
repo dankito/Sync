@@ -13,12 +13,12 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class AndroidDiContainer {
+public class AndroidActivityDiContainer {
 
   protected final Activity activity;
 
 
-  public AndroidDiContainer(Activity activity) {
+  public AndroidActivityDiContainer(Activity activity) {
     this.activity = activity;
   }
 
