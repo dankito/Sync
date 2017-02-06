@@ -20,12 +20,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
 
-public class DeviceTreeCell extends TreeCell<DiscoveredDevice> {
+public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<DiscoveredDevice> {
 
   protected static final int TREE_CELL_HEIGHT = 80;
 
 
-  protected HBox graphicPane;
+  protected HBox deviceGraphicPane;
 
   protected ImageView imgvwOsIcon;
 
@@ -36,7 +36,7 @@ public class DeviceTreeCell extends TreeCell<DiscoveredDevice> {
   protected Label lblDeviceAddress;
 
 
-  public DeviceTreeCell() {
+  public DeviceOrSyncModuleConfigurationTreeCell() {
     setupGraphic();
   }
 
@@ -48,24 +48,24 @@ public class DeviceTreeCell extends TreeCell<DiscoveredDevice> {
     setMinHeight(TREE_CELL_HEIGHT);
     setMaxHeight(TREE_CELL_HEIGHT);
 
-    graphicPane = new HBox();
-    graphicPane.setAlignment(Pos.CENTER_LEFT);
-    graphicPane.setMinHeight(TREE_CELL_HEIGHT);
-    graphicPane.setMaxHeight(TREE_CELL_HEIGHT);
+    deviceGraphicPane = new HBox();
+    deviceGraphicPane.setAlignment(Pos.CENTER_LEFT);
+    deviceGraphicPane.setMinHeight(TREE_CELL_HEIGHT);
+    deviceGraphicPane.setMaxHeight(TREE_CELL_HEIGHT);
 
     imgvwOsIcon = new ImageView();
     imgvwOsIcon.setFitWidth(TREE_CELL_HEIGHT);
     imgvwOsIcon.setFitHeight(TREE_CELL_HEIGHT );
 
-    graphicPane.getChildren().add(imgvwOsIcon);
+    deviceGraphicPane.getChildren().add(imgvwOsIcon);
     HBox.setMargin(imgvwOsIcon, new Insets(6, 6, 6, 0));
 
     pnDeviceInfo = new VBox();
     pnDeviceInfo.setAlignment(Pos.CENTER_LEFT);
 
-    graphicPane.getChildren().add(pnDeviceInfo);
-    HBox.setHgrow(graphicPane, Priority.ALWAYS);
-    HBox.setMargin(graphicPane, new Insets(0, 6, 0, 6));
+    deviceGraphicPane.getChildren().add(pnDeviceInfo);
+    HBox.setHgrow(deviceGraphicPane, Priority.ALWAYS);
+    HBox.setMargin(deviceGraphicPane, new Insets(0, 6, 0, 6));
 
     lblDeviceName = new Label();
     lblDeviceName.setFont(new Font(18));
@@ -95,7 +95,7 @@ public class DeviceTreeCell extends TreeCell<DiscoveredDevice> {
       setGraphic(null);
     }
     else {
-      setGraphic(graphicPane);
+      setGraphic(deviceGraphicPane);
 
       imgvwOsIcon.setImage(new Image(IconManager.getInstance().getLogoForOperatingSystem(item.getDevice().getOsName(), item.getDevice().getOsVersion())));
 
