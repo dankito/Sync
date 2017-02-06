@@ -1,6 +1,11 @@
 package net.dankito.sync;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -27,6 +32,8 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.di.AndroidDiComponent;
 import net.dankito.sync.di.AndroidDiContainer;
 import net.dankito.sync.di.DaggerAndroidDiComponent;
+import net.dankito.sync.service.SyncBackgroundService;
+import net.dankito.sync.service.SyncBackgroundServiceBinder;
 
 import javax.inject.Inject;
 
@@ -47,6 +54,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   protected IPermissionsManager permissionsManager;
 
 
+  protected SyncBackgroundService syncBackgroundService = null;
+
+
+  protected ListView lstvwUnknownDiscoveredDevices;
+
+  protected ListView lstvwKnownSynchronizedDiscoveredDevices;
+
   protected LinearLayout linlytUnknownDiscoveredDevices;
 
   protected LinearLayout linlytKnownSynchronizedDiscoveredDevices;
@@ -58,16 +72,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    setupDependencyInjection();
-
     setupUi();
+  }
 
-    setupLogic();
+  @Override
+  protected void onResume() {
+    super.onResume();
+
+    Intent intent= new Intent(this, SyncBackgroundService.class);
+    startService(intent);
+    bindService(intent, syncBackgroundServiceConnection, Context.BIND_AUTO_CREATE);
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+
+    unbindService(syncBackgroundServiceConnection);
+  }
+
+  protected void setupActivity() {
+    if(isAlreadySetup() == false) {
+      setupDependencyInjection();
+
+      setupLogic();
+    }
+  }
+
+  protected boolean isAlreadySetup() {
+    return component != null;
   }
 
   protected void setupDependencyInjection() {
     component = DaggerAndroidDiComponent.builder()
         .androidDiContainer(new AndroidDiContainer(this))
+        .androidServiceDiContainer(syncBackgroundService.getDiContainer())
         .build();
 
     component.inject(this);
@@ -75,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   protected void setupUi() {
     setContentView(R.layout.activity_main);
+
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
@@ -97,11 +137,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 //    navigationView.setNavigationItemSelectedListener(this);
 
-    ListView lstvwUnknownDiscoveredDevices = (ListView)findViewById(R.id.lstvwUnknownDiscoveredDevices);
-    lstvwUnknownDiscoveredDevices.setAdapter(new UnknownDiscoveredDevicesAdapter(this, devicesManager));
+    lstvwUnknownDiscoveredDevices = (ListView)findViewById(R.id.lstvwUnknownDiscoveredDevices);
 
-    ListView lstvwKnownSynchronizedDiscoveredDevices = (ListView)findViewById(R.id.lstvwKnownSynchronizedDiscoveredDevices);
-    lstvwKnownSynchronizedDiscoveredDevices.setAdapter(new KnownSynchronizedDiscoveredDevicesAdapter(this, devicesManager));
+    lstvwKnownSynchronizedDiscoveredDevices = (ListView)findViewById(R.id.lstvwKnownSynchronizedDiscoveredDevices);
 
     linlytUnknownDiscoveredDevices = (LinearLayout)findViewById(R.id.linlytUnknownDiscoveredDevices);
 
@@ -175,10 +213,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
   protected void setupLogic() {
-    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
+    lstvwUnknownDiscoveredDevices.setAdapter(new UnknownDiscoveredDevicesAdapter(this, devicesManager));
+    lstvwKnownSynchronizedDiscoveredDevices.setAdapter(new KnownSynchronizedDiscoveredDevicesAdapter(this, devicesManager));
 
-    devicesManager.start();
+    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
   }
+
+
+  protected ServiceConnection syncBackgroundServiceConnection = new ServiceConnection() {
+
+    public void onServiceConnected(ComponentName className, IBinder binder) {
+      SyncBackgroundServiceBinder backgroundServiceBinder = (SyncBackgroundServiceBinder) binder;
+      syncBackgroundService = backgroundServiceBinder.getService();
+
+      setupActivity();
+    }
+
+    public void onServiceDisconnected(ComponentName className) {
+      syncBackgroundService = null;
+    }
+  };
 
 
   protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
