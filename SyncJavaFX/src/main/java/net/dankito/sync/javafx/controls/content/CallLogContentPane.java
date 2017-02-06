@@ -72,7 +72,7 @@ public class CallLogContentPane extends VBox implements Initializable {
     VBox.setVgrow(tbvwCallLog, Priority.ALWAYS);
 
     clmnDate = new TableColumn<>();
-    clmnDate.setPrefWidth(150);
+    clmnDate.setPrefWidth(180);
     localization.bindTableColumnText(clmnDate, "date");
     clmnDate.setCellFactory(param -> new CallLogDateTableCell());
     tbvwCallLog.getColumns().add(clmnDate);
@@ -84,7 +84,7 @@ public class CallLogContentPane extends VBox implements Initializable {
     tbvwCallLog.getColumns().add(clmnDuration);
 
     clmnNumber = new TableColumn<>();
-    clmnNumber.setPrefWidth(200);
+    clmnNumber.setPrefWidth(350);
     localization.bindTableColumnText(clmnNumber, "number");
     clmnNumber.setCellFactory(param -> new CallLogPhoneNumberTableCell());
     tbvwCallLog.getColumns().add(clmnNumber);
