@@ -16,8 +16,6 @@ import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
 import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -37,27 +35,7 @@ public class SyncModuleConfigurationsAdapter extends BaseAdapter {
     this.syncModuleConfigurationManager = syncModuleConfigurationManager;
     this.syncModuleConfigurationsForDevice = syncModuleConfigurationsForDevice;
 
-    this.sortedSyncConfigurationModules = new ArrayList<>(syncModuleConfigurationsForDevice.getSyncModuleConfigurations());
-
-    sortSyncConfigurationModules();
-  }
-
-  private void sortSyncConfigurationModules() {
-    Collections.sort(sortedSyncConfigurationModules, new Comparator<SyncModuleSyncModuleConfigurationPair>() {
-      @Override
-      public int compare(SyncModuleSyncModuleConfigurationPair o1, SyncModuleSyncModuleConfigurationPair o2) {
-        int displayPriority1 = o1.getSyncModule().getDisplayPriority();
-        int displayPriority2 = o2.getSyncModule().getDisplayPriority();
-
-        if(displayPriority1 > displayPriority2) {
-          return 1;
-        }
-        if(displayPriority1 == displayPriority2) {
-          return 0;
-        }
-        return -1;
-      }
-    });
+    this.sortedSyncConfigurationModules = new ArrayList<>(syncModuleConfigurationsForDevice.getSyncModuleConfigurationsSorted());
   }
 
 
