@@ -19,4 +19,9 @@ public class DeviceTreeItem extends TreeItem {
     this.remoteDevice = remoteDevice;
   }
 
+
+  public DiscoveredDevice getRemoteDevice() {
+    return remoteDevice;
+  }
+
 }
