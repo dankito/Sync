@@ -2,6 +2,7 @@ package net.dankito.sync.javafx.controls.cells;
 
 import net.dankito.sync.Device;
 import net.dankito.sync.OsType;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.javafx.FXUtils;
 import net.dankito.sync.javafx.services.IconManager;
@@ -20,9 +21,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
 
-public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<DiscoveredDevice> {
+public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Object> {
 
-  protected static final int TREE_CELL_HEIGHT = 80;
+  protected static final int DEVICE_TREE_CELL_HEIGHT = 80;
+
+  protected static final int SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT = 45;
 
 
   protected HBox deviceGraphicPane;
@@ -36,6 +39,11 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Discovered
   protected Label lblDeviceAddress;
 
 
+  protected HBox syncModuleConfigurationGraphicPane;
+
+  protected Label lblSyncModuleName;
+
+
   public DeviceOrSyncModuleConfigurationTreeCell() {
     setupGraphic();
   }
@@ -45,17 +53,23 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Discovered
     setText(null);
     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     setAlignment(Pos.CENTER_LEFT);
-    setMinHeight(TREE_CELL_HEIGHT);
-    setMaxHeight(TREE_CELL_HEIGHT);
 
+    setDisclosureNode(null);
+
+    setupDeviceGraphicPane();
+
+    setupSyncModuleConfigurationGraphicPane();
+  }
+
+  protected void setupDeviceGraphicPane() {
     deviceGraphicPane = new HBox();
     deviceGraphicPane.setAlignment(Pos.CENTER_LEFT);
-    deviceGraphicPane.setMinHeight(TREE_CELL_HEIGHT);
-    deviceGraphicPane.setMaxHeight(TREE_CELL_HEIGHT);
+    deviceGraphicPane.setMinHeight(DEVICE_TREE_CELL_HEIGHT);
+    deviceGraphicPane.setMaxHeight(DEVICE_TREE_CELL_HEIGHT);
 
     imgvwOsIcon = new ImageView();
-    imgvwOsIcon.setFitWidth(TREE_CELL_HEIGHT);
-    imgvwOsIcon.setFitHeight(TREE_CELL_HEIGHT );
+    imgvwOsIcon.setFitWidth(DEVICE_TREE_CELL_HEIGHT);
+    imgvwOsIcon.setFitHeight(DEVICE_TREE_CELL_HEIGHT);
 
     deviceGraphicPane.getChildren().add(imgvwOsIcon);
     HBox.setMargin(imgvwOsIcon, new Insets(6, 6, 6, 0));
@@ -87,21 +101,59 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Discovered
     VBox.setVgrow(lblDeviceAddress, Priority.ALWAYS);
   }
 
+  protected void setupSyncModuleConfigurationGraphicPane() {
+    syncModuleConfigurationGraphicPane = new HBox();
+    syncModuleConfigurationGraphicPane.setAlignment(Pos.CENTER_LEFT);
+    syncModuleConfigurationGraphicPane.setMinHeight(SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT);
+    syncModuleConfigurationGraphicPane.setMaxHeight(SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT);
+
+    lblSyncModuleName = new Label();
+    lblSyncModuleName.setFont(new Font(18));
+    lblSyncModuleName.setTextOverrun(OverrunStyle.ELLIPSIS);
+    lblSyncModuleName.setMaxWidth(FXUtils.SizeMaxValue);
+    FXUtils.ensureNodeOnlyUsesSpaceIfVisible(lblSyncModuleName);
+
+    syncModuleConfigurationGraphicPane.getChildren().add(lblSyncModuleName);
+    VBox.setVgrow(lblSyncModuleName, Priority.ALWAYS);
+    VBox.setMargin(lblSyncModuleName, new Insets(6, 0, 6, 0));
+  }
+
   @Override
-  protected void updateItem(DiscoveredDevice item, boolean empty) {
+  protected void updateItem(Object item, boolean empty) {
     super.updateItem(item, empty);
 
     if(empty) {
       setGraphic(null);
     }
     else {
-      setGraphic(deviceGraphicPane);
-
-      imgvwOsIcon.setImage(new Image(IconManager.getInstance().getLogoForOperatingSystem(item.getDevice().getOsName(), item.getDevice().getOsVersion())));
-
-      lblDeviceName.setText(getDeviceDescription(item.getDevice()));
-      lblDeviceAddress.setText(item.getAddress());
+      if(item instanceof DiscoveredDevice) {
+        showDeviceGraphic((DiscoveredDevice) item);
+      }
+      else if(item instanceof SyncModuleConfiguration) {
+        showSyncModuleConfigurationGraphic((SyncModuleConfiguration)item);
+      }
     }
+  }
+
+  protected void showSyncModuleConfigurationGraphic(SyncModuleConfiguration syncModuleConfiguration) {
+    setGraphic(syncModuleConfigurationGraphicPane);
+
+    setMinHeight(SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT);
+    setMaxHeight(SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT);
+
+    lblSyncModuleName.setText(syncModuleConfiguration.getSyncModuleType());
+  }
+
+  protected void showDeviceGraphic(DiscoveredDevice device) {
+    setGraphic(deviceGraphicPane);
+
+    setMinHeight(DEVICE_TREE_CELL_HEIGHT);
+    setMaxHeight(DEVICE_TREE_CELL_HEIGHT);
+
+    imgvwOsIcon.setImage(new Image(IconManager.getInstance().getLogoForOperatingSystem(device.getDevice().getOsName(), device.getDevice().getOsVersion())));
+
+    lblDeviceName.setText(getDeviceDescription(device.getDevice()));
+    lblDeviceAddress.setText(device.getAddress());
   }
 
   protected String getDeviceDescription(Device device) {
