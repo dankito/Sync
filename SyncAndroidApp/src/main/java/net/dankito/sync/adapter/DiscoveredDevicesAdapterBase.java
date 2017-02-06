@@ -34,6 +34,7 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
     this.devicesManager = devicesManager;
 
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
+    discoveredDevicesChanged();
   }
 
 

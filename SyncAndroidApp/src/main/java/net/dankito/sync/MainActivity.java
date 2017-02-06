@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     lstvwKnownSynchronizedDiscoveredDevices.setAdapter(new KnownSynchronizedDiscoveredDevicesAdapter(this, devicesManager));
 
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
+    discoveredDevicesChanged();
   }
 
 
