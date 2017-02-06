@@ -3,6 +3,9 @@ package net.dankito.sync.javafx.controls.content;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.Device;
+import net.dankito.sync.data.IDataManager;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.javafx.FXUtils;
 import net.dankito.sync.javafx.controls.Initializable;
 import net.dankito.sync.javafx.controls.cells.contacts.ContactEmailAddressTableCell;
@@ -11,7 +14,9 @@ import net.dankito.sync.javafx.localization.JavaFxLocalization;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SynchronizationListener;
+import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,6 +40,12 @@ public class ContactsContentPane extends VBox implements Initializable {
 
   @Inject
   protected IEntityManager entityManager;
+
+  @Inject
+  protected IDataManager dataManager;
+
+
+  protected DiscoveredDevice selectedRemoteDevice;
 
 
   protected TableView<ContactSyncEntity> tbvwContacts;
@@ -97,10 +108,34 @@ public class ContactsContentPane extends VBox implements Initializable {
     updateContacts();
   }
 
+  public void showContactsForDevice(DiscoveredDevice remoteDevice, SyncModuleSyncModuleConfigurationPair pair) {
+    updateContacts(remoteDevice);
+  }
+
   protected void updateContacts() {
-    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+    if(selectedRemoteDevice != null) {
+      updateContacts(selectedRemoteDevice);
+    }
+  }
+
+  protected void updateContacts(DiscoveredDevice selectedRemoteDevice) {
+    List<ContactSyncEntity> contacts = getSynchronizedContactsForRemoteDevice(selectedRemoteDevice);
 
     tbvwContacts.setItems(FXCollections.observableArrayList(contacts));
+  }
+
+  protected List<ContactSyncEntity> getSynchronizedContactsForRemoteDevice(DiscoveredDevice remoteDevice) {
+    List<ContactSyncEntity> contactsForDevice = new ArrayList<>();
+    Device localDevice = dataManager.getLocalConfig().getLocalDevice();
+
+    List<ContactSyncEntity> allContacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+    for(ContactSyncEntity contact : allContacts) {
+      if(contact.getSourceDevice() == remoteDevice.getDevice() || contact.getSourceDevice() == localDevice) {
+        contactsForDevice.add(contact);
+      }
+    }
+
+    return contactsForDevice;
   }
 
 
@@ -112,5 +147,4 @@ public class ContactsContentPane extends VBox implements Initializable {
       }
     }
   };
-
 }
