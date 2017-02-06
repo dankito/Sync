@@ -13,12 +13,14 @@ import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SynchronizationListener;
 
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Priority;
@@ -98,9 +100,18 @@ public class CallLogContentPane extends VBox implements Initializable {
   protected void updateCallLog() {
     List<CallLogSyncEntity> callLog = entityManager.getAllEntitiesOfType(CallLogSyncEntity.class);
 
-    tbvwCallLog.setItems(FXCollections.observableArrayList(callLog));
+    ObservableList<CallLogSyncEntity> items = FXCollections.observableArrayList(callLog);
+    FXCollections.sort(items, callLogComparator);
+    tbvwCallLog.setItems(items);
   }
 
+
+  Comparator<CallLogSyncEntity> callLogComparator = new Comparator<CallLogSyncEntity>() {
+    @Override
+    public int compare(CallLogSyncEntity o1, CallLogSyncEntity o2) {
+      return o2.getDate().compareTo(o1.getDate());
+    }
+  };
 
   protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
     @Override
