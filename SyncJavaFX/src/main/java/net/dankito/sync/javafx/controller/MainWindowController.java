@@ -59,6 +59,8 @@ public class MainWindowController {
   protected ISyncModuleConfigurationManager syncModuleConfigurationManager;
 
 
+  protected DiscoveredDevice selectedSynchronizedDevice = null;
+
   protected Map<DiscoveredDevice, DeviceTreeItem> mapUnknownDeviceDeviceTreeItem = new HashMap<>();
 
   protected Map<DiscoveredDevice, DeviceTreeItem> mapKnownSynchronizedDeviceDeviceTreeItem = new HashMap<>();
@@ -156,15 +158,26 @@ public class MainWindowController {
   }
 
   protected void selectedUnknownDiscoveredDevicesTreeNodeChanged(Object selectedValue) {
+    this.selectedSynchronizedDevice = null;
+
     showUnselectedNodeContentPane();
   }
 
   protected void selectedKnownSynchronizedDevicesTreeNodeChanged(TreeItem treeItem) {
     if(treeItem instanceof SynchronizedDeviceSyncModuleConfigurationTreeItem) {
       SynchronizedDeviceSyncModuleConfigurationTreeItem configTreeItem = (SynchronizedDeviceSyncModuleConfigurationTreeItem)treeItem;
+      this.selectedSynchronizedDevice = configTreeItem.getDevice();
+
       showContentPaneForSyncModule(configTreeItem.getDevice(), configTreeItem.getValue());
     }
+    else if(treeItem instanceof DeviceTreeItem) {
+      this.selectedSynchronizedDevice = ((DeviceTreeItem)treeItem).getRemoteDevice();
+
+      showUnselectedNodeContentPane();
+    }
     else {
+      this.selectedSynchronizedDevice = null;
+
       showUnselectedNodeContentPane();
     }
   }
@@ -227,6 +240,12 @@ public class MainWindowController {
   }
 
   protected void disconnectedFromDevice(DiscoveredDevice device) {
+    if(this.selectedSynchronizedDevice == device) {
+      trvwKnownSynchronizedDevices.getSelectionModel().clearSelection();
+      this.selectedSynchronizedDevice = null;
+      showUnselectedNodeContentPane();
+    }
+
     if(mapUnknownDeviceDeviceTreeItem.containsKey(device)) {
       DeviceTreeItem deviceTreeItem = mapUnknownDeviceDeviceTreeItem.remove(device);
       trvwUnknownDiscoveredDevices.getRoot().getChildren().remove(deviceTreeItem);
