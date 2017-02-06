@@ -112,6 +112,8 @@ public class ContactsContentPane extends VBox implements Initializable {
   }
 
   public void showContactsForDevice(DiscoveredDevice remoteDevice, SyncModuleSyncModuleConfigurationPair pair) {
+    this.selectedRemoteDevice = remoteDevice;
+
     updateContacts(remoteDevice);
   }
 
