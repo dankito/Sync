@@ -7,9 +7,10 @@ import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.javafx.FXUtils;
-import net.dankito.sync.javafx.controls.cells.DeviceTreeCell;
+import net.dankito.sync.javafx.controls.cells.DeviceOrSyncModuleConfigurationTreeCell;
 import net.dankito.sync.javafx.controls.treeitems.DeviceRootTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
+import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceTreeItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
@@ -99,7 +100,7 @@ public class MainWindowController {
     trvwUnknownDiscoveredDevices.setCellFactory(new Callback<TreeView, TreeCell>() {
       @Override
       public TreeCell call(TreeView param) {
-        return new DeviceTreeCell();
+        return new DeviceOrSyncModuleConfigurationTreeCell();
       }
     });
 
@@ -110,7 +111,7 @@ public class MainWindowController {
     trvwKnownSynchronizedDevices.setCellFactory(new Callback<TreeView, TreeCell>() {
       @Override
       public TreeCell call(TreeView param) {
-        return new DeviceTreeCell();
+        return new DeviceOrSyncModuleConfigurationTreeCell();
       }
     });
 
@@ -120,14 +121,14 @@ public class MainWindowController {
 
 
   protected void connectedToUnknownDevice(DiscoveredDevice connectedDevice) {
-    DeviceTreeItem treeItem = new DeviceTreeItem(connectedDevice, dataManager.getLocalConfig().getLocalDevice());
+    DeviceTreeItem treeItem = new DeviceTreeItem(connectedDevice);
     trvwUnknownDiscoveredDevices.getRoot().getChildren().add(treeItem);
 
     mapUnknownDeviceDeviceTreeItem.put(connectedDevice, treeItem);
   }
 
   protected void connectedToSynchronizedDevice(DiscoveredDevice connectedDevice) {
-    DeviceTreeItem treeItem = new DeviceTreeItem(connectedDevice, dataManager.getLocalConfig().getLocalDevice());
+    DeviceTreeItem treeItem = new SynchronizedDeviceTreeItem(connectedDevice, dataManager.getLocalConfig().getLocalDevice());
     trvwKnownSynchronizedDevices.getRoot().getChildren().add(treeItem);
 
     mapKnownSynchronizedDeviceDeviceTreeItem.put(connectedDevice, treeItem);
