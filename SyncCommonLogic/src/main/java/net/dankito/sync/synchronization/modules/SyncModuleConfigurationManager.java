@@ -10,7 +10,10 @@ import net.dankito.sync.synchronization.ISyncConfigurationManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.inject.Named;
 
+
+@Named
 public class SyncModuleConfigurationManager implements ISyncModuleConfigurationManager {
 
 
