@@ -13,6 +13,7 @@ import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceTreeItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
+import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
 
 import org.springframework.context.ApplicationContext;
 
@@ -41,6 +42,8 @@ public class MainWindowController {
   protected IDevicesManager devicesManager;
 
   protected ISyncConfigurationManager syncConfigurationManager;
+
+  protected ISyncModuleConfigurationManager syncModuleConfigurationManager;
 
 
   protected Map<DiscoveredDevice, DeviceTreeItem> mapUnknownDeviceDeviceTreeItem = new HashMap<>();
@@ -82,6 +85,8 @@ public class MainWindowController {
     dataManager = context.getBean(IDataManager.class);
 
     syncConfigurationManager = context.getBean(ISyncConfigurationManager.class);
+
+    syncModuleConfigurationManager = context.getBean(ISyncModuleConfigurationManager.class);
 
     devicesManager = context.getBean(IDevicesManager.class);
   }
@@ -128,7 +133,7 @@ public class MainWindowController {
   }
 
   protected void connectedToSynchronizedDevice(DiscoveredDevice connectedDevice) {
-    DeviceTreeItem treeItem = new SynchronizedDeviceTreeItem(connectedDevice, dataManager.getLocalConfig().getLocalDevice());
+    DeviceTreeItem treeItem = new SynchronizedDeviceTreeItem(connectedDevice, syncModuleConfigurationManager);
     trvwKnownSynchronizedDevices.getRoot().getChildren().add(treeItem);
 
     mapKnownSynchronizedDeviceDeviceTreeItem.put(connectedDevice, treeItem);

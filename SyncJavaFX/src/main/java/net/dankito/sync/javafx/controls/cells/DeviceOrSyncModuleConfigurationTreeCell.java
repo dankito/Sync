@@ -2,10 +2,10 @@ package net.dankito.sync.javafx.controls.cells;
 
 import net.dankito.sync.Device;
 import net.dankito.sync.OsType;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.javafx.FXUtils;
 import net.dankito.sync.javafx.services.IconManager;
+import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -129,19 +129,19 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Object> {
       if(item instanceof DiscoveredDevice) {
         showDeviceGraphic((DiscoveredDevice) item);
       }
-      else if(item instanceof SyncModuleConfiguration) {
-        showSyncModuleConfigurationGraphic((SyncModuleConfiguration)item);
+      else if(item instanceof SyncModuleSyncModuleConfigurationPair) {
+        showSyncModuleConfigurationGraphic((SyncModuleSyncModuleConfigurationPair)item);
       }
     }
   }
 
-  protected void showSyncModuleConfigurationGraphic(SyncModuleConfiguration syncModuleConfiguration) {
+  protected void showSyncModuleConfigurationGraphic(SyncModuleSyncModuleConfigurationPair pair) {
     setGraphic(syncModuleConfigurationGraphicPane);
 
     setMinHeight(SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT);
     setMaxHeight(SYNC_MODULE_CONFIGURATION_TREE_CELL_HEIGHT);
 
-    lblSyncModuleName.setText(syncModuleConfiguration.getSyncModuleType());
+    lblSyncModuleName.setText(pair.getSyncModule().getName());
   }
 
   protected void showDeviceGraphic(DiscoveredDevice device) {

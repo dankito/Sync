@@ -1,74 +1,40 @@
 package net.dankito.sync.javafx.controls.treeitems;
 
-import net.dankito.sync.Device;
-import net.dankito.sync.SyncConfiguration;
-import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
+import net.dankito.sync.synchronization.modules.SyncConfigurationWithDevice;
+import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
 
 public class SynchronizedDeviceTreeItem extends DeviceTreeItem {
 
-  protected Device localDevice;
+  protected ISyncModuleConfigurationManager syncModuleConfigurationManager;
 
 
 
-  public SynchronizedDeviceTreeItem(DiscoveredDevice remoteDevice, Device localDevice) {
+  public SynchronizedDeviceTreeItem(DiscoveredDevice remoteDevice, ISyncModuleConfigurationManager syncModuleConfigurationManager) {
     super(remoteDevice);
-    this.localDevice = localDevice;
 
-    setupItem(remoteDevice);
+    this.syncModuleConfigurationManager = syncModuleConfigurationManager;
+
+    setupSyncModuleConfigurationChildren(remoteDevice, syncModuleConfigurationManager);
   }
 
 
-  protected void setupItem(DiscoveredDevice remoteDevice) {
+  protected void setupSyncModuleConfigurationChildren(DiscoveredDevice remoteDevice, ISyncModuleConfigurationManager syncModuleConfigurationManager) {
     setExpanded(true);
 
-    List<SyncConfiguration> syncConfigurations = getSyncConfigurationsForAllSynchronizingDevices(remoteDevice.getDevice());
+    SyncConfigurationWithDevice syncModuleConfigurationsForDevice = syncModuleConfigurationManager.getSyncModuleConfigurationsForDevice(remoteDevice);
 
-    for(SyncConfiguration syncConfiguration : syncConfigurations) {
-      for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-        addSyncModuleConfigurationChild(syncModuleConfiguration);
-      }
+    for(SyncModuleSyncModuleConfigurationPair pair : syncModuleConfigurationsForDevice.getSyncModuleConfigurationsSorted()) {
+      addSyncModuleConfigurationChild(pair);
     }
   }
 
-  protected void addSyncModuleConfigurationChild(SyncModuleConfiguration syncModuleConfiguration) {
-    SyncModuleConfigurationTreeItem child = new SyncModuleConfigurationTreeItem(syncModuleConfiguration);
+  protected void addSyncModuleConfigurationChild(SyncModuleSyncModuleConfigurationPair pair) {
+    SyncModuleConfigurationTreeItem child = new SyncModuleConfigurationTreeItem(pair);
 
     getChildren().add(child);
-  }
-
-  protected List<SyncConfiguration> getSyncConfigurationsForAllSynchronizingDevices(Device remoteDevice) {
-    List<SyncConfiguration> syncConfigurations = new ArrayList<>();
-
-    for(SyncConfiguration syncConfiguration : remoteDevice.getSourceSyncConfigurations()) {
-      if(syncConfiguration.getDestinationDevice() == localDevice) {
-        syncConfigurations.add(syncConfiguration);
-      }
-    }
-
-    for(SyncConfiguration syncConfiguration : remoteDevice.getDestinationSyncConfigurations()) {
-      if(syncConfiguration.getSourceDevice() == localDevice) {
-        syncConfigurations.add(syncConfiguration);
-      }
-    }
-
-    Collections.sort(syncConfigurations, new Comparator<SyncConfiguration>() {
-      @Override
-      public int compare(SyncConfiguration config1, SyncConfiguration config2) {
-        Device device1 = config1.getSourceDevice() == remoteDevice ? config1.getDestinationDevice() : config1.getSourceDevice();
-        Device device2 = config2.getSourceDevice() == remoteDevice ? config2.getDestinationDevice() : config2.getSourceDevice();
-
-        return device1.toString().compareTo(device2.toString());
-      }
-    });
-
-    return syncConfigurations;
   }
 
 }

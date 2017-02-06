@@ -1,19 +1,19 @@
 package net.dankito.sync.javafx.controls.treeitems;
 
-import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
 import javafx.scene.control.TreeItem;
 
 
-public class SyncModuleConfigurationTreeItem extends TreeItem<SyncModuleConfiguration> {
+public class SyncModuleConfigurationTreeItem extends TreeItem<SyncModuleSyncModuleConfigurationPair> {
 
 
-  protected SyncModuleConfiguration syncModuleConfiguration;
+  protected SyncModuleSyncModuleConfigurationPair SyncModuleSyncModuleConfigurationPair;
 
 
-  public SyncModuleConfigurationTreeItem(SyncModuleConfiguration syncModuleConfiguration) {
-    super(syncModuleConfiguration);
-    this.syncModuleConfiguration = syncModuleConfiguration;
+  public SyncModuleConfigurationTreeItem(SyncModuleSyncModuleConfigurationPair pair) {
+    super(pair);
+    this.SyncModuleSyncModuleConfigurationPair = pair;
   }
 
 }
