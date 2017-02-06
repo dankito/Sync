@@ -12,6 +12,7 @@ import net.dankito.sync.javafx.controls.content.CallLogContentPane;
 import net.dankito.sync.javafx.controls.content.ContactsContentPane;
 import net.dankito.sync.javafx.controls.treeitems.DeviceRootTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
+import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceSyncModuleConfigurationTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceTreeItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
@@ -150,7 +151,7 @@ public class MainWindowController {
     trvwKnownSynchronizedDevices.setShowRoot(false);
     trvwKnownSynchronizedDevices.setRoot(new DeviceRootTreeItem());
     trvwKnownSynchronizedDevices.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-      selectedKnownSynchronizedDevicesTreeNodeChanged(((TreeItem)newValue).getValue());
+      selectedKnownSynchronizedDevicesTreeNodeChanged((TreeItem)newValue);
     });
   }
 
@@ -158,9 +159,10 @@ public class MainWindowController {
     showUnselectedNodeContentPane();
   }
 
-  protected void selectedKnownSynchronizedDevicesTreeNodeChanged(Object selectedValue) {
-    if(selectedValue instanceof SyncModuleSyncModuleConfigurationPair) {
-      showContentPaneForSyncModule((SyncModuleSyncModuleConfigurationPair) selectedValue);
+  protected void selectedKnownSynchronizedDevicesTreeNodeChanged(TreeItem treeItem) {
+    if(treeItem instanceof SynchronizedDeviceSyncModuleConfigurationTreeItem) {
+      SynchronizedDeviceSyncModuleConfigurationTreeItem configTreeItem = (SynchronizedDeviceSyncModuleConfigurationTreeItem)treeItem;
+      showContentPaneForSyncModule(configTreeItem.getDevice(), configTreeItem.getValue());
     }
     else {
       showUnselectedNodeContentPane();
@@ -179,10 +181,9 @@ public class MainWindowController {
   }
 
 
-  protected void showContentPaneForSyncModule(SyncModuleSyncModuleConfigurationPair selectedValue) {
-    SyncModuleSyncModuleConfigurationPair pair = selectedValue;
+  protected void showContentPaneForSyncModule(DiscoveredDevice remoteDevice, SyncModuleSyncModuleConfigurationPair pair) {
     if(pair.getSyncModule() instanceof ContactsJavaEndpointSyncModule) {
-      showContactsContentPane();
+      showContactsContentPane(remoteDevice, pair);
     }
     else if(pair.getSyncModule() instanceof CallLogJavaEndpointSyncModule) {
       showCallLogContentPane();
@@ -192,7 +193,8 @@ public class MainWindowController {
     }
   }
 
-  protected void showContactsContentPane() {
+  protected void showContactsContentPane(DiscoveredDevice remoteDevice, SyncModuleSyncModuleConfigurationPair pair) {
+    contactsContentPane.showContactsForDevice(remoteDevice, pair);
     setContent(contactsContentPane);
   }
 
