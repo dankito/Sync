@@ -1,32 +1,43 @@
 package net.dankito.sync.javafx.controller;
 
 
+import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
 import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.javafx.FXUtils;
+import net.dankito.sync.javafx.controls.content.ContactsContentPane;
 import net.dankito.sync.javafx.controls.cells.DeviceOrSyncModuleConfigurationTreeCell;
 import net.dankito.sync.javafx.controls.treeitems.DeviceRootTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.DeviceTreeItem;
 import net.dankito.sync.javafx.controls.treeitems.SynchronizedDeviceTreeItem;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
+import net.dankito.sync.synchronization.modules.ContactsJavaEndpointSyncModule;
 import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
+import net.dankito.sync.synchronization.modules.SyncModuleSyncModuleConfigurationPair;
 
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -34,6 +45,8 @@ public class MainWindowController {
 
 
   protected Stage stage = null;
+
+  protected ApplicationContext context;
 
   protected IDataManager dataManager;
 
@@ -69,8 +82,15 @@ public class MainWindowController {
   protected ScrollPane scrpnDeviceDetails;
 
 
+  protected Node unselectedNodeContentPane;
+
+  @Inject
+  protected ContactsContentPane contactsContentPane;
+
+
   public void init(ApplicationContext context, Stage stage) {
     this.stage = stage;
+    this.context = context;
 
     initDependencies(context);
 
@@ -99,6 +119,8 @@ public class MainWindowController {
 
   protected void setupUi() {
     setupDeviceTreeViews();
+
+    setupContentPane();
   }
 
   protected void setupDeviceTreeViews() {
@@ -111,6 +133,9 @@ public class MainWindowController {
 
     trvwUnknownDiscoveredDevices.setShowRoot(false);
     trvwUnknownDiscoveredDevices.setRoot(new DeviceRootTreeItem());
+    trvwUnknownDiscoveredDevices.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+      selectedUnknownDiscoveredDevicesTreeNodeChanged(((TreeItem)newValue).getValue());
+    });
 
 
     trvwKnownSynchronizedDevices.setCellFactory(new Callback<TreeView, TreeCell>() {
@@ -122,6 +147,52 @@ public class MainWindowController {
 
     trvwKnownSynchronizedDevices.setShowRoot(false);
     trvwKnownSynchronizedDevices.setRoot(new DeviceRootTreeItem());
+    trvwKnownSynchronizedDevices.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+      selectedKnownSynchronizedDevicesTreeNodeChanged(((TreeItem)newValue).getValue());
+    });
+  }
+
+  protected void selectedUnknownDiscoveredDevicesTreeNodeChanged(Object selectedValue) {
+    showUnselectedNodeContentPane();
+  }
+
+  protected void selectedKnownSynchronizedDevicesTreeNodeChanged(Object selectedValue) {
+    if(selectedValue instanceof SyncModuleSyncModuleConfigurationPair) {
+      SyncModuleSyncModuleConfigurationPair pair = (SyncModuleSyncModuleConfigurationPair)selectedValue;
+      if(pair.getSyncModule() instanceof ContactsJavaEndpointSyncModule) {
+        showContactsContentPane(pair.getSyncModuleConfiguration());
+      }
+      else {
+        showUnselectedNodeContentPane();
+      }
+    }
+    else {
+      showUnselectedNodeContentPane();
+    }
+  }
+
+
+  protected void setupContentPane() {
+    unselectedNodeContentPane = new Region();
+
+    contactsContentPane = context.getBean(ContactsContentPane.class);
+    contactsContentPane.init();
+  }
+
+
+  protected void showUnselectedNodeContentPane() {
+    setContent(unselectedNodeContentPane);
+  }
+
+  protected void showContactsContentPane(SyncModuleConfiguration syncModuleConfiguration) {
+    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+    contactsContentPane.setContacts(contacts);
+
+    setContent(contactsContentPane);
+  }
+
+  protected void setContent(Node contentPane) {
+    scrpnDeviceDetails.setContent(contentPane);
   }
 
 
