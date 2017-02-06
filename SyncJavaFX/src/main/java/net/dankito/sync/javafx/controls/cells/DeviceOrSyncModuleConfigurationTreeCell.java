@@ -17,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
@@ -54,11 +55,18 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Object> {
     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     setAlignment(Pos.CENTER_LEFT);
 
-    setDisclosureNode(null);
-
     setupDeviceGraphicPane();
 
     setupSyncModuleConfigurationGraphicPane();
+
+    centerDisclosureNode();
+  }
+
+  protected void centerDisclosureNode() {
+    disclosureNodeProperty().addListener((obs, oldNode, newNode) -> {
+      final StackPane pane = (StackPane) newNode;
+      newNode.translateYProperty().bind(heightProperty().multiply(0.5).subtract(pane.heightProperty()));
+    });
   }
 
   protected void setupDeviceGraphicPane() {
