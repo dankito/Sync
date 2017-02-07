@@ -65,7 +65,7 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void start() {
-    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getDeviceInfoFromDeviceForDevicesDiscoverer(localConfig.getLocalDevice()), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
+    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getDeviceInfoForDevicesDiscoverer(localConfig.getLocalDevice()), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
         DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
@@ -274,7 +274,7 @@ public class DevicesManager implements IDevicesManager {
   }
 
   // TODO: replace by normal call to getDeviceInfoFromDevice() as soon as Message Bus is implemented
-  protected String getDeviceInfoFromDeviceForDevicesDiscoverer(Device device) {
+  protected String getDeviceInfoForDevicesDiscoverer(Device device) {
     try {
       return objectMapper.writeValueAsString(new DeviceMap(device));
     } catch(Exception e) {
