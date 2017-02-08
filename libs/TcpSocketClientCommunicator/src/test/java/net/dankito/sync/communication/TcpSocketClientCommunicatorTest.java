@@ -65,7 +65,7 @@ public class TcpSocketClientCommunicatorTest {
   public void setUp() throws Exception {
     socketHandler = Mockito.spy(new SocketHandler());
     messageSerializer = Mockito.spy(new JsonMessageSerializer());
-    threadPool = Mockito.spy(new ThreadPool());
+    threadPool = new ThreadPool();
 
     setupRemoteMessagesReceiver();
 
@@ -291,6 +291,32 @@ public class TcpSocketClientCommunicatorTest {
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
     Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
+  }
+
+
+  @Test
+  public void sendMessageReturnsError() {
+    Mockito.doReturn(new SocketResult(false)).when(socketHandler).sendMessage(Mockito.any(Socket.class), Mockito.any(byte[].class));
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.SEND_REQUEST_TO_REMOTE, response.getErrorType());
   }
 
 
