@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 public class TcpSocketClientCommunicatorTest {
@@ -101,7 +102,7 @@ public class TcpSocketClientCommunicatorTest {
     remoteRequestReceiver = new RequestReceiver(socketHandler, remoteMessageHandler, messageSerializer, threadPool);
     remoteRequestReceiver.start(MESSAGES_RECEIVER_PORT, remoteNetworkSettings);
 
-    try { waitForMessagesReceiverBeingSetupLatch.await(); } catch(Exception e) { }
+    try { waitForMessagesReceiverBeingSetupLatch.await(1, TimeUnit.SECONDS); } catch(Exception e) { }
   }
 
   @After
@@ -123,7 +124,7 @@ public class TcpSocketClientCommunicatorTest {
       }
     });
 
-    try { countDownLatch.await(); } catch(Exception ignored) { }
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
 
@@ -155,7 +156,7 @@ public class TcpSocketClientCommunicatorTest {
       }
     });
 
-    try { countDownLatch.await(); } catch(Exception ignored) { }
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
 
@@ -180,7 +181,7 @@ public class TcpSocketClientCommunicatorTest {
       }
     });
 
-    try { countDownLatch.await(); } catch(Exception ignored) { }
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
 
@@ -205,7 +206,7 @@ public class TcpSocketClientCommunicatorTest {
       }
     });
 
-    try { countDownLatch.await(); } catch(Exception ignored) { }
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
 
@@ -232,7 +233,7 @@ public class TcpSocketClientCommunicatorTest {
       }
     });
 
-    try { countDownLatch.await(); } catch(Exception ignored) { }
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
 
@@ -257,13 +258,39 @@ public class TcpSocketClientCommunicatorTest {
       }
     });
 
-    try { countDownLatch.await(); } catch(Exception ignored) { }
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
 
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
     Assert.assertEquals(ResponseErrorType.DESERIALIZE_REQUEST, response.getErrorType());
+  }
+
+
+  @Test
+  public void serializeResponseFails() throws Exception {
+    Mockito.doThrow(Exception.class).when(messageSerializer).serializeResponse(Mockito.any(Response.class));
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
   }
 
 }
