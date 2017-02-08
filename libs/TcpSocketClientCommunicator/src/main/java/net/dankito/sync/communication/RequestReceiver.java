@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 
 public class RequestReceiver implements IRequestReceiver {
@@ -108,11 +109,11 @@ public class RequestReceiver implements IRequestReceiver {
 
         receivedRequestAsync(clientSocket);
       } catch(Exception e) {
-        if(e instanceof InterruptedException) {
+        if(e instanceof InterruptedException || e instanceof SocketException) {
           break;
         }
         else {
-//          log.error("An error occurred accepting client request", e);
+          log.error("An error occurred accepting client request", e);
         }
       }
     }
