@@ -48,7 +48,7 @@ public class TcpSocketClientCommunicatorTest {
 
   protected DiscoveredDevice remoteDevice;
 
-  protected IRequestReceiver remoteRequestReceiver;
+  protected RequestReceiver remoteRequestReceiver;
 
   protected IMessageHandler remoteMessageHandler;
 
@@ -65,7 +65,7 @@ public class TcpSocketClientCommunicatorTest {
   public void setUp() throws Exception {
     socketHandler = Mockito.spy(new SocketHandler());
     messageSerializer = Mockito.spy(new JsonMessageSerializer());
-    threadPool = new ThreadPool();
+    threadPool = Mockito.spy(new ThreadPool());
 
     setupRemoteMessagesReceiver();
 
@@ -99,7 +99,7 @@ public class TcpSocketClientCommunicatorTest {
 
     remoteMessageHandler = new MessageHandler(remoteNetworkSettings);
 
-    remoteRequestReceiver = new RequestReceiver(socketHandler, remoteMessageHandler, messageSerializer, threadPool);
+    remoteRequestReceiver = Mockito.spy(new RequestReceiver(socketHandler, remoteMessageHandler, messageSerializer, threadPool));
     remoteRequestReceiver.start(MESSAGES_RECEIVER_PORT, remoteNetworkSettings);
 
     try { waitForMessagesReceiverBeingSetupLatch.await(1, TimeUnit.SECONDS); } catch(Exception e) { }
@@ -291,6 +291,28 @@ public class TcpSocketClientCommunicatorTest {
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
     Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
+  }
+
+
+  @Test
+  public void receivedRequestAsyncThrowsException_SimplyToHave100PercentLineCoverage() {
+    Mockito.doThrow(Exception.class).when(remoteRequestReceiver).receivedRequestAsync(Mockito.any(Socket.class));
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    Assert.assertFalse(responseHolder.isObjectSet());
   }
 
 }
