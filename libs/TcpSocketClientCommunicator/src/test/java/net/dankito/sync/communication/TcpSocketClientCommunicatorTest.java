@@ -4,6 +4,7 @@ import net.dankito.sync.Device;
 import net.dankito.sync.OsType;
 import net.dankito.sync.communication.callbacks.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.Request;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.communication.message.ResponseErrorType;
 import net.dankito.sync.devices.DiscoveredDevice;
@@ -61,7 +62,7 @@ public class TcpSocketClientCommunicatorTest {
   @Before
   public void setUp() throws Exception {
     socketHandler = new SocketHandler();
-    messageSerializer = new JsonMessageSerializer();
+    messageSerializer = Mockito.spy(new JsonMessageSerializer());
     threadPool = new ThreadPool();
 
     setupRemoteMessagesReceiver();
@@ -139,7 +140,7 @@ public class TcpSocketClientCommunicatorTest {
 
 
   @Test
-  public void sendMessageToClosedClient() throws Exception {
+  public void sendRequestToClosedClient() throws Exception {
     remoteRequestReceiver.close();
 
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
@@ -160,6 +161,56 @@ public class TcpSocketClientCommunicatorTest {
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
     Assert.assertEquals(ResponseErrorType.SEND_REQUEST_TO_REMOTE, response.getErrorType());
+  }
+
+
+  @Test
+  public void sendRequest_SerializingRequestFails() throws Exception {
+    Mockito.doThrow(Exception.class).when(messageSerializer).serializeRequest(Mockito.any(Request.class));
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(); } catch(Exception ignored) { }
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.SERIALIZATION_ERROR, response.getErrorType());
+  }
+
+
+  @Test
+  public void sendRequest_DeserializingResponseFails() throws Exception {
+    Mockito.doReturn(new Response(ResponseErrorType.DESERIALIZATION_ERROR, new Exception())).when(messageSerializer).deserializeResponse(Mockito.anyString(), Mockito.anyString());
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(); } catch(Exception ignored) { }
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.DESERIALIZATION_ERROR, response.getErrorType());
   }
 
 }
