@@ -93,7 +93,7 @@ public class JsonMessageSerializer implements IMessageSerializer {
       return deserializeObject(responseString, Response.class, responseBodyType);
     } catch(Exception e) {
       log.error("Could not deserialize response " + responseString, e);
-      return new Response(ResponseErrorType.DESERIALIZATION_ERROR, e);
+      return new Response(ResponseErrorType.DESERIALIZE_RESPONSE, e);
     }
   }
 

@@ -3,9 +3,9 @@ package net.dankito.sync.communication.message;
 
 public enum ResponseErrorType {
 
-  SERIALIZATION_ERROR,
+  SERIALIZE_REQUEST,
   SEND_REQUEST_TO_REMOTE,
   RETRIEVE_RESPONSE,
-  DESERIALIZATION_ERROR
+  DESERIALIZE_RESPONSE
 
 }

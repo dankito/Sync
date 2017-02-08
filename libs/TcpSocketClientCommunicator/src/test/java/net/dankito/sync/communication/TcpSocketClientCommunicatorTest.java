@@ -186,13 +186,13 @@ public class TcpSocketClientCommunicatorTest {
 
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.SERIALIZATION_ERROR, response.getErrorType());
+    Assert.assertEquals(ResponseErrorType.SERIALIZE_REQUEST, response.getErrorType());
   }
 
 
   @Test
   public void sendRequest_DeserializingResponseFails() throws Exception {
-    Mockito.doReturn(new Response(ResponseErrorType.DESERIALIZATION_ERROR, new Exception())).when(messageSerializer).deserializeResponse(Mockito.anyString(), Mockito.anyString());
+    Mockito.doReturn(new Response(ResponseErrorType.DESERIALIZE_RESPONSE, new Exception())).when(messageSerializer).deserializeResponse(Mockito.anyString(), Mockito.anyString());
 
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -211,7 +211,7 @@ public class TcpSocketClientCommunicatorTest {
 
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.DESERIALIZATION_ERROR, response.getErrorType());
+    Assert.assertEquals(ResponseErrorType.DESERIALIZE_RESPONSE, response.getErrorType());
   }
 
 

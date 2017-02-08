@@ -82,7 +82,7 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
     }
     catch(Exception e) {
       log.error("Could not send request " + request + " to client " + (socket != null ? socket.getInetAddress() : ""), e);
-      callback.done(new Response(ResponseErrorType.SERIALIZATION_ERROR, e));
+      callback.done(new Response(ResponseErrorType.SERIALIZE_REQUEST, e));
     }
 
     return false;
