@@ -1,5 +1,7 @@
 package net.dankito.sync.communication;
 
+import com.couchbase.lite.support.Base64;
+
 import net.dankito.sync.Device;
 import net.dankito.sync.OsType;
 import net.dankito.sync.communication.callbacks.SendRequestCallback;
@@ -22,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -350,6 +354,33 @@ public class TcpSocketClientCommunicatorTest {
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
     Assert.assertTrue(response.getError().getMessage().contains("exceeds max message length"));
+  }
+
+
+  @Test
+  public void sendMessageFails_ExceptionIsPassedOnToCallback() throws IOException {
+    IOException exceptionToReturn = new IOException("Arbitrary Exception");
+    Mockito.doThrow(exceptionToReturn).when(socketHandler).sendMessage(Mockito.any(Base64.InputStream.class), Mockito.any(OutputStream.class));
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(exceptionToReturn, response.getError());
   }
 
 
