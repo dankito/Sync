@@ -241,4 +241,29 @@ public class TcpSocketClientCommunicatorTest {
     Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
   }
 
+
+  @Test
+  public void deserializingRequestFails() throws Exception {
+    Mockito.doThrow(Exception.class).when(messageSerializer).deserializeRequest(Mockito.anyString());
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(); } catch(Exception ignored) { }
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.DESERIALIZE_REQUEST, response.getErrorType());
+  }
+
 }
