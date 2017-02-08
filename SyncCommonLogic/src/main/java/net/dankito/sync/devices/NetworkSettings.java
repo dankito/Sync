@@ -2,6 +2,9 @@ package net.dankito.sync.devices;
 
 import net.dankito.sync.Device;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.inject.Named;
 
 
@@ -13,6 +16,8 @@ public class NetworkSettings implements INetworkSettings {
   protected int messagePort;
 
   protected int synchronizationPort;
+
+  protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
 
 
   @Override
@@ -31,7 +36,11 @@ public class NetworkSettings implements INetworkSettings {
 
   @Override
   public void setMessagePort(int messagePort) {
+    Object oldValue = this.messagePort;
+
     this.messagePort = messagePort;
+
+    callSettingChangedListeners(NetworkSetting.MESSAGES_PORT, messagePort, oldValue);
   }
 
   @Override
@@ -41,7 +50,26 @@ public class NetworkSettings implements INetworkSettings {
 
   @Override
   public void setSynchronizationPort(int synchronizationPort) {
+    Object oldValue = this.synchronizationPort;
+
     this.synchronizationPort = synchronizationPort;
+
+    callSettingChangedListeners(NetworkSetting.SYNCHRONIZATION_PORT, synchronizationPort, oldValue);
+  }
+
+
+  public void addListener(NetworkSettingsChangedListener listener) {
+    listeners.add(listener);
+  }
+
+  public void removeListener(NetworkSettingsChangedListener listener) {
+    listeners.remove(listener);
+  }
+
+  protected void callSettingChangedListeners(NetworkSetting setting, Object newValue, Object oldValue) {
+    for(NetworkSettingsChangedListener listener : listeners) {
+      listener.settingsChanged(this, setting, newValue, oldValue);
+    }
   }
 
 
