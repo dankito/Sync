@@ -5,6 +5,7 @@ include ':SyncDataModel'
 
 include ':DevicesDiscovererAndroid'
 include ':DevicesDiscoverer'
+include ':TcpSocketClientCommunicator'
 include ':AndroidUtils'
 include ':JavaUtils'
 
@@ -18,6 +19,7 @@ include ':JpaAnnotationReader'
 
 project(':DevicesDiscovererAndroid').projectDir = new File('libs/DevicesDiscovererAndroid')
 project(':DevicesDiscoverer').projectDir = new File('libs/DevicesDiscoverer')
+project(':TcpSocketClientCommunicator').projectDir = new File('libs/TcpSocketClientCommunicator')
 project(':AndroidUtils').projectDir = new File('libs/AndroidUtils/AndroidUtilsLib')
 project(':JavaUtils').projectDir = new File('libs/AndroidUtils/JavaUtils')
 
