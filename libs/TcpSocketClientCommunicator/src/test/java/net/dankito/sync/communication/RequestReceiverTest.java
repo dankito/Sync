@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 public class RequestReceiverTest {
 
+  protected static final int TEST_PORT = 54321;
+
+
   protected RequestReceiver underTest;
 
 
@@ -32,6 +35,8 @@ public class RequestReceiverTest {
 
   protected INetworkSettings networkSettings;
 
+  protected RequestReceiver requestReceiver2;
+
 
   @Before
   public void setUp() throws Exception {
@@ -42,12 +47,17 @@ public class RequestReceiverTest {
     threadPool = new ThreadPool();
 
     underTest = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
+
+    requestReceiver2 = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
   }
 
   @After
   public void tearDown() throws Exception {
     underTest.close();
+
+    requestReceiver2.close();
   }
+
 
   @Test
   public void start_DesiredPortOutOfExpectedRange() throws Exception {
@@ -57,7 +67,7 @@ public class RequestReceiverTest {
     networkSettings.addListener(new NetworkSettingsChangedListener() {
       @Override
       public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        selectedPortHolder.setObject((int)newValue); // should never come to this
+        selectedPortHolder.setObject((Integer)newValue); // should never come to this
         countDownLatch.countDown();
       }
     });
@@ -85,8 +95,7 @@ public class RequestReceiverTest {
       }
     });
 
-    int alreadyBoundPort = 54321;
-    RequestReceiver requestReceiver2 = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
+    int alreadyBoundPort = TEST_PORT;
     requestReceiver2.start(alreadyBoundPort, networkSettings);
 
     try { countDownLatchRequestReceiver2.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
@@ -99,7 +108,7 @@ public class RequestReceiverTest {
       @Override
       public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
         if(setting == NetworkSetting.MESSAGES_PORT) {
-          selectedPortHolder.setObject((int) newValue); // should never come to this
+          selectedPortHolder.setObject((Integer)newValue);
           countDownLatchRequestReceiverUnderTest.countDown();
         }
       }
@@ -112,6 +121,56 @@ public class RequestReceiverTest {
 
     Assert.assertTrue(selectedPortHolder.isObjectSet());
     Assert.assertEquals(alreadyBoundPort + 1, (int)selectedPortHolder.getObject());
+  }
+
+
+  @Test
+  public void close_SocketGetClosed() throws Exception {
+    int testPort = TEST_PORT;
+
+    final CountDownLatch countDownLatchReceiver1 = new CountDownLatch(1);
+
+    networkSettings.addListener(new NetworkSettingsChangedListener() {
+      @Override
+      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
+        if(setting == NetworkSetting.MESSAGES_PORT) {
+          countDownLatchReceiver1.countDown();
+        }
+      }
+    });
+
+    underTest.start(testPort, networkSettings);
+
+    try { countDownLatchReceiver1.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    underTest.close();
+
+
+    testIfSocketGotClosed(testPort);
+  }
+
+  protected void testIfSocketGotClosed(int testPort) {
+    // now start second receiver on some port to check if port is available again
+    final CountDownLatch countDownLatchReceiver2 = new CountDownLatch(1);
+    final ObjectHolder<Integer> receiver2SelectedPortHolder = new ObjectHolder<>();
+
+    networkSettings.addListener(new NetworkSettingsChangedListener() {
+      @Override
+      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
+        if(setting == NetworkSetting.MESSAGES_PORT) {
+          receiver2SelectedPortHolder.setObject((Integer)newValue);
+          countDownLatchReceiver2.countDown();
+        }
+      }
+    });
+
+    requestReceiver2.start(testPort, networkSettings);
+
+    try { countDownLatchReceiver2.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+    Assert.assertTrue(receiver2SelectedPortHolder.isObjectSet());
+    Assert.assertEquals(testPort, (int)receiver2SelectedPortHolder.getObject());
   }
 
 }
