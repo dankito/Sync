@@ -9,12 +9,14 @@ import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 
 public class RequestReceiverTest {
@@ -79,7 +81,7 @@ public class RequestReceiverTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertFalse(selectedPortHolder.isObjectSet());
+    assertThat(selectedPortHolder.isObjectSet(), is(false));
   }
 
   @Test
@@ -119,8 +121,8 @@ public class RequestReceiverTest {
 
     try { countDownLatchRequestReceiverUnderTest.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(selectedPortHolder.isObjectSet());
-    Assert.assertEquals(alreadyBoundPort + 1, (int)selectedPortHolder.getObject());
+    assertThat(selectedPortHolder.isObjectSet(), is(true));
+    assertThat((int)selectedPortHolder.getObject(), is(alreadyBoundPort + 1));
   }
 
 
@@ -169,8 +171,8 @@ public class RequestReceiverTest {
 
     try { countDownLatchReceiver2.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(receiver2SelectedPortHolder.isObjectSet());
-    Assert.assertEquals(testPort, (int)receiver2SelectedPortHolder.getObject());
+    assertThat(receiver2SelectedPortHolder.isObjectSet(), is(true));
+    assertThat((int)receiver2SelectedPortHolder.getObject(), is(testPort));
   }
 
 }
