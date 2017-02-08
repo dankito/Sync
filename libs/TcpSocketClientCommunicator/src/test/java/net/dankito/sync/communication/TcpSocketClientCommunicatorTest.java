@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -61,7 +62,7 @@ public class TcpSocketClientCommunicatorTest {
 
   @Before
   public void setUp() throws Exception {
-    socketHandler = new SocketHandler();
+    socketHandler = Mockito.spy(new SocketHandler());
     messageSerializer = Mockito.spy(new JsonMessageSerializer());
     threadPool = new ThreadPool();
 
@@ -211,6 +212,33 @@ public class TcpSocketClientCommunicatorTest {
     Response<DeviceInfo> response = responseHolder.getObject();
     Assert.assertFalse(response.isCouldHandleMessage());
     Assert.assertEquals(ResponseErrorType.DESERIALIZATION_ERROR, response.getErrorType());
+  }
+
+
+  @Test
+  public void sendRequest_RetrievingResponseFails() throws Exception {
+    Mockito.when(socketHandler.receiveMessage(Mockito.any(Socket.class)))
+        .thenCallRealMethod()
+        .thenReturn(new SocketResult(false));
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(); } catch(Exception ignored) { }
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
   }
 
 }
