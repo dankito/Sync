@@ -46,7 +46,9 @@ public class TcpSocketClientCommunicatorTest {
 
   protected IClientCommunicator underTest;
 
-  protected DiscoveredDevice remoteDevice;
+  protected Device remoteDevice;
+
+  protected DiscoveredDevice discoveredRemoteDevice;
 
   protected RequestReceiver remoteRequestReceiver;
 
@@ -73,25 +75,25 @@ public class TcpSocketClientCommunicatorTest {
   }
 
   protected void setupRemoteMessagesReceiver() {
-    Device remoteDev = Mockito.mock(Device.class);
-    Mockito.when(remoteDev.getId()).thenReturn(DEVICE_ID);
-    Mockito.when(remoteDev.getUniqueDeviceId()).thenReturn(DEVICE_UNIQUE_ID);
-    Mockito.when(remoteDev.getName()).thenReturn(DEVICE_NAME);
-    Mockito.when(remoteDev.getOsName()).thenReturn(DEVICE_OS_NAME);
-    Mockito.when(remoteDev.getOsVersion()).thenReturn(DEVICE_OS_VERSION);
-    Mockito.when(remoteDev.getOsType()).thenReturn(DEVICE_OS_TYPE);
+    remoteDevice = Mockito.mock(Device.class);
+    Mockito.when(remoteDevice.getId()).thenReturn(DEVICE_ID);
+    Mockito.when(remoteDevice.getUniqueDeviceId()).thenReturn(DEVICE_UNIQUE_ID);
+    Mockito.when(remoteDevice.getName()).thenReturn(DEVICE_NAME);
+    Mockito.when(remoteDevice.getOsName()).thenReturn(DEVICE_OS_NAME);
+    Mockito.when(remoteDevice.getOsVersion()).thenReturn(DEVICE_OS_VERSION);
+    Mockito.when(remoteDevice.getOsType()).thenReturn(DEVICE_OS_TYPE);
 
-    remoteDevice = new DiscoveredDevice(remoteDev, "localhost");
+    discoveredRemoteDevice = new DiscoveredDevice(remoteDevice, "localhost");
 
     final CountDownLatch waitForMessagesReceiverBeingSetupLatch = new CountDownLatch(1);
 
     remoteNetworkSettings = new NetworkSettings();
-    remoteNetworkSettings.setLocalHostDevice(remoteDev);
+    remoteNetworkSettings.setLocalHostDevice(remoteDevice);
     remoteNetworkSettings.addListener(new NetworkSettingsChangedListener() {
       @Override
       public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
         if(setting == NetworkSetting.MESSAGES_PORT) {
-          remoteDevice.setMessagesPort((int)newValue);
+          discoveredRemoteDevice.setMessagesPort((int)newValue);
           waitForMessagesReceiverBeingSetupLatch.countDown();
         }
       }
@@ -116,7 +118,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -148,7 +150,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -173,7 +175,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -198,7 +200,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -225,7 +227,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -250,7 +252,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -275,7 +277,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -301,7 +303,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
@@ -321,13 +323,44 @@ public class TcpSocketClientCommunicatorTest {
 
 
   @Test
+  public void sendMessageThatExceedsMaxMessageSize() {
+    StringBuffer stringThatExceedsMaxMessageSize = new StringBuffer(CommunicationConfig.MAX_MESSAGE_SIZE + 1);
+    for(int i = 0; i <= CommunicationConfig.MAX_MESSAGE_SIZE; i++) {
+      stringThatExceedsMaxMessageSize.append('a');
+    }
+
+    Mockito.when(remoteDevice.getName()).thenReturn(stringThatExceedsMaxMessageSize.toString());
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertTrue(response.getError().getMessage().contains("exceeds max message length"));
+  }
+
+
+  @Test
   public void receivedRequestAsyncThrowsException_SimplyToHave100PercentLineCoverage() {
     Mockito.doThrow(Exception.class).when(remoteRequestReceiver).receivedRequestAsync(Mockito.any(Socket.class));
 
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
