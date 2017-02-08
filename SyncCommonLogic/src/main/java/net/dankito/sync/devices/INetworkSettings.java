@@ -5,7 +5,7 @@ import net.dankito.sync.Device;
 /**
  * Created by ganymed on 15/09/16.
  */
-public interface INetworkConfigurationManager {
+public interface INetworkSettings {
 
   Device getLocalHostDevice();
 

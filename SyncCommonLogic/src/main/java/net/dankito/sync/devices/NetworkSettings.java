@@ -6,7 +6,7 @@ import javax.inject.Named;
 
 
 @Named
-public class NetworkConfigurationManager implements INetworkConfigurationManager {
+public class NetworkSettings implements INetworkSettings {
 
   protected Device localHostDevice;
 

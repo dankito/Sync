@@ -11,8 +11,8 @@ import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.data.IPlatformConfigurationReader;
 import net.dankito.sync.devices.DevicesManager;
 import net.dankito.sync.devices.IDevicesManager;
-import net.dankito.sync.devices.INetworkConfigurationManager;
-import net.dankito.sync.devices.NetworkConfigurationManager;
+import net.dankito.sync.devices.INetworkSettings;
+import net.dankito.sync.devices.NetworkSettings;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerAndroid;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
@@ -64,7 +64,7 @@ public class AndroidServiceDiContainer {
 
   protected IFileStorageService fileStorageService = null;
 
-  protected INetworkConfigurationManager networkConfigurationManager = null;
+  protected INetworkSettings networkSettings = null;
 
   protected EntityManagerConfiguration entityManagerConfiguration = null;
 
@@ -188,12 +188,12 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public INetworkConfigurationManager provideNetworkConfigurationManager() {
-    if(networkConfigurationManager == null) {
-      networkConfigurationManager = new NetworkConfigurationManager();
+  public INetworkSettings provideNetworkNetworkSettings() {
+    if(networkSettings == null) {
+      networkSettings = new NetworkSettings();
     }
 
-    return networkConfigurationManager;
+    return networkSettings;
   }
 
 
@@ -224,9 +224,9 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public ISyncManager provideSyncManager(IEntityManager entityManager, INetworkConfigurationManager networkConfigurationManager, IDevicesManager devicesManager, IThreadPool threadPool) {
+  public ISyncManager provideSyncManager(IEntityManager entityManager, INetworkSettings networkSettings, IDevicesManager devicesManager, IThreadPool threadPool) {
     if(syncManager == null) {
-      syncManager = new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkConfigurationManager, devicesManager, threadPool,
+      syncManager = new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkSettings, devicesManager, threadPool,
           SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
     }
 

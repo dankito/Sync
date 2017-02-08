@@ -18,7 +18,7 @@ import net.dankito.sync.SyncEntityLocalLookupKeys;
 import net.dankito.sync.config.DatabaseTableConfig;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
-import net.dankito.sync.devices.INetworkConfigurationManager;
+import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
 import net.dankito.utils.AsyncProducerConsumerQueue;
 import net.dankito.utils.ConsumerListener;
@@ -55,7 +55,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
   protected Manager manager;
 
-  protected INetworkConfigurationManager configurationManager;
+  protected INetworkSettings networkSettings;
 
   protected SynchronizedDataMerger dataMerger;
 
@@ -77,17 +77,17 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
 
   @Inject
-  public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkConfigurationManager configurationManager, IDevicesManager devicesManager, IThreadPool threadPool) {
-    this(entityManager, configurationManager, devicesManager, threadPool, SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
+  public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkSettings networkSettings, IDevicesManager devicesManager, IThreadPool threadPool) {
+    this(entityManager, networkSettings, devicesManager, threadPool, SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
   }
 
-  public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkConfigurationManager configurationManager, IDevicesManager devicesManager,
+  public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkSettings networkSettings, IDevicesManager devicesManager,
                                   IThreadPool threadPool, int synchronizationPort, boolean alsoUsePullReplication) {
     super(devicesManager, threadPool);
     this.entityManager = entityManager;
     this.database = entityManager.getDatabase();
     this.manager = database.getManager();
-    this.configurationManager = configurationManager;
+    this.networkSettings = networkSettings;
     this.synchronizationPort = synchronizationPort;
     this.alsoUsePullReplication = alsoUsePullReplication;
 
@@ -155,7 +155,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     couchbaseLiteListener = new LiteListener(manager, listenPort, allowedCredentials);
     synchronizationPort = couchbaseLiteListener.getListenPort();
 
-    configurationManager.setSynchronizationPort(synchronizationPort);
+    networkSettings.setSynchronizationPort(synchronizationPort);
 
     listenerThread = new Thread(couchbaseLiteListener);
     listenerThread.start();
