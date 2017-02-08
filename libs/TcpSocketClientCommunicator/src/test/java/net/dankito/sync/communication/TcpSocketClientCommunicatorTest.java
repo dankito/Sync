@@ -5,6 +5,7 @@ import net.dankito.sync.OsType;
 import net.dankito.sync.communication.callbacks.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.Response;
+import net.dankito.sync.communication.message.ResponseErrorType;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.sync.devices.NetworkSetting;
@@ -123,15 +124,42 @@ public class TcpSocketClientCommunicatorTest {
     try { countDownLatch.await(); } catch(Exception ignored) { }
 
     Assert.assertTrue(responseHolder.isObjectSet());
-    Assert.assertTrue(responseHolder.getObject().isCouldHandleMessage());
 
-    DeviceInfo receivedDeviceInfo = responseHolder.getObject().getBody();
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertTrue(response.isCouldHandleMessage());
+
+    DeviceInfo receivedDeviceInfo = response.getBody();
     Assert.assertEquals(DEVICE_ID, receivedDeviceInfo.getId());
     Assert.assertEquals(DEVICE_UNIQUE_ID, receivedDeviceInfo.getUniqueDeviceId());
     Assert.assertEquals(DEVICE_NAME, receivedDeviceInfo.getName());
     Assert.assertEquals(DEVICE_OS_NAME, receivedDeviceInfo.getOsName());
     Assert.assertEquals(DEVICE_OS_VERSION, receivedDeviceInfo.getOsVersion());
     Assert.assertEquals(DEVICE_OS_TYPE, receivedDeviceInfo.getOsType());
+  }
+
+
+  @Test
+  public void sendMessageToClosedClient() throws Exception {
+    remoteRequestReceiver.close();
+
+    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    underTest.getDeviceInfo(remoteDevice, new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        responseHolder.setObject(response);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(); } catch(Exception ignored) { }
+
+    Assert.assertTrue(responseHolder.isObjectSet());
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+    Assert.assertFalse(response.isCouldHandleMessage());
+    Assert.assertEquals(ResponseErrorType.SEND_REQUEST_TO_REMOTE, response.getErrorType());
   }
 
 }
