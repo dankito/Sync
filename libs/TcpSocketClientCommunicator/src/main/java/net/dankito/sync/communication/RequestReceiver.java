@@ -3,6 +3,7 @@ package net.dankito.sync.communication;
 
 import net.dankito.sync.communication.message.Request;
 import net.dankito.sync.communication.message.Response;
+import net.dankito.sync.communication.message.ResponseErrorType;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.utils.IThreadPool;
 
@@ -111,7 +112,7 @@ public class RequestReceiver implements IRequestReceiver {
           break;
         }
         else {
-          log.error("An error occurred accepting client request", e);
+//          log.error("An error occurred accepting client request", e);
         }
       }
     }
@@ -143,7 +144,7 @@ public class RequestReceiver implements IRequestReceiver {
       receivedRequest(clientSocket, request);
     } catch(Exception e) {
       log.error("Could not deserialize request string " + requestString, e);
-      // TODO: what to do in error case? Send error message to client?
+      dispatchResponseToRequest(clientSocket, null, new Response(ResponseErrorType.DESERIALIZE_REQUEST, e));
     }
   }
 
