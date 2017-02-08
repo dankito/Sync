@@ -19,7 +19,6 @@ import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -29,6 +28,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 
 
 public class TcpSocketClientCommunicatorTest {
@@ -132,18 +135,18 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(responseHolder.isObjectSet());
+    assertThat(responseHolder.isObjectSet(), is(true));
 
     Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertTrue(response.isCouldHandleMessage());
+    assertThat(response.isCouldHandleMessage(), is(true));
 
     DeviceInfo receivedDeviceInfo = response.getBody();
-    Assert.assertEquals(DEVICE_ID, receivedDeviceInfo.getId());
-    Assert.assertEquals(DEVICE_UNIQUE_ID, receivedDeviceInfo.getUniqueDeviceId());
-    Assert.assertEquals(DEVICE_NAME, receivedDeviceInfo.getName());
-    Assert.assertEquals(DEVICE_OS_NAME, receivedDeviceInfo.getOsName());
-    Assert.assertEquals(DEVICE_OS_VERSION, receivedDeviceInfo.getOsVersion());
-    Assert.assertEquals(DEVICE_OS_TYPE, receivedDeviceInfo.getOsType());
+    assertThat(receivedDeviceInfo.getId(), is(DEVICE_ID));
+    assertThat(receivedDeviceInfo.getUniqueDeviceId(), is(DEVICE_UNIQUE_ID));
+    assertThat(receivedDeviceInfo.getName(), is(DEVICE_NAME));
+    assertThat(receivedDeviceInfo.getOsName(), is(DEVICE_OS_NAME));
+    assertThat(receivedDeviceInfo.getOsVersion(), is(DEVICE_OS_VERSION));
+    assertThat(receivedDeviceInfo.getOsType(), is(DEVICE_OS_TYPE));
   }
 
 
@@ -164,11 +167,8 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(responseHolder.isObjectSet());
 
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.SEND_REQUEST_TO_REMOTE, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.SEND_REQUEST_TO_REMOTE);
   }
 
 
@@ -189,11 +189,8 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(responseHolder.isObjectSet());
 
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.SERIALIZE_REQUEST, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.SERIALIZE_REQUEST);
   }
 
 
@@ -214,11 +211,8 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(responseHolder.isObjectSet());
 
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.DESERIALIZE_RESPONSE, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.DESERIALIZE_RESPONSE);
   }
 
 
@@ -241,11 +235,8 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(responseHolder.isObjectSet());
 
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.RETRIEVE_RESPONSE);
   }
 
 
@@ -266,11 +257,8 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    Assert.assertTrue(responseHolder.isObjectSet());
 
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.DESERIALIZE_REQUEST, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.DESERIALIZE_REQUEST);
   }
 
 
@@ -292,11 +280,7 @@ public class TcpSocketClientCommunicatorTest {
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
 
-    Assert.assertTrue(responseHolder.isObjectSet());
-
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.RETRIEVE_RESPONSE, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.RETRIEVE_RESPONSE);
   }
 
 
@@ -318,11 +302,7 @@ public class TcpSocketClientCommunicatorTest {
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
 
-    Assert.assertTrue(responseHolder.isObjectSet());
-
-    Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(ResponseErrorType.SEND_REQUEST_TO_REMOTE, response.getErrorType());
+    assertThatErrorTypeIs(responseHolder, ResponseErrorType.SEND_REQUEST_TO_REMOTE);
   }
 
 
@@ -348,12 +328,11 @@ public class TcpSocketClientCommunicatorTest {
 
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-
-    Assert.assertTrue(responseHolder.isObjectSet());
+    assertThat(responseHolder.isObjectSet(), is(true));
 
     Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertTrue(response.getError().getMessage().contains("exceeds max message length"));
+    assertThat(response.isCouldHandleMessage(), is(false));
+    assertThat(response.getError().getMessage(), containsString("exceeds max message length"));
   }
 
 
@@ -376,11 +355,11 @@ public class TcpSocketClientCommunicatorTest {
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
 
-    Assert.assertTrue(responseHolder.isObjectSet());
+    assertThat(responseHolder.isObjectSet(), is(true));
 
     Response<DeviceInfo> response = responseHolder.getObject();
-    Assert.assertFalse(response.isCouldHandleMessage());
-    Assert.assertEquals(exceptionToReturn, response.getError());
+    assertThat(response.isCouldHandleMessage(), is(false));
+    assertThat(exceptionToReturn, is(response.getError()));
   }
 
 
@@ -402,7 +381,17 @@ public class TcpSocketClientCommunicatorTest {
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
 
-    Assert.assertFalse(responseHolder.isObjectSet());
+    assertThat(responseHolder.isObjectSet(), is(false));
+  }
+
+
+  protected void assertThatErrorTypeIs(ObjectHolder<Response<DeviceInfo>> responseHolder, ResponseErrorType errorType) {
+    assertThat(responseHolder.isObjectSet(), is(true));
+
+    Response<DeviceInfo> response = responseHolder.getObject();
+
+    assertThat(response.isCouldHandleMessage(), is(false));
+    assertThat(response.getErrorType(), is(errorType));
   }
 
 }
