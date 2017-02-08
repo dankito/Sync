@@ -68,16 +68,26 @@ public class SocketHandler {
 
   protected SocketResult receiveMessage(InputStream inputStream) throws IOException {
     byte[] buffer = new byte[CommunicationConfig.MAX_MESSAGE_SIZE];
-    int read = inputStream.read(buffer, 0, buffer.length);
 
-    if(read > -1 && read < CommunicationConfig.MAX_MESSAGE_SIZE) {
-      String responseString = new String(buffer, 0, read, CommunicationConfig.MESSAGE_CHARSET_NAME);
+    int read = 0;
+    int totalRead = 0;
+
+    while((read = inputStream.read(buffer, totalRead, CommunicationConfig.BUFFER_SIZE)) > -1) {
+      totalRead += read;
+
+      if(read < CommunicationConfig.BUFFER_SIZE || totalRead >= CommunicationConfig.MAX_MESSAGE_SIZE) {
+        break;
+      }
+    }
+
+    if(totalRead > 0 && totalRead < CommunicationConfig.MAX_MESSAGE_SIZE) {
+      String responseString = new String(buffer, 0, totalRead, CommunicationConfig.MESSAGE_CHARSET_NAME);
       buffer = null; // TODO: run GarbageCollector to free memory?
 
       return new SocketResult(responseString);
     }
     else {
-      if(read <= 0) {
+      if(totalRead <= 0) {
         return new SocketResult(new Exception("Could not receive any bytes"));
       }
       else {
