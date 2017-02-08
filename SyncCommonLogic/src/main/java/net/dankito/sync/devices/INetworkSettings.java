@@ -19,4 +19,8 @@ public interface INetworkSettings {
 
   void setSynchronizationPort(int synchronizationPort);
 
+  void addListener(NetworkSettingsChangedListener listener);
+
+  void removeListener(NetworkSettingsChangedListener listener);
+
 }

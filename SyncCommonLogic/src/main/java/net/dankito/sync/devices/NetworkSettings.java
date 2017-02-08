@@ -58,10 +58,12 @@ public class NetworkSettings implements INetworkSettings {
   }
 
 
+  @Override
   public void addListener(NetworkSettingsChangedListener listener) {
     listeners.add(listener);
   }
 
+  @Override
   public void removeListener(NetworkSettingsChangedListener listener) {
     listeners.remove(listener);
   }
