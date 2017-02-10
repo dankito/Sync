@@ -15,6 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +49,8 @@ public class TcpSocketClientCommunicatorTest {
 
   protected DiscoveredDevice discoveredRemoteDevice;
 
+  protected SocketAddress destinationAddress;
+
 
   @Before
   public void setUp() throws Exception {
@@ -60,6 +64,7 @@ public class TcpSocketClientCommunicatorTest {
       @Override
       public void started(boolean couldStartMessagesReceiver, int messagesReceiverPort, Exception startException) {
         discoveredRemoteDevice.setMessagesPort(messagesReceiverPort);
+        destinationAddress = new InetSocketAddress("localhost", messagesReceiverPort);
         countDownLatch.countDown();
       }
     });
@@ -89,7 +94,7 @@ public class TcpSocketClientCommunicatorTest {
     final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.getDeviceInfo(discoveredRemoteDevice, new SendRequestCallback<DeviceInfo>() {
+    underTest.getDeviceInfo(destinationAddress, new SendRequestCallback<DeviceInfo>() {
       @Override
       public void done(Response<DeviceInfo> response) {
         responseHolder.setObject(response);
