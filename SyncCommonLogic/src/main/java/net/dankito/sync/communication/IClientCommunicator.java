@@ -8,7 +8,7 @@ import net.dankito.sync.devices.DiscoveredDevice;
 
 public interface IClientCommunicator {
 
-  void start(final ClientCommunicatorListener listener);
+  void start(int desiredCommunicatorPort, ClientCommunicatorListener listener);
 
   void getDeviceInfo(DiscoveredDevice remoteDevice, SendRequestCallback<DeviceInfo> callback);
 

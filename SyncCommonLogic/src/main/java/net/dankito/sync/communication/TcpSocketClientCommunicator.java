@@ -46,8 +46,8 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
 
 
   @Override
-  public void start(final ClientCommunicatorListener listener) {
-    requestReceiver.start(CommunicatorConfig.DEFAULT_MESSAGES_RECEIVER_PORT, new RequestReceiverCallback() {
+  public void start(final int desiredCommunicatorPort, final ClientCommunicatorListener listener) {
+    requestReceiver.start(desiredCommunicatorPort, new RequestReceiverCallback() {
       @Override
       public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
         listener.started(couldStartReceiver, messagesReceiverPort, startException);
