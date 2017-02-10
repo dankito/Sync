@@ -76,23 +76,7 @@ public class DevicesManager implements IDevicesManager {
     String localDeviceInfoKey = getDeviceInfoKey(networkSettings);
 
     devicesDiscoverer.startAsync(new DevicesDiscovererConfig(localDeviceInfoKey, DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
-        DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, DevicesManagerConfig.DISCOVERY_MESSAGE_PREFIX, new DevicesDiscovererListener() {
-      @Override
-      public void deviceFound(String deviceInfo, String address) {
-        requestDeviceDetailsFromDevice(deviceInfo, address);
-      }
-
-      @Override
-      public void deviceDisconnected(String deviceInfo) {
-        DiscoveredDevice device = discoveredDevices.get(deviceInfo);
-        if(device != null) {
-          disconnectedFromDevice(deviceInfo, device);
-        }
-        else {
-          log.error("This should never occur! Disconnected from Device, but was not in discoveredDevices: " + deviceInfo);
-        }
-      }
-    }));
+        DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, DevicesManagerConfig.DISCOVERY_MESSAGE_PREFIX, discovererListener));
   }
 
   @Override
@@ -115,6 +99,24 @@ public class DevicesManager implements IDevicesManager {
     discoveredDevices.clear();
   }
 
+
+  protected DevicesDiscovererListener discovererListener = new DevicesDiscovererListener() {
+    @Override
+    public void deviceFound(String deviceInfo, String address) {
+      requestDeviceDetailsFromDevice(deviceInfo, address);
+    }
+
+    @Override
+    public void deviceDisconnected(String deviceInfo) {
+      DiscoveredDevice device = discoveredDevices.get(deviceInfo);
+      if(device != null) {
+        disconnectedFromDevice(deviceInfo, device);
+      }
+      else {
+        log.error("This should never occur! Disconnected from Device, but was not in discoveredDevices: " + deviceInfo);
+      }
+    }
+  };
 
   protected void requestDeviceDetailsFromDevice(String deviceInfoKey, final String address) {
     try {
