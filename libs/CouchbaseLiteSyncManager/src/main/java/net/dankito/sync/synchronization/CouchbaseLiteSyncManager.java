@@ -138,10 +138,12 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   }
 
   @Override
-  protected void startSynchronizationListener() {
+  protected boolean startSynchronizationListener() {
     try {
-      startCBLListener(synchronizationPort, manager, allowedCredentials);
+      return startCBLListener(synchronizationPort, manager, allowedCredentials);
     } catch(Exception e) { log.error("Could not start Couchbase Lite synchronization listener", e); }
+
+    return false;
   }
 
   @Override
@@ -149,7 +151,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     stopCBLListener();
   }
 
-  protected void startCBLListener(int listenPort, Manager manager, Credentials allowedCredentials) throws Exception {
+  protected boolean startCBLListener(int listenPort, Manager manager, Credentials allowedCredentials) throws Exception {
     log.info("Starting Couchbase Lite Listener");
 
     couchbaseLiteListener = new LiteListener(manager, listenPort, allowedCredentials);
@@ -159,6 +161,8 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
     listenerThread = new Thread(couchbaseLiteListener);
     listenerThread.start();
+
+    return synchronizationPort > 0 && synchronizationPort < 65536;
   }
 
   protected void stopCBLListener() {

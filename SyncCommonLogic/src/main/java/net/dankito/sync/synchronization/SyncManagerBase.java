@@ -35,7 +35,7 @@ public abstract class SyncManagerBase implements ISyncManager {
 
   protected abstract boolean isListenerStarted();
 
-  protected abstract void startSynchronizationListener();
+  protected abstract boolean startSynchronizationListener();
 
   protected abstract void stopSynchronizationListener();
 
