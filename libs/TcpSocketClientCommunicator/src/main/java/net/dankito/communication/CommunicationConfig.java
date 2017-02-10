@@ -15,7 +15,4 @@ public class CommunicationConfig {
 
   public static final String METHOD_NAME_AND_BODY_SEPARATOR = ":";
 
-
-  public static final String GET_DEVICE_INFO_METHOD_NAME = "GetDeviceInfo";
-
 }

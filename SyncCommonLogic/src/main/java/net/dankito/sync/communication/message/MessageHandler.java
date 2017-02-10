@@ -1,8 +1,10 @@
 package net.dankito.sync.communication.message;
 
+import net.dankito.communication.IMessageHandler;
+import net.dankito.communication.message.Request;
+import net.dankito.communication.message.Response;
 import net.dankito.sync.Device;
-import net.dankito.sync.communication.CommunicationConfig;
-import net.dankito.sync.communication.IMessageHandler;
+import net.dankito.sync.communication.CommunicatorConfig;
 
 
 public class MessageHandler implements IMessageHandler {
@@ -18,7 +20,7 @@ public class MessageHandler implements IMessageHandler {
   @Override
   public Response handleReceivedRequest(Request request) {
     switch(request.getMethod()) {
-      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
+      case CommunicatorConfig.GET_DEVICE_INFO_METHOD_NAME:
         return handleGetDeviceInfoRequest(request);
     }
 
@@ -29,7 +31,7 @@ public class MessageHandler implements IMessageHandler {
   @Override
   public Class getResponseBodyClassForMethod(String methodName) throws Exception {
     switch(methodName) {
-      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
+      case CommunicatorConfig.GET_DEVICE_INFO_METHOD_NAME:
         return DeviceInfo.class;
       default:
         throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
@@ -39,7 +41,7 @@ public class MessageHandler implements IMessageHandler {
   @Override
   public Class getRequestBodyClassForMethod(String methodName) throws Exception {
     switch(methodName) {
-      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
+      case CommunicatorConfig.GET_DEVICE_INFO_METHOD_NAME:
         return null; // requests without request bodies
       default:
         throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
