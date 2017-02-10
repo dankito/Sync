@@ -1,6 +1,5 @@
 package net.dankito.sync.communication.message;
 
-
 public class Response<T> {
 
   protected boolean couldHandleMessage;
