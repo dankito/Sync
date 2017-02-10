@@ -21,7 +21,10 @@ import net.dankito.utils.IThreadPool;
 
 import java.net.SocketAddress;
 
+import javax.inject.Named;
 
+
+@Named
 public class TcpSocketClientCommunicator implements IClientCommunicator {
 
   protected IRequestSender requestSender;
