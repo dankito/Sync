@@ -3,6 +3,8 @@ package net.dankito.sync.communication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,8 +22,8 @@ public class SocketHandler {
     OutputStream outputStream = null;
 
     try {
-      inputStream = new ByteArrayInputStream(message);
-      outputStream = socket.getOutputStream();
+      inputStream = new BufferedInputStream(new ByteArrayInputStream(message));
+      outputStream = new BufferedOutputStream(socket.getOutputStream());
 
       return sendMessage(inputStream, outputStream);
     }
@@ -55,7 +57,7 @@ public class SocketHandler {
 
   public SocketResult receiveMessage(Socket socket) {
     try {
-      InputStream inputStream = socket.getInputStream();
+      InputStream inputStream = new BufferedInputStream(socket.getInputStream());
 
       // do not close inputStream, otherwise socket gets closed
       return receiveMessage(inputStream);
