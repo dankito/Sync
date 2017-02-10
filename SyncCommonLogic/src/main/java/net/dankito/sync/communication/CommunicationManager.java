@@ -3,7 +3,6 @@ package net.dankito.sync.communication;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.INetworkSettings;
-import net.dankito.utils.IThreadPool;
 
 import javax.inject.Named;
 
@@ -17,15 +16,11 @@ public class CommunicationManager implements ICommunicationManager {
 
   protected INetworkSettings networkSettings;
 
-  protected IThreadPool threadPool;
 
-
-  public CommunicationManager(IDevicesManager devicesManager, INetworkSettings networkSettings, IThreadPool threadPool) {
+  public CommunicationManager(IDevicesManager devicesManager, IClientCommunicator clientCommunicator, INetworkSettings networkSettings) {
     this.devicesManager = devicesManager;
+    this.clientCommunicator = clientCommunicator;
     this.networkSettings = networkSettings;
-    this.threadPool = threadPool;
-
-    this.clientCommunicator = new TcpSocketClientCommunicator(networkSettings.getLocalHostDevice(), threadPool);
   }
 
 
