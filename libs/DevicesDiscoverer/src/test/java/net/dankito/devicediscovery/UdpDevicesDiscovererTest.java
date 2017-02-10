@@ -25,6 +25,8 @@ public class UdpDevicesDiscovererTest {
 
   protected static final int CHECK_FOR_DEVICES_INTERVAL = 100;
 
+  protected static final String DISCOVERY_PREFIX = "UdpDevicesDiscovererTest";
+
   protected static final String FIRST_DISCOVERER_ID = "Gandhi";
 
   protected static final String SECOND_DISCOVERER_ID = "Mandela";
@@ -243,7 +245,7 @@ public class UdpDevicesDiscovererTest {
   protected void startDiscoverer(IDevicesDiscoverer discoverer, String deviceId, DevicesDiscovererListener listener) {
     startedDiscoverers.add(discoverer);
 
-    DevicesDiscovererConfig config = new DevicesDiscovererConfig(deviceId, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, listener);
+    DevicesDiscovererConfig config = new DevicesDiscovererConfig(deviceId, DISCOVERY_PORT, CHECK_FOR_DEVICES_INTERVAL, DISCOVERY_PREFIX, listener);
 
     discoverer.startAsync(config);
   }

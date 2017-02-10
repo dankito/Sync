@@ -6,11 +6,16 @@ package net.dankito.devicediscovery;
 
 public class DevicesDiscovererConfig {
 
+  public static final String DEFAULT_DISCOVERY_MESSAGE_PREFIX = "DevicesDiscovery";
+
+
   protected String localDeviceInfo;
 
   protected int discoverDevicesPort;
 
   protected int checkForDevicesIntervalMillis;
+
+  protected String discoveryMessagePrefix = DEFAULT_DISCOVERY_MESSAGE_PREFIX;
 
   protected DevicesDiscovererListener listener;
 
@@ -24,6 +29,12 @@ public class DevicesDiscovererConfig {
     this.discoverDevicesPort = discoverDevicesPort;
     this.checkForDevicesIntervalMillis = checkForDevicesIntervalMillis;
     this.listener = listener;
+  }
+
+  public DevicesDiscovererConfig(String localDeviceInfo, int discoverDevicesPort, int checkForDevicesIntervalMillis, String discoveryMessagePrefix, DevicesDiscovererListener listener) {
+    this(localDeviceInfo, discoverDevicesPort, checkForDevicesIntervalMillis, listener);
+
+    this.discoveryMessagePrefix = discoveryMessagePrefix;
   }
 
 
@@ -49,6 +60,14 @@ public class DevicesDiscovererConfig {
 
   public void setCheckForDevicesIntervalMillis(int checkForDevicesIntervalMillis) {
     this.checkForDevicesIntervalMillis = checkForDevicesIntervalMillis;
+  }
+
+  public String getDiscoveryMessagePrefix() {
+    return discoveryMessagePrefix;
+  }
+
+  public void setDiscoveryMessagePrefix(String discoveryMessagePrefix) {
+    this.discoveryMessagePrefix = discoveryMessagePrefix;
   }
 
   public DevicesDiscovererListener getListener() {

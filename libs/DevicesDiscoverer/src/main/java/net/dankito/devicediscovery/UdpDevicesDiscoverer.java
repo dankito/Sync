@@ -30,8 +30,6 @@ import javax.inject.Named;
 @Named
 public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
-  protected static final String DEVICES_DISCOVERY_MESSAGE = "DevicesDiscovery";
-
   protected static final String MESSAGE_HEADER_AND_BODY_SEPARATOR = " : ";
 
   protected static final Charset MESSAGES_CHARSET = Charset.forName("utf8");
@@ -176,7 +174,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
           }
         }
 
-        listenerReceivedPacket(buffer, packet, config.getLocalDeviceInfo(), config.getListener());
+        listenerReceivedPacket(buffer, packet, config);
       }
     } catch(Exception ex) {
       log.error("An error occurred starting UdpDevicesSearcher", ex);
@@ -199,20 +197,22 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   }
 
 
-  protected void listenerReceivedPacket(byte[] buffer, DatagramPacket packet, String localDeviceInfo, DevicesDiscovererListener listener) {
-    receivedPacketsQueue.add(new ReceivedUdpDevicesDiscovererPacket(Arrays.copyOf(buffer, packet.getLength()), packet, packet.getAddress().getHostAddress(), localDeviceInfo, listener));
+  protected void listenerReceivedPacket(byte[] buffer, DatagramPacket packet, DevicesDiscovererConfig config) {
+    receivedPacketsQueue.add(new ReceivedUdpDevicesDiscovererPacket(Arrays.copyOf(buffer, packet.getLength()), packet, packet.getAddress().getHostAddress(),
+        config.getLocalDeviceInfo(), config.getDiscoveryMessagePrefix(), config.getListener()));
   }
 
 
   protected ConsumerListener<ReceivedUdpDevicesDiscovererPacket> receivedPacketsHandler = new ConsumerListener<ReceivedUdpDevicesDiscovererPacket>() {
     @Override
     public void consumeItem(ReceivedUdpDevicesDiscovererPacket receivedPacket) {
-      handleReceivedPacket(receivedPacket.getReceivedData(), receivedPacket.getPacket(), receivedPacket.getSenderAddress(), receivedPacket.getLocalDeviceInfo(), receivedPacket.getListener());
+      handleReceivedPacket(receivedPacket.getReceivedData(), receivedPacket.getPacket(), receivedPacket.getSenderAddress(), receivedPacket.getLocalDeviceInfo(),
+          receivedPacket.getDiscoveryMessagePrefix(), receivedPacket.getListener());
     }
   };
 
-  protected void handleReceivedPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, DevicesDiscovererListener listener) {
-    if(isSearchingForDevicesMessage(receivedData, receivedData.length)) {
+  protected void handleReceivedPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, String discoveryMessagePrefix, DevicesDiscovererListener listener) {
+    if(isSearchingForDevicesMessage(receivedData, receivedData.length, discoveryMessagePrefix)) {
       String remoteDeviceInfo = getDeviceInfoFromMessage(receivedData, senderAddress);
 
       if(isSelfSentPacket(remoteDeviceInfo, localDeviceInfo) == false) {
@@ -226,9 +226,9 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     }
   }
 
-  protected boolean isSearchingForDevicesMessage(byte[] receivedData, int packetLength) {
+  protected boolean isSearchingForDevicesMessage(byte[] receivedData, int packetLength, String discoveryMessagePrefix) {
     String receivedMessage = parseBytesToString(receivedData, packetLength);
-    return receivedMessage.startsWith(DEVICES_DISCOVERY_MESSAGE);
+    return receivedMessage.startsWith(discoveryMessagePrefix);
   }
 
   protected boolean isSelfSentPacket(String remoteDeviceInfo, String localDeviceInfo) {
@@ -342,7 +342,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   }
 
   protected void sendBroadcastOnSocket(DatagramSocket broadcastSocket, InetAddress broadcastAddress, DevicesDiscovererConfig config) throws IOException {
-    DatagramPacket searchDevicesPacket = createSearchDevicesDatagramPacket(broadcastAddress, config.getLocalDeviceInfo(), config.getDiscoverDevicesPort());
+    DatagramPacket searchDevicesPacket = createSearchDevicesDatagramPacket(broadcastAddress, config);
     broadcastSocket.send(searchDevicesPacket);
 
     try { Thread.sleep(config.getCheckForDevicesIntervalMillis()); } catch(Exception ignored) { }
@@ -362,11 +362,11 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     }, DELAY_BEFORE_RESTARTING_BROADCAST_FOR_ADDRESS_MILLIS);
   }
 
-  protected DatagramPacket createSearchDevicesDatagramPacket(InetAddress broadcastAddress, String localDeviceInfo, int discoverDevicesPort) {
-    String message = DEVICES_DISCOVERY_MESSAGE + MESSAGE_HEADER_AND_BODY_SEPARATOR + localDeviceInfo;
+  protected DatagramPacket createSearchDevicesDatagramPacket(InetAddress broadcastAddress, DevicesDiscovererConfig config) {
+    String message = config.getDiscoveryMessagePrefix() + MESSAGE_HEADER_AND_BODY_SEPARATOR + config.getLocalDeviceInfo();
     byte[] messageBytes = message.getBytes(MESSAGES_CHARSET);
 
-    return new DatagramPacket(messageBytes, messageBytes.length, broadcastAddress, discoverDevicesPort);
+    return new DatagramPacket(messageBytes, messageBytes.length, broadcastAddress, config.getDiscoverDevicesPort());
   }
 
   protected String getDeviceInfoFromMessage(byte[] receivedBytes, String senderAddress) {

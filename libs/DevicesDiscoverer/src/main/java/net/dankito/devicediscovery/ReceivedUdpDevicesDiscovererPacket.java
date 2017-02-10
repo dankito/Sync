@@ -15,14 +15,17 @@ public class ReceivedUdpDevicesDiscovererPacket {
 
   protected String localDeviceInfo;
 
+  protected String discoveryMessagePrefix;
+
   protected DevicesDiscovererListener listener;
 
 
-  public ReceivedUdpDevicesDiscovererPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, DevicesDiscovererListener listener) {
+  public ReceivedUdpDevicesDiscovererPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, String discoveryMessagePrefix, DevicesDiscovererListener listener) {
     this.receivedData = receivedData;
     this.packet = packet;
     this.senderAddress = senderAddress;
     this.localDeviceInfo = localDeviceInfo;
+    this.discoveryMessagePrefix = discoveryMessagePrefix;
     this.listener = listener;
   }
 
@@ -41,6 +44,10 @@ public class ReceivedUdpDevicesDiscovererPacket {
 
   public String getLocalDeviceInfo() {
     return localDeviceInfo;
+  }
+
+  public String getDiscoveryMessagePrefix() {
+    return discoveryMessagePrefix;
   }
 
   public DevicesDiscovererListener getListener() {
