@@ -26,6 +26,13 @@ public class Response<T> {
     this.body = body;
   }
 
+  public Response(boolean couldHandleMessage, ResponseErrorType errorType, Exception error, T body) {
+    this.couldHandleMessage = couldHandleMessage;
+    this.errorType = errorType;
+    this.error = error;
+    this.body = body;
+  }
+
 
   public boolean isCouldHandleMessage() {
     return couldHandleMessage;
