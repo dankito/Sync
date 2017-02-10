@@ -1,4 +1,4 @@
-package net.dankito.sync.communication;
+package net.dankito.communication;
 
 public interface IRequestReceiver {
 

@@ -1,8 +1,8 @@
-package net.dankito.sync.communication;
+package net.dankito.communication;
 
 
-import net.dankito.sync.communication.message.Request;
-import net.dankito.sync.communication.message.Response;
+import net.dankito.communication.message.Request;
+import net.dankito.communication.message.Response;
 
 public interface IMessageSerializer {
 

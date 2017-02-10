@@ -1,10 +1,10 @@
-package net.dankito.sync.communication;
+package net.dankito.communication;
 
 
-import net.dankito.sync.communication.callback.SendRequestCallback;
-import net.dankito.sync.communication.message.Request;
-import net.dankito.sync.communication.message.Response;
-import net.dankito.sync.communication.message.ResponseErrorType;
+import net.dankito.communication.callback.SendRequestCallback;
+import net.dankito.communication.message.Request;
+import net.dankito.communication.message.Response;
+import net.dankito.communication.message.ResponseErrorType;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;

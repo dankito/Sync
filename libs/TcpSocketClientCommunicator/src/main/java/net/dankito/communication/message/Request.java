@@ -1,4 +1,4 @@
-package net.dankito.sync.communication.message;
+package net.dankito.communication.message;
 
 
 public class Request<T> {

@@ -1,11 +1,11 @@
-package net.dankito.sync.communication;
+package net.dankito.communication;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.dankito.sync.communication.message.Request;
-import net.dankito.sync.communication.message.Response;
-import net.dankito.sync.communication.message.ResponseErrorType;
+import net.dankito.communication.message.Request;
+import net.dankito.communication.message.ResponseErrorType;
+import net.dankito.communication.message.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,11 @@
-package net.dankito.sync.communication;
+package net.dankito.communication;
 
+import net.dankito.communication.IMessageHandler;
+import net.dankito.communication.IMessageSerializer;
+import net.dankito.communication.IRequestReceiver;
+import net.dankito.communication.RequestReceiver;
+import net.dankito.communication.RequestReceiverCallback;
+import net.dankito.communication.SocketHandler;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;

@@ -1,4 +1,4 @@
-package net.dankito.sync.communication.util;
+package net.dankito.communication.util;
 
 
 public class TestResponseBody {
