@@ -1,7 +1,5 @@
 package net.dankito.sync.communication;
 
-import net.dankito.sync.devices.INetworkSettings;
-import net.dankito.sync.devices.NetworkSettings;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
@@ -9,6 +7,7 @@ import net.dankito.utils.ThreadPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -25,26 +24,15 @@ public class RequestReceiverTest {
   protected RequestReceiver underTest;
 
 
-  protected SocketHandler socketHandler;
-
-  protected IMessageHandler messageHandler;
-
-  protected IMessageSerializer messageSerializer;
-
-  protected IThreadPool threadPool;
-
-  protected INetworkSettings networkSettings;
-
   protected RequestReceiver requestReceiver2;
 
 
   @Before
   public void setUp() throws Exception {
-    socketHandler = new SocketHandler();
-    networkSettings = new NetworkSettings();
-    messageHandler = new MessageHandler(networkSettings);
-    messageSerializer = new JsonMessageSerializer();
-    threadPool = new ThreadPool();
+    SocketHandler socketHandler = Mockito.mock(SocketHandler.class);
+    IMessageHandler messageHandler = Mockito.mock(IMessageHandler.class);
+    IMessageSerializer messageSerializer = Mockito.mock(IMessageSerializer.class);
+    IThreadPool threadPool = new ThreadPool();
 
     underTest = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
 
