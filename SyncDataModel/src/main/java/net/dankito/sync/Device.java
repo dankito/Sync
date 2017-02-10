@@ -50,6 +50,16 @@ public class Device extends BaseEntity {
     this.uniqueDeviceId = uniqueDeviceId;
   }
 
+  public Device(String id, String uniqueDeviceId, String name, OsType osType, String osName, String osVersion, String description) {
+    this.id = id;
+    this.uniqueDeviceId = uniqueDeviceId;
+    this.name = name;
+    this.osType = osType;
+    this.osName = osName;
+    this.osVersion = osVersion;
+    this.description = description;
+  }
+
 
   public String getUniqueDeviceId() {
     return uniqueDeviceId;
