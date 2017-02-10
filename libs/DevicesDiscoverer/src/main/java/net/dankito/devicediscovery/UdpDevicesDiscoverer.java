@@ -212,8 +212,10 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   };
 
   protected void handleReceivedPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, String discoveryMessagePrefix, DevicesDiscovererListener listener) {
-    if(isSearchingForDevicesMessage(receivedData, receivedData.length, discoveryMessagePrefix)) {
-      String remoteDeviceInfo = getDeviceInfoFromMessage(receivedData, senderAddress);
+    String receivedMessage = parseBytesToString(receivedData, receivedData.length);
+
+    if(isSearchingForDevicesMessage(receivedMessage, discoveryMessagePrefix)) {
+      String remoteDeviceInfo = getDeviceInfoFromMessage(receivedMessage, senderAddress);
 
       if(isSelfSentPacket(remoteDeviceInfo, localDeviceInfo) == false) {
         if(hasDeviceAlreadyBeenFound(remoteDeviceInfo) == false) {
@@ -226,8 +228,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     }
   }
 
-  protected boolean isSearchingForDevicesMessage(byte[] receivedData, int packetLength, String discoveryMessagePrefix) {
-    String receivedMessage = parseBytesToString(receivedData, packetLength);
+  protected boolean isSearchingForDevicesMessage(String receivedMessage, String discoveryMessagePrefix) {
     return receivedMessage.startsWith(discoveryMessagePrefix);
   }
 
@@ -369,9 +370,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     return new DatagramPacket(messageBytes, messageBytes.length, broadcastAddress, config.getDiscoverDevicesPort());
   }
 
-  protected String getDeviceInfoFromMessage(byte[] receivedBytes, String senderAddress) {
-    String receivedMessage = parseBytesToString(receivedBytes, receivedBytes.length);
-
+  protected String getDeviceInfoFromMessage(String receivedMessage, String senderAddress) {
     int bodyStartIndex = receivedMessage.indexOf(MESSAGE_HEADER_AND_BODY_SEPARATOR) + MESSAGE_HEADER_AND_BODY_SEPARATOR.length();
 
     return receivedMessage.substring(bodyStartIndex);
