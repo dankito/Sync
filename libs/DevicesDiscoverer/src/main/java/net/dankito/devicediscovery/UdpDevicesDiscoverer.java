@@ -30,7 +30,7 @@ import javax.inject.Named;
 @Named
 public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
-  protected static final String MESSAGE_HEADER_AND_BODY_SEPARATOR = " : ";
+  protected static final String MESSAGE_HEADER_AND_BODY_SEPARATOR = ":";
 
   protected static final Charset MESSAGES_CHARSET = Charset.forName("utf8");
 
