@@ -1,13 +1,10 @@
 package net.dankito.communication;
 
-import com.couchbase.lite.support.Base64;
-
 import net.dankito.communication.callback.SendRequestCallback;
-import net.dankito.communication.util.TestResponseBody;
-import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
 import net.dankito.communication.message.ResponseErrorType;
+import net.dankito.communication.util.TestResponseBody;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
@@ -20,6 +17,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -144,12 +142,12 @@ public class RequestSenderTest {
   public void sendRequestToClosedClient() throws Exception {
     remoteRequestReceiver.close();
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -166,12 +164,12 @@ public class RequestSenderTest {
   public void sendRequest_SerializingRequestFails() throws Exception {
     Mockito.doThrow(Exception.class).when(messageSerializer).serializeRequest(Mockito.any(Request.class));
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -188,12 +186,12 @@ public class RequestSenderTest {
   public void sendRequest_DeserializingResponseFails() throws Exception {
     Mockito.doReturn(new Response(ResponseErrorType.DESERIALIZE_RESPONSE, new Exception())).when(messageSerializer).deserializeResponse(Mockito.anyString(), Mockito.anyString());
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -212,12 +210,12 @@ public class RequestSenderTest {
         .thenCallRealMethod()
         .thenReturn(new SocketResult(false));
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -234,12 +232,12 @@ public class RequestSenderTest {
   public void deserializingRequestFails() throws Exception {
     Mockito.doThrow(Exception.class).when(messageSerializer).deserializeRequest(Mockito.anyString());
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -256,12 +254,12 @@ public class RequestSenderTest {
   public void serializeResponseFails() throws Exception {
     Mockito.doThrow(Exception.class).when(messageSerializer).serializeResponse(Mockito.any(Response.class));
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -278,12 +276,12 @@ public class RequestSenderTest {
   public void sendMessageReturnsError() {
     Mockito.doReturn(new SocketResult(false)).when(socketHandler).sendMessage(Mockito.any(Socket.class), Mockito.any(byte[].class));
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -305,12 +303,12 @@ public class RequestSenderTest {
 
     testResponseBody.setString(stringThatExceedsMaxMessageSize.toString());
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -320,7 +318,7 @@ public class RequestSenderTest {
 
     assertThat(responseHolder.isObjectSet(), is(true));
 
-    Response<DeviceInfo> response = responseHolder.getObject();
+    Response<TestResponseBody> response = responseHolder.getObject();
     assertThat(response.isCouldHandleMessage(), is(false));
     assertThat(response.getError().getMessage(), containsString("exceeds max message length"));
   }
@@ -329,14 +327,14 @@ public class RequestSenderTest {
   @Test
   public void sendMessageFails_ExceptionIsPassedOnToCallback() throws IOException {
     IOException exceptionToReturn = new IOException("Arbitrary Exception");
-    Mockito.doThrow(exceptionToReturn).when(socketHandler).sendMessage(Mockito.any(Base64.InputStream.class), Mockito.any(OutputStream.class));
+    Mockito.doThrow(exceptionToReturn).when(socketHandler).sendMessage(Mockito.any(InputStream.class), Mockito.any(OutputStream.class));
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -347,7 +345,7 @@ public class RequestSenderTest {
 
     assertThat(responseHolder.isObjectSet(), is(true));
 
-    Response<DeviceInfo> response = responseHolder.getObject();
+    Response<TestResponseBody> response = responseHolder.getObject();
     assertThat(response.isCouldHandleMessage(), is(false));
     assertThat(exceptionToReturn, is(response.getError()));
   }
@@ -357,12 +355,12 @@ public class RequestSenderTest {
   public void receivedRequestAsyncThrowsException_SimplyToHave100PercentLineCoverage() {
     Mockito.doThrow(Exception.class).when(remoteRequestReceiver).receivedRequestAsync(Mockito.any(Socket.class));
 
-    final ObjectHolder<Response<DeviceInfo>> responseHolder = new ObjectHolder<>();
+    final ObjectHolder<Response<TestResponseBody>> responseHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<DeviceInfo>() {
+    underTest.sendRequestAndReceiveResponseAsync(destinationAddress, testRequest, new SendRequestCallback<TestResponseBody>() {
       @Override
-      public void done(Response<DeviceInfo> response) {
+      public void done(Response<TestResponseBody> response) {
         responseHolder.setObject(response);
         countDownLatch.countDown();
       }
@@ -375,10 +373,10 @@ public class RequestSenderTest {
   }
 
 
-  protected void assertThatErrorTypeIs(ObjectHolder<Response<DeviceInfo>> responseHolder, ResponseErrorType errorType) {
+  protected void assertThatErrorTypeIs(ObjectHolder<Response<TestResponseBody>> responseHolder, ResponseErrorType errorType) {
     assertThat(responseHolder.isObjectSet(), is(true));
 
-    Response<DeviceInfo> response = responseHolder.getObject();
+    Response<TestResponseBody> response = responseHolder.getObject();
 
     assertThat(response.isCouldHandleMessage(), is(false));
     assertThat(response.getErrorType(), is(errorType));
