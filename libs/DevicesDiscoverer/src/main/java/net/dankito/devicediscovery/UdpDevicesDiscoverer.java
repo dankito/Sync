@@ -218,13 +218,17 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
       String remoteDeviceInfo = getDeviceInfoFromMessage(receivedMessage);
 
       if(isSelfSentPacket(remoteDeviceInfo, localDeviceInfo) == false) {
-        if(hasDeviceAlreadyBeenFound(remoteDeviceInfo) == false) {
-          deviceFound(remoteDeviceInfo, senderAddress, listener);
-        }
-        else {
-          connectionsAliveWatcher.receivedMessageFromDevice(remoteDeviceInfo);
-        }
+        handleReceivedRemotePacket(remoteDeviceInfo, senderAddress, listener);
       }
+    }
+  }
+
+  protected void handleReceivedRemotePacket(String remoteDeviceInfo, String senderAddress, DevicesDiscovererListener listener) {
+    if(hasDeviceAlreadyBeenFound(remoteDeviceInfo) == false) {
+      deviceFound(remoteDeviceInfo, senderAddress, listener);
+    }
+    else {
+      connectionsAliveWatcher.receivedMessageFromDevice(remoteDeviceInfo);
     }
   }
 
