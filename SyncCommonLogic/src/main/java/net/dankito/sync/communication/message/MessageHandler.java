@@ -1,8 +1,7 @@
-package net.dankito.sync.communication;
+package net.dankito.sync.communication.message;
 
-import net.dankito.sync.communication.message.DeviceInfo;
-import net.dankito.sync.communication.message.Request;
-import net.dankito.sync.communication.message.Response;
+import net.dankito.sync.communication.CommunicationConfig;
+import net.dankito.sync.communication.IMessageHandler;
 import net.dankito.sync.devices.INetworkSettings;
 
 
