@@ -1,4 +1,4 @@
-package net.dankito.sync.communication.callbacks;
+package net.dankito.sync.communication.callback;
 
 import net.dankito.sync.communication.message.Response;
 
