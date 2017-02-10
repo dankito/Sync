@@ -34,6 +34,8 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
   protected static final Charset MESSAGES_CHARSET = Charset.forName("utf8");
 
+  protected static final String DEVICE_KEY_ADDRESS_AND_DEVICE_INFO_SEPARATOR = " | ";
+
   protected static final int DELAY_BEFORE_RESTARTING_BROADCAST_FOR_ADDRESS_MILLIS = 5000;
 
   private static final Logger log = LoggerFactory.getLogger(UdpDevicesDiscoverer.class);
@@ -224,11 +226,13 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   }
 
   protected void handleReceivedRemotePacket(String remoteDeviceInfo, String senderAddress, DevicesDiscovererListener listener) {
-    if(hasDeviceAlreadyBeenFound(remoteDeviceInfo) == false) {
-      deviceFound(remoteDeviceInfo, senderAddress, listener);
+    String remoteDeviceKey = createDeviceKey(senderAddress, remoteDeviceInfo);
+
+    if(hasDeviceAlreadyBeenFound(remoteDeviceKey) == false) {
+      deviceFound(remoteDeviceKey, remoteDeviceInfo, senderAddress, listener);
     }
     else {
-      connectionsAliveWatcher.receivedMessageFromDevice(remoteDeviceInfo);
+      connectionsAliveWatcher.receivedMessageFromDevice(remoteDeviceKey);
     }
   }
 
@@ -252,11 +256,11 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     return false;
   }
 
-  protected void deviceFound(String remoteDeviceInfo, String remoteDeviceAddress, DevicesDiscovererListener listener) {
+  protected void deviceFound(String remoteDeviceKey, String remoteDeviceInfo, String remoteDeviceAddress, DevicesDiscovererListener listener) {
     log.info("Found Device " + remoteDeviceInfo + " on " + remoteDeviceAddress);
 
     synchronized(this) {
-      foundDevices.add(remoteDeviceInfo);
+      foundDevices.add(remoteDeviceKey);
 
       if(foundDevices.size() == 1) {
         startConnectionsAliveWatcher(listener);
@@ -275,8 +279,10 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     });
   }
 
-  protected void deviceDisconnected(String deviceInfo, DevicesDiscovererListener listener) {
-    removeDeviceFromFoundDevices(deviceInfo);
+  protected void deviceDisconnected(String deviceKey, DevicesDiscovererListener listener) {
+    removeDeviceFromFoundDevices(deviceKey);
+
+    String deviceInfo = extractDeviceInfoFromDeviceInfoKey(deviceKey);
 
     if(listener != null) {
       listener.deviceDisconnected(deviceInfo);
@@ -387,6 +393,22 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
 
   protected void removeDeviceFromFoundDevices(String deviceInfo) {
     foundDevices.remove(deviceInfo);
+  }
+
+  protected String createDeviceKey(String senderAddress, String remoteDeviceInfo) {
+    return senderAddress + DEVICE_KEY_ADDRESS_AND_DEVICE_INFO_SEPARATOR + remoteDeviceInfo;
+  }
+
+  protected String extractDeviceInfoFromDeviceInfoKey(String deviceKey) {
+    int deviceInfoStartIndex = deviceKey.indexOf(DEVICE_KEY_ADDRESS_AND_DEVICE_INFO_SEPARATOR);
+
+    if(deviceInfoStartIndex > 0) {
+      deviceInfoStartIndex += DEVICE_KEY_ADDRESS_AND_DEVICE_INFO_SEPARATOR.length();
+
+      return deviceKey.substring(deviceInfoStartIndex);
+    }
+
+    return null;
   }
 
 }

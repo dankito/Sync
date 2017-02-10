@@ -71,17 +71,17 @@ public class ConnectionsAliveWatcher {
   protected void checkIfConnectedDevicesStillAreConnected(List<String> foundDevices, final ConnectionsAliveWatcherListener listener) {
     Long now = new Date().getTime();
 
-    for(final String foundDevice : foundDevices) {
-      if(hasDeviceExpired(foundDevice, now)) {
-        log.info("Device " + foundDevice + " has disconnected, last message received at " +
-            new Date(lastMessageReceivedFromDeviceTimestamps.get(foundDevice)) + ", now = " + new Date(now));
-        deviceDisconnected(foundDevice, listener);
+    for(final String foundDeviceKey : foundDevices) {
+      if(hasDeviceExpired(foundDeviceKey, now)) {
+        log.info("Device " + foundDeviceKey + " has disconnected, last message received at " +
+            new Date(lastMessageReceivedFromDeviceTimestamps.get(foundDeviceKey)) + ", now = " + new Date(now));
+        deviceDisconnected(foundDeviceKey, listener);
       }
     }
   }
 
-  protected boolean hasDeviceExpired(String foundDevice, Long now) {
-    Long lastMessageReceivedFromDeviceTimestamp = lastMessageReceivedFromDeviceTimestamps.get(foundDevice);
+  protected boolean hasDeviceExpired(String foundDeviceKey, Long now) {
+    Long lastMessageReceivedFromDeviceTimestamp = lastMessageReceivedFromDeviceTimestamps.get(foundDeviceKey);
 
     if(lastMessageReceivedFromDeviceTimestamp != null) {
       return lastMessageReceivedFromDeviceTimestamp < now - connectionTimeout;
@@ -90,11 +90,11 @@ public class ConnectionsAliveWatcher {
     return false;
   }
 
-  protected void deviceDisconnected(String disconnectedDevice, ConnectionsAliveWatcherListener listener) {
-    lastMessageReceivedFromDeviceTimestamps.remove(disconnectedDevice);
+  protected void deviceDisconnected(String disconnectedDeviceKey, ConnectionsAliveWatcherListener listener) {
+    lastMessageReceivedFromDeviceTimestamps.remove(disconnectedDeviceKey);
 
     if(listener != null) {
-      listener.deviceDisconnected(disconnectedDevice);
+      listener.deviceDisconnected(disconnectedDeviceKey);
     }
   }
 
