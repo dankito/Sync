@@ -19,10 +19,14 @@ public class JsonMessageSerializer implements IMessageSerializer {
   private static final Logger log = LoggerFactory.getLogger(JsonMessageSerializer.class);
 
 
+  protected IMessageHandler messageHandler;
+
   protected ObjectMapper objectMapper;
 
 
-  public JsonMessageSerializer() {
+  public JsonMessageSerializer(IMessageHandler messageHandler) {
+    this.messageHandler = messageHandler;
+
     this.objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
@@ -60,22 +64,13 @@ public class JsonMessageSerializer implements IMessageSerializer {
   }
 
   protected Object deserializeRequestBody(String methodName, String requestBodyString) throws Exception {
-    Class requestBodyClass = getRequestBodyClass(methodName);
+    Class requestBodyClass = messageHandler.getRequestBodyClassForMethod(methodName);
 
     if(requestBodyClass != null) {
       return deserializeObject(requestBodyString, requestBodyClass);
     }
 
     return null;
-  }
-
-  protected Class getRequestBodyClass(String methodName) throws Exception {
-    switch(methodName) {
-      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
-        return null; // requests without request bodies
-      default:
-        throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
-    }
   }
 
 
@@ -89,20 +84,11 @@ public class JsonMessageSerializer implements IMessageSerializer {
   @Override
   public Response deserializeResponse(String methodName, String responseString) {
     try {
-      Class responseBodyType = getResponseBodyClass(methodName);
+      Class responseBodyType = messageHandler.getResponseBodyClassForMethod(methodName);
       return deserializeObject(responseString, Response.class, responseBodyType);
     } catch(Exception e) {
       log.error("Could not deserialize response " + responseString, e);
       return new Response(ResponseErrorType.DESERIALIZE_RESPONSE, e);
-    }
-  }
-
-  protected Class getResponseBodyClass(String methodName) throws Exception {
-    switch(methodName) {
-      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
-        return DeviceInfo.class;
-      default:
-        throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
     }
   }
 
