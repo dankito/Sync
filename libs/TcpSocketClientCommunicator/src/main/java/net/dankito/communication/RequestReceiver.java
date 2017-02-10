@@ -1,15 +1,16 @@
 package net.dankito.communication;
 
 
-import net.dankito.communication.message.ResponseErrorType;
 import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
+import net.dankito.communication.message.ResponseErrorType;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -84,7 +85,7 @@ public class RequestReceiver implements IRequestReceiver {
       waitForArrivingRequests();
     } catch(Exception e) {
       log.error("Could not bind receiverSocket to port " + desiredPort, e);
-      if(e instanceof IOException) {
+      if(e instanceof BindException || e instanceof IOException) {
         createReceiverSocket(desiredPort + 1, callback);
       }
       else {
