@@ -18,18 +18,21 @@ public class DeviceInfo {
 
   protected String osVersion;
 
+  protected String description;
+
 
   public DeviceInfo() {
 
   }
 
-  public DeviceInfo(String id, String uniqueDeviceId, String name, OsType osType, String osName, String osVersion) {
+  public DeviceInfo(String id, String uniqueDeviceId, String name, OsType osType, String osName, String osVersion, String description) {
     this.id = id;
     this.uniqueDeviceId = uniqueDeviceId;
     this.name = name;
     this.osType = osType;
     this.osName = osName;
     this.osVersion = osVersion;
+    this.description = description;
   }
 
 
@@ -81,6 +84,14 @@ public class DeviceInfo {
     this.osVersion = osVersion;
   }
 
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
 
   @Override
   public String toString() {
@@ -89,7 +100,7 @@ public class DeviceInfo {
 
 
   public static DeviceInfo fromDevice(Device device) {
-    return new DeviceInfo(device.getId(), device.getUniqueDeviceId(), device.getName(), device.getOsType(), device.getOsName(), device.getOsVersion());
+    return new DeviceInfo(device.getId(), device.getUniqueDeviceId(), device.getName(), device.getOsType(), device.getOsName(), device.getOsVersion(), device.getDescription());
   }
 
 }
