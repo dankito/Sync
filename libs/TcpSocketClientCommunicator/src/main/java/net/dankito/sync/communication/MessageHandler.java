@@ -27,6 +27,27 @@ public class MessageHandler implements IMessageHandler {
   }
 
 
+  @Override
+  public Class getResponseBodyClassForMethod(String methodName) throws Exception {
+    switch(methodName) {
+      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
+        return DeviceInfo.class;
+      default:
+        throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
+    }
+  }
+
+  @Override
+  public Class getRequestBodyClassForMethod(String methodName) throws Exception {
+    switch(methodName) {
+      case CommunicationConfig.GET_DEVICE_INFO_METHOD_NAME:
+        return null; // requests without request bodies
+      default:
+        throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
+    }
+  }
+
+
   protected Response handleGetDeviceInfoRequest(Request request) {
     return new Response(DeviceInfo.fromDevice(networkConfigurationManager.getLocalHostDevice()));
   }
