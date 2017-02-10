@@ -2,8 +2,10 @@ package net.dankito.sync.communication;
 
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.MessageHandler;
 import net.dankito.sync.communication.message.Request;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.utils.IThreadPool;
 
 import java.net.InetSocketAddress;
 
