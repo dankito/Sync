@@ -285,10 +285,9 @@ public class DevicesManager implements IDevicesManager {
   @Override
   public void remoteDeviceStartedSynchronizingWithUs(Device remoteDevice) {
     DiscoveredDevice discoveredRemoteDevice = getDiscoveredDeviceForDevice(remoteDevice);
-    String remoteDeviceInfo = getDeviceInfoKey(discoveredRemoteDevice);
 
     for(DiscoveredDevice discoveredDevice : discoveredDevices.values()) {
-      if(remoteDeviceInfo.equals(getDeviceInfoKey(discoveredDevice))) {
+      if(discoveredDevice.equals(discoveredRemoteDevice)) {
         addDeviceToKnownSynchronizedDevicesAndCallListeners(discoveredDevice, null);
         break;
       }
