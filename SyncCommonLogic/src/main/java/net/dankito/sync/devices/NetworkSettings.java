@@ -1,10 +1,12 @@
 package net.dankito.sync.devices;
 
 import net.dankito.sync.Device;
+import net.dankito.sync.data.IDataManager;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 
@@ -18,6 +20,16 @@ public class NetworkSettings implements INetworkSettings {
   protected int synchronizationPort;
 
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
+
+
+  public NetworkSettings(Device localHostDevice) {
+    this.localHostDevice = localHostDevice;
+  }
+
+  @Inject
+  public NetworkSettings(IDataManager dataManager) {
+    this(dataManager.getLocalConfig().getLocalDevice());
+  }
 
 
   @Override
