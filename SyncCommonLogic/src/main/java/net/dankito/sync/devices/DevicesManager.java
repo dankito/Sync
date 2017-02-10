@@ -73,9 +73,9 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void start() {
-    String deviceInfo = getDeviceInfoForDevicesDiscoverer(networkSettings);
+    String localDeviceInfoKey = getDeviceInfoKey(networkSettings);
 
-    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(deviceInfo, DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
+    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(localDeviceInfoKey, DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
         DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
@@ -240,14 +240,14 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
-  protected String getDeviceInfoForDevicesDiscoverer(INetworkSettings networkSettings) {
+  protected String getDeviceInfoKey(INetworkSettings networkSettings) {
     DiscoveredDevice localDevice = new DiscoveredDevice(networkSettings.getLocalHostDevice(), "localhost");
     localDevice.setMessagesPort(networkSettings.getMessagePort());
 
-    return getDeviceInfoFromDevice(localDevice);
+    return getDeviceInfoKey(localDevice);
   }
 
-  protected String getDeviceInfoFromDevice(DiscoveredDevice device) {
+  protected String getDeviceInfoKey(DiscoveredDevice device) {
     return device.getDevice().getUniqueDeviceId() + DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR + device.getMessagesPort();
   }
 
@@ -285,10 +285,10 @@ public class DevicesManager implements IDevicesManager {
   @Override
   public void remoteDeviceStartedSynchronizingWithUs(Device remoteDevice) {
     DiscoveredDevice discoveredRemoteDevice = getDiscoveredDeviceForDevice(remoteDevice);
-    String remoteDeviceInfo = getDeviceInfoFromDevice(discoveredRemoteDevice);
+    String remoteDeviceInfo = getDeviceInfoKey(discoveredRemoteDevice);
 
     for(DiscoveredDevice discoveredDevice : discoveredDevices.values()) {
-      if(remoteDeviceInfo.equals(getDeviceInfoFromDevice(discoveredDevice))) {
+      if(remoteDeviceInfo.equals(getDeviceInfoKey(discoveredDevice))) {
         addDeviceToKnownSynchronizedDevicesAndCallListeners(discoveredDevice, null);
         break;
       }
@@ -311,13 +311,13 @@ public class DevicesManager implements IDevicesManager {
   }
 
   protected boolean addDeviceToKnownSynchronizedDevices(DiscoveredDevice device) {
-    String deviceInfo = getDeviceInfoFromDevice(device);
+    String deviceInfoKey = getDeviceInfoKey(device);
 
-    if(deviceInfo != null) {
-      unknownDevices.remove(deviceInfo);
-      knownIgnoredDevices.remove(deviceInfo);
+    if(deviceInfoKey != null) {
+      unknownDevices.remove(deviceInfoKey);
+      knownIgnoredDevices.remove(deviceInfoKey);
 
-      knownSynchronizedDevices.put(deviceInfo, device);
+      knownSynchronizedDevices.put(deviceInfoKey, device);
 
       return true;
     }
@@ -349,9 +349,9 @@ public class DevicesManager implements IDevicesManager {
   public void stopSynchronizingWithDevice(DiscoveredDevice device) {
     localConfig.removeSynchronizedDevice(device.getDevice());
 
-    String deviceInfo = getDeviceInfoFromDevice(device);
-    knownSynchronizedDevices.remove(deviceInfo);
-    unknownDevices.put(deviceInfo, device);
+    String deviceInfoKey = getDeviceInfoKey(device);
+    knownSynchronizedDevices.remove(deviceInfoKey);
+    unknownDevices.put(deviceInfoKey, device);
 
     removeFromSourceAndDestinationSyncConfigurationOnDevices(device.getDevice());
 
@@ -406,9 +406,9 @@ public class DevicesManager implements IDevicesManager {
   public void addDeviceToIgnoreList(DiscoveredDevice device) {
     if(localConfig.addIgnoredDevice(device.getDevice())) {
       if(entityManager.updateEntity(localConfig)) {
-        String deviceInfo = getDeviceInfoFromDevice(device);
-        unknownDevices.remove(deviceInfo);
-        knownIgnoredDevices.put(deviceInfo, device);
+        String deviceInfoKey = getDeviceInfoKey(device);
+        unknownDevices.remove(deviceInfoKey);
+        knownIgnoredDevices.put(deviceInfoKey, device);
 
         callDiscoveredDeviceDisconnectedListeners(device);
         callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_IGNORED_DEVICE);
@@ -420,8 +420,8 @@ public class DevicesManager implements IDevicesManager {
   public void startSynchronizingWithIgnoredDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
     if(localConfig.removeIgnoredDevice(device.getDevice())) {
         if(entityManager.updateEntity(localConfig)) {
-          String deviceInfo = getDeviceInfoFromDevice(device);
-          knownIgnoredDevices.remove(deviceInfo);
+          String deviceInfoKey = getDeviceInfoKey(device);
+          knownIgnoredDevices.remove(deviceInfoKey);
 
           startSynchronizingWithDevice(device, syncModuleConfigurations);
         }

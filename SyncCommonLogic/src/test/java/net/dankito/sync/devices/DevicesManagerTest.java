@@ -202,7 +202,7 @@ public class DevicesManagerTest {
   protected DiscoveredDevice mockUnknownDiscoveredDevice() {
     DiscoveredDevice discoveredDevice = mockDiscoveredDevice();
 
-    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice), discoveredDevice);
+    underTest.unknownDevices.put(underTest.getDeviceInfoKey(discoveredDevice), discoveredDevice);
 
     return discoveredDevice;
   }
@@ -210,7 +210,7 @@ public class DevicesManagerTest {
   protected DiscoveredDevice mockIgnoredDiscoveredDevice() {
     DiscoveredDevice discoveredDevice = mockDiscoveredDevice();
 
-    underTest.knownIgnoredDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice), discoveredDevice);
+    underTest.knownIgnoredDevices.put(underTest.getDeviceInfoKey(discoveredDevice), discoveredDevice);
 
     localConfig.addIgnoredDevice(discoveredDevice.getDevice());
     entityManager.updateEntity(localConfig);
@@ -224,7 +224,7 @@ public class DevicesManagerTest {
     discoveredDevice.setMessagesPort(MESSAGES_RECEIVER_PORT);
     entityManager.persistEntity(remoteDevice);
 
-    underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice), discoveredDevice);
+    underTest.discoveredDevices.put(underTest.getDeviceInfoKey(discoveredDevice), discoveredDevice);
 
     return discoveredDevice;
   }
