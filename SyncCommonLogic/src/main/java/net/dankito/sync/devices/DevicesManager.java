@@ -103,22 +103,16 @@ public class DevicesManager implements IDevicesManager {
   protected DevicesDiscovererListener discovererListener = new DevicesDiscovererListener() {
     @Override
     public void deviceFound(String deviceInfo, String address) {
-      requestDeviceDetailsFromDevice(deviceInfo, address);
+      getDeviceDetailsForDiscoveredDevice(deviceInfo, address);
     }
 
     @Override
     public void deviceDisconnected(String deviceInfo) {
-      DiscoveredDevice device = discoveredDevices.get(deviceInfo);
-      if(device != null) {
-        disconnectedFromDevice(deviceInfo, device);
-      }
-      else {
-        log.error("This should never occur! Disconnected from Device, but was not in discoveredDevices: " + deviceInfo);
-      }
+      DevicesManager.this.deviceDisconnected(deviceInfo);
     }
   };
 
-  protected void requestDeviceDetailsFromDevice(String deviceInfoKey, final String address) {
+  protected void getDeviceDetailsForDiscoveredDevice(String deviceInfoKey, final String address) {
     try {
       String deviceUniqueId = getDeviceUniqueIdFromDeviceInfoKey(deviceInfoKey);
       final int messagesPort = getMessagesPortFromDeviceInfoKey(deviceInfoKey);
@@ -210,6 +204,17 @@ public class DevicesManager implements IDevicesManager {
     }
     else {
       return DiscoveredDeviceType.UNKNOWN_DEVICE;
+    }
+  }
+
+
+  protected void deviceDisconnected(String deviceInfoKey) {
+    DiscoveredDevice device = discoveredDevices.get(deviceInfoKey);
+    if(device != null) {
+      disconnectedFromDevice(deviceInfoKey, device);
+    }
+    else {
+      log.error("This should never occur! Disconnected from Device, but was not in discoveredDevices: " + deviceInfoKey);
     }
   }
 
