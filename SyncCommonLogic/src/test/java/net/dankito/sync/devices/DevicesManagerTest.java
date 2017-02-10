@@ -6,10 +6,14 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.communication.IClientCommunicator;
+import net.dankito.sync.communication.TcpSocketClientCommunicator;
+import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
 
@@ -21,14 +25,21 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class DevicesManagerTest {
+
+  protected static final int MESSAGES_RECEIVER_PORT = 54321;
+
 
   protected DevicesManager underTest;
 
   protected IEntityManager entityManager;
 
   protected IDataManager dataManager;
+
+  protected IClientCommunicator clientCommunicator;
 
   protected LocalConfig localConfig;
 
@@ -41,15 +52,36 @@ public class DevicesManagerTest {
     this.localConfig = new LocalConfig(localDevice);
     entityManager.persistEntity(localConfig);
 
+    final INetworkSettings networkSettings = new NetworkSettings(localDevice);
+
     dataManager = Mockito.mock(IDataManager.class);
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
 
-    underTest = new DevicesManager(new UdpDevicesDiscoverer(new ThreadPool()), dataManager, entityManager);
+    IThreadPool threadPool = new ThreadPool();
+
+    clientCommunicator = new TcpSocketClientCommunicator(networkSettings, threadPool);
+
+    underTest = new DevicesManager(new UdpDevicesDiscoverer(threadPool), clientCommunicator, dataManager, networkSettings, entityManager);
+
+
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    clientCommunicator.start(MESSAGES_RECEIVER_PORT, new ClientCommunicatorListener() {
+      @Override
+      public void started(boolean couldStartMessagesReceiver, int messagesReceiverPort, Exception startException) {
+        networkSettings.setMessagePort(messagesReceiverPort);
+        countDownLatch.countDown();
+      }
+    });
+
+    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
   }
 
   @After
   public void tearDown() {
     underTest.stop();
+
+    clientCommunicator.stop();
 
     new JavaFileStorageService().deleteFolderRecursively(entityManager.getDatabasePath());
   }
@@ -170,7 +202,7 @@ public class DevicesManagerTest {
   protected DiscoveredDevice mockUnknownDiscoveredDevice() {
     DiscoveredDevice discoveredDevice = mockDiscoveredDevice();
 
-    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice.getDevice()), discoveredDevice);
+    underTest.unknownDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice), discoveredDevice);
 
     return discoveredDevice;
   }
@@ -178,7 +210,7 @@ public class DevicesManagerTest {
   protected DiscoveredDevice mockIgnoredDiscoveredDevice() {
     DiscoveredDevice discoveredDevice = mockDiscoveredDevice();
 
-    underTest.knownIgnoredDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice.getDevice()), discoveredDevice);
+    underTest.knownIgnoredDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice), discoveredDevice);
 
     localConfig.addIgnoredDevice(discoveredDevice.getDevice());
     entityManager.updateEntity(localConfig);
@@ -189,9 +221,10 @@ public class DevicesManagerTest {
   protected DiscoveredDevice mockDiscoveredDevice() {
     Device remoteDevice = new Device("Remote");
     DiscoveredDevice discoveredDevice = new DiscoveredDevice(remoteDevice, "1-1-1-Love");
+    discoveredDevice.setMessagesPort(MESSAGES_RECEIVER_PORT);
     entityManager.persistEntity(remoteDevice);
 
-    underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(remoteDevice), discoveredDevice);
+    underTest.discoveredDevices.put(underTest.getDeviceInfoFromDevice(discoveredDevice), discoveredDevice);
 
     return discoveredDevice;
   }

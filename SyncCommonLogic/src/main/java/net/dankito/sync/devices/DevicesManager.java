@@ -1,15 +1,16 @@
 package net.dankito.sync.devices;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.dankito.devicediscovery.DevicesDiscovererConfig;
 import net.dankito.devicediscovery.DevicesDiscovererListener;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
-import net.dankito.sync.OsType;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.communication.IClientCommunicator;
+import net.dankito.sync.communication.callback.SendRequestCallback;
+import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SynchronizationConfig;
@@ -17,6 +18,7 @@ import net.dankito.sync.synchronization.SynchronizationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,16 +31,20 @@ import javax.inject.Named;
 @Named
 public class DevicesManager implements IDevicesManager {
 
+  protected static final String DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR = ":";
+
   private static final Logger log = LoggerFactory.getLogger(DevicesManager.class);
 
 
   protected IDevicesDiscoverer devicesDiscoverer;
 
+  protected IClientCommunicator clientCommunicator;
+
   protected LocalConfig localConfig;
 
-  protected IEntityManager entityManager;
+  protected INetworkSettings networkSettings;
 
-  protected ObjectMapper objectMapper = new ObjectMapper();
+  protected IEntityManager entityManager;
 
 
   protected Map<String, DiscoveredDevice> discoveredDevices = new ConcurrentHashMap<>();
@@ -55,8 +61,10 @@ public class DevicesManager implements IDevicesManager {
   protected List<KnownSynchronizedDevicesListener> knownSynchronizedDevicesListeners = new CopyOnWriteArrayList<>();
 
 
-  public DevicesManager(IDevicesDiscoverer devicesDiscoverer, IDataManager dataManager, IEntityManager entityManager) {
+  public DevicesManager(IDevicesDiscoverer devicesDiscoverer, IClientCommunicator clientCommunicator, IDataManager dataManager, INetworkSettings networkSettings, IEntityManager entityManager) {
     this.devicesDiscoverer = devicesDiscoverer;
+    this.clientCommunicator = clientCommunicator;
+    this.networkSettings = networkSettings;
     this.entityManager = entityManager;
 
     this.localConfig = dataManager.getLocalConfig();
@@ -65,7 +73,9 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void start() {
-    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(getDeviceInfoForDevicesDiscoverer(localConfig.getLocalDevice()), DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
+    String deviceInfo = getDeviceInfoForDevicesDiscoverer(networkSettings);
+
+    devicesDiscoverer.startAsync(new DevicesDiscovererConfig(deviceInfo, DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
         DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
@@ -74,12 +84,6 @@ public class DevicesManager implements IDevicesManager {
 
       @Override
       public void deviceDisconnected(String deviceInfo) {
-        // TODO: normally deviceInfo is the unique device id, we still have to implement this
-        try {
-          Device device = objectMapper.readValue(deviceInfo, Device.class);
-          deviceInfo = device.getUniqueDeviceId();
-        } catch(Exception ignored) { }
-
         DiscoveredDevice device = discoveredDevices.get(deviceInfo);
         if(device != null) {
           disconnectedFromDevice(deviceInfo, device);
@@ -112,32 +116,66 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
-  protected void requestDeviceDetailsFromDevice(String deviceInfo, String address) {
-    // TODO
-
+  protected void requestDeviceDetailsFromDevice(String deviceInfoKey, final String address) {
     try {
-      Device device = objectMapper.readValue(deviceInfo, Device.class);
+      String deviceUniqueId = getDeviceUniqueIdFromDeviceInfoKey(deviceInfoKey);
+      final int messagesPort = getMessagesPortFromDeviceInfoKey(deviceInfoKey);
 
-      try {
-        Device persistedDevice = entityManager.getEntityById(Device.class, device.getId());
-        if(persistedDevice != null) {
-          device = persistedDevice;
-        }
-        else {
-          entityManager.persistEntity(device);
-        }
-      } catch(Exception e) {
-        entityManager.persistEntity(device);
+      Device persistedDevice = getPersistedDeviceForUniqueId(deviceUniqueId);
+
+      if(persistedDevice != null) {
+        discoveredDevice(deviceInfoKey, persistedDevice, address, messagesPort);
       }
-
-      deviceInfo = device.getUniqueDeviceId();
-
-      DiscoveredDevice discoveredDevice = new DiscoveredDevice(device, address);
-      discoveredDevice.setSynchronizationPort(SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT); // TODO: ask from remote
-      discoveredDevice(deviceInfo, discoveredDevice);
+      else {
+        retrieveDeviceInfoFromRemote(deviceInfoKey, address, messagesPort);
+      }
     } catch(Exception e) {
-      log.error("Could not deserialize Device from " + deviceInfo, e);
+      log.error("Could not deserialize Device from " + deviceInfoKey, e);
     }
+  }
+
+  protected Device getPersistedDeviceForUniqueId(String deviceUniqueId) {
+    List<Device> persistedDevices = entityManager.getAllEntitiesOfType(Device.class);
+    for(Device device : persistedDevices) {
+      if(deviceUniqueId.equals(device.getUniqueDeviceId())) {
+        return device;
+      }
+    }
+
+    return null;
+  }
+
+  protected void retrieveDeviceInfoFromRemote(final String deviceInfoKey, final String address, final int messagesPort) {
+    clientCommunicator.getDeviceInfo(new InetSocketAddress(address, messagesPort), new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        if(response.isCouldHandleMessage()) {
+          successfullyRetrievedDeviceInfo(deviceInfoKey, response.getBody(), address, messagesPort);
+        }
+      }
+    });
+  }
+
+  protected void successfullyRetrievedDeviceInfo(String deviceInfoKey, DeviceInfo deviceInfo, String address, int messagesPort) {
+    Device remoteDevice = mapDeviceInfoToDevice(deviceInfo);
+
+    entityManager.persistEntity(remoteDevice);
+
+    discoveredDevice(deviceInfoKey, remoteDevice, address, messagesPort);
+  }
+
+  protected Device mapDeviceInfoToDevice(DeviceInfo deviceInfo) {
+    return new Device(deviceInfo.getId(), deviceInfo.getUniqueDeviceId(), deviceInfo.getName(), deviceInfo.getOsType(), deviceInfo.getOsName(),
+        deviceInfo.getOsVersion(), deviceInfo.getDescription());
+  }
+
+  protected void discoveredDevice(String deviceInfoKey, Device device, String address, int messagesPort) {
+    DiscoveredDevice discoveredDevice = new DiscoveredDevice(device, address);
+
+    discoveredDevice.setMessagesPort(messagesPort);
+    discoveredDevice.setSynchronizationPort(SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT); // TODO: ask from remote
+
+    discoveredDevice(deviceInfoKey, discoveredDevice);
   }
 
   protected void discoveredDevice(String deviceInfo, DiscoveredDevice device) {
@@ -202,90 +240,36 @@ public class DevicesManager implements IDevicesManager {
   }
 
 
-  public class DeviceMap {
+  protected String getDeviceInfoForDevicesDiscoverer(INetworkSettings networkSettings) {
+    DiscoveredDevice localDevice = new DiscoveredDevice(networkSettings.getLocalHostDevice(), "localhost");
+    localDevice.setMessagesPort(networkSettings.getMessagePort());
 
-    protected String id;
-    protected String uniqueDeviceId;
-    protected String name;
-    protected OsType osType;
-    protected String osName;
-    protected String osVersion;
-
-    public DeviceMap() {
-
-    }
-
-    public DeviceMap(Device device) {
-      this.id = device.getId();
-      this.uniqueDeviceId = device.getUniqueDeviceId();
-      this.name = device.getName();
-      this.osType = device.getOsType();
-      this.osName = device.getOsName();
-      this.osVersion = device.getOsVersion();
-    }
-
-    public String getId() {
-      return id;
-    }
-
-    public void setId(String id) {
-      this.id = id;
-    }
-
-    public String getUniqueDeviceId() {
-      return uniqueDeviceId;
-    }
-
-    public void setUniqueDeviceId(String uniqueDeviceId) {
-      this.uniqueDeviceId = uniqueDeviceId;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public void setName(String name) {
-      this.name = name;
-    }
-
-    public OsType getOsType() {
-      return osType;
-    }
-
-    public void setOsType(OsType osType) {
-      this.osType = osType;
-    }
-
-    public String getOsName() {
-      return osName;
-    }
-
-    public void setOsName(String osName) {
-      this.osName = osName;
-    }
-
-    public String getOsVersion() {
-      return osVersion;
-    }
-
-    public void setOsVersion(String osVersion) {
-      this.osVersion = osVersion;
-    }
+    return getDeviceInfoFromDevice(localDevice);
   }
 
-  // TODO: replace by normal call to getDeviceInfoFromDevice() as soon as Message Bus is implemented
-  protected String getDeviceInfoForDevicesDiscoverer(Device device) {
-    try {
-      return objectMapper.writeValueAsString(new DeviceMap(device));
-    } catch(Exception e) {
-      log.error("Could not serialize device to JSON: " + device, e);
-    }
-
-    return "";
+  protected String getDeviceInfoFromDevice(DiscoveredDevice device) {
+    return device.getDevice().getUniqueDeviceId() + DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR + device.getMessagesPort();
   }
 
-  protected String getDeviceInfoFromDevice(Device device) {
-    return device.getUniqueDeviceId();
+  protected String getDeviceUniqueIdFromDeviceInfoKey(String deviceInfoKey) {
+    int portStartIndex = deviceInfoKey.lastIndexOf(DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR);
+    if(portStartIndex > 0) {
+      return deviceInfoKey.substring(0, portStartIndex);
+    }
+
+    return null;
+  }
+
+  protected int getMessagesPortFromDeviceInfoKey(String deviceInfoKey) {
+    int portStartIndex = deviceInfoKey.lastIndexOf(DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR);
+    if(portStartIndex > 0) {
+      portStartIndex += DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR.length();
+
+      String portString = deviceInfoKey.substring(portStartIndex);
+      return Integer.parseInt(portString);
+    }
+
+    return -1;
   }
 
 
@@ -300,10 +284,11 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void remoteDeviceStartedSynchronizingWithUs(Device remoteDevice) {
-    String remoteDeviceInfo = getDeviceInfoFromDevice(remoteDevice);
+    DiscoveredDevice discoveredRemoteDevice = getDiscoveredDeviceForDevice(remoteDevice);
+    String remoteDeviceInfo = getDeviceInfoFromDevice(discoveredRemoteDevice);
 
     for(DiscoveredDevice discoveredDevice : discoveredDevices.values()) {
-      if(remoteDeviceInfo.equals(getDeviceInfoFromDevice(discoveredDevice.getDevice()))) {
+      if(remoteDeviceInfo.equals(getDeviceInfoFromDevice(discoveredDevice))) {
         addDeviceToKnownSynchronizedDevicesAndCallListeners(discoveredDevice, null);
         break;
       }
@@ -326,7 +311,7 @@ public class DevicesManager implements IDevicesManager {
   }
 
   protected boolean addDeviceToKnownSynchronizedDevices(DiscoveredDevice device) {
-    String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+    String deviceInfo = getDeviceInfoFromDevice(device);
 
     if(deviceInfo != null) {
       unknownDevices.remove(deviceInfo);
@@ -364,7 +349,7 @@ public class DevicesManager implements IDevicesManager {
   public void stopSynchronizingWithDevice(DiscoveredDevice device) {
     localConfig.removeSynchronizedDevice(device.getDevice());
 
-    String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+    String deviceInfo = getDeviceInfoFromDevice(device);
     knownSynchronizedDevices.remove(deviceInfo);
     unknownDevices.put(deviceInfo, device);
 
@@ -421,7 +406,7 @@ public class DevicesManager implements IDevicesManager {
   public void addDeviceToIgnoreList(DiscoveredDevice device) {
     if(localConfig.addIgnoredDevice(device.getDevice())) {
       if(entityManager.updateEntity(localConfig)) {
-        String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+        String deviceInfo = getDeviceInfoFromDevice(device);
         unknownDevices.remove(deviceInfo);
         knownIgnoredDevices.put(deviceInfo, device);
 
@@ -435,7 +420,7 @@ public class DevicesManager implements IDevicesManager {
   public void startSynchronizingWithIgnoredDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
     if(localConfig.removeIgnoredDevice(device.getDevice())) {
         if(entityManager.updateEntity(localConfig)) {
-          String deviceInfo = getDeviceInfoFromDevice(device.getDevice());
+          String deviceInfo = getDeviceInfoFromDevice(device);
           knownIgnoredDevices.remove(deviceInfo);
 
           startSynchronizingWithDevice(device, syncModuleConfigurations);

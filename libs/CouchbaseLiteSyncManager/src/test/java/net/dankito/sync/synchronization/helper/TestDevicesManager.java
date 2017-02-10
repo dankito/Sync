@@ -11,12 +11,12 @@ public class TestDevicesManager extends DevicesManager {
 
 
   public TestDevicesManager() {
-    super(null, new IDataManager() {
+    super(null, null, new IDataManager() {
       @Override
       public LocalConfig getLocalConfig() {
         return new LocalConfig(null);
       }
-    }, null);
+    }, null, null);
   }
 
 
