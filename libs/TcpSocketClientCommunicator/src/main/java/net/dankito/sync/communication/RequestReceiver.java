@@ -4,7 +4,6 @@ package net.dankito.sync.communication;
 import net.dankito.sync.communication.message.Request;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.communication.message.ResponseErrorType;
-import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
@@ -61,45 +60,45 @@ public class RequestReceiver implements IRequestReceiver {
   }
 
 
-  public void start(int desiredMessagesReceiverPort, INetworkSettings networkSettings) {
-    createReceiverSocketAsync(desiredMessagesReceiverPort, networkSettings);
+  public void start(int desiredMessagesReceiverPort, RequestReceiverCallback callback) {
+    createReceiverSocketAsync(desiredMessagesReceiverPort, callback);
   }
 
-  protected void createReceiverSocketAsync(final int desiredPort, final INetworkSettings networkSettings) {
+  protected void createReceiverSocketAsync(final int desiredPort, final RequestReceiverCallback callback) {
     receiverThread = new Thread(new Runnable() {
       @Override
       public void run() {
-        createReceiverSocket(desiredPort, networkSettings);
+        createReceiverSocket(desiredPort, callback);
       }
     });
 
     receiverThread.start();
   }
 
-  protected void createReceiverSocket(int desiredPort, INetworkSettings networkSettings) {
+  protected void createReceiverSocket(int desiredPort, RequestReceiverCallback callback) {
     try {
       receiverSocket = new ServerSocket(desiredPort);
 
-      receiverSocketBoundToPort(desiredPort, networkSettings);
+      receiverSocketBoundToPort(desiredPort, callback);
 
       waitForArrivingRequests();
     } catch(Exception e) {
       log.error("Could not bind receiverSocket to port " + desiredPort, e);
       if(e instanceof IOException) {
-        createReceiverSocket(desiredPort + 1, networkSettings);
+        createReceiverSocket(desiredPort + 1, callback);
       }
       else {
-        creatingReceiverSocketFailed(desiredPort, e);
+        creatingReceiverSocketFailed(desiredPort, e, callback);
       }
     }
   }
 
-  protected void creatingReceiverSocketFailed(int port, Exception exception) {
-    // TODO: notify Sync that opening receiver socket failed (should actually never occur)
+  protected void creatingReceiverSocketFailed(int port, Exception exception, RequestReceiverCallback callback) {
+    callback.started(this, false, port, exception);
   }
 
-  protected void receiverSocketBoundToPort(int port, INetworkSettings networkSettings) {
-    networkSettings.setMessagePort(port);
+  protected void receiverSocketBoundToPort(int port, RequestReceiverCallback callback) {
+    callback.started(this, true, port, null);
   }
 
   protected void waitForArrivingRequests() {

@@ -1,9 +1,7 @@
 package net.dankito.sync.communication;
 
 import net.dankito.sync.devices.INetworkSettings;
-import net.dankito.sync.devices.NetworkSetting;
 import net.dankito.sync.devices.NetworkSettings;
-import net.dankito.sync.devices.NetworkSettingsChangedListener;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
@@ -63,42 +61,37 @@ public class RequestReceiverTest {
 
   @Test
   public void start_DesiredPortOutOfExpectedRange() throws Exception {
-    final ObjectHolder<Integer> selectedPortHolder = new ObjectHolder<>();
+    final ObjectHolder<Boolean> startResultHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    networkSettings.addListener(new NetworkSettingsChangedListener() {
+
+    int portOutOfRange = (int)Math.pow(2, 16);
+    underTest.start(portOutOfRange, new RequestReceiverCallback() {
       @Override
-      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        selectedPortHolder.setObject((Integer)newValue); // should never come to this
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        startResultHolder.setObject(couldStartReceiver);
         countDownLatch.countDown();
       }
     });
 
 
-    int portOutOfRange = (int)Math.pow(2, 16);
-    underTest.start(portOutOfRange, networkSettings);
-
-
     try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    assertThat(selectedPortHolder.isObjectSet(), is(false));
+    assertThat(startResultHolder.isObjectSet(), is(true));
+    assertThat(startResultHolder.getObject(), is(false));
   }
 
   @Test
   public void start_DesiredPortAlreadyBound() throws Exception {
     final CountDownLatch countDownLatchRequestReceiver2 = new CountDownLatch(1);
 
-    networkSettings.addListener(new NetworkSettingsChangedListener() {
+    int alreadyBoundPort = TEST_PORT;
+    requestReceiver2.start(alreadyBoundPort, new RequestReceiverCallback() {
       @Override
-      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        if(setting == NetworkSetting.MESSAGES_PORT) {
-          countDownLatchRequestReceiver2.countDown();
-        }
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        countDownLatchRequestReceiver2.countDown();
       }
     });
-
-    int alreadyBoundPort = TEST_PORT;
-    requestReceiver2.start(alreadyBoundPort, networkSettings);
 
     try { countDownLatchRequestReceiver2.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
@@ -106,17 +99,16 @@ public class RequestReceiverTest {
     final ObjectHolder<Integer> selectedPortHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatchRequestReceiverUnderTest = new CountDownLatch(1);
 
-    networkSettings.addListener(new NetworkSettingsChangedListener() {
+
+    underTest.start(alreadyBoundPort, new RequestReceiverCallback() {
       @Override
-      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        if(setting == NetworkSetting.MESSAGES_PORT) {
-          selectedPortHolder.setObject((Integer)newValue);
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        if(couldStartReceiver) {
+          selectedPortHolder.setObject(messagesReceiverPort);
           countDownLatchRequestReceiverUnderTest.countDown();
         }
       }
     });
-
-    underTest.start(alreadyBoundPort, networkSettings);
 
 
     try { countDownLatchRequestReceiverUnderTest.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
@@ -132,16 +124,14 @@ public class RequestReceiverTest {
 
     final CountDownLatch countDownLatchReceiver1 = new CountDownLatch(1);
 
-    networkSettings.addListener(new NetworkSettingsChangedListener() {
+    underTest.start(testPort, new RequestReceiverCallback() {
       @Override
-      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        if(setting == NetworkSetting.MESSAGES_PORT) {
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        if(couldStartReceiver) {
           countDownLatchReceiver1.countDown();
         }
       }
     });
-
-    underTest.start(testPort, networkSettings);
 
     try { countDownLatchReceiver1.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
@@ -157,17 +147,15 @@ public class RequestReceiverTest {
     final CountDownLatch countDownLatchReceiver2 = new CountDownLatch(1);
     final ObjectHolder<Integer> receiver2SelectedPortHolder = new ObjectHolder<>();
 
-    networkSettings.addListener(new NetworkSettingsChangedListener() {
+    requestReceiver2.start(testPort, new RequestReceiverCallback() {
       @Override
-      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        if(setting == NetworkSetting.MESSAGES_PORT) {
-          receiver2SelectedPortHolder.setObject((Integer)newValue);
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        if(couldStartReceiver) {
+          receiver2SelectedPortHolder.setObject(messagesReceiverPort);
           countDownLatchReceiver2.countDown();
         }
       }
     });
-
-    requestReceiver2.start(testPort, networkSettings);
 
     try { countDownLatchReceiver2.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
 

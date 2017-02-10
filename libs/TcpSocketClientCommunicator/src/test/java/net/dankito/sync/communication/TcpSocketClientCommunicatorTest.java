@@ -11,9 +11,7 @@ import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.communication.message.ResponseErrorType;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
-import net.dankito.sync.devices.NetworkSetting;
 import net.dankito.sync.devices.NetworkSettings;
-import net.dankito.sync.devices.NetworkSettingsChangedListener;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
@@ -96,20 +94,19 @@ public class TcpSocketClientCommunicatorTest {
 
     remoteNetworkSettings = new NetworkSettings();
     remoteNetworkSettings.setLocalHostDevice(remoteDevice);
-    remoteNetworkSettings.addListener(new NetworkSettingsChangedListener() {
-      @Override
-      public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
-        if(setting == NetworkSetting.MESSAGES_PORT) {
-          discoveredRemoteDevice.setMessagesPort((int)newValue);
-          waitForMessagesReceiverBeingSetupLatch.countDown();
-        }
-      }
-    });
 
     remoteMessageHandler = new MessageHandler(remoteNetworkSettings);
 
     remoteRequestReceiver = Mockito.spy(new RequestReceiver(socketHandler, remoteMessageHandler, messageSerializer, threadPool));
-    remoteRequestReceiver.start(MESSAGES_RECEIVER_PORT, remoteNetworkSettings);
+    remoteRequestReceiver.start(MESSAGES_RECEIVER_PORT, new RequestReceiverCallback() {
+      @Override
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        if(couldStartReceiver) {
+          discoveredRemoteDevice.setMessagesPort(messagesReceiverPort);
+          waitForMessagesReceiverBeingSetupLatch.countDown();
+        }
+      }
+    });
 
     try { waitForMessagesReceiverBeingSetupLatch.await(1, TimeUnit.SECONDS); } catch(Exception e) { }
   }
