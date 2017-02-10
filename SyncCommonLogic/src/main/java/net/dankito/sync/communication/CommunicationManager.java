@@ -5,7 +5,10 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.utils.IThreadPool;
 
+import javax.inject.Named;
 
+
+@Named
 public class CommunicationManager implements ICommunicationManager {
 
   protected IClientCommunicator clientCommunicator;
