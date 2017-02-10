@@ -10,6 +10,8 @@ public interface IClientCommunicator {
 
   void start(int desiredCommunicatorPort, ClientCommunicatorListener listener);
 
+  void stop();
+
   void getDeviceInfo(DiscoveredDevice remoteDevice, SendRequestCallback<DeviceInfo> callback);
 
 }

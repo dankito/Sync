@@ -55,6 +55,11 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
     });
   }
 
+  @Override
+  public void stop() {
+    requestReceiver.close();
+  }
+
 
   @Override
   public void getDeviceInfo(DiscoveredDevice remoteDevice, final SendRequestCallback<DeviceInfo> callback) {
