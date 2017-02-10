@@ -1,17 +1,17 @@
 package net.dankito.sync.communication.message;
 
+import net.dankito.sync.Device;
 import net.dankito.sync.communication.CommunicationConfig;
 import net.dankito.sync.communication.IMessageHandler;
-import net.dankito.sync.devices.INetworkSettings;
 
 
 public class MessageHandler implements IMessageHandler {
 
-  protected INetworkSettings networkConfigurationManager;
+  protected Device localDevice;
 
 
-  public MessageHandler(INetworkSettings networkConfigurationManager) {
-    this.networkConfigurationManager = networkConfigurationManager;
+  public MessageHandler(Device localDevice) {
+    this.localDevice = localDevice;
   }
 
 
@@ -48,7 +48,7 @@ public class MessageHandler implements IMessageHandler {
 
 
   protected Response handleGetDeviceInfoRequest(Request request) {
-    return new Response(DeviceInfo.fromDevice(networkConfigurationManager.getLocalHostDevice()));
+    return new Response(DeviceInfo.fromDevice(localDevice));
   }
 
 }
