@@ -12,11 +12,11 @@ import net.dankito.communication.SocketHandler;
 import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
 import net.dankito.communication.message.ResponseErrorType;
-import net.dankito.sync.Device;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.MessageHandler;
+import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.utils.IThreadPool;
 
 import java.net.SocketAddress;
@@ -32,13 +32,13 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected IRequestReceiver requestReceiver;
 
 
-  public TcpSocketClientCommunicator(Device localDevice, IThreadPool threadPool) {
-    setupDependencies(localDevice, threadPool);
+  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
+    setupDependencies(networkSettings, threadPool);
   }
 
-  protected void setupDependencies(Device localDevice, IThreadPool threadPool) {
+  protected void setupDependencies(INetworkSettings networkSettings, IThreadPool threadPool) {
     SocketHandler socketHandler = new SocketHandler();
-    IMessageHandler messageHandler = new MessageHandler(localDevice);
+    IMessageHandler messageHandler = new MessageHandler(networkSettings.getLocalHostDevice());
     IMessageSerializer messageSerializer = new JsonMessageSerializer(messageHandler);
 
     requestSender = new RequestSender(socketHandler, messageSerializer, threadPool);

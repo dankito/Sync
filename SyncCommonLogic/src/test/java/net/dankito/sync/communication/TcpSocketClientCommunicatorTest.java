@@ -7,6 +7,8 @@ import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.INetworkSettings;
+import net.dankito.sync.devices.NetworkSettings;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 
@@ -56,7 +58,9 @@ public class TcpSocketClientCommunicatorTest {
   public void setUp() throws Exception {
     setUpRemoteDevice();
 
-    underTest = new TcpSocketClientCommunicator(remoteDevice, new ThreadPool());
+    INetworkSettings networkSettings = new NetworkSettings(remoteDevice);
+
+    underTest = new TcpSocketClientCommunicator(networkSettings, new ThreadPool());
 
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
