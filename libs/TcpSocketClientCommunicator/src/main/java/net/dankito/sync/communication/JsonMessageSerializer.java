@@ -3,7 +3,6 @@ package net.dankito.sync.communication;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.Request;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.communication.message.ResponseErrorType;
