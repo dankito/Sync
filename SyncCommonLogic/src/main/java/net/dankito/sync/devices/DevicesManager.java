@@ -76,7 +76,7 @@ public class DevicesManager implements IDevicesManager {
     String localDeviceInfoKey = getDeviceInfoKey(networkSettings);
 
     devicesDiscoverer.startAsync(new DevicesDiscovererConfig(localDeviceInfoKey, DevicesManagerConfig.DEVICES_DISCOVERER_PORT,
-        DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, new DevicesDiscovererListener() {
+        DevicesManagerConfig.CHECK_FOR_DEVICES_INTERVAL_MILLIS, DevicesManagerConfig.DISCOVERY_MESSAGE_PREFIX, new DevicesDiscovererListener() {
       @Override
       public void deviceFound(String deviceInfo, String address) {
         requestDeviceDetailsFromDevice(deviceInfo, address);
