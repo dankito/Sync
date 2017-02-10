@@ -1,6 +1,7 @@
 package net.dankito.sync.javafx.controller;
 
 
+import net.dankito.sync.communication.ICommunicationManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.DiscoveredDeviceType;
@@ -51,6 +52,8 @@ public class MainWindowController {
   protected IDataManager dataManager;
 
   protected IEntityManager entityManager;
+
+  protected ICommunicationManager communicationManager;
 
   protected IDevicesManager devicesManager;
 
@@ -113,12 +116,15 @@ public class MainWindowController {
 
     syncModuleConfigurationManager = context.getBean(ISyncModuleConfigurationManager.class);
 
+    communicationManager = context.getBean(ICommunicationManager.class);
+
     devicesManager = context.getBean(IDevicesManager.class);
   }
 
   protected void setupLogic() {
     devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
-    devicesManager.start();
+
+    communicationManager.startAsync();
   }
 
 

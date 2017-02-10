@@ -4,7 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
-import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.communication.ICommunicationManager;
 import net.dankito.sync.di.AndroidServiceDiComponent;
 import net.dankito.sync.di.AndroidServiceDiContainer;
 import net.dankito.sync.di.DaggerAndroidServiceDiComponent;
@@ -23,7 +23,7 @@ public class SyncBackgroundService extends Service {
 
 
   @Inject
-  protected IDevicesManager devicesManager;
+  protected ICommunicationManager communicationManager;
 
   @Inject
   protected ISyncConfigurationManager syncConfigurationManager;
@@ -71,7 +71,7 @@ public class SyncBackgroundService extends Service {
 
 
   protected void setupLogic() {
-    devicesManager.start();
+    communicationManager.startAsync();
   }
 
 
