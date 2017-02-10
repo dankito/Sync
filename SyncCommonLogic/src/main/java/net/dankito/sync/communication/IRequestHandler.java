@@ -1,11 +1,11 @@
 package net.dankito.sync.communication;
 
 import net.dankito.communication.message.Request;
-import net.dankito.communication.message.Response;
+import net.dankito.sync.communication.callback.RequestHandlerCallback;
 
 
 public interface IRequestHandler {
 
-  Response handle(Request request);
+  void handle(Request request, RequestHandlerCallback callback);
 
 }
