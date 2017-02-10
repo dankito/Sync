@@ -6,6 +6,10 @@ import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
 import net.dankito.sync.AndroidPlatformConfigurationReader;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.communication.CommunicationManager;
+import net.dankito.sync.communication.IClientCommunicator;
+import net.dankito.sync.communication.ICommunicationManager;
+import net.dankito.sync.communication.TcpSocketClientCommunicator;
 import net.dankito.sync.data.DataManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.data.IPlatformConfigurationReader;
@@ -53,6 +57,10 @@ public class AndroidServiceDiContainer {
   protected IPlatformConfigurationReader platformConfigurationReader = null;
 
   protected IDataManager dataManager = null;
+
+  protected IClientCommunicator clientCommunicator;
+
+  protected ICommunicationManager communicationManager;
 
   protected IDevicesDiscoverer devicesDiscoverer = null;
 
@@ -148,9 +156,29 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, IDataManager dataManager, IEntityManager entityManager) {
+  public IClientCommunicator provideClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
+    if(clientCommunicator == null) {
+      clientCommunicator = new TcpSocketClientCommunicator(networkSettings, threadPool);
+    }
+
+    return clientCommunicator;
+  }
+
+  @Provides
+  @Singleton
+  public ICommunicationManager provideCommunicationManager(IDevicesManager devicesManager, IClientCommunicator clientCommunicator, INetworkSettings networkSettings) {
+    if(communicationManager == null) {
+      communicationManager = new CommunicationManager(devicesManager, clientCommunicator, networkSettings);
+    }
+
+    return communicationManager;
+  }
+
+  @Provides
+  @Singleton
+  public IDevicesManager provideDevicesManager(IDevicesDiscoverer devicesDiscoverer, IClientCommunicator clientCommunicator, IDataManager dataManager, INetworkSettings networkSettings, IEntityManager entityManager) {
     if(devicesManager == null) {
-      devicesManager = new DevicesManager(devicesDiscoverer, dataManager, entityManager);
+      devicesManager = new DevicesManager(devicesDiscoverer, clientCommunicator, dataManager, networkSettings, entityManager);
     }
 
     return devicesManager;
@@ -188,9 +216,9 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public INetworkSettings provideNetworkNetworkSettings() {
+  public INetworkSettings provideNetworkNetworkSettings(IDataManager dataManager) {
     if(networkSettings == null) {
-      networkSettings = new NetworkSettings();
+      networkSettings = new NetworkSettings(dataManager);
     }
 
     return networkSettings;
