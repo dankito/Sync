@@ -206,16 +206,16 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   protected ConsumerListener<ReceivedUdpDevicesDiscovererPacket> receivedPacketsHandler = new ConsumerListener<ReceivedUdpDevicesDiscovererPacket>() {
     @Override
     public void consumeItem(ReceivedUdpDevicesDiscovererPacket receivedPacket) {
-      handleReceivedPacket(receivedPacket.getReceivedData(), receivedPacket.getPacket(), receivedPacket.getSenderAddress(), receivedPacket.getLocalDeviceInfo(),
+      handleReceivedPacket(receivedPacket.getReceivedData(), receivedPacket.getSenderAddress(), receivedPacket.getLocalDeviceInfo(),
           receivedPacket.getDiscoveryMessagePrefix(), receivedPacket.getListener());
     }
   };
 
-  protected void handleReceivedPacket(byte[] receivedData, DatagramPacket packet, String senderAddress, String localDeviceInfo, String discoveryMessagePrefix, DevicesDiscovererListener listener) {
+  protected void handleReceivedPacket(byte[] receivedData, String senderAddress, String localDeviceInfo, String discoveryMessagePrefix, DevicesDiscovererListener listener) {
     String receivedMessage = parseBytesToString(receivedData, receivedData.length);
 
     if(isSearchingForDevicesMessage(receivedMessage, discoveryMessagePrefix)) {
-      String remoteDeviceInfo = getDeviceInfoFromMessage(receivedMessage, senderAddress);
+      String remoteDeviceInfo = getDeviceInfoFromMessage(receivedMessage);
 
       if(isSelfSentPacket(remoteDeviceInfo, localDeviceInfo) == false) {
         if(hasDeviceAlreadyBeenFound(remoteDeviceInfo) == false) {
@@ -370,7 +370,7 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     return new DatagramPacket(messageBytes, messageBytes.length, broadcastAddress, config.getDiscoverDevicesPort());
   }
 
-  protected String getDeviceInfoFromMessage(String receivedMessage, String senderAddress) {
+  protected String getDeviceInfoFromMessage(String receivedMessage) {
     int bodyStartIndex = receivedMessage.indexOf(MESSAGE_HEADER_AND_BODY_SEPARATOR) + MESSAGE_HEADER_AND_BODY_SEPARATOR.length();
 
     return receivedMessage.substring(bodyStartIndex);
