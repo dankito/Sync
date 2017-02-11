@@ -178,6 +178,7 @@ public class DevicesManager implements IDevicesManager {
   protected void discoveredDevice(String deviceInfoKey, DiscoveredDevice device) {
     synchronized(discoveredDevices) {
       discoveredDevices.put(deviceInfoKey, device);
+      networkSettings.addDiscoveredDevice(device);
 
       DiscoveredDeviceType type = determineDiscoveredDeviceType(device);
 
@@ -248,6 +249,7 @@ public class DevicesManager implements IDevicesManager {
   protected void disconnectedFromDevice(String deviceInfo, DiscoveredDevice device) {
     synchronized(discoveredDevices) {
       discoveredDevices.remove(deviceInfo);
+      networkSettings.removeDiscoveredDevice(device);
 
       if(isKnownSynchronizedDevice(device)) {
         knownSynchronizedDevices.remove(deviceInfo);
