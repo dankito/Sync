@@ -135,9 +135,11 @@ public class RequestReceiver implements IRequestReceiver {
     if(result.isSuccessful()) {
       receivedRequest(clientSocket, result.getReceivedMessage());
     }
-    // TODO: what to do in error case?
+    else {
+      // TODO: what to do in error case?
 
-    socketHandler.closeSocket(clientSocket);
+      socketHandler.closeSocket(clientSocket);
+    }
   }
 
   protected void receivedRequest(Socket clientSocket, String requestString) {
@@ -172,6 +174,8 @@ public class RequestReceiver implements IRequestReceiver {
     } catch(Exception e) {
       log.error("Could not send response " + response + " to request " + request + " to client " + (clientSocket != null ? clientSocket.getInetAddress() : ""), e);
     }
+
+    socketHandler.closeSocket(clientSocket);
   }
 
 }
