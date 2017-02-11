@@ -108,7 +108,7 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   public void respondToSynchronizationPermittingChallenge(DiscoveredDevice remoteDevice, String nonce, String challengeResponse,
                                                           final SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody> callback) {
     Request<RespondToSynchronizationPermittingChallengeRequestBody> request = new Request<>(CommunicatorConfig.RESPONSE_TO_SYNCHRONIZATION_PERMITTING_CHALLENGE_METHOD_NAME,
-        new RespondToSynchronizationPermittingChallengeRequestBody(nonce, challengeResponse));
+        new RespondToSynchronizationPermittingChallengeRequestBody(nonce, challengeResponse, networkSettings.getSynchronizationPort()));
 
     requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), request,
         new net.dankito.communication.callback.SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody>() {
@@ -123,7 +123,7 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   @Override
   public void requestStartSynchronization(DiscoveredDevice remoteDevice, final SendRequestCallback<RequestStartSynchronizationResponseBody> callback) {
     Request<RequestStartSynchronizationRequestBody> request = new Request<>(CommunicatorConfig.REQUEST_START_SYNCHRONIZATION_METHOD_NAME,
-        new RequestStartSynchronizationRequestBody(networkSettings.getLocalHostDevice().getUniqueDeviceId()));
+        new RequestStartSynchronizationRequestBody(networkSettings.getLocalHostDevice().getUniqueDeviceId(), networkSettings.getSynchronizationPort()));
 
     requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), request,
         new net.dankito.communication.callback.SendRequestCallback<RequestStartSynchronizationResponseBody>() {
