@@ -60,10 +60,6 @@ public class NetworkSettings implements INetworkSettings {
     return localHostDevice;
   }
 
-  public void setLocalHostDevice(Device localHostDevice) {
-    this.localHostDevice = localHostDevice;
-  }
-
   @Override
   public int getMessagePort() {
     return messagePort;

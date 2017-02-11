@@ -12,8 +12,6 @@ public interface INetworkSettings {
 
   Device getLocalHostDevice();
 
-  void setLocalHostDevice(Device localDevice);
-
   int getMessagePort();
 
   void setMessagePort(int messageReceiverPort);
