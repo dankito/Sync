@@ -17,6 +17,7 @@ import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.MessageHandler;
 import net.dankito.sync.communication.message.MessageHandlerConfig;
+import net.dankito.sync.communication.message.RequestStartSynchronizationRequestBody;
 import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.utils.IThreadPool;
@@ -80,7 +81,10 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
 
   @Override
   public void requestStartSynchronization(DiscoveredDevice remoteDevice, final SendRequestCallback<RequestStartSynchronizationResponseBody> callback) {
-    requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), new Request(CommunicatorConfig.REQUEST_START_SYNCHRONIZATION_METHOD_NAME),
+    Request<RequestStartSynchronizationRequestBody> request = new Request<>(CommunicatorConfig.REQUEST_START_SYNCHRONIZATION_METHOD_NAME,
+        new RequestStartSynchronizationRequestBody(remoteDevice.getDevice().getUniqueDeviceId()));
+
+    requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), request,
         new net.dankito.communication.callback.SendRequestCallback<RequestStartSynchronizationResponseBody>() {
           @Override
           public void done(Response<RequestStartSynchronizationResponseBody> response) {

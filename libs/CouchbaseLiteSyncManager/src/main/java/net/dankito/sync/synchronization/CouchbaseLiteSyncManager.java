@@ -19,6 +19,7 @@ import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
 import net.dankito.sync.communication.IRequestHandler;
 import net.dankito.sync.communication.callback.RequestHandlerCallback;
+import net.dankito.sync.communication.message.RequestStartSynchronizationRequestBody;
 import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
 import net.dankito.sync.communication.message.RequestStartSynchronizationResult;
 import net.dankito.sync.config.DatabaseTableConfig;
@@ -275,8 +276,9 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     }
   };
 
-  protected void handleStartSynchronizationRequest(Request<String> request, RequestHandlerCallback callback) {
-    String remoteDeviceUniqueId = request.getBody();
+  protected void handleStartSynchronizationRequest(Request<RequestStartSynchronizationRequestBody> request, RequestHandlerCallback callback) {
+    RequestStartSynchronizationRequestBody body = request.getBody();
+    String remoteDeviceUniqueId = body.getUniqueDeviceId();
 
     if(isSynchronizingPermitted(remoteDeviceUniqueId) == false) {
       callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.DENIED)));

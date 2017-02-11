@@ -45,8 +45,9 @@ public class MessageHandler implements IMessageHandler {
   @Override
   public Class getRequestBodyClassForMethod(String methodName) throws Exception {
     switch(methodName) {
-      case CommunicatorConfig.GET_DEVICE_INFO_METHOD_NAME:
       case CommunicatorConfig.REQUEST_START_SYNCHRONIZATION_METHOD_NAME:
+        return RequestStartSynchronizationRequestBody.class;
+      case CommunicatorConfig.GET_DEVICE_INFO_METHOD_NAME:
         return null; // requests without request bodies
       default:
         throw new Exception("Don't know how to deserialize response of method " + methodName); // TODO: translate
