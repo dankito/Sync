@@ -256,6 +256,7 @@ public class DevicesManager implements IDevicesManager {
 
       if(isKnownSynchronizedDevice(device)) {
         knownSynchronizedDevices.remove(deviceInfo);
+        networkSettings.removeConnectedDevicePermittedToSynchronize(device.getDevice());
         callKnownSynchronizedDeviceDisconnected(device);
       }
       else if(isKnownIgnoredDevice(device)) {
