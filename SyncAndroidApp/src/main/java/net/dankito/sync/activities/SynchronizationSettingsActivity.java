@@ -1,13 +1,17 @@
 package net.dankito.sync.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import net.dankito.android.util.services.IPermissionsManager;
@@ -16,6 +20,13 @@ import net.dankito.sync.MainActivity;
 import net.dankito.sync.R;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.adapter.SyncModuleConfigurationsAdapter;
+import net.dankito.sync.communication.IClientCommunicator;
+import net.dankito.sync.communication.callback.SendRequestCallback;
+import net.dankito.sync.communication.message.RequestPermitSynchronizationResponseBody;
+import net.dankito.sync.communication.message.RequestPermitSynchronizationResult;
+import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeResponseBody;
+import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeResult;
+import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
@@ -48,6 +59,9 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
   @Inject
   protected IPermissionsManager permissionsManager;
+
+  @Inject
+  protected IClientCommunicator clientCommunicator;
 
 
   protected DiscoveredDevice remoteDevice;
@@ -125,6 +139,116 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
   }
 
 
+  protected void askDeviceIfSynchronizingIsPermitted(final DiscoveredDevice remoteDevice) {
+    clientCommunicator.requestPermitSynchronization(remoteDevice, new SendRequestCallback<RequestPermitSynchronizationResponseBody>() {
+      @Override
+      public void done(Response<RequestPermitSynchronizationResponseBody> response) {
+        if(response.isCouldHandleMessage()) {
+          RequestPermitSynchronizationResponseBody responseBody = response.getBody();
+          if(responseBody.getResult() == RequestPermitSynchronizationResult.RESPOND_TO_CHALLENGE) {
+            getChallengeResponseFromUser(remoteDevice, responseBody.getNonce(), false);
+          }
+          else {
+            showAlertSynchronizingIsNotPermitted(remoteDevice);
+          }
+        }
+        else {
+          showErrorMessage(response);
+        }
+      }
+    });
+  }
+
+  protected void getChallengeResponseFromUser(final DiscoveredDevice remoteDevice, final String nonce, final boolean wasCodePreviouslyWronglyEntered) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        getChallengeResponseFromUserOnUiThread(remoteDevice, nonce, wasCodePreviouslyWronglyEntered);
+      }
+    });
+  }
+
+  protected void getChallengeResponseFromUserOnUiThread(final DiscoveredDevice remoteDevice, final String nonce, boolean wasCodePreviouslyWronglyEntered) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+    String title = getString(R.string.alert_title_enter_response_code_for_permitting_synchronization, remoteDevice.getDevice().getDeviceFullDisplayName());
+    if(wasCodePreviouslyWronglyEntered) {
+      title = getString(R.string.alert_title_entered_response_code_was_wrong, remoteDevice.getDevice().getDeviceFullDisplayName());
+    }
+    builder.setTitle(title);
+
+    final EditText input = new EditText(this);
+    input.setInputType(InputType.TYPE_CLASS_NUMBER);
+    builder.setView(input);
+
+    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        String enteredResponse = input.getText().toString();
+        sendChallengeResponseToRemote(remoteDevice, nonce, enteredResponse);
+
+      }
+    });
+    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.cancel();
+      }
+    });
+
+    builder.show();
+  }
+
+  protected void sendChallengeResponseToRemote(final DiscoveredDevice remoteDevice, final String nonce, String enteredResponse) {
+    clientCommunicator.respondToSynchronizationPermittingChallenge(remoteDevice, nonce, enteredResponse, new SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody>() {
+      @Override
+      public void done(Response<RespondToSynchronizationPermittingChallengeResponseBody> response) {
+        handleEnteredChallengeResponse(remoteDevice, response, nonce);
+      }
+    });
+  }
+
+  protected void handleEnteredChallengeResponse(DiscoveredDevice remoteDevice, Response<RespondToSynchronizationPermittingChallengeResponseBody> response, String nonce) {
+    if(response.isCouldHandleMessage()) {
+      RespondToSynchronizationPermittingChallengeResult result = response.getBody().getResult();
+      if(result == RespondToSynchronizationPermittingChallengeResult.ALLOWED) {
+        remoteAllowedSynchronization(remoteDevice);
+      }
+      else if(result == RespondToSynchronizationPermittingChallengeResult.WRONG_CODE) {
+        getChallengeResponseFromUser(remoteDevice, nonce, true);
+      }
+      else {
+        showAlertSynchronizingIsNotPermitted(remoteDevice);
+      }
+    }
+    else {
+      showErrorMessage(response);
+    }
+  }
+
+  protected void remoteAllowedSynchronization(DiscoveredDevice remoteDevice) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        remoteAllowedSynchronizationOnUiThread();
+      }
+    });
+  }
+
+  protected void remoteAllowedSynchronizationOnUiThread() {
+    startSynchronizingWithDevice();
+
+    closeActivity();
+  }
+
+  protected void showAlertSynchronizingIsNotPermitted(DiscoveredDevice remoteDevice) {
+    // TODO
+  }
+
+  protected void showErrorMessage(Response response) {
+    // TODO
+  }
+
   protected void startSynchronizingWithDevice() {
     final List<SyncModuleConfiguration> syncModuleConfigurations = new ArrayList<>();
 
@@ -184,13 +308,13 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     @Override
     public void onClick(View v) {
       if(syncModuleConfigurationsForDevice.isSyncConfigurationPersisted() == false) {
-        startSynchronizingWithDevice();
+        askDeviceIfSynchronizingIsPermitted(remoteDevice);
       }
       else {
         updateSyncConfiguration();
-      }
 
-      closeActivity();
+        closeActivity();
+      }
     }
   };
 
