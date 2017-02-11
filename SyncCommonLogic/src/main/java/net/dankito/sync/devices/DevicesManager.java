@@ -227,6 +227,8 @@ public class DevicesManager implements IDevicesManager {
       RequestStartSynchronizationResponseBody body = response.getBody();
 
       if(body.getResult() == RequestStartSynchronizationResult.ALLOWED) {
+        device.setSynchronizationPort(body.getSynchronizationPort());
+
         devicesPendingStartSynchronization.remove(deviceInfoKey);
         knownSynchronizedDevices.put(deviceInfoKey, device);
 
