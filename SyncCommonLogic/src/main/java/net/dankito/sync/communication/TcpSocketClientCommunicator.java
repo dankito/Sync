@@ -117,8 +117,10 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   }
 
   @Override
-  public void respondToSynchronizationPermittingChallenge(final DiscoveredDevice remoteDevice, String nonce, String challengeResponse,
+  public void respondToSynchronizationPermittingChallenge(final DiscoveredDevice remoteDevice, String nonce, String enteredCode,
                                                           final SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody> callback) {
+    String challengeResponse = challengeHandler.createChallengeResponse(nonce, enteredCode);
+
     Request<RespondToSynchronizationPermittingChallengeRequestBody> request = new Request<>(CommunicatorConfig.RESPONSE_TO_SYNCHRONIZATION_PERMITTING_CHALLENGE_METHOD_NAME,
         new RespondToSynchronizationPermittingChallengeRequestBody(nonce, challengeResponse, networkSettings.getSynchronizationPort()));
 
