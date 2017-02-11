@@ -1,9 +1,16 @@
 package net.dankito.sync.synchronization;
 
+import net.dankito.sync.communication.IRequestHandler;
+
 /**
  * Created by ganymed on 07/10/16.
  */
 public class NoOpSyncManager implements ISyncManager {
+
+  @Override
+  public void stop() {
+
+  }
 
   @Override
   public boolean addSynchronizationListener(SynchronizationListener listener) {
@@ -16,8 +23,8 @@ public class NoOpSyncManager implements ISyncManager {
   }
 
   @Override
-  public void stop() {
-
+  public IRequestHandler getRequestStartSynchronizationHandler() {
+    return null;
   }
 
 }
