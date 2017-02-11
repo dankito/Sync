@@ -334,6 +334,7 @@ public class DevicesManager implements IDevicesManager {
   protected void addDeviceToKnownSynchronizedDevicesAndCallListeners(DiscoveredDevice device, SyncConfiguration syncConfiguration) {
     if(addDeviceToKnownSynchronizedDevices(device)) {
       addDeviceToLocalConfigSynchronizedDevices(device);
+      networkSettings.addDevicePermittedToSynchronize(device.getDevice());
 
       if(syncConfiguration != null) { // if remote device started synchronization, syncConfiguration is null
         setSourceAndDestinationSyncConfigurationOnDevices(device, syncConfiguration);
@@ -383,6 +384,7 @@ public class DevicesManager implements IDevicesManager {
 
   @Override
   public void stopSynchronizingWithDevice(DiscoveredDevice device) {
+    networkSettings.removeDevicePermittedToSynchronize(device.getDevice());
     localConfig.removeSynchronizedDevice(device.getDevice());
 
     String deviceInfoKey = getDeviceInfoKey(device);
