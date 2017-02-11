@@ -17,6 +17,8 @@ import javax.inject.Named;
 @Named
 public class NetworkSettings implements INetworkSettings {
 
+  protected LocalConfig localConfig;
+
   protected Device localHostDevice;
 
   protected int messagePort;
@@ -39,6 +41,7 @@ public class NetworkSettings implements INetworkSettings {
 
 
   private void initProperties(LocalConfig localConfig) {
+    this.localConfig = localConfig;
     this.localHostDevice = localConfig.getLocalDevice();
 
     for(Device synchronizedDevice : localConfig.getSynchronizedDevices()) {
@@ -46,6 +49,11 @@ public class NetworkSettings implements INetworkSettings {
     }
   }
 
+
+  @Override
+  public LocalConfig getLocalConfig() {
+    return localConfig;
+  }
 
   @Override
   public Device getLocalHostDevice() {
