@@ -6,6 +6,8 @@ import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
 import net.dankito.sync.Device;
 import net.dankito.sync.communication.CommunicatorConfig;
+import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
+import net.dankito.sync.communication.callback.ShouldPermitSynchronizingWithDeviceCallback;
 import net.dankito.sync.devices.INetworkSettings;
 
 import java.util.List;
@@ -53,14 +55,22 @@ public class MessageHandler implements IMessageHandler {
   }
 
 
-  protected void handleRequestPermitSynchronizationRequest(Request<DeviceInfo> request, RequestHandlerCallback callback) {
-    DeviceInfo remoteDeviceInfo = request.getBody();
+  protected void handleRequestPermitSynchronizationRequest(Request<DeviceInfo> request, final RequestHandlerCallback callback) {
+    final DeviceInfo remoteDeviceInfo = request.getBody();
+    final IsSynchronizationPermittedHandler permittingHandler = config.getIsSynchronizationPermittedHandler();
 
-    boolean allowsSynchronization = true; // TODO: call handler
+    permittingHandler.shouldPermitSynchronizingWithDevice(remoteDeviceInfo, new ShouldPermitSynchronizingWithDeviceCallback() {
+      @Override
+      public void done(DeviceInfo remoteDeviceInfo, boolean permitsSynchronization) {
+        handleShouldPermitSynchronizingWithDeviceResult(remoteDeviceInfo, permitsSynchronization, permittingHandler, callback);
+      }
+    });
+  }
 
-    if(allowsSynchronization) {
+  protected void handleShouldPermitSynchronizingWithDeviceResult(DeviceInfo remoteDeviceInfo, boolean permitsSynchronization, IsSynchronizationPermittedHandler permittingHandler, RequestHandlerCallback callback) {
+    if(permitsSynchronization) {
       NonceToResponsePair nonceToResponsePair = challengeHandler.createChallengeForDevice(remoteDeviceInfo);
-      // TODO: show challenge to User
+      permittingHandler.showCorrectResponseToUserNonBlocking(remoteDeviceInfo, nonceToResponsePair.getCorrectResponse());
 
       callback.done(new Response<RequestPermitSynchronizationResponseBody>(new RequestPermitSynchronizationResponseBody(
           RequestPermitSynchronizationResult.RESPOND_TO_CHALLENGE, nonceToResponsePair.getNonce())));
