@@ -15,7 +15,6 @@ import net.dankito.sync.communication.message.RequestStartSynchronizationResult;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.IEntityManager;
-import net.dankito.sync.synchronization.SynchronizationConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,20 +117,38 @@ public class DevicesManager implements IDevicesManager {
 
   protected void getDeviceDetailsForDiscoveredDevice(String deviceInfoKey, final String address) {
     try {
-      String deviceUniqueId = getDeviceUniqueIdFromDeviceInfoKey(deviceInfoKey);
       final int messagesPort = getMessagesPortFromDeviceInfoKey(deviceInfoKey);
 
-      Device persistedDevice = getPersistedDeviceForUniqueId(deviceUniqueId);
-
-      if(persistedDevice != null) {
-        discoveredDevice(deviceInfoKey, persistedDevice, address, messagesPort);
-      }
-      else {
-        retrieveDeviceInfoFromRemote(deviceInfoKey, address, messagesPort);
-      }
+      retrieveDeviceInfoFromRemote(deviceInfoKey, address, messagesPort);
     } catch(Exception e) {
       log.error("Could not deserialize Device from " + deviceInfoKey, e);
     }
+  }
+
+  protected void retrieveDeviceInfoFromRemote(final String deviceInfoKey, final String address, final int messagesPort) {
+    clientCommunicator.getDeviceInfo(new InetSocketAddress(address, messagesPort), new SendRequestCallback<DeviceInfo>() {
+      @Override
+      public void done(Response<DeviceInfo> response) {
+        if(response.isCouldHandleMessage()) {
+          successfullyRetrievedDeviceInfo(deviceInfoKey, response.getBody(), address, messagesPort);
+        }
+        else {
+          // TODO: try periodically to get DeviceInfo from remote
+        }
+      }
+    });
+  }
+
+  protected void successfullyRetrievedDeviceInfo(String deviceInfoKey, DeviceInfo deviceInfo, String address, int messagesPort) {
+    Device remoteDevice = getPersistedDeviceForUniqueId(deviceInfo.getUniqueDeviceId());
+
+    if(remoteDevice == null) { // remote device not known and therefore persisted yet
+      remoteDevice = mapDeviceInfoToDevice(deviceInfo);
+
+      entityManager.persistEntity(remoteDevice);
+    }
+
+    discoveredDevice(deviceInfoKey, remoteDevice, address, messagesPort);
   }
 
   protected Device getPersistedDeviceForUniqueId(String deviceUniqueId) {
@@ -145,25 +162,6 @@ public class DevicesManager implements IDevicesManager {
     return null;
   }
 
-  protected void retrieveDeviceInfoFromRemote(final String deviceInfoKey, final String address, final int messagesPort) {
-    clientCommunicator.getDeviceInfo(new InetSocketAddress(address, messagesPort), new SendRequestCallback<DeviceInfo>() {
-      @Override
-      public void done(Response<DeviceInfo> response) {
-        if(response.isCouldHandleMessage()) {
-          successfullyRetrievedDeviceInfo(deviceInfoKey, response.getBody(), address, messagesPort);
-        }
-      }
-    });
-  }
-
-  protected void successfullyRetrievedDeviceInfo(String deviceInfoKey, DeviceInfo deviceInfo, String address, int messagesPort) {
-    Device remoteDevice = mapDeviceInfoToDevice(deviceInfo);
-
-    entityManager.persistEntity(remoteDevice);
-
-    discoveredDevice(deviceInfoKey, remoteDevice, address, messagesPort);
-  }
-
   protected Device mapDeviceInfoToDevice(DeviceInfo deviceInfo) {
     return new Device(deviceInfo.getId(), deviceInfo.getUniqueDeviceId(), deviceInfo.getName(), deviceInfo.getOsType(), deviceInfo.getOsName(),
         deviceInfo.getOsVersion(), deviceInfo.getDescription());
@@ -173,7 +171,6 @@ public class DevicesManager implements IDevicesManager {
     DiscoveredDevice discoveredDevice = new DiscoveredDevice(device, address);
 
     discoveredDevice.setMessagesPort(messagesPort);
-    discoveredDevice.setSynchronizationPort(SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT); // TODO: ask from remote
 
     discoveredDevice(deviceInfoKey, discoveredDevice);
   }
