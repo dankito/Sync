@@ -21,6 +21,10 @@ public interface INetworkSettings {
 
   boolean isDevicePermittedToSynchronize(String uniqueDeviceId);
 
+  void addDevicePermittedToSynchronize(Device device);
+
+  void removeDevicePermittedToSynchronize(Device device);
+
   void addListener(NetworkSettingsChangedListener listener);
 
   void removeListener(NetworkSettingsChangedListener listener);
