@@ -10,7 +10,6 @@ import net.dankito.sync.communication.CommunicationManager;
 import net.dankito.sync.communication.IClientCommunicator;
 import net.dankito.sync.communication.ICommunicationManager;
 import net.dankito.sync.communication.TcpSocketClientCommunicator;
-import net.dankito.sync.communication.message.MessageHandlerConfig;
 import net.dankito.sync.data.DataManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.data.IPlatformConfigurationReader;
@@ -58,8 +57,6 @@ public class AndroidServiceDiContainer {
   protected IPlatformConfigurationReader platformConfigurationReader = null;
 
   protected IDataManager dataManager = null;
-
-  protected MessageHandlerConfig messageHandlerConfig;
 
   protected IClientCommunicator clientCommunicator;
 
@@ -155,16 +152,6 @@ public class AndroidServiceDiContainer {
     }
 
     return devicesDiscoverer;
-  }
-
-  @Provides
-  @Singleton
-  public MessageHandlerConfig provideMessageHandlerConfig(INetworkSettings networkSettings, ISyncManager syncManager) {
-    if(messageHandlerConfig == null) {
-      messageHandlerConfig = new MessageHandlerConfig(networkSettings, syncManager.getRequestStartSynchronizationHandler());
-    }
-
-    return messageHandlerConfig;
   }
 
   @Provides
