@@ -16,9 +16,12 @@ import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.MessageHandler;
-import net.dankito.sync.devices.INetworkSettings;
+import net.dankito.sync.communication.message.MessageHandlerConfig;
+import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.utils.IThreadPool;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import javax.inject.Named;
@@ -32,13 +35,13 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected IRequestReceiver requestReceiver;
 
 
-  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
-    setupDependencies(networkSettings, threadPool);
+  public TcpSocketClientCommunicator(MessageHandlerConfig messageHandlerConfig, IThreadPool threadPool) {
+    setupDependencies(messageHandlerConfig, threadPool);
   }
 
-  protected void setupDependencies(INetworkSettings networkSettings, IThreadPool threadPool) {
+  protected void setupDependencies(MessageHandlerConfig messageHandlerConfig, IThreadPool threadPool) {
     SocketHandler socketHandler = new SocketHandler();
-    IMessageHandler messageHandler = new MessageHandler(networkSettings.getLocalHostDevice());
+    IMessageHandler messageHandler = new MessageHandler(messageHandlerConfig);
     IMessageSerializer messageSerializer = new JsonMessageSerializer(messageHandler);
 
     requestSender = new RequestSender(socketHandler, messageSerializer, threadPool);
@@ -74,6 +77,22 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
         });
   }
 
+
+  @Override
+  public void requestStartSynchronization(DiscoveredDevice remoteDevice, final SendRequestCallback<RequestStartSynchronizationResponseBody> callback) {
+    requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), new Request(CommunicatorConfig.REQUEST_START_SYNCHRONIZATION_METHOD_NAME),
+        new net.dankito.communication.callback.SendRequestCallback<RequestStartSynchronizationResponseBody>() {
+          @Override
+          public void done(Response<RequestStartSynchronizationResponseBody> response) {
+            callback.done(mapResponse(response));
+          }
+        });
+  }
+
+
+  protected SocketAddress getSocketAddressFromDevice(DiscoveredDevice device) {
+    return new InetSocketAddress(device.getAddress(), device.getMessagesPort());
+  }
 
   protected net.dankito.sync.communication.message.Response mapResponse(Response response) {
     return new net.dankito.sync.communication.message.Response(response.isCouldHandleMessage(), mapResponseErrorType(response.getErrorType()),
