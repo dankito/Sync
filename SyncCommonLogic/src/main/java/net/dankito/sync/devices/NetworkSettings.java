@@ -113,6 +113,10 @@ public class NetworkSettings implements INetworkSettings {
   }
 
 
+  /**
+   * Actually only needed to start CouchbaseLite Listener
+   * @param device
+   */
   public void addDevicesAskedForPermittingSynchronization(DiscoveredDevice device) {
     devicesAskedForPermittingSynchronization.put(device.getDevice().getUniqueDeviceId(), device);
 
