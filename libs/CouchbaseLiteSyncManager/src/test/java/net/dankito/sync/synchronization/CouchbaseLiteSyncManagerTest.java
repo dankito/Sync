@@ -43,8 +43,8 @@ public class CouchbaseLiteSyncManagerTest {
   public static final int DEVICE_2_SYNCHRONIZATION_PORT = 23458;
 
 
-  protected INetworkSettings networkSettings1 = new NetworkSettings();
-  protected INetworkSettings networkSettings2 = new NetworkSettings();
+  protected INetworkSettings networkSettings1;
+  protected INetworkSettings networkSettings2;
 
   protected TestDevicesManager devicesManager1 = new TestDevicesManager();
   protected TestDevicesManager devicesManager2 = new TestDevicesManager();
@@ -64,17 +64,22 @@ public class CouchbaseLiteSyncManagerTest {
     IThreadPool threadPool = new ThreadPool();
     NetworkHelper networkHelper = new NetworkHelper();
 
+    Device dev1 = new Device(DEVICE_1_ID);
+    device1 = new DiscoveredDevice(dev1, networkHelper.getIPAddressString(true));
+    device1.setSynchronizationPort(DEVICE_1_SYNCHRONIZATION_PORT);
+
+    Device dev2 = new Device(DEVICE_2_ID);
+    device2 = new DiscoveredDevice(dev2, networkHelper.getIPAddressString(true));
+    device2.setSynchronizationPort(DEVICE_2_SYNCHRONIZATION_PORT);
+
+    networkSettings1 = new NetworkSettings(dev1);
+    networkSettings2 = new NetworkSettings(dev2);
+
     entityManager1 = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData/db01_" + System.currentTimeMillis(), 1));
     entityManager2 = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData/db01_" + System.currentTimeMillis(), 1));
 
-    syncManager1 = new CouchbaseLiteSyncManager(entityManager1, networkSettings1, devicesManager1, threadPool, DEVICE_1_SYNCHRONIZATION_PORT, true);
-    syncManager2 = new CouchbaseLiteSyncManager(entityManager2, networkSettings2, devicesManager2, threadPool, DEVICE_2_SYNCHRONIZATION_PORT, true);
-
-    device1 = new DiscoveredDevice(new Device(DEVICE_1_ID), networkHelper.getIPAddressString(true));
-    device1.setSynchronizationPort(DEVICE_1_SYNCHRONIZATION_PORT);
-
-    device2 = new DiscoveredDevice(new Device(DEVICE_2_ID), networkHelper.getIPAddressString(true));
-    device2.setSynchronizationPort(DEVICE_2_SYNCHRONIZATION_PORT);
+    syncManager1 = new CouchbaseLiteSyncManager(entityManager1, networkSettings1, threadPool, DEVICE_1_SYNCHRONIZATION_PORT, true);
+    syncManager2 = new CouchbaseLiteSyncManager(entityManager2, networkSettings2, threadPool, DEVICE_2_SYNCHRONIZATION_PORT, true);
 
     devicesManager1.simulateKnownSynchronizedDeviceConnected(device2);
     devicesManager2.simulateKnownSynchronizedDeviceConnected(device1);
