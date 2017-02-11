@@ -6,6 +6,7 @@ import net.dankito.utils.services.HashService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class ChallengeHandler {
@@ -16,6 +17,8 @@ public class ChallengeHandler {
 
 
   protected HashService hashService = new HashService();
+
+  protected Random random = new Random(System.nanoTime());
 
   protected Map<String, DeviceInfo> nonceToDeviceInfoMap = new HashMap<>();
 
@@ -38,7 +41,9 @@ public class ChallengeHandler {
   }
 
   protected String createCorrectResponse() {
-    return "1111"; // TODO
+    int response = random.nextInt(1000000);
+
+    return String.format("%06d", response);
   }
 
 
