@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import net.dankito.android.util.AlertHelper;
+import net.dankito.android.util.ShowAlertDialogCallback;
 import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.adapter.KnownSynchronizedDiscoveredDevicesAdapter;
 import net.dankito.sync.adapter.UnknownDiscoveredDevicesAdapter;
@@ -193,9 +194,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String message = getString(R.string.alert_message_permit_device_to_synchronize, deviceInfoString);
     String alertTitle = getString(R.string.alert_title_permit_device_to_synchronize);
 
-    boolean permitsSynchronization = true;
-
-    sendShouldPermitSynchronizingWithDeviceResult(permitsSynchronization);
+    AlertHelper.showConfirmMessage(this, message, alertTitle, new ShowAlertDialogCallback() {
+      @Override
+      public void optionSelected(boolean hasConfirmed) {
+        sendShouldPermitSynchronizingWithDeviceResult(hasConfirmed);
+      }
+    });
   }
 
   private void sendShouldPermitSynchronizingWithDeviceResult(boolean permitsSynchronization) {
