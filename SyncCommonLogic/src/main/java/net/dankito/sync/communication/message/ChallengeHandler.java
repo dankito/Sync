@@ -10,6 +10,8 @@ public class ChallengeHandler {
   protected static final int DEFAULT_COUNT_RETRIES = 2;
 
 
+  protected Map<String, DeviceInfo> nonceToDeviceInfoMap = new HashMap<>();
+
   protected Map<String, String> nonceToCorrectResponsesMap = new HashMap<>();
 
   protected Map<String, Integer> nonceToCountRetriesMap = new HashMap<>();
@@ -18,6 +20,8 @@ public class ChallengeHandler {
   public NonceToResponsePair createChallengeForDevice(DeviceInfo deviceInfo) {
     String nonce = UUID.randomUUID().toString();
     String correctResponse = createCorrectResponse();
+
+    nonceToDeviceInfoMap.put(nonce, deviceInfo);
 
     nonceToCorrectResponsesMap.put(nonce, correctResponse);
 
@@ -59,6 +63,10 @@ public class ChallengeHandler {
     }
 
     return 0;
+  }
+
+  public DeviceInfo getDeviceInfoForNonce(String nonce) {
+    return nonceToDeviceInfoMap.get(nonce);
   }
 
 }
