@@ -7,14 +7,17 @@ public class RespondToSynchronizationPermittingChallengeRequestBody {
 
   protected String challengeResponse;
 
+  protected int synchronizationPort;
+
 
   protected RespondToSynchronizationPermittingChallengeRequestBody() { // for Jackson
 
   }
 
-  public RespondToSynchronizationPermittingChallengeRequestBody(String nonce, String challengeResponse) {
+  public RespondToSynchronizationPermittingChallengeRequestBody(String nonce, String challengeResponse, int synchronizationPort) {
     this.nonce = nonce;
     this.challengeResponse = challengeResponse;
+    this.synchronizationPort = synchronizationPort;
   }
 
 
@@ -24,6 +27,10 @@ public class RespondToSynchronizationPermittingChallengeRequestBody {
 
   public String getChallengeResponse() {
     return challengeResponse;
+  }
+
+  public int getSynchronizationPort() {
+    return synchronizationPort;
   }
 
 }
