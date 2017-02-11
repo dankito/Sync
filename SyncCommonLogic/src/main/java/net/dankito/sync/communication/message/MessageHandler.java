@@ -8,6 +8,7 @@ import net.dankito.sync.Device;
 import net.dankito.sync.communication.CommunicatorConfig;
 import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
 import net.dankito.sync.communication.callback.ShouldPermitSynchronizingWithDeviceCallback;
+import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 
 import java.util.List;
@@ -85,19 +86,37 @@ public class MessageHandler implements IMessageHandler {
     RespondToSynchronizationPermittingChallengeResponseBody responseBody = null;
 
     if(challengeHandler.isResponseOk(nonce, request.getBody().getChallengeResponse())) {
+      addToPermittedSynchronizedDevices(nonce);
+
       responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.ALLOWED);
     }
     else {
-      int countRetriesLeft = challengeHandler.getCountRetriesLeftForNonce(nonce);
-      if(countRetriesLeft > 0) {
-        responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.WRONG_CODE, countRetriesLeft);
-      }
-      else {
-        responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.DENIED);
-      }
+      responseBody = createWrongCodeResponse(nonce);
     }
 
     callback.done(new Response<RespondToSynchronizationPermittingChallengeResponseBody>(responseBody));
+  }
+
+  protected void addToPermittedSynchronizedDevices(String nonce) {
+    DeviceInfo deviceInfo = challengeHandler.getDeviceInfoForNonce(nonce);
+    String deviceUniqueId = deviceInfo.getUniqueDeviceId();
+
+    DiscoveredDevice discoveredDevice = networkSettings.getDiscoveredDevice(deviceUniqueId);
+    if(discoveredDevice != null) {
+      networkSettings.addConnectedDevicePermittedToSynchronize(discoveredDevice.getDevice());
+    }
+  }
+
+  protected RespondToSynchronizationPermittingChallengeResponseBody createWrongCodeResponse(String nonce) {
+    RespondToSynchronizationPermittingChallengeResponseBody responseBody;
+    int countRetriesLeft = challengeHandler.getCountRetriesLeftForNonce(nonce);
+    if(countRetriesLeft > 0) {
+      responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.WRONG_CODE, countRetriesLeft);
+    }
+    else {
+      responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.DENIED);
+    }
+    return responseBody;
   }
 
 
