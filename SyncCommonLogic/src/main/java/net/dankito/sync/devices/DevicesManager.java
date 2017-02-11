@@ -311,6 +311,8 @@ public class DevicesManager implements IDevicesManager {
   @Override
   public void startSynchronizingWithDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
     // TODO: the whole process should actually run in a transaction
+    networkSettings.addConnectedDevicePermittedToSynchronize(device.getDevice());
+
     SyncConfiguration syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), device.getDevice(), syncModuleConfigurations);
     if(entityManager.persistEntity(syncConfiguration)) {
       addDeviceToKnownSynchronizedDevicesAndCallListeners(device, syncConfiguration);
