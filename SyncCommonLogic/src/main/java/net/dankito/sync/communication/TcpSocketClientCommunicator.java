@@ -21,6 +21,7 @@ import net.dankito.sync.communication.message.RequestStartSynchronizationRequest
 import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
+import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.utils.IThreadPool;
 
 import java.net.InetSocketAddress;
@@ -39,11 +40,15 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected INetworkSettings networkSettings;
 
 
-  public TcpSocketClientCommunicator(MessageHandlerConfig messageHandlerConfig, IThreadPool threadPool) {
-    setupDependencies(messageHandlerConfig, threadPool);
+  public TcpSocketClientCommunicator(ISyncManager syncManager, INetworkSettings networkSettings, IThreadPool threadPool) {
+    setupDependencies(syncManager, networkSettings, threadPool);
   }
 
-  protected void setupDependencies(MessageHandlerConfig messageHandlerConfig, IThreadPool threadPool) {
+  protected void setupDependencies(ISyncManager syncManager, INetworkSettings networkSettings, IThreadPool threadPool) {
+    this.networkSettings = networkSettings;
+
+    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, syncManager);
+
     SocketHandler socketHandler = new SocketHandler();
     IMessageHandler messageHandler = new MessageHandler(messageHandlerConfig);
     IMessageSerializer messageSerializer = new JsonMessageSerializer(messageHandler);
@@ -51,8 +56,6 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
     this.requestSender = new RequestSender(socketHandler, messageSerializer, threadPool);
 
     this.requestReceiver = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
-
-    this.networkSettings = messageHandlerConfig.getNetworkSettings();
   }
 
 

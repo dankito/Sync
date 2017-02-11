@@ -169,9 +169,9 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public IClientCommunicator provideClientCommunicator(MessageHandlerConfig messageHandlerConfig, IThreadPool threadPool) {
+  public IClientCommunicator provideClientCommunicator(ISyncManager syncManager, INetworkSettings networkSettings, IThreadPool threadPool) {
     if(clientCommunicator == null) {
-      clientCommunicator = new TcpSocketClientCommunicator(messageHandlerConfig, threadPool);
+      clientCommunicator = new TcpSocketClientCommunicator(syncManager, networkSettings, threadPool);
     }
 
     return clientCommunicator;

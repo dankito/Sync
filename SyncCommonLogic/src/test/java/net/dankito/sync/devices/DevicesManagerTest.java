@@ -7,14 +7,13 @@ import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.communication.IClientCommunicator;
-import net.dankito.sync.communication.IRequestHandler;
 import net.dankito.sync.communication.TcpSocketClientCommunicator;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
-import net.dankito.sync.communication.message.MessageHandlerConfig;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
@@ -55,14 +54,14 @@ public class DevicesManagerTest {
     entityManager.persistEntity(localConfig);
 
     final INetworkSettings networkSettings = new NetworkSettings(localConfig);
-    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, (IRequestHandler)null);
+    ISyncManager syncManager = Mockito.mock(ISyncManager.class);
 
     dataManager = Mockito.mock(IDataManager.class);
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
 
     IThreadPool threadPool = new ThreadPool();
 
-    clientCommunicator = new TcpSocketClientCommunicator(messageHandlerConfig, threadPool);
+    clientCommunicator = new TcpSocketClientCommunicator(syncManager, networkSettings, threadPool);
 
     underTest = new DevicesManager(new UdpDevicesDiscoverer(threadPool), clientCommunicator, dataManager, networkSettings, entityManager);
 

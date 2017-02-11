@@ -6,11 +6,11 @@ import net.dankito.sync.OsType;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
-import net.dankito.sync.communication.message.MessageHandlerConfig;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.sync.devices.NetworkSettings;
+import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 
@@ -61,9 +61,9 @@ public class TcpSocketClientCommunicatorTest {
     setUpRemoteDevice();
 
     INetworkSettings networkSettings = new NetworkSettings(new LocalConfig(remoteDevice));
-    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, (IRequestHandler)null);
+    ISyncManager syncManager = Mockito.mock(ISyncManager.class);
 
-    underTest = new TcpSocketClientCommunicator(messageHandlerConfig, new ThreadPool());
+    underTest = new TcpSocketClientCommunicator(syncManager, networkSettings, new ThreadPool());
 
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
