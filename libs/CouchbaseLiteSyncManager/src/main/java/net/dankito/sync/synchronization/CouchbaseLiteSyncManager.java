@@ -82,7 +82,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
   public CouchbaseLiteSyncManager(CouchbaseLiteEntityManagerBase entityManager, INetworkSettings networkSettings,
                                   IThreadPool threadPool, int synchronizationPort, boolean alsoUsePullReplication) {
-    super(threadPool);
+    super(networkSettings, threadPool);
     this.entityManager = entityManager;
     this.database = entityManager.getDatabase();
     this.manager = database.getManager();
