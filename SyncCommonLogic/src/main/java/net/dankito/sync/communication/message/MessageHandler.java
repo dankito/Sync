@@ -4,16 +4,22 @@ import net.dankito.communication.IMessageHandler;
 import net.dankito.communication.callback.RequestHandlerCallback;
 import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
+import net.dankito.sync.Device;
 import net.dankito.sync.communication.CommunicatorConfig;
+import net.dankito.sync.devices.INetworkSettings;
 
 
 public class MessageHandler implements IMessageHandler {
 
   protected MessageHandlerConfig config;
 
+  protected INetworkSettings networkSettings;
+
 
   public MessageHandler(MessageHandlerConfig config) {
     this.config = config;
+
+    this.networkSettings = config.getNetworkSettings();
   }
 
 
@@ -29,16 +35,30 @@ public class MessageHandler implements IMessageHandler {
 
 
   protected Response handleGetDeviceInfoRequest(Request request) {
-    return new Response(DeviceInfo.fromDevice(config.getNetworkSettings().getLocalHostDevice()));
+    return new Response(DeviceInfo.fromDevice(networkSettings.getLocalHostDevice()));
   }
 
-  protected void handleRequestStartSynchronizationRequest(Request request, final RequestHandlerCallback callback) {
-    config.getRequestStartSynchronizationHandler().handle(request, new net.dankito.sync.communication.callback.RequestHandlerCallback() {
-      @Override
-      public void done(Response response) {
-        callback.done(response);
+  protected void handleRequestStartSynchronizationRequest(Request<RequestStartSynchronizationRequestBody> request, final RequestHandlerCallback callback) {
+    RequestStartSynchronizationRequestBody body = request.getBody();
+    String remoteDeviceUniqueId = body.getUniqueDeviceId();
+
+    if(isSynchronizingPermitted(remoteDeviceUniqueId) == false) {
+      callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.DENIED)));
+    }
+    else {
+      callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.ALLOWED,
+          networkSettings.getSynchronizationPort())));
+    }
+  }
+
+  protected boolean isSynchronizingPermitted(String remoteDeviceUniqueId) {
+    for(Device synchronizedDevice : networkSettings.getLocalConfig().getSynchronizedDevices()) {
+      if(synchronizedDevice.getUniqueDeviceId().equals(remoteDeviceUniqueId)) {
+        return true;
       }
-    });
+    }
+
+    return false;
   }
 
 
