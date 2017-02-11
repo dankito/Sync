@@ -22,7 +22,10 @@
     <!-- When getting remote device from Intent fails -->
     <string name="title_activity_synchronization_settings">Error occurred</string>
     <string name="bidirectional">Bidirectional</string>
-    <string name="alert_title_enter_response_code_for_permitting_synchronization">Enter Code shown on %s:</string>
+    <string name="alert_title_permit_device_to_synchronize">Device asks for Permission</string>
+    <string name="alert_message_permit_device_to_synchronize" formatted="false">Permit %s to synchronize?</string>
+    <string name="alert_message_enter_this_code_on_remote_device" formatted="false">Enter this code on %s:\r\n    %s</string>
+    <string name="alert_title_enter_response_code_for_permitting_synchronization" formatted="false">Enter Code shown on %s:</string>
     <string name="alert_title_entered_response_code_was_wrong">Entered Code was wrong.\r\nEnter Code shown on %s:</string>
 
 </resources>
