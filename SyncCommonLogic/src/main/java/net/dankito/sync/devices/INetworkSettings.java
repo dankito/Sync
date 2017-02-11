@@ -20,6 +20,10 @@ public interface INetworkSettings {
 
   void setSynchronizationPort(int synchronizationPort);
 
+  void addConnectedDevicePermittedToSynchronize(Device device);
+
+  void removeConnectedDevicePermittedToSynchronize(Device device);
+
   void addListener(NetworkSettingsChangedListener listener);
 
   void removeListener(NetworkSettingsChangedListener listener);

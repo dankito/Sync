@@ -4,7 +4,10 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.data.IDataManager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
@@ -21,6 +24,8 @@ public class NetworkSettings implements INetworkSettings {
   protected int messagePort;
 
   protected int synchronizationPort;
+
+  protected Map<String, Device> connectedDevicesPermittedToSynchronization = new HashMap<>();
 
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -72,6 +77,25 @@ public class NetworkSettings implements INetworkSettings {
     this.synchronizationPort = synchronizationPort;
 
     callSettingChangedListeners(NetworkSetting.SYNCHRONIZATION_PORT, synchronizationPort, oldValue);
+  }
+
+
+  public void addConnectedDevicePermittedToSynchronize(Device device) {
+    List<Device> oldValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
+
+    connectedDevicesPermittedToSynchronization.put(device.getUniqueDeviceId(), device);
+
+    List<Device> newValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
+    callSettingChangedListeners(NetworkSetting.ADDED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, newValue, oldValue);
+  }
+
+  public void removeConnectedDevicePermittedToSynchronize(Device device) {
+    List<Device> oldValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
+
+    connectedDevicesPermittedToSynchronization.remove(device.getUniqueDeviceId());
+
+    List<Device> newValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
+    callSettingChangedListeners(NetworkSetting.REMOVED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, newValue, oldValue);
   }
 
 
