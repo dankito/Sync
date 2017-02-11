@@ -95,7 +95,13 @@ public class DeviceInfo {
 
   @Override
   public String toString() {
-    return getName() + " " + getOsName();
+    String description = getOsName() + " " + getOsVersion();
+
+    if(getName() != null && getName().length() > 0) {
+      description = getName() + " " + description;
+    }
+
+    return description;
   }
 
 
