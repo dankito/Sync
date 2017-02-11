@@ -8,6 +8,7 @@ import net.dankito.utils.IThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -55,13 +56,14 @@ public class FileSender {
 
       socket = new Socket();
       socket.connect(new InetSocketAddress(jobItem.getDestinationAddress(), jobItem.getDestinationPort()), 0);
-      socketOutputStream = socket.getOutputStream();
+      socketOutputStream = new BufferedOutputStream(socket.getOutputStream());
 
       dataOutputStream = new DataOutputStream(socketOutputStream);
       dataOutputStream.writeUTF(jobItem.getSyncJobItem().getId());
 
       sendFileToDestination(fileInputStream, socketOutputStream, jobItem);
 
+      dataOutputStream.close();
       socketOutputStream.close();
       fileInputStream.close();
       socket.close();

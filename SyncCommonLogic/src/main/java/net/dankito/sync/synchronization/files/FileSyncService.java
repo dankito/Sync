@@ -12,6 +12,8 @@ import net.dankito.utils.ConsumerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -143,7 +145,7 @@ public class FileSyncService {
     DataInputStream clientDataInputStream = null;
 
     try {
-      clientInputStream = clientSocket.getInputStream();
+      clientInputStream = new BufferedInputStream(clientSocket.getInputStream());
       clientDataInputStream = new DataInputStream(clientInputStream);
 
       String syncJobItemId = clientDataInputStream.readUTF();
@@ -153,7 +155,7 @@ public class FileSyncService {
         File destinationFile = getFileDestinationPathForSyncJobItem(jobItem);
         destinationFile.getParentFile().mkdirs();
 
-        if(receiveFile(clientDataInputStream, destinationFile, jobItem, clientSocket)) {
+        if(receiveFile(clientInputStream, destinationFile, jobItem, clientSocket)) {
           jobItem.getEntity().setLocalLookupKey(destinationFile.getAbsolutePath());
           removeFileSyncJobItem(jobItem);
           callFileRetrievedListeners(jobItem, destinationFile);
@@ -171,17 +173,17 @@ public class FileSyncService {
     }
   }
 
-  protected boolean receiveFile(DataInputStream clientDataInputStream, File destinationFile, SyncJobItem jobItem, Socket clientSocket) throws IOException {
+  protected boolean receiveFile(InputStream inputStream, File destinationFile, SyncJobItem jobItem, Socket clientSocket) throws IOException {
     long startTime = System.currentTimeMillis();
 
-    OutputStream output = new FileOutputStream(destinationFile);
+    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(destinationFile));
 
     byte[] buffer = new byte[bufferSize];
     int read;
     int totalRead = 0;
 
-    while ((read = clientDataInputStream.read(buffer)) != -1) {
-      output.write(buffer, 0, read);
+    while ((read = inputStream.read(buffer)) != -1) {
+      outputStream.write(buffer, 0, read);
       totalRead += read;
     }
 
