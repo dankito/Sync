@@ -4,7 +4,6 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.data.IDataManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,40 +86,28 @@ public class NetworkSettings implements INetworkSettings {
   }
 
   public void addDiscoveredDevice(DiscoveredDevice device) {
-    List<DiscoveredDevice> oldValue = new ArrayList<>(discoveredDevices.values());
-
     discoveredDevices.put(device.getDevice().getUniqueDeviceId(), device);
 
-    List<DiscoveredDevice> newValue = new ArrayList<>(discoveredDevices.values());
-    callSettingChangedListeners(NetworkSetting.ADDED_DISCOVERED_DEVICE, newValue, oldValue);
+    callSettingChangedListeners(NetworkSetting.ADDED_DISCOVERED_DEVICE, device, null);
   }
 
   public void removeDiscoveredDevice(DiscoveredDevice device) {
-    List<DiscoveredDevice> oldValue = new ArrayList<>(discoveredDevices.values());
-
     discoveredDevices.remove(device.getDevice().getUniqueDeviceId());
 
-    List<DiscoveredDevice> newValue = new ArrayList<>(discoveredDevices.values());
-    callSettingChangedListeners(NetworkSetting.REMOVED_DISCOVERED_DEVICE, newValue, oldValue);
+    callSettingChangedListeners(NetworkSetting.REMOVED_DISCOVERED_DEVICE, device, null);
   }
 
 
   public void addConnectedDevicePermittedToSynchronize(Device device) {
-    List<Device> oldValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
-
     connectedDevicesPermittedToSynchronization.put(device.getUniqueDeviceId(), device);
 
-    List<Device> newValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
-    callSettingChangedListeners(NetworkSetting.ADDED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, newValue, oldValue);
+    callSettingChangedListeners(NetworkSetting.ADDED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, device, null);
   }
 
   public void removeConnectedDevicePermittedToSynchronize(Device device) {
-    List<Device> oldValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
-
     connectedDevicesPermittedToSynchronization.remove(device.getUniqueDeviceId());
 
-    List<Device> newValue = new ArrayList<>(connectedDevicesPermittedToSynchronization.values());
-    callSettingChangedListeners(NetworkSetting.REMOVED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, newValue, oldValue);
+    callSettingChangedListeners(NetworkSetting.REMOVED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, device, null);
   }
 
 
