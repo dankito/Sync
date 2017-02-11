@@ -25,6 +25,8 @@ public class NetworkSettings implements INetworkSettings {
 
   protected int synchronizationPort;
 
+  protected Map<String, DiscoveredDevice> discoveredDevices = new HashMap<>();
+
   protected Map<String, Device> connectedDevicesPermittedToSynchronization = new HashMap<>();
 
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
@@ -77,6 +79,29 @@ public class NetworkSettings implements INetworkSettings {
     this.synchronizationPort = synchronizationPort;
 
     callSettingChangedListeners(NetworkSetting.SYNCHRONIZATION_PORT, synchronizationPort, oldValue);
+  }
+
+
+  public DiscoveredDevice getDiscoveredDevice(String uniqueDeviceId) {
+    return discoveredDevices.get(uniqueDeviceId);
+  }
+
+  public void addDiscoveredDevice(DiscoveredDevice device) {
+    List<DiscoveredDevice> oldValue = new ArrayList<>(discoveredDevices.values());
+
+    discoveredDevices.put(device.getDevice().getUniqueDeviceId(), device);
+
+    List<DiscoveredDevice> newValue = new ArrayList<>(discoveredDevices.values());
+    callSettingChangedListeners(NetworkSetting.ADDED_DISCOVERED_DEVICE, newValue, oldValue);
+  }
+
+  public void removeDiscoveredDevice(DiscoveredDevice device) {
+    List<DiscoveredDevice> oldValue = new ArrayList<>(discoveredDevices.values());
+
+    discoveredDevices.remove(device.getDevice().getUniqueDeviceId());
+
+    List<DiscoveredDevice> newValue = new ArrayList<>(discoveredDevices.values());
+    callSettingChangedListeners(NetworkSetting.REMOVED_DISCOVERED_DEVICE, newValue, oldValue);
   }
 
 

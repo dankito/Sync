@@ -20,6 +20,12 @@ public interface INetworkSettings {
 
   void setSynchronizationPort(int synchronizationPort);
 
+  DiscoveredDevice getDiscoveredDevice(String uniqueDeviceId);
+
+  void addDiscoveredDevice(DiscoveredDevice device);
+
+  void removeDiscoveredDevice(DiscoveredDevice device);
+
   void addConnectedDevicePermittedToSynchronize(Device device);
 
   void removeConnectedDevicePermittedToSynchronize(Device device);
