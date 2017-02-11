@@ -8,6 +8,8 @@ import net.dankito.sync.Device;
 import net.dankito.sync.communication.CommunicatorConfig;
 import net.dankito.sync.devices.INetworkSettings;
 
+import java.util.List;
+
 
 public class MessageHandler implements IMessageHandler {
 
@@ -40,25 +42,29 @@ public class MessageHandler implements IMessageHandler {
 
   protected void handleRequestStartSynchronizationRequest(Request<RequestStartSynchronizationRequestBody> request, final RequestHandlerCallback callback) {
     RequestStartSynchronizationRequestBody body = request.getBody();
-    String remoteDeviceUniqueId = body.getUniqueDeviceId();
+    Device permittedSynchronizedDevice = isDevicePermittedToSynchronize(body.getUniqueDeviceId());
 
-    if(isSynchronizingPermitted(remoteDeviceUniqueId) == false) {
+    if(permittedSynchronizedDevice == null) { // not permitted to synchronize
       callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.DENIED)));
     }
     else {
+      networkSettings.addConnectedDevicePermittedToSynchronize(permittedSynchronizedDevice);
+
       callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.ALLOWED,
           networkSettings.getSynchronizationPort())));
     }
   }
 
-  protected boolean isSynchronizingPermitted(String remoteDeviceUniqueId) {
-    for(Device synchronizedDevice : networkSettings.getLocalConfig().getSynchronizedDevices()) {
+  protected Device isDevicePermittedToSynchronize(String remoteDeviceUniqueId) {
+    List<Device> synchronizedDevices = networkSettings.getLocalConfig().getSynchronizedDevices();
+
+    for(Device synchronizedDevice : synchronizedDevices) {
       if(synchronizedDevice.getUniqueDeviceId().equals(remoteDeviceUniqueId)) {
-        return true;
+        return synchronizedDevice;
       }
     }
 
-    return false;
+    return null;
   }
 
 
