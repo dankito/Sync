@@ -10,6 +10,7 @@ import net.dankito.sync.communication.CommunicationManager;
 import net.dankito.sync.communication.IClientCommunicator;
 import net.dankito.sync.communication.ICommunicationManager;
 import net.dankito.sync.communication.TcpSocketClientCommunicator;
+import net.dankito.sync.communication.message.MessageHandlerConfig;
 import net.dankito.sync.data.DataManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.data.IPlatformConfigurationReader;
@@ -57,6 +58,8 @@ public class AndroidServiceDiContainer {
   protected IPlatformConfigurationReader platformConfigurationReader = null;
 
   protected IDataManager dataManager = null;
+
+  protected MessageHandlerConfig messageHandlerConfig;
 
   protected IClientCommunicator clientCommunicator;
 
@@ -156,9 +159,19 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public IClientCommunicator provideClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
+  public MessageHandlerConfig provideMessageHandlerConfig(INetworkSettings networkSettings, ISyncManager syncManager) {
+    if(messageHandlerConfig == null) {
+      messageHandlerConfig = new MessageHandlerConfig(networkSettings, syncManager.getRequestStartSynchronizationHandler());
+    }
+
+    return messageHandlerConfig;
+  }
+
+  @Provides
+  @Singleton
+  public IClientCommunicator provideClientCommunicator(MessageHandlerConfig messageHandlerConfig, IThreadPool threadPool) {
     if(clientCommunicator == null) {
-      clientCommunicator = new TcpSocketClientCommunicator(networkSettings, threadPool);
+      clientCommunicator = new TcpSocketClientCommunicator(messageHandlerConfig, threadPool);
     }
 
     return clientCommunicator;
@@ -252,9 +265,9 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public ISyncManager provideSyncManager(IEntityManager entityManager, INetworkSettings networkSettings, IDevicesManager devicesManager, IThreadPool threadPool) {
+  public ISyncManager provideSyncManager(IEntityManager entityManager, INetworkSettings networkSettings, IThreadPool threadPool) {
     if(syncManager == null) {
-      syncManager = new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkSettings, devicesManager, threadPool,
+      syncManager = new CouchbaseLiteSyncManager((CouchbaseLiteEntityManagerBase)entityManager, networkSettings, threadPool,
           SynchronizationConfig.DEFAULT_SYNCHRONIZATION_PORT, SynchronizationConfig.DEFAULT_ALSO_USE_PULL_REPLICATION);
     }
 
