@@ -86,7 +86,7 @@ public class MessageHandler implements IMessageHandler {
     RespondToSynchronizationPermittingChallengeResponseBody responseBody = null;
 
     if(challengeHandler.isResponseOk(nonce, request.getBody().getChallengeResponse())) {
-      addToPermittedSynchronizedDevices(nonce);
+      addToPermittedSynchronizedDevices(request.getBody());
 
       responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.ALLOWED);
     }
@@ -97,12 +97,14 @@ public class MessageHandler implements IMessageHandler {
     callback.done(new Response<RespondToSynchronizationPermittingChallengeResponseBody>(responseBody));
   }
 
-  protected void addToPermittedSynchronizedDevices(String nonce) {
-    DeviceInfo deviceInfo = challengeHandler.getDeviceInfoForNonce(nonce);
+  protected void addToPermittedSynchronizedDevices(RespondToSynchronizationPermittingChallengeRequestBody requestBody) {
+    DeviceInfo deviceInfo = challengeHandler.getDeviceInfoForNonce(requestBody.getNonce());
     String deviceUniqueId = deviceInfo.getUniqueDeviceId();
 
     DiscoveredDevice discoveredDevice = networkSettings.getDiscoveredDevice(deviceUniqueId);
     if(discoveredDevice != null) {
+      discoveredDevice.setSynchronizationPort(requestBody.getSynchronizationPort());
+
       networkSettings.addConnectedDevicePermittedToSynchronize(discoveredDevice);
     }
   }
@@ -129,6 +131,8 @@ public class MessageHandler implements IMessageHandler {
     else {
       DiscoveredDevice permittedSynchronizedDevice = networkSettings.getDiscoveredDevice(body.getUniqueDeviceId());
       if(permittedSynchronizedDevice != null) {
+        permittedSynchronizedDevice.setSynchronizationPort(body.getSynchronizationPort());
+
         networkSettings.addConnectedDevicePermittedToSynchronize(permittedSynchronizedDevice);
       }
 
