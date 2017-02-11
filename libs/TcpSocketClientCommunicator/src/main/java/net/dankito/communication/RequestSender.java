@@ -47,7 +47,7 @@ public class RequestSender implements IRequestSender {
     Socket socket = new Socket();
 
     try{
-      socket.setSoTimeout(2 * 60 * 1000); // wait for a long time for response
+      socket.setSoTimeout(0); // disables socket read() timeout
       socket.setReuseAddress(true);
       socket.connect(destinationAddress);
 
