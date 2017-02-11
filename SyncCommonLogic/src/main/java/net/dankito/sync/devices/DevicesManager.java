@@ -10,6 +10,8 @@ import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.communication.IClientCommunicator;
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
+import net.dankito.sync.communication.message.RequestStartSynchronizationResult;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.IEntityManager;
@@ -48,6 +50,8 @@ public class DevicesManager implements IDevicesManager {
 
 
   protected Map<String, DiscoveredDevice> discoveredDevices = new ConcurrentHashMap<>();
+
+  protected Map<String, DiscoveredDevice> devicesPendingStartSynchronization = new ConcurrentHashMap<>();
 
   protected Map<String, DiscoveredDevice> knownSynchronizedDevices = new ConcurrentHashMap<>();
 
@@ -174,21 +178,21 @@ public class DevicesManager implements IDevicesManager {
     discoveredDevice(deviceInfoKey, discoveredDevice);
   }
 
-  protected void discoveredDevice(String deviceInfo, DiscoveredDevice device) {
+  protected void discoveredDevice(String deviceInfoKey, DiscoveredDevice device) {
     synchronized(discoveredDevices) {
-      discoveredDevices.put(deviceInfo, device);
+      discoveredDevices.put(deviceInfoKey, device);
 
       DiscoveredDeviceType type = determineDiscoveredDeviceType(device);
 
       if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
-        knownSynchronizedDevices.put(deviceInfo, device);
-        callKnownSynchronizedDeviceConnected(device);
+        discoveredKnownSynchronizedDevice(device, deviceInfoKey);
+        return; // TODO: callDiscoveredDeviceConnectedListeners with Pending_Synchronization?
       }
       else if(type == DiscoveredDeviceType.KNOWN_IGNORED_DEVICE) {
-        knownIgnoredDevices.put(deviceInfo, device);
+        knownIgnoredDevices.put(deviceInfoKey, device);
       }
       else {
-        unknownDevices.put(deviceInfo, device);
+        unknownDevices.put(deviceInfoKey, device);
       }
 
       callDiscoveredDeviceConnectedListeners(device, type);
@@ -205,6 +209,32 @@ public class DevicesManager implements IDevicesManager {
     else {
       return DiscoveredDeviceType.UNKNOWN_DEVICE;
     }
+  }
+
+  protected void discoveredKnownSynchronizedDevice(final DiscoveredDevice device, final String deviceInfoKey) {
+    devicesPendingStartSynchronization.put(deviceInfoKey, device);
+
+    clientCommunicator.requestStartSynchronization(device, new SendRequestCallback<RequestStartSynchronizationResponseBody>() {
+      @Override
+      public void done(Response<RequestStartSynchronizationResponseBody> response) {
+        handleRequestStartSynchronizationResponse(response, device, deviceInfoKey);
+      }
+    });
+  }
+
+  protected void handleRequestStartSynchronizationResponse(Response<RequestStartSynchronizationResponseBody> response, DiscoveredDevice device, String deviceInfoKey) {
+    if(response.isCouldHandleMessage()) {
+      RequestStartSynchronizationResponseBody body = response.getBody();
+
+      if(body.getResult() == RequestStartSynchronizationResult.ALLOWED) {
+        devicesPendingStartSynchronization.remove(deviceInfoKey);
+        knownSynchronizedDevices.put(deviceInfoKey, device);
+
+        callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
+        callKnownSynchronizedDeviceConnected(device);
+      }
+    }
+    // TODO: what to do if not?
   }
 
 
