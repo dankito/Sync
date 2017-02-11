@@ -10,6 +10,7 @@ import net.dankito.sync.communication.CommunicationManager;
 import net.dankito.sync.communication.IClientCommunicator;
 import net.dankito.sync.communication.ICommunicationManager;
 import net.dankito.sync.communication.TcpSocketClientCommunicator;
+import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
 import net.dankito.sync.data.DataManager;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.data.IPlatformConfigurationReader;
@@ -33,6 +34,7 @@ import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModuleConfigurationManager;
 import net.dankito.sync.synchronization.modules.SyncModuleConfigurationManager;
+import net.dankito.sync.util.AndroidIsSynchronizationPermittedHandler;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.IFileStorageService;
@@ -58,9 +60,11 @@ public class AndroidServiceDiContainer {
 
   protected IDataManager dataManager = null;
 
-  protected IClientCommunicator clientCommunicator;
+  protected IsSynchronizationPermittedHandler isSynchronizationPermittedHandler = null;
 
-  protected ICommunicationManager communicationManager;
+  protected IClientCommunicator clientCommunicator = null;
+
+  protected ICommunicationManager communicationManager = null;
 
   protected IDevicesDiscoverer devicesDiscoverer = null;
 
@@ -143,6 +147,16 @@ public class AndroidServiceDiContainer {
     return dataManager.getLocalConfig();
   }
 
+  @Provides
+  @Singleton
+  public IsSynchronizationPermittedHandler provideIsSynchronizationPermittedHandler(Context context) {
+    if(isSynchronizationPermittedHandler == null) {
+      isSynchronizationPermittedHandler = new AndroidIsSynchronizationPermittedHandler(context);
+    }
+
+    return isSynchronizationPermittedHandler;
+  }
+
 
   @Provides
   @Singleton
@@ -156,9 +170,9 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public IClientCommunicator provideClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
+  public IClientCommunicator provideClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
     if(clientCommunicator == null) {
-      clientCommunicator = new TcpSocketClientCommunicator(networkSettings, threadPool);
+      clientCommunicator = new TcpSocketClientCommunicator(networkSettings, permissionHandler, threadPool);
     }
 
     return clientCommunicator;
