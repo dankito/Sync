@@ -10,18 +10,11 @@ import com.couchbase.lite.listener.Credentials;
 import com.couchbase.lite.listener.LiteListener;
 import com.couchbase.lite.replicator.Replication;
 
-import net.dankito.communication.message.Request;
-import net.dankito.communication.message.Response;
 import net.dankito.jpa.annotationreader.config.PropertyConfig;
 import net.dankito.jpa.couchbaselite.Dao;
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
-import net.dankito.sync.communication.IRequestHandler;
-import net.dankito.sync.communication.callback.RequestHandlerCallback;
-import net.dankito.sync.communication.message.RequestStartSynchronizationRequestBody;
-import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
-import net.dankito.sync.communication.message.RequestStartSynchronizationResult;
 import net.dankito.sync.config.DatabaseTableConfig;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
@@ -261,46 +254,6 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
         stopCBLListener();
       }
     }
-  }
-
-
-  @Override
-  public IRequestHandler getRequestStartSynchronizationHandler() {
-    return requestStartSynchronizationHandler;
-  }
-
-  protected IRequestHandler requestStartSynchronizationHandler = new IRequestHandler() {
-    @Override
-    public void handle(Request request, RequestHandlerCallback callback) {
-      handleStartSynchronizationRequest(request, callback);
-    }
-  };
-
-  protected void handleStartSynchronizationRequest(Request<RequestStartSynchronizationRequestBody> request, RequestHandlerCallback callback) {
-    RequestStartSynchronizationRequestBody body = request.getBody();
-    String remoteDeviceUniqueId = body.getUniqueDeviceId();
-
-    if(isSynchronizingPermitted(remoteDeviceUniqueId) == false) {
-      callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.DENIED)));
-    }
-    else {
-      handleStartSynchronizationRequestForSyncPermitted(remoteDeviceUniqueId, callback);
-    }
-  }
-
-  protected void handleStartSynchronizationRequestForSyncPermitted(String remoteDeviceUniqueId, RequestHandlerCallback callback) {
-    if(isListenerStarted() == false) {
-      if(startSynchronizationListener() == false) {
-        callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.COULD_NOT_START_LISTENER)));
-        return;
-      }
-    }
-
-    callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.ALLOWED, synchronizationPort)));
-  }
-
-  protected boolean isSynchronizingPermitted(String remoteDeviceUniqueId) {
-    return networkSettings.isDevicePermittedToSynchronize(remoteDeviceUniqueId);
   }
 
 
