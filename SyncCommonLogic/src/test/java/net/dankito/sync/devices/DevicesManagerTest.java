@@ -59,7 +59,7 @@ public class DevicesManagerTest {
 
     IThreadPool threadPool = new ThreadPool();
 
-    clientCommunicator = new TcpSocketClientCommunicator(networkSettings, threadPool);
+    clientCommunicator = new TcpSocketClientCommunicator(networkSettings, null, threadPool);
 
     underTest = new DevicesManager(new UdpDevicesDiscoverer(threadPool), clientCommunicator, dataManager, networkSettings, entityManager);
 

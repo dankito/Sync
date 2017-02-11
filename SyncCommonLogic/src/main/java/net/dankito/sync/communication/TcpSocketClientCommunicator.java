@@ -13,6 +13,7 @@ import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
 import net.dankito.communication.message.ResponseErrorType;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
+import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.MessageHandler;
@@ -42,14 +43,14 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected INetworkSettings networkSettings;
 
 
-  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
-    setupDependencies(networkSettings, threadPool);
+  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
+    setupDependencies(networkSettings, permissionHandler, threadPool);
   }
 
-  protected void setupDependencies(INetworkSettings networkSettings, IThreadPool threadPool) {
+  protected void setupDependencies(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
     this.networkSettings = networkSettings;
 
-    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings);
+    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, permissionHandler);
 
     SocketHandler socketHandler = new SocketHandler();
     IMessageHandler messageHandler = new MessageHandler(messageHandlerConfig);
