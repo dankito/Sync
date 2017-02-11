@@ -1,5 +1,6 @@
 package net.dankito.communication;
 
+import net.dankito.communication.callback.RequestHandlerCallback;
 import net.dankito.communication.callback.SendRequestCallback;
 import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
@@ -79,16 +80,19 @@ public class RequestSenderTest {
     remoteMessageHandler = Mockito.mock(IMessageHandler.class);
     Mockito.doReturn(null).when(remoteMessageHandler).getRequestBodyClassForMethod(TEST_METHOD_NAME);
     Mockito.doReturn(TestResponseBody.class).when(remoteMessageHandler).getResponseBodyClassForMethod(TEST_METHOD_NAME);
-    Mockito.doAnswer(new Answer<Response>() {
+    Mockito.doAnswer(new Answer() {
       @Override
-      public Response answer(InvocationOnMock invocation) throws Throwable {
+      public Object answer(InvocationOnMock invocation) throws Throwable {
         Request request = (Request)invocation.getArguments()[0];
+        RequestHandlerCallback callback = (RequestHandlerCallback)invocation.getArguments()[1];
+
         if(TEST_METHOD_NAME.equals(request.getMethod())) {
-          return testResponse;
+          callback.done(testResponse);
         }
+
         return null;
       }
-    }).when(remoteMessageHandler).handleReceivedRequest(Mockito.any(Request.class));
+    }).when(remoteMessageHandler).handleReceivedRequest(Mockito.any(Request.class), Mockito.any(RequestHandlerCallback.class));
 
     messageSerializer = Mockito.spy(new JsonMessageSerializer(remoteMessageHandler));
 
