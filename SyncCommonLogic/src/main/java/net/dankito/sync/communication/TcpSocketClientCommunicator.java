@@ -17,8 +17,11 @@ import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.MessageHandler;
 import net.dankito.sync.communication.message.MessageHandlerConfig;
+import net.dankito.sync.communication.message.RequestPermitSynchronizationResponseBody;
 import net.dankito.sync.communication.message.RequestStartSynchronizationRequestBody;
 import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
+import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeRequestBody;
+import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeResponseBody;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.utils.IThreadPool;
@@ -80,6 +83,36 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
         new Request(CommunicatorConfig.GET_DEVICE_INFO_METHOD_NAME), new net.dankito.communication.callback.SendRequestCallback<DeviceInfo>() {
           @Override
           public void done(Response<DeviceInfo> response) {
+            callback.done(mapResponse(response));
+          }
+        });
+  }
+
+
+  @Override
+  public void requestPermitSynchronization(DiscoveredDevice remoteDevice, final SendRequestCallback<RequestPermitSynchronizationResponseBody> callback) {
+    Request<DeviceInfo> request = new Request<>(CommunicatorConfig.REQUEST_PERMIT_SYNCHRONIZATION_METHOD_NAME,
+        DeviceInfo.fromDevice(networkSettings.getLocalHostDevice()));
+
+    requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), request,
+        new net.dankito.communication.callback.SendRequestCallback<RequestPermitSynchronizationResponseBody>() {
+          @Override
+          public void done(Response<RequestPermitSynchronizationResponseBody> response) {
+            callback.done(mapResponse(response));
+          }
+        });
+  }
+
+  @Override
+  public void respondToSynchronizationPermittingChallenge(DiscoveredDevice remoteDevice, String nonce, String challengeResponse,
+                                                          final SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody> callback) {
+    Request<RespondToSynchronizationPermittingChallengeRequestBody> request = new Request<>(CommunicatorConfig.RESPONSE_TO_SYNCHRONIZATION_PERMITTING_CHALLENGE_METHOD_NAME,
+        new RespondToSynchronizationPermittingChallengeRequestBody(nonce, challengeResponse));
+
+    requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), request,
+        new net.dankito.communication.callback.SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody>() {
+          @Override
+          public void done(Response<RespondToSynchronizationPermittingChallengeResponseBody> response) {
             callback.done(mapResponse(response));
           }
         });
