@@ -300,7 +300,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   }
 
   protected boolean isSynchronizingPermitted(String remoteDeviceUniqueId) {
-    return true; // TODO
+    return networkSettings.isDevicePermittedToSynchronize(remoteDeviceUniqueId);
   }
 
 
