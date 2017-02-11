@@ -183,7 +183,7 @@ public class DevicesManager implements IDevicesManager {
 
       if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
         discoveredKnownSynchronizedDevice(device, deviceInfoKey);
-        return; // TODO: callDiscoveredDeviceConnectedListeners with Pending_Synchronization?
+        knownSynchronizedDevices.put(deviceInfoKey, device);
       }
       else if(type == DiscoveredDeviceType.KNOWN_IGNORED_DEVICE) {
         knownIgnoredDevices.put(deviceInfoKey, device);
@@ -227,9 +227,7 @@ public class DevicesManager implements IDevicesManager {
         device.setSynchronizationPort(body.getSynchronizationPort());
 
         devicesPendingStartSynchronization.remove(deviceInfoKey);
-        knownSynchronizedDevices.put(deviceInfoKey, device);
 
-        callDiscoveredDeviceConnectedListeners(device, DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE);
         callKnownSynchronizedDeviceConnected(device);
       }
     }
