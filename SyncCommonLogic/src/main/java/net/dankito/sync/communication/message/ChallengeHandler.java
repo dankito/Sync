@@ -1,6 +1,5 @@
 package net.dankito.sync.communication.message;
 
-
 import net.dankito.utils.services.HashAlgorithm;
 import net.dankito.utils.services.HashService;
 
@@ -9,6 +8,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import javax.inject.Named;
+
+
+@Named
 public class ChallengeHandler {
 
   protected static final int DEFAULT_COUNT_RETRIES = 2;
