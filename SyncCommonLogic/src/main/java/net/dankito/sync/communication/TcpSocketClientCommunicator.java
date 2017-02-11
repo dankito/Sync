@@ -87,7 +87,7 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   @Override
   public void requestStartSynchronization(DiscoveredDevice remoteDevice, final SendRequestCallback<RequestStartSynchronizationResponseBody> callback) {
     Request<RequestStartSynchronizationRequestBody> request = new Request<>(CommunicatorConfig.REQUEST_START_SYNCHRONIZATION_METHOD_NAME,
-        new RequestStartSynchronizationRequestBody(remoteDevice.getDevice().getUniqueDeviceId()));
+        new RequestStartSynchronizationRequestBody(networkSettings.getLocalHostDevice().getUniqueDeviceId()));
 
     requestSender.sendRequestAndReceiveResponseAsync(getSocketAddressFromDevice(remoteDevice), request,
         new net.dankito.communication.callback.SendRequestCallback<RequestStartSynchronizationResponseBody>() {
