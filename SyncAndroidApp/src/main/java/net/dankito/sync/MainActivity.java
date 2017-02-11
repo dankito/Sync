@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import net.dankito.android.util.AlertHelper;
 import net.dankito.android.util.services.IPermissionsManager;
 import net.dankito.sync.adapter.KnownSynchronizedDiscoveredDevicesAdapter;
 import net.dankito.sync.adapter.UnknownDiscoveredDevicesAdapter;
@@ -34,6 +35,7 @@ import net.dankito.sync.di.AndroidActivityDiContainer;
 import net.dankito.sync.di.DaggerAndroidActivityDiComponent;
 import net.dankito.sync.service.SyncBackgroundService;
 import net.dankito.sync.service.SyncBackgroundServiceBinder;
+import net.dankito.sync.util.AndroidIsSynchronizationPermittedHandler;
 
 import javax.inject.Inject;
 
@@ -73,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     super.onCreate(savedInstanceState);
 
     setupUi();
+
+    if(getIntent() != null) {
+      handleIntent(getIntent());
+    }
   }
 
   @Override
@@ -165,6 +171,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+  }
+
+
+  protected void handleIntent(Intent intent) {
+    if(intent.hasExtra(AndroidIsSynchronizationPermittedHandler.IS_SYNCHRONIZATION_PERMITTED_HANDLER_EXTRA_NAME)) {
+      switch(intent.getStringExtra(AndroidIsSynchronizationPermittedHandler.IS_SYNCHRONIZATION_PERMITTED_HANDLER_EXTRA_NAME)) {
+        case AndroidIsSynchronizationPermittedHandler.SHOULD_PERMIT_SYNCHRONIZING_WITH_DEVICE_ACTION:
+          handleShouldPermitSynchronizingWithDeviceIntent(intent);
+          break;
+        case AndroidIsSynchronizationPermittedHandler.SHOW_CORRECT_RESPONSE_TO_USER_NON_BLOCKING_ACTION:
+          handleShowCorrectResponseToUserIntent(intent);
+          break;
+      }
+    }
+  }
+
+  protected void handleShouldPermitSynchronizingWithDeviceIntent(Intent intent) {
+    String deviceInfoString = intent.getStringExtra(AndroidIsSynchronizationPermittedHandler.DEVICE_INFO_EXTRA_NAME);
+
+    String message = getString(R.string.alert_message_permit_device_to_synchronize, deviceInfoString);
+    String alertTitle = getString(R.string.alert_title_permit_device_to_synchronize);
+
+    boolean permitsSynchronization = true;
+
+    sendShouldPermitSynchronizingWithDeviceResult(permitsSynchronization);
+  }
+
+  private void sendShouldPermitSynchronizingWithDeviceResult(boolean permitsSynchronization) {
+    Intent sendResultIntent = new Intent(AndroidIsSynchronizationPermittedHandler.SHOULD_PERMIT_SYNCHRONIZING_WITH_DEVICE_ACTION);
+
+    sendResultIntent.putExtra(AndroidIsSynchronizationPermittedHandler.PERMITS_SYNCHRONIZATION_EXTRA_NAME, permitsSynchronization);
+
+    sendBroadcast(sendResultIntent);
+  }
+
+  protected void handleShowCorrectResponseToUserIntent(Intent intent) {
+    String deviceInfoString = intent.getStringExtra(AndroidIsSynchronizationPermittedHandler.DEVICE_INFO_EXTRA_NAME);
+    String correctResponse = intent.getStringExtra(AndroidIsSynchronizationPermittedHandler.CORRECT_RESPONSE_EXTRA_NAME);
+
+    String message = getString(R.string.alert_message_enter_this_code_on_remote_device, deviceInfoString, correctResponse);
+
+    AlertHelper.showMessage(this, message);
   }
 
 
