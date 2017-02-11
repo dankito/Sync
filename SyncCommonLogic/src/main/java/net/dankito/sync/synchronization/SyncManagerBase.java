@@ -2,9 +2,6 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.devices.DiscoveredDevice;
-import net.dankito.sync.devices.DiscoveredDeviceType;
-import net.dankito.sync.devices.DiscoveredDevicesListener;
-import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.utils.IThreadPool;
 
 import org.slf4j.Logger;
@@ -26,10 +23,8 @@ public abstract class SyncManagerBase implements ISyncManager {
   protected Set<SynchronizationListener> synchronizationListeners = new HashSet<>();
 
 
-  public SyncManagerBase(IDevicesManager devicesManager, IThreadPool threadPool) {
+  public SyncManagerBase(IThreadPool threadPool) {
     this.threadPool = threadPool;
-
-    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
   }
 
 
@@ -74,35 +69,6 @@ public abstract class SyncManagerBase implements ISyncManager {
     for(SynchronizationListener listener : synchronizationListeners) {
       listener.entitySynchronized(entity);
     }
-  }
-
-
-  // TODO: this is wrong, could also be an unregistered device
-  protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
-    @Override
-    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
-      if(isListenerStarted() == false) {
-        startSynchronizationListener();
-      }
-
-      if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE || isSyncDestinationForRemoteDevice(connectedDevice)) {
-        startSynchronizationWithDeviceAsync(connectedDevice);
-      }
-    }
-
-    @Override
-    public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
-
-    }
-  };
-
-  protected boolean isSyncDestinationForRemoteDevice(DiscoveredDevice remoteDevice) {
-    // TODO
-//    for(SyncConfiguration syncConfiguration : remoteDevice.getDevice().getSourceSyncConfigurations()) {
-//      if()
-//    }
-
-    return true;
   }
 
 }
