@@ -17,9 +17,8 @@ import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.SyncState;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
-import net.dankito.sync.devices.DiscoveredDeviceType;
-import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.devices.KnownSynchronizedDevicesListener;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.files.FileSender;
 import net.dankito.sync.synchronization.files.FileSyncJobItem;
@@ -108,7 +107,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     this.syncQueue = new EntitiesSyncQueue(entityManager, fileStorageService, localConfig.getLocalDevice());
 
     syncManager.addSynchronizationListener(synchronizationListener);
-    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
+    devicesManager.addKnownSynchronizedDevicesListener(knownSynchronizedDevicesListener);
   }
 
 
@@ -1159,19 +1158,15 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
-  protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
+  protected KnownSynchronizedDevicesListener knownSynchronizedDevicesListener = new KnownSynchronizedDevicesListener() {
     @Override
-    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
-      if(type == DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE) {
-        connectedToSynchronizedDevice(connectedDevice);
-      }
+    public void knownSynchronizedDeviceConnected(DiscoveredDevice connectedDevice) {
+      connectedToSynchronizedDevice(connectedDevice);
     }
 
     @Override
-    public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
-      if(connectedSynchronizedDevices.contains(disconnectedDevice)) {
-        disconnectedFromSynchronizedDevice(disconnectedDevice);
-      }
+    public void knownSynchronizedDeviceDisconnected(DiscoveredDevice disconnectedDevice) {
+      disconnectedFromSynchronizedDevice(disconnectedDevice);
     }
   };
 
