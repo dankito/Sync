@@ -65,20 +65,35 @@ public abstract class SyncManagerBase implements ISyncManager {
       else if(setting == NetworkSetting.REMOVED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE) {
         stoppedSynchronizingWithDevice((DiscoveredDevice)newValue);
       }
+      else if(setting == NetworkSetting.ADDED_DEVICES_ASKED_FOR_PERMITTING_SYNCHRONIZATION) {
+        mayStartSynchronizationListener();
+      }
+      else if(setting == NetworkSetting.REMOVED_DEVICES_ASKED_FOR_PERMITTING_SYNCHRONIZATION) {
+        mayStopSynchronizationListener();
+      }
     }
   };
 
   protected void synchronizingWithDevicePermitted(DiscoveredDevice device) {
-    if(isListenerStarted() == false) {
-      startSynchronizationListener();
-    }
+    mayStartSynchronizationListener();
 
     startSynchronizationWithDeviceAsync(device);
   }
 
   protected void stoppedSynchronizingWithDevice(DiscoveredDevice device) {
+    mayStopSynchronizationListener();
 
     stopSynchronizationWithDevice(device);
+  }
+
+  protected void mayStartSynchronizationListener() {
+    if(isListenerStarted() == false) {
+      startSynchronizationListener();
+    }
+  }
+
+  protected void mayStopSynchronizationListener() {
+    // TODO
   }
 
 
