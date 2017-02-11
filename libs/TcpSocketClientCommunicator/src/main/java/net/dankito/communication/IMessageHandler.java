@@ -1,12 +1,12 @@
 package net.dankito.communication;
 
+import net.dankito.communication.callback.RequestHandlerCallback;
 import net.dankito.communication.message.Request;
-import net.dankito.communication.message.Response;
 
 
 public interface IMessageHandler {
 
-  Response handleReceivedRequest(Request request);
+  void handleReceivedRequest(Request request, RequestHandlerCallback callback);
 
   Class getRequestBodyClassForMethod(String methodName) throws Exception;
 

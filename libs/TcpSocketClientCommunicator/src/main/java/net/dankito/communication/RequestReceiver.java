@@ -1,6 +1,7 @@
 package net.dankito.communication;
 
 
+import net.dankito.communication.callback.RequestHandlerCallback;
 import net.dankito.communication.message.Request;
 import net.dankito.communication.message.Response;
 import net.dankito.communication.message.ResponseErrorType;
@@ -149,10 +150,13 @@ public class RequestReceiver implements IRequestReceiver {
     }
   }
 
-  protected void receivedRequest(Socket clientSocket, Request request) {
-    Response response = messageHandler.handleReceivedRequest(request);
-
-    dispatchResponseToRequest(clientSocket, request, response);
+  protected void receivedRequest(final Socket clientSocket, final Request request) {
+    messageHandler.handleReceivedRequest(request, new RequestHandlerCallback() {
+      @Override
+      public void done(Response response) {
+        dispatchResponseToRequest(clientSocket, request, response);
+      }
+    });
   }
 
 
