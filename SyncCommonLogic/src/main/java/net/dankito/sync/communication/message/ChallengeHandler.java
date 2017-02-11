@@ -80,7 +80,7 @@ public class ChallengeHandler {
       String correctResponse = nonceToCorrectResponsesMap.get(nonce);
       String correctChallengeResponse = createChallengeResponse(nonce, correctResponse);
 
-      challengeResponse.equals(correctChallengeResponse);
+      return challengeResponse.equals(correctChallengeResponse);
     }
 
     return false;
