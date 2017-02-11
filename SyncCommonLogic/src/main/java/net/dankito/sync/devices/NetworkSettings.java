@@ -4,10 +4,7 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.data.IDataManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
@@ -25,8 +22,6 @@ public class NetworkSettings implements INetworkSettings {
 
   protected int synchronizationPort;
 
-  protected Map<String, Device> devicesPermittedSynchronization = new HashMap<>();
-
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
 
 
@@ -36,17 +31,8 @@ public class NetworkSettings implements INetworkSettings {
   }
 
   public NetworkSettings(LocalConfig localConfig) {
-    initProperties(localConfig);
-  }
-
-
-  private void initProperties(LocalConfig localConfig) {
     this.localConfig = localConfig;
     this.localHostDevice = localConfig.getLocalDevice();
-
-    for(Device synchronizedDevice : localConfig.getSynchronizedDevices()) {
-      addDevicePermittedToSynchronize(synchronizedDevice);
-    }
   }
 
 
@@ -86,29 +72,6 @@ public class NetworkSettings implements INetworkSettings {
     this.synchronizationPort = synchronizationPort;
 
     callSettingChangedListeners(NetworkSetting.SYNCHRONIZATION_PORT, synchronizationPort, oldValue);
-  }
-
-
-  public boolean isDevicePermittedToSynchronize(String uniqueDeviceId) {
-    return devicesPermittedSynchronization.containsKey(uniqueDeviceId);
-  }
-
-  public void addDevicePermittedToSynchronize(Device device) {
-    List<Device> oldValue = new ArrayList<>(devicesPermittedSynchronization.values());
-
-    devicesPermittedSynchronization.put(device.getUniqueDeviceId(), device);
-
-    List<Device> newValue = new ArrayList<>(devicesPermittedSynchronization.values());
-    callSettingChangedListeners(NetworkSetting.ADDED_DEVICE_PERMITTED_TO_SYNCHRONIZE, newValue, oldValue);
-  }
-
-  public void removeDevicePermittedToSynchronize(Device device) {
-    List<Device> oldValue = new ArrayList<>(devicesPermittedSynchronization.values());
-
-    devicesPermittedSynchronization.remove(device.getUniqueDeviceId());
-
-    List<Device> newValue = new ArrayList<>(devicesPermittedSynchronization.values());
-    callSettingChangedListeners(NetworkSetting.REMOVED_DEVICE_PERMITTED_TO_SYNCHRONIZE, newValue, oldValue);
   }
 
 
