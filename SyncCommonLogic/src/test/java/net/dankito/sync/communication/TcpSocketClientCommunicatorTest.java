@@ -1,6 +1,7 @@
 package net.dankito.sync.communication;
 
 import net.dankito.sync.Device;
+import net.dankito.sync.LocalConfig;
 import net.dankito.sync.OsType;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.communication.callback.SendRequestCallback;
@@ -59,7 +60,7 @@ public class TcpSocketClientCommunicatorTest {
   public void setUp() throws Exception {
     setUpRemoteDevice();
 
-    INetworkSettings networkSettings = new NetworkSettings(remoteDevice);
+    INetworkSettings networkSettings = new NetworkSettings(new LocalConfig(remoteDevice));
     MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, (IRequestHandler)null);
 
     underTest = new TcpSocketClientCommunicator(messageHandlerConfig, new ThreadPool());

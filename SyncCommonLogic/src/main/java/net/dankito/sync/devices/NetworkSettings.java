@@ -1,6 +1,7 @@
 package net.dankito.sync.devices;
 
 import net.dankito.sync.Device;
+import net.dankito.sync.LocalConfig;
 import net.dankito.sync.data.IDataManager;
 
 import java.util.List;
@@ -22,13 +23,18 @@ public class NetworkSettings implements INetworkSettings {
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
 
 
-  public NetworkSettings(Device localHostDevice) {
-    this.localHostDevice = localHostDevice;
-  }
-
   @Inject
   public NetworkSettings(IDataManager dataManager) {
-    this(dataManager.getLocalConfig().getLocalDevice());
+    this(dataManager.getLocalConfig());
+  }
+
+  public NetworkSettings(LocalConfig localConfig) {
+    initProperties(localConfig);
+  }
+
+
+  private void initProperties(LocalConfig localConfig) {
+    this.localHostDevice = localConfig.getLocalDevice();
   }
 
 

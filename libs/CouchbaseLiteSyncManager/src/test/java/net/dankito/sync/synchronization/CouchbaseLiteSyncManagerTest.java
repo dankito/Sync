@@ -5,6 +5,7 @@ import com.couchbase.lite.CouchbaseLiteException;
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
+import net.dankito.sync.LocalConfig;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.sync.devices.NetworkSettings;
@@ -72,8 +73,8 @@ public class CouchbaseLiteSyncManagerTest {
     device2 = new DiscoveredDevice(dev2, networkHelper.getIPAddressString(true));
     device2.setSynchronizationPort(DEVICE_2_SYNCHRONIZATION_PORT);
 
-    networkSettings1 = new NetworkSettings(dev1);
-    networkSettings2 = new NetworkSettings(dev2);
+    networkSettings1 = new NetworkSettings(new LocalConfig(dev1));
+    networkSettings2 = new NetworkSettings(new LocalConfig(dev2));
 
     entityManager1 = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData/db01_" + System.currentTimeMillis(), 1));
     entityManager2 = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData/db01_" + System.currentTimeMillis(), 1));

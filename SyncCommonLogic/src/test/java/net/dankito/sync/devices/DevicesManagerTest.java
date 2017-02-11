@@ -54,7 +54,7 @@ public class DevicesManagerTest {
     this.localConfig = new LocalConfig(localDevice);
     entityManager.persistEntity(localConfig);
 
-    final INetworkSettings networkSettings = new NetworkSettings(localDevice);
+    final INetworkSettings networkSettings = new NetworkSettings(localConfig);
     MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, (IRequestHandler)null);
 
     dataManager = Mockito.mock(IDataManager.class);
