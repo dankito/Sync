@@ -3,9 +3,7 @@ package net.dankito.sync.devices;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 
-/**
- * Created by ganymed on 15/09/16.
- */
+
 public interface INetworkSettings {
 
   LocalConfig getLocalConfig();
@@ -29,6 +27,10 @@ public interface INetworkSettings {
   void addConnectedDevicePermittedToSynchronize(DiscoveredDevice device);
 
   void removeConnectedDevicePermittedToSynchronize(DiscoveredDevice device);
+
+  void addDevicesAskedForPermittingSynchronization(DiscoveredDevice device);
+
+  void removeDevicesAskedForPermittingSynchronization(DiscoveredDevice device);
 
   void addListener(NetworkSettingsChangedListener listener);
 
