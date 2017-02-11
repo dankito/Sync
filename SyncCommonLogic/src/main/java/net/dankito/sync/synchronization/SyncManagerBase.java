@@ -1,7 +1,6 @@
 package net.dankito.sync.synchronization;
 
 import net.dankito.sync.BaseEntity;
-import net.dankito.sync.Device;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.sync.devices.NetworkSetting;
@@ -12,12 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-/**
- * Created by ganymed on 28/08/16.
- */
+
 public abstract class SyncManagerBase implements ISyncManager {
 
   private static final Logger log = LoggerFactory.getLogger(SyncManagerBase.class);
@@ -64,19 +60,26 @@ public abstract class SyncManagerBase implements ISyncManager {
     @Override
     public void settingsChanged(INetworkSettings networkSettings, NetworkSetting setting, Object newValue, Object oldValue) {
       if(setting == NetworkSetting.ADDED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE) {
-        List<Device> permittedConnectedDevices = (List<Device>)newValue;
-        if(permittedConnectedDevices.size() == 1) {
-          startSynchronizationListener();
-        }
+        synchronizingWithDevicePermitted((DiscoveredDevice)newValue);
       }
       else if(setting == NetworkSetting.REMOVED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE) {
-        List<Device> permittedConnectedDevices = (List<Device>)newValue;
-        if(permittedConnectedDevices.size() == 0) {
-          stopSynchronizationListener();
-        }
+        stoppedSynchronizingWithDevice((DiscoveredDevice)newValue);
       }
     }
   };
+
+  protected void synchronizingWithDevicePermitted(DiscoveredDevice device) {
+    if(isListenerStarted() == false) {
+      startSynchronizationListener();
+    }
+
+    startSynchronizationWithDeviceAsync(device);
+  }
+
+  protected void stoppedSynchronizingWithDevice(DiscoveredDevice device) {
+
+    stopSynchronizationWithDevice(device);
+  }
 
 
   protected boolean hasSynchronizationListeners() {
