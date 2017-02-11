@@ -88,7 +88,7 @@ public class MessageHandler implements IMessageHandler {
     if(challengeHandler.isResponseOk(nonce, request.getBody().getChallengeResponse())) {
       addToPermittedSynchronizedDevices(request.getBody());
 
-      responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(RespondToSynchronizationPermittingChallengeResult.ALLOWED);
+      responseBody = new RespondToSynchronizationPermittingChallengeResponseBody(networkSettings.getSynchronizationPort());
     }
     else {
       responseBody = createWrongCodeResponse(nonce);

@@ -7,6 +7,8 @@ public class RespondToSynchronizationPermittingChallengeResponseBody {
 
   protected int countRetriesLeft = 0;
 
+  protected int synchronizationPort = 0;
+
 
   protected RespondToSynchronizationPermittingChallengeResponseBody() { // for Jackson
 
@@ -21,6 +23,12 @@ public class RespondToSynchronizationPermittingChallengeResponseBody {
     this.countRetriesLeft = countRetriesLeft;
   }
 
+  public RespondToSynchronizationPermittingChallengeResponseBody(int synchronizationPort) {
+    this(RespondToSynchronizationPermittingChallengeResult.ALLOWED);
+
+    this.synchronizationPort = synchronizationPort;
+  }
+
 
   public RespondToSynchronizationPermittingChallengeResult getResult() {
     return result;
@@ -28,6 +36,10 @@ public class RespondToSynchronizationPermittingChallengeResponseBody {
 
   public int getCountRetriesLeft() {
     return countRetriesLeft;
+  }
+
+  public int getSynchronizationPort() {
+    return synchronizationPort;
   }
 
 }
