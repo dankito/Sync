@@ -29,6 +29,7 @@ import net.dankito.sync.communication.message.RespondToSynchronizationPermitting
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
+import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.sync.synchronization.ISyncConfigurationManager;
 import net.dankito.sync.synchronization.modules.AndroidSyncModuleBase;
 import net.dankito.sync.synchronization.modules.ISyncModule;
@@ -62,6 +63,9 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
   @Inject
   protected IClientCommunicator clientCommunicator;
+
+  @Inject
+  protected INetworkSettings networkSettings;
 
 
   protected DiscoveredDevice remoteDevice;
@@ -140,6 +144,7 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
 
 
   protected void askDeviceIfSynchronizingIsPermitted(final DiscoveredDevice remoteDevice) {
+    // TODO: ensure CouchbaseLiteListener is started
     clientCommunicator.requestPermitSynchronization(remoteDevice, new SendRequestCallback<RequestPermitSynchronizationResponseBody>() {
       @Override
       public void done(Response<RequestPermitSynchronizationResponseBody> response) {
@@ -192,6 +197,8 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
+        networkSettings.removeDevicesAskedForPermittingSynchronization(remoteDevice);
+
         dialog.cancel();
       }
     });
