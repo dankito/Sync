@@ -84,6 +84,11 @@ public class NetworkSettings implements INetworkSettings {
   }
 
 
+  public boolean isDevicePermittedToSynchronize(String uniqueDeviceId) {
+    return devicesPermittedSynchronization.containsKey(uniqueDeviceId);
+  }
+
+
   @Override
   public void addListener(NetworkSettingsChangedListener listener) {
     listeners.add(listener);

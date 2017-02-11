@@ -19,6 +19,8 @@ public interface INetworkSettings {
 
   void setSynchronizationPort(int synchronizationPort);
 
+  boolean isDevicePermittedToSynchronize(String uniqueDeviceId);
+
   void addListener(NetworkSettingsChangedListener listener);
 
   void removeListener(NetworkSettingsChangedListener listener);
