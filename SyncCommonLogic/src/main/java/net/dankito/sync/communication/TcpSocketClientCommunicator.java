@@ -15,6 +15,7 @@ import net.dankito.communication.message.ResponseErrorType;
 import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
 import net.dankito.sync.communication.callback.SendRequestCallback;
+import net.dankito.sync.communication.message.ChallengeHandler;
 import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.MessageHandler;
 import net.dankito.sync.communication.message.MessageHandlerConfig;
@@ -44,6 +45,8 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
 
   protected INetworkSettings networkSettings;
 
+  protected ChallengeHandler challengeHandler;
+
 
   public TcpSocketClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
     setupDependencies(networkSettings, permissionHandler, threadPool);
@@ -51,8 +54,9 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
 
   protected void setupDependencies(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
     this.networkSettings = networkSettings;
+    this.challengeHandler = new ChallengeHandler();
 
-    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, permissionHandler);
+    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, challengeHandler, permissionHandler);
 
     SocketHandler socketHandler = new SocketHandler();
     IMessageHandler messageHandler = new MessageHandler(messageHandlerConfig);

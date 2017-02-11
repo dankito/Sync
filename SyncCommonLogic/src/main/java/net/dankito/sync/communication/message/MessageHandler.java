@@ -28,7 +28,7 @@ public class MessageHandler implements IMessageHandler {
 
     this.networkSettings = config.getNetworkSettings();
 
-    this.challengeHandler = new ChallengeHandler();
+    this.challengeHandler = config.getChallengeHandler();
   }
 
 

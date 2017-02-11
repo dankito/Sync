@@ -11,17 +11,24 @@ public class MessageHandlerConfig {
 
   protected INetworkSettings networkSettings;
 
+  protected ChallengeHandler challengeHandler;
+
   protected IsSynchronizationPermittedHandler isSynchronizationPermittedHandler;
 
 
-  public MessageHandlerConfig(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler) {
+  public MessageHandlerConfig(INetworkSettings networkSettings, ChallengeHandler challengeHandler, IsSynchronizationPermittedHandler permissionHandler) {
     this.networkSettings = networkSettings;
+    this.challengeHandler = challengeHandler;
     this.isSynchronizationPermittedHandler = permissionHandler;
   }
 
 
   public INetworkSettings getNetworkSettings() {
     return networkSettings;
+  }
+
+  public ChallengeHandler getChallengeHandler() {
+    return challengeHandler;
   }
 
   public IsSynchronizationPermittedHandler getIsSynchronizationPermittedHandler() {
