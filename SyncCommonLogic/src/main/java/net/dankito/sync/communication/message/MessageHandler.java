@@ -122,29 +122,31 @@ public class MessageHandler implements IMessageHandler {
 
   protected void handleRequestStartSynchronizationRequest(Request<RequestStartSynchronizationRequestBody> request, final RequestHandlerCallback callback) {
     RequestStartSynchronizationRequestBody body = request.getBody();
-    Device permittedSynchronizedDevice = isDevicePermittedToSynchronize(body.getUniqueDeviceId());
 
-    if(permittedSynchronizedDevice == null) { // not permitted to synchronize
+    if(isDevicePermittedToSynchronize(body.getUniqueDeviceId()) == false) {
       callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.DENIED)));
     }
     else {
-      networkSettings.addConnectedDevicePermittedToSynchronize(permittedSynchronizedDevice);
+      DiscoveredDevice permittedSynchronizedDevice = networkSettings.getDiscoveredDevice(body.getUniqueDeviceId());
+      if(permittedSynchronizedDevice != null) {
+        networkSettings.addConnectedDevicePermittedToSynchronize(permittedSynchronizedDevice.getDevice());
+      }
 
       callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.ALLOWED,
           networkSettings.getSynchronizationPort())));
     }
   }
 
-  protected Device isDevicePermittedToSynchronize(String remoteDeviceUniqueId) {
+  protected boolean isDevicePermittedToSynchronize(String remoteDeviceUniqueId) {
     List<Device> synchronizedDevices = networkSettings.getLocalConfig().getSynchronizedDevices();
 
     for(Device synchronizedDevice : synchronizedDevices) {
       if(synchronizedDevice.getUniqueDeviceId().equals(remoteDeviceUniqueId)) {
-        return synchronizedDevice;
+        return true;
       }
     }
 
-    return null;
+    return false;
   }
 
 
