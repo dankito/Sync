@@ -13,7 +13,6 @@ import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
-import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
@@ -54,14 +53,13 @@ public class DevicesManagerTest {
     entityManager.persistEntity(localConfig);
 
     final INetworkSettings networkSettings = new NetworkSettings(localConfig);
-    ISyncManager syncManager = Mockito.mock(ISyncManager.class);
 
     dataManager = Mockito.mock(IDataManager.class);
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
 
     IThreadPool threadPool = new ThreadPool();
 
-    clientCommunicator = new TcpSocketClientCommunicator(syncManager, networkSettings, threadPool);
+    clientCommunicator = new TcpSocketClientCommunicator(networkSettings, threadPool);
 
     underTest = new DevicesManager(new UdpDevicesDiscoverer(threadPool), clientCommunicator, dataManager, networkSettings, entityManager);
 

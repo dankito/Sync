@@ -21,7 +21,6 @@ import net.dankito.sync.communication.message.RequestStartSynchronizationRequest
 import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
-import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.utils.IThreadPool;
 
 import java.net.InetSocketAddress;
@@ -40,11 +39,11 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected INetworkSettings networkSettings;
 
 
-  public TcpSocketClientCommunicator(ISyncManager syncManager, INetworkSettings networkSettings, IThreadPool threadPool) {
-    setupDependencies(syncManager, networkSettings, threadPool);
+  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IThreadPool threadPool) {
+    setupDependencies(networkSettings, threadPool);
   }
 
-  protected void setupDependencies(ISyncManager syncManager, INetworkSettings networkSettings, IThreadPool threadPool) {
+  protected void setupDependencies(INetworkSettings networkSettings, IThreadPool threadPool) {
     this.networkSettings = networkSettings;
 
     MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings);
