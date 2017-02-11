@@ -2,6 +2,7 @@ package net.dankito.sync.util;
 
 import android.app.Activity;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 
 
@@ -34,13 +35,7 @@ public class AlertHelper {
   }
 
   protected static void showInfoMessageOnUiThread(final Activity activity, final CharSequence infoMessage, final CharSequence alertTitle) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-    if(alertTitle != null) {
-      builder = builder.setTitle(alertTitle);
-    }
-    builder = builder.setMessage(infoMessage);
-
-    builder.setNegativeButton(android.R.string.ok, null);
+    AlertDialog.Builder builder = createDialog(activity, infoMessage, alertTitle);
 
     builder.create().show();
   }
@@ -73,18 +68,23 @@ public class AlertHelper {
   }
 
   public static void showErrorMessageOnUiThread(final Activity activity, final CharSequence errorMessage, final CharSequence alertTitle) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-    if(alertTitle != null) {
-      builder = builder.setTitle(alertTitle);
-    }
-    builder = builder.setMessage(errorMessage);
-    // TODO: set error icon
-
-    builder.setNegativeButton(android.R.string.ok, null);
+    AlertDialog.Builder builder = createDialog(activity, errorMessage, alertTitle);
 
     builder.create().show();
   }
 
+  @NonNull
+  protected static AlertDialog.Builder createDialog(Activity activity, CharSequence message, CharSequence alertTitle) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+    if(alertTitle != null) {
+      builder = builder.setTitle(alertTitle);
+    }
+    builder = builder.setMessage(message);
+    // TODO: set error icon
+
+    builder.setNegativeButton(android.R.string.ok, null);
+    return builder;
+  }
 
 
   protected static boolean isRunningOnUiThread() {
