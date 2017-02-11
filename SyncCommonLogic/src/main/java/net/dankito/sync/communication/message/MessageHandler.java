@@ -103,7 +103,7 @@ public class MessageHandler implements IMessageHandler {
 
     DiscoveredDevice discoveredDevice = networkSettings.getDiscoveredDevice(deviceUniqueId);
     if(discoveredDevice != null) {
-      networkSettings.addConnectedDevicePermittedToSynchronize(discoveredDevice.getDevice());
+      networkSettings.addConnectedDevicePermittedToSynchronize(discoveredDevice);
     }
   }
 
@@ -129,7 +129,7 @@ public class MessageHandler implements IMessageHandler {
     else {
       DiscoveredDevice permittedSynchronizedDevice = networkSettings.getDiscoveredDevice(body.getUniqueDeviceId());
       if(permittedSynchronizedDevice != null) {
-        networkSettings.addConnectedDevicePermittedToSynchronize(permittedSynchronizedDevice.getDevice());
+        networkSettings.addConnectedDevicePermittedToSynchronize(permittedSynchronizedDevice);
       }
 
       callback.done(new Response<RequestStartSynchronizationResponseBody>(new RequestStartSynchronizationResponseBody(RequestStartSynchronizationResult.ALLOWED,

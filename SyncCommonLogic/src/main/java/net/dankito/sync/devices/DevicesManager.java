@@ -253,7 +253,7 @@ public class DevicesManager implements IDevicesManager {
 
       if(isKnownSynchronizedDevice(device)) {
         knownSynchronizedDevices.remove(deviceInfo);
-        networkSettings.removeConnectedDevicePermittedToSynchronize(device.getDevice());
+        networkSettings.removeConnectedDevicePermittedToSynchronize(device);
         callKnownSynchronizedDeviceDisconnected(device);
       }
       else if(isKnownIgnoredDevice(device)) {
@@ -313,7 +313,7 @@ public class DevicesManager implements IDevicesManager {
   @Override
   public void startSynchronizingWithDevice(DiscoveredDevice device, List<SyncModuleConfiguration> syncModuleConfigurations) {
     // TODO: the whole process should actually run in a transaction
-    networkSettings.addConnectedDevicePermittedToSynchronize(device.getDevice());
+    networkSettings.addConnectedDevicePermittedToSynchronize(device);
 
     SyncConfiguration syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), device.getDevice(), syncModuleConfigurations);
     if(entityManager.persistEntity(syncConfiguration)) {

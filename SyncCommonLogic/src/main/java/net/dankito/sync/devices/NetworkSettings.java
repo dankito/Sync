@@ -26,7 +26,7 @@ public class NetworkSettings implements INetworkSettings {
 
   protected Map<String, DiscoveredDevice> discoveredDevices = new HashMap<>();
 
-  protected Map<String, Device> connectedDevicesPermittedToSynchronization = new HashMap<>();
+  protected Map<String, DiscoveredDevice> connectedDevicesPermittedToSynchronization = new HashMap<>();
 
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -98,14 +98,14 @@ public class NetworkSettings implements INetworkSettings {
   }
 
 
-  public void addConnectedDevicePermittedToSynchronize(Device device) {
-    connectedDevicesPermittedToSynchronization.put(device.getUniqueDeviceId(), device);
+  public void addConnectedDevicePermittedToSynchronize(DiscoveredDevice device) {
+    connectedDevicesPermittedToSynchronization.put(device.getDevice().getUniqueDeviceId(), device);
 
     callSettingChangedListeners(NetworkSetting.ADDED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, device, null);
   }
 
-  public void removeConnectedDevicePermittedToSynchronize(Device device) {
-    connectedDevicesPermittedToSynchronization.remove(device.getUniqueDeviceId());
+  public void removeConnectedDevicePermittedToSynchronize(DiscoveredDevice device) {
+    connectedDevicesPermittedToSynchronization.remove(device.getDevice().getUniqueDeviceId());
 
     callSettingChangedListeners(NetworkSetting.REMOVED_CONNECTED_DEVICE_PERMITTED_TO_SYNCHRONIZE, device, null);
   }

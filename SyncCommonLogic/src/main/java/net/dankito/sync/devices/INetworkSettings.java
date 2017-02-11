@@ -26,9 +26,9 @@ public interface INetworkSettings {
 
   void removeDiscoveredDevice(DiscoveredDevice device);
 
-  void addConnectedDevicePermittedToSynchronize(Device device);
+  void addConnectedDevicePermittedToSynchronize(DiscoveredDevice device);
 
-  void removeConnectedDevicePermittedToSynchronize(Device device);
+  void removeConnectedDevicePermittedToSynchronize(DiscoveredDevice device);
 
   void addListener(NetworkSettingsChangedListener listener);
 
