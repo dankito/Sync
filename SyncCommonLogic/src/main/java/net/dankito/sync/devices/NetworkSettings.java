@@ -4,7 +4,9 @@ import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.data.IDataManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
@@ -19,6 +21,8 @@ public class NetworkSettings implements INetworkSettings {
   protected int messagePort;
 
   protected int synchronizationPort;
+
+  protected Map<String, Device> devicesPermittedSynchronization = new HashMap<>();
 
   protected List<NetworkSettingsChangedListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -35,6 +39,10 @@ public class NetworkSettings implements INetworkSettings {
 
   private void initProperties(LocalConfig localConfig) {
     this.localHostDevice = localConfig.getLocalDevice();
+
+    for(Device synchronizedDevice : localConfig.getSynchronizedDevices()) {
+      devicesPermittedSynchronization.put(synchronizedDevice.getUniqueDeviceId(), synchronizedDevice);
+    }
   }
 
 
