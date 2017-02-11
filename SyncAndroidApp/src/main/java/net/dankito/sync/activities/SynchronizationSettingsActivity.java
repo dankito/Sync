@@ -1,5 +1,6 @@
 package net.dankito.sync.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -204,6 +206,15 @@ public class SynchronizationSettingsActivity extends AppCompatActivity {
     });
 
     builder.show();
+
+    input.requestFocus();
+    input.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        InputMethodManager keyboard = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        keyboard.showSoftInput(input, 0);
+      }
+    },50);
   }
 
   protected void sendChallengeResponseToRemote(final DiscoveredDevice remoteDevice, final String nonce, String enteredResponse) {
