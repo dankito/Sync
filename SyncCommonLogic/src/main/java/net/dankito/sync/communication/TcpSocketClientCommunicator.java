@@ -122,13 +122,25 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
         new net.dankito.communication.callback.SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody>() {
           @Override
           public void done(Response<RespondToSynchronizationPermittingChallengeResponseBody> response) {
-            if(response.isCouldHandleMessage() && response.getBody().getResult() != RespondToSynchronizationPermittingChallengeResult.WRONG_CODE) {
-              networkSettings.removeDevicesAskedForPermittingSynchronization(remoteDevice);
-            }
+            handleRespondToSynchronizationPermittingChallengeResponse(remoteDevice, response);
 
             callback.done(mapResponse(response));
           }
         });
+  }
+
+  protected void handleRespondToSynchronizationPermittingChallengeResponse(DiscoveredDevice remoteDevice, Response<RespondToSynchronizationPermittingChallengeResponseBody> response) {
+    if(response.isCouldHandleMessage()) {
+      RespondToSynchronizationPermittingChallengeResult result = response.getBody().getResult();
+
+      if(response.getBody().getResult() != RespondToSynchronizationPermittingChallengeResult.WRONG_CODE) {
+        networkSettings.removeDevicesAskedForPermittingSynchronization(remoteDevice);
+      }
+
+      if(result == RespondToSynchronizationPermittingChallengeResult.ALLOWED) {
+        remoteDevice.setSynchronizationPort(response.getBody().getSynchronizationPort());
+      }
+    }
   }
 
 
