@@ -47,7 +47,7 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected void setupDependencies(ISyncManager syncManager, INetworkSettings networkSettings, IThreadPool threadPool) {
     this.networkSettings = networkSettings;
 
-    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, syncManager);
+    MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings);
 
     SocketHandler socketHandler = new SocketHandler();
     IMessageHandler messageHandler = new MessageHandler(messageHandlerConfig);
