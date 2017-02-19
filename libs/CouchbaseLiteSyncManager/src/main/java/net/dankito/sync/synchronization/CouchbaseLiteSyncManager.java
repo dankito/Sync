@@ -94,7 +94,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     this.conflictHandler = new ConflictHandler(entityManager, database);
 
     // wait some time before processing synchronized entities as they may have dependent entities which haven't been synchronized yet
-    this.changeQueue = new AsyncProducerConsumerQueue<>(1, MILLIS_TO_WAIT_BEFORE_PROCESSING_SYNCHRONIZED_ENTITY, synchronizationChangesHandler);
+    this.changeQueue = new AsyncProducerConsumerQueue<>(1, AsyncProducerConsumerQueue.NO_LIMIT_ITEMS_TO_QUEUE, MILLIS_TO_WAIT_BEFORE_PROCESSING_SYNCHRONIZED_ENTITY, synchronizationChangesHandler);
 
     setReplicationFilter(database);
   }
