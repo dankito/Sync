@@ -2,6 +2,7 @@ package net.dankito.sync.communication.message;
 
 import net.dankito.utils.services.HashAlgorithm;
 import net.dankito.utils.services.HashService;
+import net.dankito.utils.services.IBase64Service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,8 @@ public class ChallengeHandler {
   protected static final HashAlgorithm CHALLENGE_RESPONSE_HASH_ALGORITHM = HashAlgorithm.SHA512;
 
 
+  protected IBase64Service base64Service;
+
   protected HashService hashService = new HashService();
 
   protected Random random = new Random(System.nanoTime());
@@ -28,6 +31,11 @@ public class ChallengeHandler {
   protected Map<String, String> nonceToCorrectResponsesMap = new HashMap<>();
 
   protected Map<String, Integer> nonceToCountRetriesMap = new HashMap<>();
+
+
+  public ChallengeHandler(IBase64Service base64Service) {
+    this.base64Service = base64Service;
+  }
 
 
   public NonceToResponsePair createChallengeForDevice(DeviceInfo deviceInfo) {
@@ -54,15 +62,17 @@ public class ChallengeHandler {
     String challengeResponse = nonce + "-" + enteredCode;
 
     try {
-      return hashService.hashString(CHALLENGE_RESPONSE_HASH_ALGORITHM, challengeResponse);
+      byte[] hashedChallengeResponse = hashService.hashStringToBytes(CHALLENGE_RESPONSE_HASH_ALGORITHM, challengeResponse);
+
+      return base64Service.encode(hashedChallengeResponse);
     } catch(Exception e) { /* should actually never occur */ }
 
     return null;
   }
 
 
-  public boolean isResponseOk(String nonce, String challengeResponse) {
-    boolean isCorrectResponse = isCorrectResponse(nonce, challengeResponse);
+  public boolean isResponseOk(String nonce, String base64EncodeChallengeResponse) {
+    boolean isCorrectResponse = isCorrectResponse(nonce, base64EncodeChallengeResponse);
 
     if(isCorrectResponse) {
       nonceToCountRetriesMap.remove(nonce);
@@ -82,13 +92,13 @@ public class ChallengeHandler {
     return isCorrectResponse;
   }
 
-  protected boolean isCorrectResponse(String nonce, String challengeResponse) {
+  protected boolean isCorrectResponse(String nonce, String base64EncodeChallengeResponse) {
     // check if nonceToCorrectResponsesMap really contains nonce as otherwise (null, null) would be a correct response
     if(nonceToCorrectResponsesMap.containsKey(nonce)) {
       String correctResponse = nonceToCorrectResponsesMap.get(nonce);
       String correctChallengeResponse = createChallengeResponse(nonce, correctResponse);
 
-      return challengeResponse.equals(correctChallengeResponse);
+      return base64EncodeChallengeResponse.equals(correctChallengeResponse);
     }
 
     return false;
