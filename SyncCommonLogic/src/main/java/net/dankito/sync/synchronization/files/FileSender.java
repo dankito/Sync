@@ -30,7 +30,7 @@ public class FileSender {
 
 
   public FileSender() {
-    this.queuedJobs = new AsyncProducerConsumerQueue<>(FileSyncServiceDefaultConfig.COUNT_PARALLEL_FILE_TRANSFERS, Integer.MAX_VALUE, fileSyncJobItemConsumerListener);
+    this.queuedJobs = new AsyncProducerConsumerQueue<>(FileSyncServiceDefaultConfig.COUNT_PARALLEL_FILE_TRANSFERS, fileSyncJobItemConsumerListener);
   }
 
 
