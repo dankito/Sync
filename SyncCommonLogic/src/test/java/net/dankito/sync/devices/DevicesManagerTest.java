@@ -275,6 +275,88 @@ public class DevicesManagerTest {
   }
 
 
+  @Test
+  public void devicesDiscovererFindsKnownSynchronizedDevice_ListenerGetsCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addSynchronizedDevice(remoteDevice);
+
+    underTest.start();
+
+    final ObjectHolder<DiscoveredDevice> discoveredDeviceHolder = new ObjectHolder<>();
+    final ObjectHolder<DiscoveredDeviceType> discoveredDeviceTypeHolder = new ObjectHolder<>();
+    final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
+    final AtomicInteger countDisconnectedFromDeviceCalled = new AtomicInteger(0);
+
+    underTest.addDiscoveredDevicesListener(new DiscoveredDevicesListener() {
+      @Override
+      public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+        discoveredDeviceHolder.setObject(connectedDevice);
+        discoveredDeviceTypeHolder.setObject(type);
+        countDeviceDiscoveredCalled.incrementAndGet();
+      }
+
+      @Override
+      public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+        countDisconnectedFromDeviceCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
+
+
+    assertThat(countDeviceDiscoveredCalled.get(), is(1));
+    assertThat(countDisconnectedFromDeviceCalled.get(), is(0));
+
+    assertThat(discoveredDeviceTypeHolder.isObjectSet(), is(true));
+    assertThat(discoveredDeviceTypeHolder.getObject(), is(DiscoveredDeviceType.KNOWN_SYNCHRONIZED_DEVICE));
+
+    assertThat(discoveredDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(discoveredDeviceHolder.getObject());
+  }
+
+
+  @Test
+  public void devicesDiscovererFindsKnownIgnoredDevice_ListenerGetsCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addIgnoredDevice(remoteDevice);
+
+    underTest.start();
+
+    final ObjectHolder<DiscoveredDevice> discoveredDeviceHolder = new ObjectHolder<>();
+    final ObjectHolder<DiscoveredDeviceType> discoveredDeviceTypeHolder = new ObjectHolder<>();
+    final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
+    final AtomicInteger countDisconnectedFromDeviceCalled = new AtomicInteger(0);
+
+    underTest.addDiscoveredDevicesListener(new DiscoveredDevicesListener() {
+      @Override
+      public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+        discoveredDeviceHolder.setObject(connectedDevice);
+        discoveredDeviceTypeHolder.setObject(type);
+        countDeviceDiscoveredCalled.incrementAndGet();
+      }
+
+      @Override
+      public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+        countDisconnectedFromDeviceCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
+
+
+    assertThat(countDeviceDiscoveredCalled.get(), is(1));
+    assertThat(countDisconnectedFromDeviceCalled.get(), is(0));
+
+    assertThat(discoveredDeviceTypeHolder.isObjectSet(), is(true));
+    assertThat(discoveredDeviceTypeHolder.getObject(), is(DiscoveredDeviceType.KNOWN_IGNORED_DEVICE));
+
+    assertThat(discoveredDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(discoveredDeviceHolder.getObject());
+  }
+
+
   protected void assertDiscoveredDeviceHasCorrectlyBeenSet(DiscoveredDevice discoveredDevice) {
     assertThat(discoveredDevice.getAddress(), is(REMOTE_DEVICE_ADDRESS));
 
