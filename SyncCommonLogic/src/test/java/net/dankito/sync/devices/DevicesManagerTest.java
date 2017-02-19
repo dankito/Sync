@@ -422,6 +422,94 @@ public class DevicesManagerTest {
     assertDiscoveredDeviceHasCorrectlyBeenSet(disconnectedDeviceHolder.getObject());
   }
 
+  @Test
+  public void disconnectedFromKnownSynchronizedDevice_ListenerGetsCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addSynchronizedDevice(remoteDevice);
+
+    underTest.start();
+
+    String deviceInfoKey = underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS));
+    devicesDiscovererListener.deviceFound(deviceInfoKey, REMOTE_DEVICE_ADDRESS);
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getKnownSynchronizedDiscoveredDevices().size(), is(1));
+
+    final ObjectHolder<DiscoveredDevice> disconnectedDeviceHolder = new ObjectHolder<>();
+    final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
+    final AtomicInteger countDisconnectedFromDeviceCalled = new AtomicInteger(0);
+
+    underTest.addDiscoveredDevicesListener(new DiscoveredDevicesListener() {
+      @Override
+      public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+        countDeviceDiscoveredCalled.incrementAndGet();
+      }
+
+      @Override
+      public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+        disconnectedDeviceHolder.setObject(disconnectedDevice);
+        countDisconnectedFromDeviceCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceDisconnected(deviceInfoKey);
+
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getKnownSynchronizedDiscoveredDevices().size(), is(0));
+
+    assertThat(countDeviceDiscoveredCalled.get(), is(0));
+    assertThat(countDisconnectedFromDeviceCalled.get(), is(1));
+
+    assertThat(disconnectedDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(disconnectedDeviceHolder.getObject());
+  }
+
+  @Test
+  public void disconnectedFromKnownIgnoredDevice_ListenerGetsCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addIgnoredDevice(remoteDevice);
+
+    underTest.start();
+
+    String deviceInfoKey = underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS));
+    devicesDiscovererListener.deviceFound(deviceInfoKey, REMOTE_DEVICE_ADDRESS);
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getKnownIgnoredDiscoveredDevices().size(), is(1));
+
+    final ObjectHolder<DiscoveredDevice> disconnectedDeviceHolder = new ObjectHolder<>();
+    final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
+    final AtomicInteger countDisconnectedFromDeviceCalled = new AtomicInteger(0);
+
+    underTest.addDiscoveredDevicesListener(new DiscoveredDevicesListener() {
+      @Override
+      public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+        countDeviceDiscoveredCalled.incrementAndGet();
+      }
+
+      @Override
+      public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+        disconnectedDeviceHolder.setObject(disconnectedDevice);
+        countDisconnectedFromDeviceCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceDisconnected(deviceInfoKey);
+
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getKnownIgnoredDiscoveredDevices().size(), is(0));
+
+    assertThat(countDeviceDiscoveredCalled.get(), is(0));
+    assertThat(countDisconnectedFromDeviceCalled.get(), is(1));
+
+    assertThat(disconnectedDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(disconnectedDeviceHolder.getObject());
+  }
+
 
   @Test
   public void requestStartSynchronizationReturnsAllowed_KnownSynchronizedDevicesListenerGetsCalled() {
