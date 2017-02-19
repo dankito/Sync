@@ -1,30 +1,63 @@
 package net.dankito.sync.devices;
 
 
+import net.dankito.devicediscovery.DevicesDiscovererConfig;
+import net.dankito.devicediscovery.DevicesDiscovererListener;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.OsType;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.communication.IClientCommunicator;
+import net.dankito.sync.communication.callback.SendRequestCallback;
+import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DevicesManagerTest {
 
   protected static final int MESSAGES_RECEIVER_PORT = 54321;
+
+  protected static final String REMOTE_DEVICE_ID = "1";
+
+  protected static final String REMOTE_DEVICE_UNIQUE_DEVICE_ID = "1";
+
+  protected static final String REMOTE_DEVICE_NAME = "remote";
+
+  protected static final String REMOTE_DEVICE_OS_NAME = "testOs";
+
+  protected static final String REMOTE_DEVICE_OS_VERSION = "0.0.1-alpha";
+
+  protected static final OsType REMOTE_DEVICE_OS_TYPE = OsType.DESKTOP;
+
+  protected static final String REMOTE_DEVICE_DESCRIPTION = "desc";
+
+  protected static final String REMOTE_DEVICE_ADDRESS = "192.168.254.254";
 
 
   protected DevicesManager underTest;
@@ -39,6 +72,10 @@ public class DevicesManagerTest {
 
   protected LocalConfig localConfig;
 
+  protected Device remoteDevice;
+
+  protected DevicesDiscovererListener devicesDiscovererListener;
+
 
   @Before
   public void setUp() throws Exception {
@@ -48,14 +85,32 @@ public class DevicesManagerTest {
     this.localConfig = new LocalConfig(localDevice);
     entityManager.persistEntity(localConfig);
 
+    remoteDevice = new Device(REMOTE_DEVICE_ID, REMOTE_DEVICE_UNIQUE_DEVICE_ID, REMOTE_DEVICE_NAME, REMOTE_DEVICE_OS_TYPE, REMOTE_DEVICE_OS_NAME, REMOTE_DEVICE_OS_VERSION, REMOTE_DEVICE_DESCRIPTION);
+
     final INetworkSettings networkSettings = new NetworkSettings(localConfig);
 
-    dataManager = Mockito.mock(IDataManager.class);
-    Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
+    dataManager = mock(IDataManager.class);
+    when(dataManager.getLocalConfig()).thenReturn(localConfig);
 
-    clientCommunicator = Mockito.mock(IClientCommunicator.class);
+    clientCommunicator = mock(IClientCommunicator.class);
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocation) throws Throwable {
+        SendRequestCallback callback = (SendRequestCallback)invocation.getArguments()[1];
+        callback.done(new Response(DeviceInfo.fromDevice(remoteDevice)));
+        return null;
+      }
+    }).when(clientCommunicator).getDeviceInfo(any(SocketAddress.class), any(SendRequestCallback.class));
 
-    devicesDiscoverer = Mockito.mock(IDevicesDiscoverer.class);
+    devicesDiscoverer = mock(IDevicesDiscoverer.class);
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocation) throws Throwable {
+        DevicesDiscovererConfig config = (DevicesDiscovererConfig)invocation.getArguments()[0];
+        devicesDiscovererListener = config.getListener();
+        return null;
+      }
+    }).when(devicesDiscoverer).startAsync(any(DevicesDiscovererConfig.class));
 
     underTest = new DevicesManager(devicesDiscoverer, clientCommunicator, dataManager, networkSettings, entityManager);
   }
@@ -179,6 +234,58 @@ public class DevicesManagerTest {
 
     Assert.assertEquals(1, localConfig.getLocalDevice().getSourceSyncConfigurations().size());
     Assert.assertEquals(1, discoveredDevice.getDevice().getDestinationSyncConfigurations().size());
+  }
+
+
+  @Test
+  public void devicesDiscovererFindsUnknownDevice_ListenerGetsCalled() {
+    underTest.start();
+
+    final ObjectHolder<DiscoveredDevice> discoveredDeviceHolder = new ObjectHolder<>();
+    final ObjectHolder<DiscoveredDeviceType> discoveredDeviceTypeHolder = new ObjectHolder<>();
+    final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
+    final AtomicInteger countDisconnectedFromDeviceCalled = new AtomicInteger(0);
+
+    underTest.addDiscoveredDevicesListener(new DiscoveredDevicesListener() {
+      @Override
+      public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+        discoveredDeviceHolder.setObject(connectedDevice);
+        discoveredDeviceTypeHolder.setObject(type);
+        countDeviceDiscoveredCalled.incrementAndGet();
+      }
+
+      @Override
+      public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+      countDisconnectedFromDeviceCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
+
+
+    assertThat(countDeviceDiscoveredCalled.get(), is(1));
+    assertThat(countDisconnectedFromDeviceCalled.get(), is(0));
+
+    assertThat(discoveredDeviceTypeHolder.isObjectSet(), is(true));
+    assertThat(discoveredDeviceTypeHolder.getObject(), is(DiscoveredDeviceType.UNKNOWN_DEVICE));
+
+    assertThat(discoveredDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(discoveredDeviceHolder.getObject());
+  }
+
+
+  protected void assertDiscoveredDeviceHasCorrectlyBeenSet(DiscoveredDevice discoveredDevice) {
+    assertThat(discoveredDevice.getAddress(), is(REMOTE_DEVICE_ADDRESS));
+
+    Device device = discoveredDevice.getDevice();
+
+    assertThat(device.getUniqueDeviceId(), is(REMOTE_DEVICE_UNIQUE_DEVICE_ID));
+    assertThat(device.getName(), is(REMOTE_DEVICE_NAME));
+    assertThat(device.getOsName(), is(REMOTE_DEVICE_OS_NAME));
+    assertThat(device.getOsVersion(), is(REMOTE_DEVICE_OS_VERSION));
+    assertThat(device.getOsType(), is(REMOTE_DEVICE_OS_TYPE));
+    assertThat(device.getDescription(), is(REMOTE_DEVICE_DESCRIPTION));
   }
 
 
