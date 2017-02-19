@@ -1,7 +1,7 @@
 package net.dankito.sync.devices;
 
 
-import net.dankito.devicediscovery.UdpDevicesDiscoverer;
+import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.sync.Device;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
@@ -11,8 +11,6 @@ import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
-import net.dankito.utils.IThreadPool;
-import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
 
 import org.junit.After;
@@ -37,6 +35,8 @@ public class DevicesManagerTest {
 
   protected IClientCommunicator clientCommunicator;
 
+  protected IDevicesDiscoverer devicesDiscoverer;
+
   protected LocalConfig localConfig;
 
 
@@ -53,11 +53,11 @@ public class DevicesManagerTest {
     dataManager = Mockito.mock(IDataManager.class);
     Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
 
-    IThreadPool threadPool = new ThreadPool();
-
     clientCommunicator = Mockito.mock(IClientCommunicator.class);
 
-    underTest = new DevicesManager(new UdpDevicesDiscoverer(threadPool), clientCommunicator, dataManager, networkSettings, entityManager);
+    devicesDiscoverer = Mockito.mock(IDevicesDiscoverer.class);
+
+    underTest = new DevicesManager(devicesDiscoverer, clientCommunicator, dataManager, networkSettings, entityManager);
   }
 
   @After
