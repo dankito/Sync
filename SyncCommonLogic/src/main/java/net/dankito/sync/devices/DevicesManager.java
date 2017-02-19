@@ -288,15 +288,6 @@ public class DevicesManager implements IDevicesManager {
     return device.getDevice().getUniqueDeviceId() + DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR + device.getMessagesPort();
   }
 
-  protected String getDeviceUniqueIdFromDeviceInfoKey(String deviceInfoKey) {
-    int portStartIndex = deviceInfoKey.lastIndexOf(DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR);
-    if(portStartIndex > 0) {
-      return deviceInfoKey.substring(0, portStartIndex);
-    }
-
-    return null;
-  }
-
   protected int getMessagesPortFromDeviceInfoKey(String deviceInfoKey) {
     int portStartIndex = deviceInfoKey.lastIndexOf(DEVICE_ID_AND_MESSAGES_PORT_SEPARATOR);
     if(portStartIndex > 0) {
