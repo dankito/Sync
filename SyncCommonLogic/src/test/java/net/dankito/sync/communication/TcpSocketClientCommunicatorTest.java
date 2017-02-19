@@ -61,7 +61,7 @@ public class TcpSocketClientCommunicatorTest {
 
     INetworkSettings networkSettings = new NetworkSettings(new LocalConfig(remoteDevice));
 
-    underTest = new TcpSocketClientCommunicator(networkSettings, null, new ThreadPool());
+    underTest = new TcpSocketClientCommunicator(networkSettings, null, null, new ThreadPool());
 
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 

@@ -29,6 +29,7 @@ import net.dankito.sync.communication.message.RespondToSynchronizationPermitting
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.services.IBase64Service;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -48,13 +49,13 @@ public class TcpSocketClientCommunicator implements IClientCommunicator {
   protected ChallengeHandler challengeHandler;
 
 
-  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
-    setupDependencies(networkSettings, permissionHandler, threadPool);
+  public TcpSocketClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IBase64Service base64Service, IThreadPool threadPool) {
+    setupDependencies(networkSettings, permissionHandler, base64Service, threadPool);
   }
 
-  protected void setupDependencies(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
+  protected void setupDependencies(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IBase64Service base64Service, IThreadPool threadPool) {
     this.networkSettings = networkSettings;
-    this.challengeHandler = new ChallengeHandler();
+    this.challengeHandler = new ChallengeHandler(base64Service);
 
     MessageHandlerConfig messageHandlerConfig = new MessageHandlerConfig(networkSettings, challengeHandler, permissionHandler);
 
