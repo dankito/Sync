@@ -2,6 +2,7 @@ package net.dankito.sync.di;
 
 import android.content.Context;
 
+import net.dankito.android.util.services.AndroidBase64Service;
 import net.dankito.devicediscovery.IDevicesDiscoverer;
 import net.dankito.devicediscovery.UdpDevicesDiscovererAndroid;
 import net.dankito.sync.AndroidPlatformConfigurationReader;
@@ -37,6 +38,7 @@ import net.dankito.sync.synchronization.modules.SyncModuleConfigurationManager;
 import net.dankito.sync.util.AndroidIsSynchronizationPermittedHandler;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.ThreadPool;
+import net.dankito.utils.services.IBase64Service;
 import net.dankito.utils.services.IFileStorageService;
 import net.dankito.utils.services.JavaFileStorageService;
 
@@ -57,6 +59,8 @@ public class AndroidServiceDiContainer {
   protected IThreadPool threadPool = null;
 
   protected IPlatformConfigurationReader platformConfigurationReader = null;
+
+  protected IBase64Service base64Service = null;
 
   protected IDataManager dataManager = null;
 
@@ -133,6 +137,16 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
+  public IBase64Service provideBase64Service() {
+    if(base64Service == null) {
+      base64Service = new AndroidBase64Service();
+    }
+
+    return base64Service;
+  }
+
+  @Provides
+  @Singleton
   public IDataManager provideDataManager(IEntityManager entityManager, IPlatformConfigurationReader platformConfigurationReader) {
     if(dataManager == null) {
       dataManager = new DataManager(entityManager, platformConfigurationReader);
@@ -170,9 +184,9 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
-  public IClientCommunicator provideClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IThreadPool threadPool) {
+  public IClientCommunicator provideClientCommunicator(INetworkSettings networkSettings, IsSynchronizationPermittedHandler permissionHandler, IBase64Service base64Service, IThreadPool threadPool) {
     if(clientCommunicator == null) {
-      clientCommunicator = new TcpSocketClientCommunicator(networkSettings, permissionHandler, threadPool);
+      clientCommunicator = new TcpSocketClientCommunicator(networkSettings, permissionHandler, base64Service, threadPool);
     }
 
     return clientCommunicator;
