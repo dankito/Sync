@@ -586,6 +586,51 @@ public class DevicesManagerTest {
   }
 
 
+  @Test
+  public void disconnectedFromSynchronizedDevice_KnownSynchronizedDevicesListenerGetsCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addSynchronizedDevice(remoteDevice);
+
+    underTest.start();
+
+    String deviceInfoKey = underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS));
+    devicesDiscovererListener.deviceFound(deviceInfoKey, REMOTE_DEVICE_ADDRESS);
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getKnownSynchronizedDiscoveredDevices().size(), is(1));
+
+    final ObjectHolder<DiscoveredDevice> disconnectedSynchronizedDeviceHolder = new ObjectHolder<>();
+    final AtomicInteger countKnownSynchronizedDeviceConnectedCalled = new AtomicInteger(0);
+    final AtomicInteger countKnownSynchronizedDeviceDisconnectedCalled = new AtomicInteger(0);
+
+    underTest.addKnownSynchronizedDevicesListener(new KnownSynchronizedDevicesListener() {
+      @Override
+      public void knownSynchronizedDeviceConnected(DiscoveredDevice connectedDevice) {
+        countKnownSynchronizedDeviceConnectedCalled.incrementAndGet();
+      }
+
+      @Override
+      public void knownSynchronizedDeviceDisconnected(DiscoveredDevice disconnectedDevice) {
+        disconnectedSynchronizedDeviceHolder.setObject(disconnectedDevice);
+        countKnownSynchronizedDeviceDisconnectedCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceDisconnected(deviceInfoKey);
+
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getKnownSynchronizedDiscoveredDevices().size(), is(0));
+
+    assertThat(countKnownSynchronizedDeviceConnectedCalled.get(), is(0));
+    assertThat(countKnownSynchronizedDeviceDisconnectedCalled.get(), is(1));
+
+    assertThat(disconnectedSynchronizedDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(disconnectedSynchronizedDeviceHolder.getObject());
+  }
+
+
   protected void assertDiscoveredDeviceHasCorrectlyBeenSet(DiscoveredDevice discoveredDevice) {
     assertThat(discoveredDevice.getAddress(), is(REMOTE_DEVICE_ADDRESS));
 
