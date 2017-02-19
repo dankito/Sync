@@ -44,6 +44,8 @@ public class EntitiesSyncQueue {
     this.largerSyncJobItemsQueue = new AsyncProducerConsumerQueue<>(1, largerSyncJobItemsConsumerListener);
   }
 
+  int countPushedSyncJobItems = 0;
+
   public void addEntityToPushToRemote(SyncEntity entityToPush, DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration) {
     EntitiesSyncQueueItem queueItem = new EntitiesSyncQueueItem(entityToPush, remoteDevice, syncModuleConfiguration);
 
@@ -59,7 +61,7 @@ public class EntitiesSyncQueue {
   protected SyncJobItem pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
     SyncEntity entity = syncQueueItem.getEntityToPush();
     DiscoveredDevice remoteDevice = syncQueueItem.getRemoteDevice();
-    log.info("Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
+    log.info("[" + countPushedSyncJobItems++ + "] Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
 
     SyncJobItem jobItem = new SyncJobItem(syncQueueItem.getSyncModuleConfiguration(), entity, localDevice, remoteDevice.getDevice());
 
@@ -74,16 +76,6 @@ public class EntitiesSyncQueue {
     return jobItem;
   }
 
-  protected void pushLargerSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
-    SyncJobItem jobItem = pushSyncEntityToRemote(syncQueueItem);
-
-    waitSomeTimeBeforePushingNextLargeJobToQueue(jobItem);
-  }
-
-  protected void waitSomeTimeBeforePushingNextLargeJobToQueue(SyncJobItem jobItem) {
-    try { Thread.sleep(jobItem.getDataSize() / WAIT_TIME_DIVISOR_BEFORE_PUSH_NEXT_FILE); } catch (Exception ignored) { }
-  }
-
 
   protected ConsumerListener<EntitiesSyncQueueItem> defaultSyncJobItemsConsumerListener = new ConsumerListener<EntitiesSyncQueueItem>() {
     @Override
@@ -95,7 +87,7 @@ public class EntitiesSyncQueue {
   protected ConsumerListener<EntitiesSyncQueueItem> largerSyncJobItemsConsumerListener = new ConsumerListener<EntitiesSyncQueueItem>() {
     @Override
     public void consumeItem(EntitiesSyncQueueItem item) {
-      pushLargerSyncEntityToRemote(item);
+      pushSyncEntityToRemote(item);
     }
   };
 
