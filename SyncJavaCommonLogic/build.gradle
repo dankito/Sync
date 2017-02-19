@@ -9,5 +9,7 @@ dependencies {
     compile project(':CouchbaseLiteSyncManager')
     compile project(':CouchbaseLiteEntityManagerJava')
 
-    compile 'org.springframework.boot:spring-boot-starter:1.4.3.RELEASE'
+    compile ('org.springframework.boot:spring-boot-starter:1.4.3.RELEASE', {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    })
 }
