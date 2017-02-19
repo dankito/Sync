@@ -245,6 +245,9 @@ public class DevicesManagerTest {
 
   @Test
   public void devicesDiscovererFindsUnknownDevice_ListenerGetsCalled() {
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getUnknownDiscoveredDevices().size(), is(0));
+
     underTest.start();
 
     final ObjectHolder<DiscoveredDevice> discoveredDeviceHolder = new ObjectHolder<>();
@@ -270,6 +273,9 @@ public class DevicesManagerTest {
     devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
 
 
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getUnknownDiscoveredDevices().size(), is(1));
+
     assertThat(countDeviceDiscoveredCalled.get(), is(1));
     assertThat(countDisconnectedFromDeviceCalled.get(), is(0));
 
@@ -283,6 +289,9 @@ public class DevicesManagerTest {
 
   @Test
   public void devicesDiscovererFindsKnownSynchronizedDevice_ListenerGetsCalled() {
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getKnownSynchronizedDiscoveredDevices().size(), is(0));
+
     entityManager.persistEntity(remoteDevice);
     localConfig.addSynchronizedDevice(remoteDevice);
 
@@ -311,6 +320,9 @@ public class DevicesManagerTest {
     devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
 
 
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getKnownSynchronizedDiscoveredDevices().size(), is(1));
+
     assertThat(countDeviceDiscoveredCalled.get(), is(1));
     assertThat(countDisconnectedFromDeviceCalled.get(), is(0));
 
@@ -324,6 +336,9 @@ public class DevicesManagerTest {
 
   @Test
   public void devicesDiscovererFindsKnownIgnoredDevice_ListenerGetsCalled() {
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getKnownIgnoredDiscoveredDevices().size(), is(0));
+
     entityManager.persistEntity(remoteDevice);
     localConfig.addIgnoredDevice(remoteDevice);
 
@@ -352,6 +367,9 @@ public class DevicesManagerTest {
     devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
 
 
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getKnownIgnoredDiscoveredDevices().size(), is(1));
+
     assertThat(countDeviceDiscoveredCalled.get(), is(1));
     assertThat(countDisconnectedFromDeviceCalled.get(), is(0));
 
@@ -364,11 +382,14 @@ public class DevicesManagerTest {
 
 
   @Test
-  public void disconnectedFromDevice_ListenerGetsCalled() {
+  public void disconnectedFromUnknownDevice_ListenerGetsCalled() {
     underTest.start();
 
     String deviceInfoKey = underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS));
     devicesDiscovererListener.deviceFound(deviceInfoKey, REMOTE_DEVICE_ADDRESS);
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(1));
+    assertThat(underTest.getUnknownDiscoveredDevices().size(), is(1));
 
     final ObjectHolder<DiscoveredDevice> disconnectedDeviceHolder = new ObjectHolder<>();
     final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
@@ -390,6 +411,9 @@ public class DevicesManagerTest {
 
     devicesDiscovererListener.deviceDisconnected(deviceInfoKey);
 
+
+    assertThat(underTest.getAllDiscoveredDevices().size(), is(0));
+    assertThat(underTest.getUnknownDiscoveredDevices().size(), is(0));
 
     assertThat(countDeviceDiscoveredCalled.get(), is(0));
     assertThat(countDisconnectedFromDeviceCalled.get(), is(1));
