@@ -12,6 +12,8 @@ import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.communication.IClientCommunicator;
 import net.dankito.sync.communication.callback.SendRequestCallback;
 import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.RequestStartSynchronizationResponseBody;
+import net.dankito.sync.communication.message.RequestStartSynchronizationResult;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
@@ -58,6 +60,10 @@ public class DevicesManagerTest {
   protected static final String REMOTE_DEVICE_DESCRIPTION = "desc";
 
   protected static final String REMOTE_DEVICE_ADDRESS = "192.168.254.254";
+
+  protected static final int REMOTE_DEVICE_MESSAGES_PORT = 47;
+
+  protected static final int REMOTE_DEVICE_SYNCHRONIZATION_PORT = 48;
 
 
   protected DevicesManager underTest;
@@ -357,6 +363,81 @@ public class DevicesManagerTest {
   }
 
 
+  @Test
+  public void requestStartSynchronizationReturnsAllowed_KnownSynchronizedDevicesListenerGetsCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addSynchronizedDevice(remoteDevice);
+
+    mockRequestStartSynchronization(RequestStartSynchronizationResult.ALLOWED, REMOTE_DEVICE_SYNCHRONIZATION_PORT);
+
+    underTest.start();
+
+    final ObjectHolder<DiscoveredDevice> synchronizedDeviceHolder = new ObjectHolder<>();
+    final AtomicInteger countKnownSynchronizedDeviceConnectedCalled = new AtomicInteger(0);
+    final AtomicInteger countKnownSynchronizedDeviceDisconnectedCalled = new AtomicInteger(0);
+
+    underTest.addKnownSynchronizedDevicesListener(new KnownSynchronizedDevicesListener() {
+      @Override
+      public void knownSynchronizedDeviceConnected(DiscoveredDevice connectedDevice) {
+        synchronizedDeviceHolder.setObject(connectedDevice);
+        countKnownSynchronizedDeviceConnectedCalled.incrementAndGet();
+      }
+
+      @Override
+      public void knownSynchronizedDeviceDisconnected(DiscoveredDevice disconnectedDevice) {
+        countKnownSynchronizedDeviceDisconnectedCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
+
+
+    assertThat(countKnownSynchronizedDeviceConnectedCalled.get(), is(1));
+    assertThat(countKnownSynchronizedDeviceDisconnectedCalled.get(), is(0));
+
+    assertThat(synchronizedDeviceHolder.isObjectSet(), is(true));
+    assertThat(synchronizedDeviceHolder.getObject().getSynchronizationPort(), is(REMOTE_DEVICE_SYNCHRONIZATION_PORT));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(synchronizedDeviceHolder.getObject());
+  }
+
+  @Test
+  public void requestStartSynchronizationReturnsDenied_KnownSynchronizedDevicesListenerDoesNotGetCalled() {
+    entityManager.persistEntity(remoteDevice);
+    localConfig.addSynchronizedDevice(remoteDevice);
+
+    mockRequestStartSynchronization(RequestStartSynchronizationResult.DENIED);
+
+    underTest.start();
+
+    final ObjectHolder<DiscoveredDevice> synchronizedDeviceHolder = new ObjectHolder<>();
+    final AtomicInteger countKnownSynchronizedDeviceConnectedCalled = new AtomicInteger(0);
+    final AtomicInteger countKnownSynchronizedDeviceDisconnectedCalled = new AtomicInteger(0);
+
+    underTest.addKnownSynchronizedDevicesListener(new KnownSynchronizedDevicesListener() {
+      @Override
+      public void knownSynchronizedDeviceConnected(DiscoveredDevice connectedDevice) {
+        synchronizedDeviceHolder.setObject(connectedDevice);
+        countKnownSynchronizedDeviceConnectedCalled.incrementAndGet();
+      }
+
+      @Override
+      public void knownSynchronizedDeviceDisconnected(DiscoveredDevice disconnectedDevice) {
+        countKnownSynchronizedDeviceDisconnectedCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceFound(underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS)), REMOTE_DEVICE_ADDRESS);
+
+
+    assertThat(countKnownSynchronizedDeviceConnectedCalled.get(), is(0));
+    assertThat(countKnownSynchronizedDeviceDisconnectedCalled.get(), is(0));
+
+    assertThat(synchronizedDeviceHolder.isObjectSet(), is(false));
+  }
+
+
   protected void assertDiscoveredDeviceHasCorrectlyBeenSet(DiscoveredDevice discoveredDevice) {
     assertThat(discoveredDevice.getAddress(), is(REMOTE_DEVICE_ADDRESS));
 
@@ -399,6 +480,21 @@ public class DevicesManagerTest {
     underTest.discoveredDevices.put(underTest.getDeviceInfoKey(discoveredDevice), discoveredDevice);
 
     return discoveredDevice;
+  }
+
+  protected void mockRequestStartSynchronization(final RequestStartSynchronizationResult result) {
+    mockRequestStartSynchronization(result, -1);
+  }
+
+  protected void mockRequestStartSynchronization(final RequestStartSynchronizationResult result, final int synchronizationPort) {
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocation) throws Throwable {
+        SendRequestCallback callback = (SendRequestCallback)invocation.getArguments()[1];
+        callback.done(new Response(new RequestStartSynchronizationResponseBody(result, synchronizationPort)));
+        return null;
+      }
+    }).when(clientCommunicator).requestStartSynchronization(any(DiscoveredDevice.class), any(SendRequestCallback.class));
   }
 
 }
