@@ -364,6 +364,42 @@ public class DevicesManagerTest {
 
 
   @Test
+  public void disconnectedFromDevice_ListenerGetsCalled() {
+    underTest.start();
+
+    String deviceInfoKey = underTest.getDeviceInfoKey(new DiscoveredDevice(remoteDevice, REMOTE_DEVICE_ADDRESS));
+    devicesDiscovererListener.deviceFound(deviceInfoKey, REMOTE_DEVICE_ADDRESS);
+
+    final ObjectHolder<DiscoveredDevice> disconnectedDeviceHolder = new ObjectHolder<>();
+    final AtomicInteger countDeviceDiscoveredCalled = new AtomicInteger(0);
+    final AtomicInteger countDisconnectedFromDeviceCalled = new AtomicInteger(0);
+
+    underTest.addDiscoveredDevicesListener(new DiscoveredDevicesListener() {
+      @Override
+      public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+        countDeviceDiscoveredCalled.incrementAndGet();
+      }
+
+      @Override
+      public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+        disconnectedDeviceHolder.setObject(disconnectedDevice);
+        countDisconnectedFromDeviceCalled.incrementAndGet();
+      }
+    });
+
+
+    devicesDiscovererListener.deviceDisconnected(deviceInfoKey);
+
+
+    assertThat(countDeviceDiscoveredCalled.get(), is(0));
+    assertThat(countDisconnectedFromDeviceCalled.get(), is(1));
+
+    assertThat(disconnectedDeviceHolder.isObjectSet(), is(true));
+    assertDiscoveredDeviceHasCorrectlyBeenSet(disconnectedDeviceHolder.getObject());
+  }
+
+
+  @Test
   public void requestStartSynchronizationReturnsAllowed_KnownSynchronizedDevicesListenerGetsCalled() {
     entityManager.persistEntity(remoteDevice);
     localConfig.addSynchronizedDevice(remoteDevice);
