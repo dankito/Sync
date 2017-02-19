@@ -7,8 +7,6 @@ import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.communication.IClientCommunicator;
-import net.dankito.sync.communication.TcpSocketClientCommunicator;
-import net.dankito.sync.communication.callback.ClientCommunicatorListener;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
@@ -25,8 +23,6 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class DevicesManagerTest {
 
@@ -59,22 +55,9 @@ public class DevicesManagerTest {
 
     IThreadPool threadPool = new ThreadPool();
 
-    clientCommunicator = new TcpSocketClientCommunicator(networkSettings, null, null, threadPool);
+    clientCommunicator = Mockito.mock(IClientCommunicator.class);
 
     underTest = new DevicesManager(new UdpDevicesDiscoverer(threadPool), clientCommunicator, dataManager, networkSettings, entityManager);
-
-
-    final CountDownLatch countDownLatch = new CountDownLatch(1);
-
-    clientCommunicator.start(MESSAGES_RECEIVER_PORT, new ClientCommunicatorListener() {
-      @Override
-      public void started(boolean couldStartMessagesReceiver, int messagesReceiverPort, Exception startException) {
-        networkSettings.setMessagePort(messagesReceiverPort);
-        countDownLatch.countDown();
-      }
-    });
-
-    try { countDownLatch.await(1, TimeUnit.SECONDS); } catch(Exception ignored) { }
   }
 
   @After
