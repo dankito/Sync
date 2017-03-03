@@ -39,6 +39,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 public class SyncConfigurationManagerBaseTest {
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID = "01";
@@ -284,6 +287,61 @@ public class SyncConfigurationManagerBaseTest {
 
   @Test
   public void syncUpdatedEntities() {
+    List<SyncEntity> testEntities = new ArrayList<>();
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
+    testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntities.add(testEntity01);
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
+    testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntities.add(testEntity02);
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+
+
+    testEntities.clear();
+
+    ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
+    updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    updatedTestEntity01.setLastModifiedOnDevice(new Date());
+    testEntities.add(updatedTestEntity01);
+
+    ContactSyncEntity updatedTestEntity02 = new ContactSyncEntity();
+    updatedTestEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    updatedTestEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
+    updatedTestEntity02.setLastModifiedOnDevice(new Date());
+    testEntities.add(updatedTestEntity02);
+
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+
+    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+    boolean entity01Updated = false, entity02Updated = false;
+
+    for(ContactSyncEntity retrievedContact : contacts) {
+      if(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME.equals(retrievedContact.getDisplayName())) {
+        entity01Updated = true;
+      }
+      else {
+        entity02Updated = true;
+      }
+    }
+
+    assertThat(entity01Updated, is(true));
+    assertThat(entity02Updated, is(true));
+  }
+
+  @Test
+  public void syncUpdatedEntitiesWithSyncEntityProperties() {
     List<SyncEntity> testEntities = new ArrayList<>();
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
