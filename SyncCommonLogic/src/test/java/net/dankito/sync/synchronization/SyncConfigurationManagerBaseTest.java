@@ -51,6 +51,7 @@ public class SyncConfigurationManagerBaseTest {
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01 = "0123456789";
   protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01 = "01234567890";
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01 = PhoneNumberType.MOBILE;
+  protected static final PhoneNumberType TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01 = PhoneNumberType.WORK;
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02 = "03456789129";
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02 = PhoneNumberType.HOME;
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03 = "0789123456";
@@ -59,6 +60,7 @@ public class SyncConfigurationManagerBaseTest {
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01 = "nelson@heroes.net";
   protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01 = "nelson@greatest-heroes.net";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01 = EmailType.WORK;
+  protected static final EmailType TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01 = EmailType.HOME;
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID = "02";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME = "Gandhi";
@@ -67,7 +69,6 @@ public class SyncConfigurationManagerBaseTest {
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01 = PhoneNumberType.WORK;
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_01 = "mahatma@heroes.net";
-  protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_01 = "mahatma@greatest-heroes.net";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_01 = EmailType.WORK;
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02 = "private@gandhi.net";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02 = EmailType.HOME;
@@ -507,14 +508,16 @@ public class SyncConfigurationManagerBaseTest {
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     testEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+    testEntity01.addEmailAddress(createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
     testEntities.add(testEntity01);
 
     mockSynchronizeEntitiesWithDevice(testEntities);
 
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
+    Assert.assertEquals(1, entityManager.getAllEntitiesOfType(EmailSyncEntity.class).size());
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+    Assert.assertEquals(3, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     testEntities.clear();
@@ -522,7 +525,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
     updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+    updatedTestEntity01.addEmailAddress(createTestEmail("1.1", TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
     testEntities.add(updatedTestEntity01);
 
 
@@ -531,12 +535,17 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
+    Assert.assertEquals(1, entityManager.getAllEntitiesOfType(EmailSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+    Assert.assertEquals(3, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
     ContactSyncEntity updatedContact = entityManager.getAllEntitiesOfType(ContactSyncEntity.class).get(0);
 
-    Assert.assertEquals(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, updatedContact.getPhoneNumbers().get(0).getNumber());
+    assertThat(updatedContact.getPhoneNumbers().get(0).getNumber(), is(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01));
+    assertThat(updatedContact.getPhoneNumbers().get(0).getType(), is(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+
+    assertThat(updatedContact.getEmailAddresses().get(0).getAddress(), is(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01));
+    assertThat(updatedContact.getEmailAddresses().get(0).getType(), is(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
   }
 
   @Test
