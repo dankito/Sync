@@ -25,6 +25,7 @@ import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.util.SyncConfigurationManagerStub;
 import net.dankito.sync.synchronization.util.SyncModuleMock;
+import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 import net.dankito.utils.services.JavaFileStorageService;
 
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -386,32 +386,37 @@ public class SyncConfigurationManagerBaseTest {
     Assert.assertEquals(5, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
     List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+    ObjectHolder<Boolean> firstPhoneNumberRetrieved = new ObjectHolder<>(false), secondPhoneNumberRetrieved = new ObjectHolder<>(false);
 
     for(ContactSyncEntity retrievedContact : contacts) {
       Assert.assertNotEquals(0, retrievedContact.getPhoneNumbers().size());
       PhoneNumberSyncEntity retrievedPhoneNumber = retrievedContact.getPhoneNumbers().get(0);
 
       if(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME.equals(retrievedContact.getDisplayName())) {
-        testUpdatedPhoneNumberOfFirstContact(retrievedPhoneNumber);
+        testUpdatedPhoneNumberOfFirstContact(retrievedPhoneNumber, firstPhoneNumberRetrieved, secondPhoneNumberRetrieved);
 
         PhoneNumberSyncEntity secondRetrievedPhoneNumber = retrievedContact.getPhoneNumbers().get(1);
-        testUpdatedPhoneNumberOfFirstContact(secondRetrievedPhoneNumber);
+        testUpdatedPhoneNumberOfFirstContact(secondRetrievedPhoneNumber, firstPhoneNumberRetrieved, secondPhoneNumberRetrieved);
       }
       else {
         Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01, retrievedPhoneNumber.getNumber());
         Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01, retrievedPhoneNumber.getType());
       }
     }
+
+    assertThat(firstPhoneNumberRetrieved.getObject(), is(true));
+    assertThat(secondPhoneNumberRetrieved.getObject(), is(true));
   }
 
-  protected void testUpdatedPhoneNumberOfFirstContact(PhoneNumberSyncEntity retrievedPhoneNumber) {
+  protected void testUpdatedPhoneNumberOfFirstContact(PhoneNumberSyncEntity retrievedPhoneNumber, ObjectHolder<Boolean> firstPhoneNumberRetrieved, ObjectHolder<Boolean> secondPhoneNumberRetrieved) {
     if(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02.equals(retrievedPhoneNumber.getNumber())) {
-      Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, retrievedPhoneNumber.getNumber());
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02, retrievedPhoneNumber.getType());
+      firstPhoneNumberRetrieved.setObject(true);
     }
     else {
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, retrievedPhoneNumber.getNumber());
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03, retrievedPhoneNumber.getType());
+      secondPhoneNumberRetrieved.setObject(true);
     }
   }
 
@@ -460,7 +465,7 @@ public class SyncConfigurationManagerBaseTest {
     Assert.assertEquals(5, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
     List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
-    AtomicBoolean firstEmailRetrieved = new AtomicBoolean(false), secondEmailRetrieved = new AtomicBoolean(false);
+    ObjectHolder<Boolean> firstEmailRetrieved = new ObjectHolder<>(false), secondEmailRetrieved = new ObjectHolder<>(false);
 
     for(ContactSyncEntity retrievedContact : contacts) {
       Assert.assertNotEquals(0, retrievedContact.getEmailAddresses().size());
@@ -478,19 +483,19 @@ public class SyncConfigurationManagerBaseTest {
       }
     }
 
-    assertThat(firstEmailRetrieved.get(), is(true));
-    assertThat(secondEmailRetrieved.get(), is(true));
+    assertThat(firstEmailRetrieved.getObject(), is(true));
+    assertThat(secondEmailRetrieved.getObject(), is(true));
   }
 
-  protected void testUpdatedEmailOfSecondContact(EmailSyncEntity retrievedEmail, AtomicBoolean firstEmailRetrieved, AtomicBoolean secondEmailRetrieved) {
+  protected void testUpdatedEmailOfSecondContact(EmailSyncEntity retrievedEmail, ObjectHolder<Boolean> firstEmailRetrieved, ObjectHolder<Boolean> secondEmailRetrieved) {
     if(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02.equals(retrievedEmail.getAddress())) {
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02, retrievedEmail.getType());
-      firstEmailRetrieved.set(true);
+      firstEmailRetrieved.setObject(true);
     }
     else {
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, retrievedEmail.getAddress());
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03, retrievedEmail.getType());
-      secondEmailRetrieved.set(true);
+      secondEmailRetrieved.setObject(true);
     }
   }
 
