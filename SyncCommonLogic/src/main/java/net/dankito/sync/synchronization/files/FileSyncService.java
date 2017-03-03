@@ -187,6 +187,8 @@ public class FileSyncService {
       totalRead += read;
     }
 
+    try { outputStream.flush(); } catch(Exception ignored) { }
+
     long endTime = System.currentTimeMillis();
     log.info(totalRead + " of " + jobItem.getDataSize() + " bytes read from " + clientSocket.getInetAddress() + " in " + (endTime - startTime) + " ms.");
 
