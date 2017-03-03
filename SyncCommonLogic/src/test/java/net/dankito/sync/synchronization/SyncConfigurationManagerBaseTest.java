@@ -134,6 +134,33 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    testEntities.add(testEntity01);
+
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
+    testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
+    testEntities.add(testEntity02);
+
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+  }
+
+  @Test
+  public void syncNewEntitiesWithPhoneNumberSyncEntityProperties() {
+    List<SyncEntity> testEntities = new ArrayList<>();
+
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
+    testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     testEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
     testEntity01.addPhoneNumber(createTestPhoneNumber("1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
     testEntity01.addPhoneNumber(createTestPhoneNumber("1.3", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
@@ -169,6 +196,7 @@ public class SyncConfigurationManagerBaseTest {
       }
     }
   }
+
 
   @Test
   public void syncPersistedButUnsyncedEntities() {
