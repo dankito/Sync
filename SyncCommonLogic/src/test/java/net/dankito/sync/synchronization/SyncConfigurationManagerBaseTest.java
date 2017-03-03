@@ -615,15 +615,18 @@ public class SyncConfigurationManagerBaseTest {
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     PhoneNumberSyncEntity phoneNumberToDelete = createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    EmailSyncEntity emailToDelete = createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
     testEntity01.addPhoneNumber(phoneNumberToDelete);
+    testEntity01.addEmailAddress(emailToDelete);
     testEntities.add(testEntity01);
 
     mockSynchronizeEntitiesWithDevice(testEntities);
 
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
+    Assert.assertEquals(1, entityManager.getAllEntitiesOfType(EmailSyncEntity.class).size());
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+    Assert.assertEquals(3, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
 
     testEntities.clear();
@@ -641,16 +644,23 @@ public class SyncConfigurationManagerBaseTest {
 
     Assert.assertEquals(1, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(PhoneNumberSyncEntity.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(EmailSyncEntity.class).size());
     Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
     Assert.assertEquals(3, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
 
     ContactSyncEntity updatedContact = entityManager.getAllEntitiesOfType(ContactSyncEntity.class).get(0);
+
     List<PhoneNumberSyncEntity> updatedPhoneNumbers = new ArrayList<>(updatedContact.getPhoneNumbers());
 
     Assert.assertEquals(2, updatedPhoneNumbers.size());
     Assert.assertFalse(updatedPhoneNumbers.contains(phoneNumberToDelete));
     Assert.assertTrue(updatedPhoneNumbers.contains(updatedTestEntity01.getPhoneNumbers().get(0)));
     Assert.assertTrue(updatedPhoneNumbers.contains(updatedTestEntity01.getPhoneNumbers().get(1)));
+
+    List<EmailSyncEntity> updatedEmails = new ArrayList<>(updatedContact.getEmailAddresses());
+
+    Assert.assertEquals(0, updatedEmails.size());
+    Assert.assertFalse(updatedEmails.contains(emailToDelete));
   }
 
 
