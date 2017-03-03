@@ -62,11 +62,6 @@ public class FileSender {
       dataOutputStream.writeUTF(jobItem.getSyncJobItem().getId());
 
       sendFileToDestination(fileInputStream, socketOutputStream, jobItem);
-
-      dataOutputStream.close();
-      socketOutputStream.close();
-      fileInputStream.close();
-      socket.close();
     } catch (Exception e) {
       log.error("Could not send file " + jobItem.getFilePath() + " to " + jobItem.getDestinationAddress() + " on port " + jobItem.getDestinationPort(), e);
     }
