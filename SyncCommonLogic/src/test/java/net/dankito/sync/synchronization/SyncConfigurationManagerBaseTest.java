@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -341,7 +342,7 @@ public class SyncConfigurationManagerBaseTest {
   }
 
   @Test
-  public void syncUpdatedEntitiesWithSyncEntityProperties() {
+  public void syncUpdatedEntitiesWithPhoneNumbersSyncEntityProperties() {
     List<SyncEntity> testEntities = new ArrayList<>();
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
@@ -411,6 +412,85 @@ public class SyncConfigurationManagerBaseTest {
     else {
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, retrievedPhoneNumber.getNumber());
       Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03, retrievedPhoneNumber.getType());
+    }
+  }
+
+  @Test
+  public void syncUpdatedEntitiesWithEmailsSyncEntityProperties() {
+    List<SyncEntity> testEntities = new ArrayList<>();
+    ContactSyncEntity testEntity01 = new ContactSyncEntity();
+    testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    testEntities.add(testEntity01);
+    ContactSyncEntity testEntity02 = new ContactSyncEntity();
+    testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    testEntities.add(testEntity02);
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(EmailSyncEntity.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+
+
+    testEntities.clear();
+
+    ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
+    updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
+    updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    updatedTestEntity01.addEmailAddress(createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
+    updatedTestEntity01.setLastModifiedOnDevice(new Date());
+    testEntities.add(updatedTestEntity01);
+
+    ContactSyncEntity updatedTestEntity02 = new ContactSyncEntity();
+    updatedTestEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
+    updatedTestEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
+    updatedTestEntity02.addEmailAddress(createTestEmail("1.2", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02));
+    updatedTestEntity02.addEmailAddress(createTestEmail("1.3", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03));
+    updatedTestEntity02.setLastModifiedOnDevice(new Date());
+    testEntities.add(updatedTestEntity02);
+
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+
+
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
+    Assert.assertEquals(3, entityManager.getAllEntitiesOfType(EmailSyncEntity.class).size());
+    Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(5, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
+
+    List<ContactSyncEntity> contacts = entityManager.getAllEntitiesOfType(ContactSyncEntity.class);
+    AtomicBoolean firstEmailRetrieved = new AtomicBoolean(false), secondEmailRetrieved = new AtomicBoolean(false);
+
+    for(ContactSyncEntity retrievedContact : contacts) {
+      Assert.assertNotEquals(0, retrievedContact.getEmailAddresses().size());
+      EmailSyncEntity retrievedEmail = retrievedContact.getEmailAddresses().get(0);
+
+      if(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME.equals(retrievedContact.getDisplayName())) {
+        Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, retrievedEmail.getAddress());
+        Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01, retrievedEmail.getType());
+      }
+      else {
+        testUpdatedEmailOfSecondContact(retrievedEmail, firstEmailRetrieved, secondEmailRetrieved);
+
+        EmailSyncEntity secondRetrievedEmail = retrievedContact.getEmailAddresses().get(1);
+        testUpdatedEmailOfSecondContact(secondRetrievedEmail, firstEmailRetrieved, secondEmailRetrieved);
+      }
+    }
+
+    assertThat(firstEmailRetrieved.get(), is(true));
+    assertThat(secondEmailRetrieved.get(), is(true));
+  }
+
+  protected void testUpdatedEmailOfSecondContact(EmailSyncEntity retrievedEmail, AtomicBoolean firstEmailRetrieved, AtomicBoolean secondEmailRetrieved) {
+    if(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02.equals(retrievedEmail.getAddress())) {
+      Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02, retrievedEmail.getType());
+      firstEmailRetrieved.set(true);
+    }
+    else {
+      Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, retrievedEmail.getAddress());
+      Assert.assertEquals(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03, retrievedEmail.getType());
+      secondEmailRetrieved.set(true);
     }
   }
 
