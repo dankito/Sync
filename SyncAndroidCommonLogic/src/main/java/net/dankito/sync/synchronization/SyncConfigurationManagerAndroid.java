@@ -7,6 +7,7 @@ import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.files.FileSender;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.AndroidCallLogSyncModule;
@@ -29,8 +30,8 @@ public class SyncConfigurationManagerAndroid extends SyncConfigurationManagerBas
 
 
   public SyncConfigurationManagerAndroid(Context context, Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                         IDataMerger dataMerger, FileSyncService fileSyncService, IFileStorageService fileStorageService, IThreadPool threadPool) {
-    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
+                                         IDataMerger dataMerger, FileSender fileSender, FileSyncService fileSyncService, IFileStorageService fileStorageService, IThreadPool threadPool) {
+    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileSender, fileStorageService, threadPool);
 
     this.context = context;
     this.localization = localization;

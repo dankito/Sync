@@ -7,6 +7,7 @@ import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SyncConfigurationManagerBase;
+import net.dankito.sync.synchronization.files.FileSender;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.utils.IThreadPool;
@@ -22,13 +23,13 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
 
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool, DiscoveredDevice remoteDevice) {
-    this(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool, new ArrayList<ISyncModule>(), remoteDevice);
+                                      IDataMerger dataMerger, FileSender fileSender, IFileStorageService fileStorageService, IThreadPool threadPool, DiscoveredDevice remoteDevice) {
+    this(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileSender, fileStorageService, threadPool, new ArrayList<ISyncModule>(), remoteDevice);
   }
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool, List<ISyncModule> mockedAvailableSyncModules, DiscoveredDevice remoteDevice) {
-    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
+                                      IDataMerger dataMerger, FileSender fileSender, IFileStorageService fileStorageService, IThreadPool threadPool, List<ISyncModule> mockedAvailableSyncModules, DiscoveredDevice remoteDevice) {
+    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileSender, fileStorageService, threadPool);
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
     connectedSynchronizedDevices.add(remoteDevice);
   }

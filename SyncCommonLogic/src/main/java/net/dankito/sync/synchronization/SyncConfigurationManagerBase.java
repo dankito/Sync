@@ -94,16 +94,16 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
 
   public SyncConfigurationManagerBase(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
+                                      IDataMerger dataMerger, FileSender fileSender, IFileStorageService fileStorageService, IThreadPool threadPool) {
     this.syncManager = syncManager;
     this.entityManager = entityManager;
     this.devicesManager = devicesManager;
     this.dataMerger = dataMerger;
+    this.fileSender = fileSender;
     this.fileStorageService = fileStorageService;
     this.threadPool = threadPool;
     this.localConfig = dataManager.getLocalConfig();
 
-    this.fileSender = new FileSender();
     this.syncQueue = new EntitiesSyncQueue(entityManager, fileStorageService, localConfig.getLocalDevice());
 
     syncManager.addSynchronizationListener(synchronizationListener);

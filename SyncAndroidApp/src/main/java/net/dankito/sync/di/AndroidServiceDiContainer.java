@@ -30,6 +30,7 @@ import net.dankito.sync.synchronization.ISyncConfigurationManager;
 import net.dankito.sync.synchronization.ISyncManager;
 import net.dankito.sync.synchronization.SyncConfigurationManagerAndroid;
 import net.dankito.sync.synchronization.SynchronizationConfig;
+import net.dankito.sync.synchronization.files.FileSender;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
@@ -77,6 +78,8 @@ public class AndroidServiceDiContainer {
   protected IDataMerger dataMerger = null;
 
   protected FileSyncService fileSyncService = null;
+
+  protected FileSender fileSender = null;
 
   protected IFileStorageService fileStorageService = null;
 
@@ -234,6 +237,16 @@ public class AndroidServiceDiContainer {
 
   @Provides
   @Singleton
+  public FileSender provideFileSender() {
+    if(fileSender == null) {
+      fileSender = new FileSender();
+    }
+
+    return fileSender;
+  }
+
+  @Provides
+  @Singleton
   public IFileStorageService provideFileStorageService() {
     if(fileStorageService == null) {
       fileStorageService = new JavaFileStorageService();
@@ -292,10 +305,10 @@ public class AndroidServiceDiContainer {
   @Provides
   @Singleton
   public ISyncConfigurationManager provideSyncConfigurationManager(Localization localization, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                                                   IDataMerger dataMerger, FileSyncService fileSyncService, IFileStorageService fileStorageService, IThreadPool threadPool) {
+                                                                   IDataMerger dataMerger, FileSender fileSender, FileSyncService fileSyncService, IFileStorageService fileStorageService, IThreadPool threadPool) {
     if(syncConfigurationManager == null) {
       syncConfigurationManager = new SyncConfigurationManagerAndroid(getContext(), localization, syncManager, dataManager, entityManager, devicesManager, dataMerger,
-          fileSyncService, fileStorageService, threadPool);
+          fileSender, fileSyncService, fileStorageService, threadPool);
     }
 
     return syncConfigurationManager;

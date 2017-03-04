@@ -4,6 +4,7 @@ import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.files.FileSender;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.AndroidPhotosJavaEndpointFileSyncModule;
@@ -28,8 +29,8 @@ public class SyncConfigurationManagerJava extends SyncConfigurationManagerBase {
 
 
   public SyncConfigurationManagerJava(Localization localization, FileSyncService fileSyncService, ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
-                                      IDataMerger dataMerger, IFileStorageService fileStorageService, IThreadPool threadPool) {
-    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileStorageService, threadPool);
+                                      IDataMerger dataMerger, FileSender fileSender, IFileStorageService fileStorageService, IThreadPool threadPool) {
+    super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileSender, fileStorageService, threadPool);
 
     this.localization = localization;
     this.fileSyncService = fileSyncService;
