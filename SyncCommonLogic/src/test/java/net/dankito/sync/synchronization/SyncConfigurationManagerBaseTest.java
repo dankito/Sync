@@ -786,6 +786,10 @@ public class SyncConfigurationManagerBaseTest {
 
 
     assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(3));
+
+    for(SyncEntityLocalLookupKeys lookupKey : (List<SyncEntityLocalLookupKeys>)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class)) {
+      assertThat(lookupKey.getEntityLastModifiedOnDevice(), notNullValue());
+    }
   }
 
 
@@ -858,6 +862,11 @@ public class SyncConfigurationManagerBaseTest {
 
 
     assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(3));
+
+    for(SyncEntityLocalLookupKeys lookupKey : (List<SyncEntityLocalLookupKeys>)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class)) {
+      assertThat(lookupKey.getEntityLastModifiedOnDevice(), notNullValue());
+      assertThat(lookupKey.getEntityLastModifiedOnDevice(), is(not(lookupKeyCreationDate)));
+    }
   }
 
 
