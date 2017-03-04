@@ -821,6 +821,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       int delay = getDelayBeforePushingEntityChangesToRemote();
 
       if(delay <= 0) {
+        syncModulesWithEntityChanges.remove(syncModule);
+
         pushModuleEntityChangesToRemoteDevices(syncModule);
       }
       else {
