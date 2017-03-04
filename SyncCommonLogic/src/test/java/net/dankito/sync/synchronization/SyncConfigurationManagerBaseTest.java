@@ -1,6 +1,7 @@
 package net.dankito.sync.synchronization;
 
 
+import net.dankito.sync.BaseEntity;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.EmailSyncEntity;
@@ -13,6 +14,7 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
+import net.dankito.sync.SyncState;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.IDevicesManager;
@@ -34,6 +36,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +45,10 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 
 public class SyncConfigurationManagerBaseTest {
 
@@ -99,10 +106,20 @@ public class SyncConfigurationManagerBaseTest {
 
   protected SyncModuleMock syncModuleMock;
 
+  protected SynchronizationListener registeredSynchronizationListener;
+
 
   @Before
   public void setUp() throws Exception {
     syncManager = Mockito.mock(ISyncManager.class);
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocation) throws Throwable {
+        registeredSynchronizationListener = (SynchronizationListener)invocation.getArguments()[0];
+        return null;
+      }
+    }).when(syncManager).addSynchronizationListener(any(SynchronizationListener.class));
+
     entityManager = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData", 1));
     devicesManager = Mockito.mock(IDevicesManager.class);
     IDataMerger dataMerger = new JpaMetadataBasedDataMerger((CouchbaseLiteEntityManagerBase)entityManager);
@@ -684,6 +701,62 @@ public class SyncConfigurationManagerBaseTest {
 
   protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
     syncModuleMock.callEntityChangedListeners(testEntities);
+  }
+
+
+
+  /*        Handling synchronized entities        */
+
+  @Test
+  public void sendEntityToRemote_SyncStateChanges() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    assertThat(getCountOfStoredSyncJobItems(), is(0));
+
+
+    synchronizeEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+
+    SyncJobItem syncJobItem = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
+
+    assertThat(syncJobItem.getState(), is(SyncState.DONE));
+    assertThat(syncJobItem.getFinishTime(), notNullValue());
+  }
+
+
+  protected SyncJobItem synchronizeEntity(SyncEntity entity) {
+    entityManager.persistEntity(entity);
+
+    SyncJobItem syncJobItem = new SyncJobItem(syncModuleConfiguration, entity, remoteDevice, localConfig.getLocalDevice());
+    entityManager.persistEntity(syncJobItem);
+
+    registeredSynchronizationListener.entitySynchronized(syncJobItem);
+
+    return syncJobItem;
+  }
+
+
+  protected int getCountOfStoredSyncJobItems() {
+    return getCountOfStoredEntities(SyncJobItem.class);
+  }
+
+  protected int getCountOfStoredSyncEntityLocalLookupKeys() {
+    return getCountOfStoredEntities(SyncEntityLocalLookupKeys.class);
+  }
+
+  protected int getCountOfStoredContacts() {
+    return getCountOfStoredEntities(ContactSyncEntity.class);
+  }
+
+  protected int getCountOfStoredEntities(Class<? extends BaseEntity> entityClass) {
+    return getAllEntitiesOfType(entityClass).size();
+  }
+
+  protected List<? extends BaseEntity> getAllEntitiesOfType(Class<? extends BaseEntity> entityClass) {
+    return entityManager.getAllEntitiesOfType(entityClass);
   }
 
 }
