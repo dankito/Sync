@@ -1012,13 +1012,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     configureLocalSyncModuleSettings(syncConfiguration, getDiscoveredDeviceForDevice(syncConfiguration.getSourceDevice()));
 
     // TODO: what is this timer good for?
-    Timer timer = new Timer();
-    timer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
-      }
-    }, 3000);
+//    Timer timer = new Timer();
+//    timer.schedule(new TimerTask() {
+//      @Override
+//      public void run() {
+//        devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
+//      }
+//    }, 3000);
+    devicesManager.remoteDeviceStartedSynchronizingWithUs(syncConfiguration.getSourceDevice());
   }
 
   protected void configureLocalSyncModuleSettings(SyncConfiguration syncConfiguration, DiscoveredDevice remoteDevice) {
