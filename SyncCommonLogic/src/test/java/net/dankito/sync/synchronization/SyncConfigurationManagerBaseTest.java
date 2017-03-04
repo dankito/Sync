@@ -799,11 +799,11 @@ public class SyncConfigurationManagerBaseTest {
     entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     mockSynchronizeEntityWithDevice(entity);
 
-    entity.setDisplayName(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-
     assertThat(getCountOfStoredSyncJobItems(), is(1));
     SyncJobItem entityCreatedSyncJob = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
 
+
+    entity.setDisplayName(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
 
     synchronizeEntity(entity);
 
@@ -842,7 +842,7 @@ public class SyncConfigurationManagerBaseTest {
   }
 
   @Test
-  public void sendUpdatedEntityWithSyncPropertiesToRemote_LookupKeysGetCreated() {
+  public void sendUpdatedEntityWithSyncPropertiesToRemote_LookupKeysGetUpdated() {
     ContactSyncEntity entity = new ContactSyncEntity();
     entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     mockSynchronizeEntityWithDevice(entity);
@@ -870,8 +870,133 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
+  @Test
+  public void sendDeletedEntityToRemote_SyncStateChanges() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    mockSynchronizeEntityWithDevice(entity);
+
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+    SyncJobItem entityCreatedSyncJob = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
+
+
+    // TODO: how do we simulate a deleted entity?
+    entity.setDeleted(true);
+    synchronizeDeletedEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncJobItems(), is(2));
+
+    for(SyncJobItem syncJobItem : (List<SyncJobItem>)getAllEntitiesOfType(SyncJobItem.class)) {
+      if(syncJobItem != entityCreatedSyncJob) {
+        assertThat(syncJobItem.getState(), is(SyncState.DONE));
+        assertThat(syncJobItem.getFinishTime(), notNullValue());
+      }
+    }
+  }
+
+  @Test
+  public void sendDeletedEntityToRemote_LookupKeyGetsDeleted() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    mockSynchronizeEntityWithDevice(entity);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
+    SyncEntityLocalLookupKeys lookupKeyBefore = (SyncEntityLocalLookupKeys)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).get(0);
+
+
+    // TODO: how do we simulate a deleted entity?
+    entity.setDeleted(true);
+    synchronizeDeletedEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(0));
+
+    assertThat(lookupKeyBefore.isDeleted(), is(true));
+  }
+
+  @Test
+  public void sendDeletedEntityWithSyncPropertiesToRemote_LookupKeysGetDeleted() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    PhoneNumberSyncEntity phoneNumber01 = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    entityManager.persistEntity(phoneNumber01);
+    entity.addPhoneNumber(phoneNumber01);
+    EmailSyncEntity email01 = createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
+    entityManager.persistEntity(email01);
+    entity.addEmailAddress(email01);
+
+    mockSynchronizeEntityWithDevice(entity);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(3));
+    List<SyncEntityLocalLookupKeys> lookupKeysBefore = (List<SyncEntityLocalLookupKeys>)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class);
+
+
+    // TODO: how do we simulate a deleted entity?
+    entity.setDeleted(true);
+    phoneNumber01.setDeleted(true);
+    email01.setDeleted(true);
+    synchronizeDeletedEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(0));
+
+    for(SyncEntityLocalLookupKeys lookupKey : lookupKeysBefore) {
+      assertThat(lookupKey.isDeleted(), is(true));
+    }
+  }
+
+  @Test
+  public void sendDeletedSyncPropertiesToRemote_LookupKeysGetDeleted() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    PhoneNumberSyncEntity phoneNumber01 = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    entityManager.persistEntity(phoneNumber01);
+    entity.addPhoneNumber(phoneNumber01);
+    PhoneNumberSyncEntity phoneNumber02 = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02);
+    entityManager.persistEntity(phoneNumber02);
+    entity.addPhoneNumber(phoneNumber02);
+    PhoneNumberSyncEntity phoneNumber03 = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03);
+    entityManager.persistEntity(phoneNumber03);
+    entity.addPhoneNumber(phoneNumber03);
+    EmailSyncEntity email01 = createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
+    entityManager.persistEntity(email01);
+    entity.addEmailAddress(email01);
+
+    mockSynchronizeEntityWithDevice(entity);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(5));
+
+
+    // TODO: how do we simulate a deleted entity?
+    entity.removePhoneNumber(phoneNumber02);
+    entity.removePhoneNumber(phoneNumber03);
+    entity.removeEmailAddress(email01);
+    phoneNumber02.setDeleted(true);
+    phoneNumber03.setDeleted(true);
+    email01.setDeleted(true);
+
+    synchronizeDeletedEntity(entity);
+    // TODO: deleted properties currently aren't detected!
+    synchronizeDeletedEntity(phoneNumber02);
+    synchronizeDeletedEntity(phoneNumber03);
+    synchronizeDeletedEntity(email01);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(2));
+  }
+
+
   protected SyncJobItem synchronizeCreatedEntity(SyncEntity entity) {
     entityManager.persistEntity(entity);
+
+    return synchronizeEntity(entity);
+  }
+
+  protected SyncJobItem synchronizeDeletedEntity(SyncEntity entity) {
+//    entityManager.deleteEntity(entity);
 
     return synchronizeEntity(entity);
   }
