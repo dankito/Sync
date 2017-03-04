@@ -691,8 +691,8 @@ public class SyncConfigurationManagerBaseTest {
     mockSynchronizeEntitiesWithDevice(testEntities);
 
 
-    Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
-    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(SyncJobItem.class).size());
+    Assert.assertEquals(2, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size()); // TODO: delete SyncEntity locally
+    Assert.assertEquals(4, entityManager.getAllEntitiesOfType(SyncJobItem.class).size()); // two new SyncJobItems have to be created to tell remote that entities got deleted
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).size());
   }
 
