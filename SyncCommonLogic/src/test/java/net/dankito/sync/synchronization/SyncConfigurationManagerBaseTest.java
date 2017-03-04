@@ -726,6 +726,24 @@ public class SyncConfigurationManagerBaseTest {
     assertThat(syncJobItem.getFinishTime(), notNullValue());
   }
 
+  @Test
+  public void sendEntityToRemote_LookupKeyGetsCreated() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(0));
+
+
+    synchronizeEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
+
+    SyncEntityLocalLookupKeys lookupKey = (SyncEntityLocalLookupKeys)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).get(0);
+
+    assertThat(lookupKey.getEntityLastModifiedOnDevice(), notNullValue());
+  }
+
 
   protected SyncJobItem synchronizeEntity(SyncEntity entity) {
     entityManager.persistEntity(entity);
