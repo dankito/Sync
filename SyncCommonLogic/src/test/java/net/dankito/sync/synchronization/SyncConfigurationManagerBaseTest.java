@@ -1281,6 +1281,25 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
+  @Test
+  public void addSyncConfiguration_SynchronizationWithRemoteGetsStarted() {
+    syncConfiguration.setDeleted(true);
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+    verify(devicesManager, times(0)).remoteDeviceStartedSynchronizingWithUs(remoteDevice);
+
+
+    List<SyncModuleConfiguration> newSyncModuleConfigurations = Arrays.asList(new SyncModuleConfiguration[] { syncModuleConfiguration, fileSyncModuleConfiguration });
+    SyncConfiguration newSyncConfiguration = new SyncConfiguration(remoteDevice, localConfig.getLocalDevice(), newSyncModuleConfigurations);
+    entityManager.persistEntity(newSyncConfiguration);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(newSyncConfiguration);
+
+
+    verify(devicesManager, times(1)).remoteDeviceStartedSynchronizingWithUs(remoteDevice);
+  }
+
+
   protected int getCountOfStoredSyncJobItems() {
     return getCountOfStoredEntities(SyncJobItem.class);
   }
