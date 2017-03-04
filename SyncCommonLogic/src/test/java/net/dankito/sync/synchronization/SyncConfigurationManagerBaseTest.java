@@ -135,6 +135,8 @@ public class SyncConfigurationManagerBaseTest {
 
   protected FileSyncModule fileSyncModule;
 
+  protected List<SyncEntityChangeListener> fileSyncModulesEntityChangeListeners = new ArrayList<>();
+
   protected SyncModuleConfiguration syncModuleConfiguration;
 
   protected SyncModuleConfiguration fileSyncModuleConfiguration;
@@ -185,6 +187,16 @@ public class SyncConfigurationManagerBaseTest {
       @Override
       public String getSyncEntityTypeItCanHandle() {
         return FILE_SYNC_MODULE_TYPE;
+      }
+
+      @Override
+      public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
+        fileSyncModulesEntityChangeListeners.add(listener);
+      }
+
+      @Override
+      public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
+        fileSyncModulesEntityChangeListeners.remove(listener);
       }
     };
     fileSyncModuleConfiguration = new SyncModuleConfiguration(fileSyncModule.getSyncEntityTypeItCanHandle());
@@ -1180,6 +1192,20 @@ public class SyncConfigurationManagerBaseTest {
 
     assertThat(underTest.activatedSyncModules.size(), is(1));
     assertThat(underTest.activatedSyncModules.containsKey(fileSyncModule), is(false));
+  }
+
+  @Test
+  public void disableSyncModuleConfiguration_RemoteRemovesSyncModuleListener() {
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
+
+
+    fileSyncModuleConfiguration.setEnabled(false);
+    entityManager.updateEntity(fileSyncModuleConfiguration);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(0));
   }
 
 
