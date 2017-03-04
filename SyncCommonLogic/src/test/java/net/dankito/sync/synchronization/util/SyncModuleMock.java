@@ -1,5 +1,8 @@
 package net.dankito.sync.synchronization.util;
 
+import net.dankito.sync.ContactSyncEntity;
+import net.dankito.sync.EmailSyncEntity;
+import net.dankito.sync.PhoneNumberSyncEntity;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
@@ -50,7 +53,7 @@ public class SyncModuleMock implements ISyncModule {
   @Override
   public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
     for(SyncEntity entity : entitiesToReturnFromReadAllEntitiesAsync) {
-      setEntityLocalLookupKey(entity);
+      setEntityLocalLookupKeyAndLastModifiedOnDevice(entity, false);
     }
 
     callback.done(new ArrayList<SyncEntity>(entitiesToReturnFromReadAllEntitiesAsync));
@@ -59,8 +62,7 @@ public class SyncModuleMock implements ISyncModule {
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
     SyncEntity syncEntity = jobItem.getEntity();
-    setEntityLocalLookupKey(syncEntity);
-    syncEntity.setLastModifiedOnDevice(new Date());
+    setEntityLocalLookupKeyAndLastModifiedOnDevice(syncEntity, true);
 
     callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
   }
@@ -95,9 +97,28 @@ public class SyncModuleMock implements ISyncModule {
   }
 
 
-  protected void setEntityLocalLookupKey(SyncEntity entity) {
+  protected void setEntityLocalLookupKeyAndLastModifiedOnDevice(SyncEntity entity, boolean updateLastModifiedIfNotNull) {
     if(entity.getLocalLookupKey() == null) {
       entity.setLocalLookupKey(entity.getId() + "_lookup_key_mock");
+    }
+
+    if(updateLastModifiedIfNotNull || entity.getLastModifiedOnDevice() == null) {
+      entity.setLastModifiedOnDevice(new Date());
+    }
+
+    setEntitySyncEntityPropertiesLocalLookupKeyAndLastModifiedOnDevice(entity, updateLastModifiedIfNotNull);
+  }
+
+  protected void setEntitySyncEntityPropertiesLocalLookupKeyAndLastModifiedOnDevice(SyncEntity entity, boolean updateLastModifiedIfNotNull) {
+    if(entity instanceof ContactSyncEntity) {
+      ContactSyncEntity contact = (ContactSyncEntity)entity;
+
+      for(PhoneNumberSyncEntity phoneNumber : contact.getPhoneNumbers()) {
+        setEntityLocalLookupKeyAndLastModifiedOnDevice(phoneNumber, updateLastModifiedIfNotNull);
+      }
+      for(EmailSyncEntity email : contact.getEmailAddresses()) {
+        setEntityLocalLookupKeyAndLastModifiedOnDevice(email, updateLastModifiedIfNotNull);
+      }
     }
   }
 
