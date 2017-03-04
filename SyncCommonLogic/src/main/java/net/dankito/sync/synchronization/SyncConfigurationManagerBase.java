@@ -218,6 +218,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     for(SyncEntity deletedEntity : deletedEntities) {
       syncQueue.addEntityToPushToRemote(deletedEntity, remoteDevice, syncModuleConfiguration);
     }
+    // TODO: shouldn't we delete entities in deletedEntities after they have been synchronized?
   }
 
   protected void determineIfEntityShouldBeSynchronized(SyncEntity entity, DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> currentlySynchronizedEntities, Map<String, SyncEntityLocalLookupKeys> lookupKeys) {
@@ -1058,7 +1059,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       });
     }
 
-    syncEntitiesCurrentlyBeingSynchronized.remove(jobItem.getEntity());
+    syncEntitiesCurrentlyBeingSynchronized.remove(jobItem.getEntity()); // TODO: shouldn't this be called in done() (+ if syncModule == null)?
   }
 
   protected void entitySuccessfullySynchronized(SyncJobItem jobItem, SyncEntityLocalLookupKeys lookupKey, SyncEntityState syncEntityState,
