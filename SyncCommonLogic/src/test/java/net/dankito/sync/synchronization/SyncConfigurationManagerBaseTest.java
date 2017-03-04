@@ -57,15 +57,19 @@ public class SyncConfigurationManagerBaseTest {
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME = "Mandela";
   protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME = "Nelson Mandela";
 
+  protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY = "phone_1.1";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01 = "0123456789";
   protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01 = "01234567890";
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01 = PhoneNumberType.MOBILE;
   protected static final PhoneNumberType TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01 = PhoneNumberType.WORK;
+  protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02_LOOKUP_KEY = "phone_1.2";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02 = "03456789129";
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02 = PhoneNumberType.HOME;
+  protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03_LOOKUP_KEY = "phone_1.3";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03 = "0789123456";
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03 = PhoneNumberType.OTHER;
 
+  protected static final String TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY = "email_1.1";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01 = "nelson@heroes.net";
   protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01 = "nelson@greatest-heroes.net";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01 = EmailType.WORK;
@@ -74,13 +78,17 @@ public class SyncConfigurationManagerBaseTest {
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID = "02";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME = "Gandhi";
 
+  protected static final String TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01_LOOKUP_KEY = "phone_2.1";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01 = "0987654321";
   protected static final PhoneNumberType TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01 = PhoneNumberType.WORK;
 
+  protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_01_LOOKUP_KEY = "email_2.1";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_01 = "mahatma@heroes.net";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_01 = EmailType.WORK;
+  protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_02_LOOKUP_KEY = "email_2.2";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02 = "private@gandhi.net";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02 = EmailType.HOME;
+  protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_03_LOOKUP_KEY = "email_2.3";
   protected static final String TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03 = "free-india@british-empire.co.uk";
   protected static final EmailType TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03 = EmailType.OTHER;
 
@@ -207,15 +215,15 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    testEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
-    testEntity01.addPhoneNumber(createTestPhoneNumber("1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
-    testEntity01.addPhoneNumber(createTestPhoneNumber("1.3", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
+    testEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+    testEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
+    testEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
     testEntities.add(testEntity01);
 
     ContactSyncEntity testEntity02 = new ContactSyncEntity();
     testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
-    testEntity02.addPhoneNumber(createTestPhoneNumber("2", TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01));
+    testEntity02.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01));
     testEntities.add(testEntity02);
 
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
@@ -250,15 +258,15 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    testEntity01.addEmailAddress(createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
+    testEntity01.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
     testEntities.add(testEntity01);
 
     ContactSyncEntity testEntity02 = new ContactSyncEntity();
     testEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     testEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
-    testEntity02.addEmailAddress(createTestEmail("2.1", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_01));
-    testEntity02.addEmailAddress(createTestEmail("2.2", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02));
-    testEntity02.addEmailAddress(createTestEmail("2.3", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03));
+    testEntity02.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_01));
+    testEntity02.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_02_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02));
+    testEntity02.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_03_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03));
     testEntities.add(testEntity02);
 
     Assert.assertEquals(0, entityManager.getAllEntitiesOfType(ContactSyncEntity.class).size());
@@ -390,15 +398,15 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
     updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.3", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
     updatedTestEntity01.setLastModifiedOnDevice(new Date());
     testEntities.add(updatedTestEntity01);
 
     ContactSyncEntity updatedTestEntity02 = new ContactSyncEntity();
     updatedTestEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     updatedTestEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
-    updatedTestEntity02.addPhoneNumber(createTestPhoneNumber("2", TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01));
+    updatedTestEntity02.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_02_PHONE_NUMBER_TYPE_01));
     updatedTestEntity02.setLastModifiedOnDevice(new Date());
     testEntities.add(updatedTestEntity02);
 
@@ -469,15 +477,15 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
     updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    updatedTestEntity01.addEmailAddress(createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
+    updatedTestEntity01.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
     updatedTestEntity01.setLastModifiedOnDevice(new Date());
     testEntities.add(updatedTestEntity01);
 
     ContactSyncEntity updatedTestEntity02 = new ContactSyncEntity();
     updatedTestEntity02.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_02_LOCAL_ID);
     updatedTestEntity02.setDisplayName(TEST_CONTACT_SYNC_ENTITY_02_DISPLAY_NAME);
-    updatedTestEntity02.addEmailAddress(createTestEmail("1.2", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02));
-    updatedTestEntity02.addEmailAddress(createTestEmail("1.3", TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03));
+    updatedTestEntity02.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_02_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_02, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_02));
+    updatedTestEntity02.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_02_EMAIL_03_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_ADDRESS_03, TEST_CONTACT_SYNC_ENTITY_02_EMAIL_TYPE_03));
     updatedTestEntity02.setLastModifiedOnDevice(new Date());
     testEntities.add(updatedTestEntity02);
 
@@ -532,8 +540,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    testEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
-    testEntity01.addEmailAddress(createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
+    testEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+    testEntity01.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
     testEntities.add(testEntity01);
 
     mockSynchronizeEntitiesWithDevice(testEntities);
@@ -550,8 +558,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
     updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.1", TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
-    updatedTestEntity01.addEmailAddress(createTestEmail("1.1", TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01));
+    updatedTestEntity01.addEmailAddress(createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_UPDATED_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01));
     testEntities.add(updatedTestEntity01);
 
 
@@ -639,8 +647,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    PhoneNumberSyncEntity phoneNumberToDelete = createTestPhoneNumber("p1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
-    EmailSyncEntity emailToDelete = createTestEmail("e1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
+    PhoneNumberSyncEntity phoneNumberToDelete = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    EmailSyncEntity emailToDelete = createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
     testEntity01.addPhoneNumber(phoneNumberToDelete);
     testEntity01.addEmailAddress(emailToDelete);
     testEntities.add(testEntity01);
@@ -659,8 +667,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
     updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("p1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("p1.3", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
     testEntities.add(updatedTestEntity01);
 
 
