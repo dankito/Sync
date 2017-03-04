@@ -49,12 +49,17 @@ public class SyncModuleMock implements ISyncModule {
 
   @Override
   public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
+    for(SyncEntity entity : entitiesToReturnFromReadAllEntitiesAsync) {
+      setEntityLocalLookupKey(entity);
+    }
+
     callback.done(new ArrayList<SyncEntity>(entitiesToReturnFromReadAllEntitiesAsync));
   }
 
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
     SyncEntity syncEntity = jobItem.getEntity();
+    setEntityLocalLookupKey(syncEntity);
     syncEntity.setLastModifiedOnDevice(new Date());
 
     callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
@@ -86,6 +91,13 @@ public class SyncModuleMock implements ISyncModule {
 
     for(SyncEntityChangeListener listener : listeners) {
       listener.entityChanged(new SyncEntityChange(this, null));
+    }
+  }
+
+
+  protected void setEntityLocalLookupKey(SyncEntity entity) {
+    if(entity.getLocalLookupKey() == null) {
+      entity.setLocalLookupKey(entity.getId() + "_lookup_key_mock");
     }
   }
 
