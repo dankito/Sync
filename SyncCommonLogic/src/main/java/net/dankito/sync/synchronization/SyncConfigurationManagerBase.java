@@ -924,12 +924,21 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
       }
       else if(syncConfiguration.isDeleted()) {
-        devicesManager.stopSynchronizingWithDevice(discoveredRemoteDevice);
+        stopSynchronizingWithDevice(discoveredRemoteDevice, syncConfiguration);
       }
       else {
         SyncConfigurationChanges changes = getSyncConfigurationChanges(syncConfiguration, discoveredRemoteDevice);
         syncConfigurationHasBeenUpdated(syncConfiguration, changes);
       }
+    }
+  }
+
+  protected void stopSynchronizingWithDevice(DiscoveredDevice discoveredRemoteDevice, SyncConfiguration syncConfiguration) {
+    devicesManager.stopSynchronizingWithDevice(discoveredRemoteDevice);
+
+    for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+      ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+      removeSyncEntityChangeListener(discoveredRemoteDevice, syncModule);
     }
   }
 
