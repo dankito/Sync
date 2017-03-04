@@ -120,7 +120,9 @@ public class SyncConfigurationManagerBaseTest {
       }
     }).when(syncManager).addSynchronizationListener(any(SynchronizationListener.class));
 
-    entityManager = new CouchbaseLiteEntityManagerJava(new EntityManagerConfiguration("testData", 1));
+    EntityManagerConfiguration entityManagerConfiguration = new EntityManagerConfiguration("testData", 1);
+    deleteDatabase(entityManagerConfiguration.getDataFolder());
+    entityManager = new CouchbaseLiteEntityManagerJava(entityManagerConfiguration);
     devicesManager = Mockito.mock(IDevicesManager.class);
     IDataMerger dataMerger = new JpaMetadataBasedDataMerger((CouchbaseLiteEntityManagerBase)entityManager);
 
@@ -161,7 +163,11 @@ public class SyncConfigurationManagerBaseTest {
   public void tearDown() {
     entityManager.close();
 
-    new JavaFileStorageService().deleteFolderRecursively(entityManager.getDatabasePath());
+    deleteDatabase(entityManager.getDatabasePath());
+  }
+
+  protected void deleteDatabase(String databasePath) {
+    new JavaFileStorageService().deleteFolderRecursively(databasePath);
   }
 
 
