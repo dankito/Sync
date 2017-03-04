@@ -892,7 +892,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       remoteEntitySynchronized(syncJobItem);
     }
     else if(areWeSourceOfSyncJobItem(syncJobItem)) {
-      if(syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE) {
+      if(isFileRemoteAwaitsThatTransferStarts(syncJobItem)) {
         remoteRetrievedOurFileSyncJobItem(syncJobItem);
       }
     }
@@ -904,6 +904,10 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected boolean areWeSourceOfSyncJobItem(SyncJobItem syncJobItem) {
     return syncJobItem.getSourceDevice() == localConfig.getLocalDevice();
+  }
+
+  protected boolean isFileRemoteAwaitsThatTransferStarts(SyncJobItem syncJobItem) {
+    return syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE;
   }
 
 
