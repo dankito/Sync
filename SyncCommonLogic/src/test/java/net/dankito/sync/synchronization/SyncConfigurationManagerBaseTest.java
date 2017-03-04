@@ -1061,12 +1061,53 @@ public class SyncConfigurationManagerBaseTest {
 
     syncJobItem.setState(SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE);
 
-    mockSendSyncJobItemToRemote(syncJobItem);
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncJobItem);
 
 
     assertThat(getCountOfStoredSyncJobItems(), is(1));
 
     verify(fileSender, times(1)).sendFileAsync(any(FileSyncJobItem.class));
+  }
+
+  @Test
+  public void createFileLocally_RemoteDoesNotWantToStartSynchronization_FileSenderDoesNotGetCalled() {
+    FileSyncEntity entity = new FileSyncEntity();
+    entity.setFilePath(TEST_FILE_SYNC_ENTITY_01_PATH);
+
+    mockSynchronizeEntityWithDevice(entity);
+
+    verifyZeroInteractions(fileSender);
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+    SyncJobItem syncJobItem = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
+
+
+    syncJobItem.setState(SyncState.DONE);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncJobItem);
+
+
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+
+    verifyZeroInteractions(fileSender);
+  }
+
+  @Test
+  public void createFileOnRemote_FileSenderDoesNotGetCalled() {
+    FileSyncEntity entity = new FileSyncEntity();
+    entity.setFilePath(TEST_FILE_SYNC_ENTITY_01_PATH);
+
+    synchronizeCreatedEntity(entity);
+
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+    SyncJobItem syncJobItem = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
+
+
+    syncJobItem.setState(SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE); // a bit constructed, should never be that way
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncJobItem);
+
+
+    verifyZeroInteractions(fileSender);
   }
 
 
@@ -1086,12 +1127,12 @@ public class SyncConfigurationManagerBaseTest {
     SyncJobItem syncJobItem = new SyncJobItem(syncModuleConfiguration, entity, remoteDevice, localConfig.getLocalDevice());
     entityManager.persistEntity(syncJobItem);
 
-    mockSendSyncJobItemToRemote(syncJobItem);
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncJobItem);
 
     return syncJobItem;
   }
 
-  protected void mockSendSyncJobItemToRemote(SyncJobItem syncJobItem) {
+  protected void mockSendSyncJobItemFromRemoteToLocalDevice(SyncJobItem syncJobItem) {
     registeredSynchronizationListener.entitySynchronized(syncJobItem);
   }
 
