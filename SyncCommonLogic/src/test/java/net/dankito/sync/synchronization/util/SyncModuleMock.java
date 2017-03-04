@@ -14,6 +14,7 @@ import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.modules.SyncModuleBase;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -53,6 +54,9 @@ public class SyncModuleMock implements ISyncModule {
 
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
+    SyncEntity syncEntity = jobItem.getEntity();
+    syncEntity.setLastModifiedOnDevice(new Date());
+
     callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
   }
 
