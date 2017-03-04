@@ -637,8 +637,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity testEntity01 = new ContactSyncEntity();
     testEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     testEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    PhoneNumberSyncEntity phoneNumberToDelete = createTestPhoneNumber("1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
-    EmailSyncEntity emailToDelete = createTestEmail("1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
+    PhoneNumberSyncEntity phoneNumberToDelete = createTestPhoneNumber("p1.1", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    EmailSyncEntity emailToDelete = createTestEmail("e1.1", TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
     testEntity01.addPhoneNumber(phoneNumberToDelete);
     testEntity01.addEmailAddress(emailToDelete);
     testEntities.add(testEntity01);
@@ -657,8 +657,8 @@ public class SyncConfigurationManagerBaseTest {
     ContactSyncEntity updatedTestEntity01 = new ContactSyncEntity();
     updatedTestEntity01.setLocalLookupKey(TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID);
     updatedTestEntity01.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
-    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("1.3", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("p1.2", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_02, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_02));
+    updatedTestEntity01.addPhoneNumber(createTestPhoneNumber("p1.3", TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_03, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_03));
     testEntities.add(updatedTestEntity01);
 
 
