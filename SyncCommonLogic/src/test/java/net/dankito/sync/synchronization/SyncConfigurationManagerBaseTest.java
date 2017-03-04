@@ -1270,8 +1270,8 @@ public class SyncConfigurationManagerBaseTest {
     assertThat(underTest.activatedSyncModules.size(), is(2));
     assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
 
-    syncConfiguration.setDeleted(true);
 
+    syncConfiguration.setDeleted(true);
 
     mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
 
@@ -1313,6 +1313,37 @@ public class SyncConfigurationManagerBaseTest {
     entityManager.persistEntity(newSyncConfiguration);
 
     mockSendSyncJobItemFromRemoteToLocalDevice(newSyncConfiguration);
+
+
+    assertThat(underTest.activatedSyncModules.size(), is(2));
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
+  }
+
+
+  /*    KnownSynchronizedDevicesListener    */
+
+  @Test
+  public void disconnectedFromSynchronizedDevice_SyncModulesGetDeactivated() {
+    assertThat(underTest.activatedSyncModules.size(), is(2));
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
+
+
+    ((SyncConfigurationManagerStub)underTest).callKnownSynchronizedDeviceDisconnectedListener();
+
+
+    assertThat(underTest.activatedSyncModules.size(), is(0));
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(0));
+  }
+
+  @Test
+  public void connectedToSynchronizedDevice_SyncModulesGetActivated() {
+    ((SyncConfigurationManagerStub)underTest).callKnownSynchronizedDeviceDisconnectedListener();
+
+    assertThat(underTest.activatedSyncModules.size(), is(0));
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(0));
+
+
+    ((SyncConfigurationManagerStub)underTest).callKnownSynchronizedDeviceConnectedListener();
 
 
     assertThat(underTest.activatedSyncModules.size(), is(2));
