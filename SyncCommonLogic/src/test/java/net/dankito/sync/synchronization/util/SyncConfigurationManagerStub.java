@@ -50,6 +50,13 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
   }
 
   @Override
+  protected void stopSynchronizingWithDevice(DiscoveredDevice discoveredRemoteDevice, SyncConfiguration syncConfiguration) {
+    connectedSynchronizedDevices.remove(discoveredRemoteDevice);
+
+    super.stopSynchronizingWithDevice(discoveredRemoteDevice, syncConfiguration);
+  }
+
+  @Override
   protected int getDelayBeforePushingEntityChangesToRemote() {
     return 0;
   }
