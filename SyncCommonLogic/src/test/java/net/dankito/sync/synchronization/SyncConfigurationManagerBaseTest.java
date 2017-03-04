@@ -1253,7 +1253,7 @@ public class SyncConfigurationManagerBaseTest {
 
 
   @Test
-  public void deleteSyncModuleConfiguration_SynchronizationWithRemoteGetsStopped() {
+  public void deleteSyncConfiguration_SynchronizationWithRemoteGetsStopped() {
     verify(devicesManager, times(0)).stopSynchronizingWithDevice(discoveredRemoteDevice);
 
     syncConfiguration.setDeleted(true);
@@ -1263,6 +1263,21 @@ public class SyncConfigurationManagerBaseTest {
 
 
     verify(devicesManager, times(1)).stopSynchronizingWithDevice(discoveredRemoteDevice);
+  }
+
+  @Test
+  public void deleteSyncConfiguration_SyncModulesGetStopped() {
+    assertThat(underTest.activatedSyncModules.size(), is(2));
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
+
+    syncConfiguration.setDeleted(true);
+
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+
+    assertThat(underTest.activatedSyncModules.size(), is(0));
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(0));
   }
 
 
