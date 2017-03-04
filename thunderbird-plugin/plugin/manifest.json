@@ -1,0 +1,17 @@
+{
+
+  "manifest_version": 2,
+  "name": "Sync",
+  "version": "0.1",
+
+  "description": "Plugin to synchronize Thunderbird Addressbook and Calender with Sync.",
+
+  "icons": {
+    "48": "icons/app-icon-48.png"
+  },
+
+  "background": {
+    "scripts": ["sync.js"]
+  }
+
+}

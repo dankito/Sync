@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+
+    <em:id>sync@dankito.net</em:id>
+
+    <em:name>Sync Thunderbird Extension</em:name>
+
+    <em:description>Plugin to synchronize Thunderbird Addressbook and Calender with Sync.</em:description>
+
+    <em:version>0.1</em:version>
+
+    <em:targetApplication>
+     <Description>
+      <em:id>toolkit@mozilla.org</em:id> <!--TODO: get Thunderbird GUID-->
+      <em:minVersion>45</em:minVersion>
+      <em:maxVersion>70</em:maxVersion>
+     </Description>
+    </em:targetApplication>
+
+    <em:type>2</em:type> <!-- 2 = Extension -->
+
+    <em:unpack>true</em:unpack>
+
+  </Description>
+</RDF>
