@@ -888,7 +888,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   };
 
   protected void retrievedSynchronizedSyncJobItem(SyncJobItem syncJobItem) {
-    if(isInitializedSyncJobForUs(syncJobItem)) {
+    if(isInitializedSyncJobWeAreDestinationFor(syncJobItem)) {
       remoteEntitySynchronized(syncJobItem);
     }
     else if(areWeSourceOfSyncJobItem(syncJobItem)) {
@@ -898,7 +898,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
   }
 
-  protected boolean isInitializedSyncJobForUs(SyncJobItem syncJobItem) {
+  protected boolean isInitializedSyncJobWeAreDestinationFor(SyncJobItem syncJobItem) {
     return syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED;
   }
 
