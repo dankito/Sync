@@ -644,10 +644,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     try {
       SyncEntity deletedEntity = entityManager.getEntityById(getEntityClassFromEntityType(lookupKey.getEntityType()), lookupKey.getEntityDatabaseId());
       if(currentlySynchronizedEntities.contains(deletedEntity) == false) {
-        if(deletedEntity != null) {
-          deletedEntities.add(deletedEntity);
-        }
-
         deleteEntityLookupKey(lookupKey);
 
         return deletedEntity;
