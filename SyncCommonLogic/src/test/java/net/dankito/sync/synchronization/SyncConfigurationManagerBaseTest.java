@@ -767,6 +767,27 @@ public class SyncConfigurationManagerBaseTest {
     assertThat(lookupKey.getEntityLastModifiedOnDevice(), notNullValue());
   }
 
+  @Test
+  public void sendCreatedEntityWithSyncPropertiesToRemote_LookupKeysGetCreated() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    PhoneNumberSyncEntity phoneNumber01 = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    entityManager.persistEntity(phoneNumber01);
+    entity.addPhoneNumber(phoneNumber01);
+    EmailSyncEntity email01 = createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
+    entityManager.persistEntity(email01);
+    entity.addEmailAddress(email01);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(0));
+
+
+    synchronizeCreatedEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(3));
+  }
+
 
   @Test
   public void sendUpdatedEntityToRemote_SyncStateChanges() {
