@@ -45,6 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -54,6 +55,7 @@ public class SyncConfigurationManagerBaseTest {
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_LOCAL_ID = "01";
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME = "Mandela";
+  protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME = "Nelson Mandela";
 
   protected static final String TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01 = "0123456789";
   protected static final String TEST_UPDATED_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01 = "01234567890";
@@ -705,7 +707,14 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
-  protected void mockSynchronizeEntitiesWithDevice(final List<SyncEntity> testEntities) {
+  protected void mockSynchronizeEntityWithDevice(SyncEntity testEntity) {
+    List<SyncEntity> testEntities = new ArrayList<>();
+    testEntities.add(testEntity);
+
+    mockSynchronizeEntitiesWithDevice(testEntities);
+  }
+
+  protected void mockSynchronizeEntitiesWithDevice(List<SyncEntity> testEntities) {
     syncModuleMock.callEntityChangedListeners(testEntities);
   }
 
@@ -714,14 +723,14 @@ public class SyncConfigurationManagerBaseTest {
   /*        Handling synchronized entities        */
 
   @Test
-  public void sendEntityToRemote_SyncStateChanges() {
+  public void sendCreatedEntityToRemote_SyncStateChanges() {
     ContactSyncEntity entity = new ContactSyncEntity();
     entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
 
     assertThat(getCountOfStoredSyncJobItems(), is(0));
 
 
-    synchronizeEntity(entity);
+    synchronizeCreatedEntity(entity);
 
 
     assertThat(getCountOfStoredSyncJobItems(), is(1));
@@ -733,14 +742,14 @@ public class SyncConfigurationManagerBaseTest {
   }
 
   @Test
-  public void sendEntityToRemote_LookupKeyGetsCreated() {
+  public void sendCreatedEntityToRemote_LookupKeyGetsCreated() {
     ContactSyncEntity entity = new ContactSyncEntity();
     entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
 
     assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(0));
 
 
-    synchronizeEntity(entity);
+    synchronizeCreatedEntity(entity);
 
 
     assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
@@ -751,9 +760,62 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
-  protected SyncJobItem synchronizeEntity(SyncEntity entity) {
+  @Test
+  public void sendUpdatedEntityToRemote_SyncStateChanges() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    mockSynchronizeEntityWithDevice(entity);
+
+    entity.setDisplayName(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+    SyncJobItem entityCreatedSyncJob = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
+
+
+    synchronizeEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncJobItems(), is(2));
+
+    for(SyncJobItem syncJobItem : (List<SyncJobItem>)getAllEntitiesOfType(SyncJobItem.class)) {
+      if(syncJobItem != entityCreatedSyncJob) {
+        assertThat(syncJobItem.getState(), is(SyncState.DONE));
+        assertThat(syncJobItem.getFinishTime(), notNullValue());
+      }
+    }
+  }
+
+  @Test
+  public void sendUpdatedEntityToRemote_LookupKeyGetsUpdated() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    mockSynchronizeEntityWithDevice(entity);
+
+    entity.setDisplayName(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
+    Date lookupKeyCreationDate = ((SyncEntityLocalLookupKeys)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).get(0)).getEntityLastModifiedOnDevice();
+
+
+    synchronizeEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
+
+    SyncEntityLocalLookupKeys lookupKey = (SyncEntityLocalLookupKeys)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).get(0);
+
+    assertThat(lookupKey.getEntityLastModifiedOnDevice(), notNullValue());
+    assertThat(lookupKey.getEntityLastModifiedOnDevice(), is(not(lookupKeyCreationDate)));
+  }
+
+
+  protected SyncJobItem synchronizeCreatedEntity(SyncEntity entity) {
     entityManager.persistEntity(entity);
 
+    return synchronizeEntity(entity);
+  }
+
+  protected SyncJobItem synchronizeEntity(SyncEntity entity) {
     SyncJobItem syncJobItem = new SyncJobItem(syncModuleConfiguration, entity, remoteDevice, localConfig.getLocalDevice());
     entityManager.persistEntity(syncJobItem);
 
