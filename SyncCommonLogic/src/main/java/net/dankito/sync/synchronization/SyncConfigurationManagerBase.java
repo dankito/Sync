@@ -876,16 +876,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     @Override
     public void entitySynchronized(BaseEntity entity) {
       if(entity instanceof SyncJobItem) {
-        SyncJobItem syncJobItem = (SyncJobItem)entity;
-
-        if(isInitializedSyncJobForUs(syncJobItem)) {
-          remoteEntitySynchronized((SyncJobItem) entity);
-        }
-        else if(areWeSourceOfSyncJobItem(syncJobItem)) {
-          if(syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE) {
-            remoteRetrievedOurFileSyncJobItem(syncJobItem);
-          }
-        }
+        retrievedSynchronizedSyncJobItem((SyncJobItem) entity);
       }
       else if(entity instanceof SyncConfiguration) {
         SyncConfiguration syncConfiguration = (SyncConfiguration)entity;
@@ -895,6 +886,17 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
     }
   };
+
+  protected void retrievedSynchronizedSyncJobItem(SyncJobItem syncJobItem) {
+    if(isInitializedSyncJobForUs(syncJobItem)) {
+      remoteEntitySynchronized(syncJobItem);
+    }
+    else if(areWeSourceOfSyncJobItem(syncJobItem)) {
+      if(syncJobItem.getEntity() instanceof FileSyncEntity && syncJobItem.getState() == SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE) {
+        remoteRetrievedOurFileSyncJobItem(syncJobItem);
+      }
+    }
+  }
 
   protected boolean isInitializedSyncJobForUs(SyncJobItem syncJobItem) {
     return syncJobItem.getDestinationDevice() == localConfig.getLocalDevice() && syncJobItem.getState() == SyncState.INITIALIZED;
