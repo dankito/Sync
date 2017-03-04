@@ -1209,6 +1209,47 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
+  @Test
+  public void enableSyncModuleConfiguration_RemoteActivatesSyncModule() {
+    fileSyncModuleConfiguration.setEnabled(false);
+    entityManager.updateEntity(fileSyncModuleConfiguration);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+    assertThat(underTest.activatedSyncModules.size(), is(1));
+    assertThat(underTest.activatedSyncModules.containsKey(fileSyncModule), is(false));
+
+
+    fileSyncModuleConfiguration.setEnabled(true);
+    entityManager.updateEntity(fileSyncModuleConfiguration);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+
+    assertThat(underTest.activatedSyncModules.size(), is(2));
+    assertThat(underTest.activatedSyncModules.containsKey(fileSyncModule), is(true));
+  }
+
+  @Test
+  public void enableSyncModuleConfiguration_RemoteAddsSyncModuleListener() {
+    fileSyncModuleConfiguration.setEnabled(false);
+    entityManager.updateEntity(fileSyncModuleConfiguration);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(0));
+
+
+    fileSyncModuleConfiguration.setEnabled(true);
+    entityManager.updateEntity(fileSyncModuleConfiguration);
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+
+    assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
+  }
+
+
   protected int getCountOfStoredSyncJobItems() {
     return getCountOfStoredEntities(SyncJobItem.class);
   }
