@@ -686,8 +686,6 @@ public class SyncConfigurationManagerBaseTest {
 
 
     testEntities.clear();
-    entityManager.deleteEntity(testEntity01);
-    entityManager.deleteEntity(testEntity02);
 
 
     mockSynchronizeEntitiesWithDevice(testEntities);
