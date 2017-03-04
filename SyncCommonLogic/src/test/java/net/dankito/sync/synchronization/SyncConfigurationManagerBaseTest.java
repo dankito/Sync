@@ -24,6 +24,8 @@ import net.dankito.sync.persistence.CouchbaseLiteEntityManagerBase;
 import net.dankito.sync.persistence.CouchbaseLiteEntityManagerJava;
 import net.dankito.sync.persistence.EntityManagerConfiguration;
 import net.dankito.sync.persistence.IEntityManager;
+import net.dankito.sync.synchronization.files.FileSender;
+import net.dankito.sync.synchronization.files.FileSyncJobItem;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.merge.JpaMetadataBasedDataMerger;
@@ -40,7 +42,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -57,6 +58,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 public class SyncConfigurationManagerBaseTest {
 
@@ -118,6 +123,8 @@ public class SyncConfigurationManagerBaseTest {
 
   protected IDataManager dataManager;
 
+  protected FileSender fileSender;
+
   protected LocalConfig localConfig;
 
   protected Device remoteDevice;
@@ -149,21 +156,27 @@ public class SyncConfigurationManagerBaseTest {
     EntityManagerConfiguration entityManagerConfiguration = new EntityManagerConfiguration("testData", 1);
     deleteDatabase(entityManagerConfiguration.getDataFolder());
     entityManager = new CouchbaseLiteEntityManagerJava(entityManagerConfiguration);
-    devicesManager = mock(IDevicesManager.class);
+
     IDataMerger dataMerger = new JpaMetadataBasedDataMerger((CouchbaseLiteEntityManagerBase)entityManager);
 
     Device localDevice = new Device("local");
     localConfig = new LocalConfig(localDevice);
 
     dataManager = mock(IDataManager.class);
-    Mockito.when(dataManager.getLocalConfig()).thenReturn(localConfig);
+    when(dataManager.getLocalConfig()).thenReturn(localConfig);
+
+    fileSender = mock(FileSender.class);
 
     remoteDevice = new Device("remote");
     DiscoveredDevice discoveredRemoteDevice = new DiscoveredDevice(remoteDevice, "1.1.1.1");
 
-    syncModuleMock = new SyncModuleMock(entitiesToReturnFromReadAllEntitiesAsync);
+    devicesManager = mock(IDevicesManager.class);
+    when(devicesManager.getDiscoveredDeviceForDevice(remoteDevice)).thenReturn(discoveredRemoteDevice);
 
+    syncModuleMock = new SyncModuleMock(entitiesToReturnFromReadAllEntitiesAsync);
     syncModuleConfiguration = new SyncModuleConfiguration(syncModuleMock.getSyncEntityTypeItCanHandle());
+    entityManager.persistEntity(syncModuleConfiguration);
+
     FileSyncModule fileSyncModule = new FileSyncModule(mock(Localization.class), new FileSyncService(entityManager), mock(IFileStorageService.class)) {
       @Override
       public String getSyncEntityTypeItCanHandle() {
@@ -171,10 +184,10 @@ public class SyncConfigurationManagerBaseTest {
       }
     };
     fileSyncModuleConfiguration = new SyncModuleConfiguration(fileSyncModule.getSyncEntityTypeItCanHandle());
+    entityManager.persistEntity(fileSyncModuleConfiguration);
+
     syncConfiguration = new SyncConfiguration(localConfig.getLocalDevice(), remoteDevice,
         Arrays.asList(new SyncModuleConfiguration[] {  syncModuleConfiguration, fileSyncModuleConfiguration }));
-    entityManager.persistEntity(syncModuleConfiguration);
-    entityManager.persistEntity(fileSyncModuleConfiguration);
     entityManager.persistEntity(syncConfiguration);
 
     localDevice.addSourceSyncConfiguration(syncConfiguration);
@@ -182,7 +195,7 @@ public class SyncConfigurationManagerBaseTest {
     entityManager.persistEntity(localDevice);
     entityManager.persistEntity(remoteDevice);
 
-    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, dataMerger, new JavaFileStorageService(), new ThreadPool(), discoveredRemoteDevice);
+    underTest = new SyncConfigurationManagerStub(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileSender, new JavaFileStorageService(), new ThreadPool(), discoveredRemoteDevice);
 
 
     SyncConfigurationManagerStub syncConfigurationManagerStub = (SyncConfigurationManagerStub)underTest;
@@ -1034,6 +1047,29 @@ public class SyncConfigurationManagerBaseTest {
   }
 
 
+  @Test
+  public void createFileLocally_RemoteWantsToStartSynchronization_FileSenderGetsCalled() {
+    FileSyncEntity entity = new FileSyncEntity();
+    entity.setFilePath(TEST_FILE_SYNC_ENTITY_01_PATH);
+
+    mockSynchronizeEntityWithDevice(entity);
+
+    verifyZeroInteractions(fileSender);
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+    SyncJobItem syncJobItem = (SyncJobItem)getAllEntitiesOfType(SyncJobItem.class).get(0);
+
+
+    syncJobItem.setState(SyncState.TRANSFERRING_FILE_TO_DESTINATION_DEVICE);
+
+    mockSendSyncJobItemToRemote(syncJobItem);
+
+
+    assertThat(getCountOfStoredSyncJobItems(), is(1));
+
+    verify(fileSender, times(1)).sendFileAsync(any(FileSyncJobItem.class));
+  }
+
+
   protected SyncJobItem synchronizeCreatedEntity(SyncEntity entity) {
     entityManager.persistEntity(entity);
 
@@ -1050,9 +1086,13 @@ public class SyncConfigurationManagerBaseTest {
     SyncJobItem syncJobItem = new SyncJobItem(syncModuleConfiguration, entity, remoteDevice, localConfig.getLocalDevice());
     entityManager.persistEntity(syncJobItem);
 
-    registeredSynchronizationListener.entitySynchronized(syncJobItem);
+    mockSendSyncJobItemToRemote(syncJobItem);
 
     return syncJobItem;
+  }
+
+  protected void mockSendSyncJobItemToRemote(SyncJobItem syncJobItem) {
+    registeredSynchronizationListener.entitySynchronized(syncJobItem);
   }
 
 
