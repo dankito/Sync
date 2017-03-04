@@ -820,11 +820,11 @@ public class SyncConfigurationManagerBaseTest {
     entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
     mockSynchronizeEntityWithDevice(entity);
 
-    entity.setDisplayName(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
-
     assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
     Date lookupKeyCreationDate = ((SyncEntityLocalLookupKeys)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).get(0)).getEntityLastModifiedOnDevice();
 
+
+    entity.setDisplayName(TEST_UPDATED_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
 
     synchronizeEntity(entity);
 
@@ -835,6 +835,29 @@ public class SyncConfigurationManagerBaseTest {
 
     assertThat(lookupKey.getEntityLastModifiedOnDevice(), notNullValue());
     assertThat(lookupKey.getEntityLastModifiedOnDevice(), is(not(lookupKeyCreationDate)));
+  }
+
+  @Test
+  public void sendUpdatedEntityWithSyncPropertiesToRemote_LookupKeysGetCreated() {
+    ContactSyncEntity entity = new ContactSyncEntity();
+    entity.setDisplayName(TEST_CONTACT_SYNC_ENTITY_01_DISPLAY_NAME);
+    mockSynchronizeEntityWithDevice(entity);
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(1));
+    Date lookupKeyCreationDate = ((SyncEntityLocalLookupKeys)getAllEntitiesOfType(SyncEntityLocalLookupKeys.class).get(0)).getEntityLastModifiedOnDevice();
+
+
+    PhoneNumberSyncEntity phoneNumber01 = createTestPhoneNumber(TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_01, TEST_CONTACT_SYNC_ENTITY_01_PHONE_NUMBER_TYPE_01);
+    entityManager.persistEntity(phoneNumber01);
+    entity.addPhoneNumber(phoneNumber01);
+    EmailSyncEntity email01 = createTestEmail(TEST_CONTACT_SYNC_ENTITY_01_EMAIL_01_LOOKUP_KEY, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_ADDRESS_01, TEST_CONTACT_SYNC_ENTITY_01_EMAIL_TYPE_01);
+    entityManager.persistEntity(email01);
+    entity.addEmailAddress(email01);
+
+    synchronizeEntity(entity);
+
+
+    assertThat(getCountOfStoredSyncEntityLocalLookupKeys(), is(3));
   }
 
 
