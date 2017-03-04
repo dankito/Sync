@@ -1101,6 +1101,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void updateSyncEntityPropertiesLookupKeys(SyncEntity entity, SyncModuleConfiguration syncModuleConfiguration, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+    // TODO: deleted properties currently aren't detected!
     if(entity instanceof ContactSyncEntity) {
       updateContactSyncEntityPropertiesLookupKeys((ContactSyncEntity)entity, syncModuleConfiguration, allLookupKeys);
     }
