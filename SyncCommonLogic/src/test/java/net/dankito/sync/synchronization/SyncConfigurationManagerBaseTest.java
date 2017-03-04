@@ -129,6 +129,8 @@ public class SyncConfigurationManagerBaseTest {
 
   protected Device remoteDevice;
 
+  protected DiscoveredDevice discoveredRemoteDevice;
+
   protected SyncConfiguration syncConfiguration;
 
   protected SyncModuleMock syncModuleMock;
@@ -174,7 +176,7 @@ public class SyncConfigurationManagerBaseTest {
 
     remoteDevice = new Device("remote");
     remoteDevice.setName("remote");
-    DiscoveredDevice discoveredRemoteDevice = new DiscoveredDevice(remoteDevice, "1.1.1.1");
+    discoveredRemoteDevice = new DiscoveredDevice(remoteDevice, "1.1.1.1");
 
     devicesManager = mock(IDevicesManager.class);
     when(devicesManager.getDiscoveredDeviceForDevice(remoteDevice)).thenReturn(discoveredRemoteDevice);
@@ -1247,6 +1249,20 @@ public class SyncConfigurationManagerBaseTest {
 
 
     assertThat(fileSyncModulesEntityChangeListeners.size(), is(1));
+  }
+
+
+  @Test
+  public void deleteSyncModuleConfiguration_SynchronizationWithRemoteGetsStopped() {
+    verify(devicesManager, times(0)).stopSynchronizingWithDevice(discoveredRemoteDevice);
+
+    syncConfiguration.setDeleted(true);
+
+
+    mockSendSyncJobItemFromRemoteToLocalDevice(syncConfiguration);
+
+
+    verify(devicesManager, times(1)).stopSynchronizingWithDevice(discoveredRemoteDevice);
   }
 
 
