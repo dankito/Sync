@@ -21,6 +21,8 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
 
   protected List<ISyncModule> mockedAvailableSyncModules;
 
+  protected DiscoveredDevice remoteDevice;
+
 
   public SyncConfigurationManagerStub(ISyncManager syncManager, IDataManager dataManager, IEntityManager entityManager, IDevicesManager devicesManager,
                                       IDataMerger dataMerger, FileSender fileSender, IFileStorageService fileStorageService, IThreadPool threadPool, DiscoveredDevice remoteDevice) {
@@ -31,6 +33,8 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
                                       IDataMerger dataMerger, FileSender fileSender, IFileStorageService fileStorageService, IThreadPool threadPool, List<ISyncModule> mockedAvailableSyncModules, DiscoveredDevice remoteDevice) {
     super(syncManager, dataManager, entityManager, devicesManager, dataMerger, fileSender, fileStorageService, threadPool);
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
+    this.remoteDevice = remoteDevice;
+
     connectedSynchronizedDevices.add(remoteDevice);
   }
 
@@ -44,6 +48,14 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
     this.mockedAvailableSyncModules = mockedAvailableSyncModules;
   }
 
+  public void callKnownSynchronizedDeviceConnectedListener() {
+    knownSynchronizedDevicesListener.knownSynchronizedDeviceConnected(remoteDevice);
+  }
+
+  public void callKnownSynchronizedDeviceDisconnectedListener() {
+    knownSynchronizedDevicesListener.knownSynchronizedDeviceDisconnected(remoteDevice);
+  }
+
 
   public void startContinuousSynchronizationWithDevice(DiscoveredDevice remoteDevice, SyncConfiguration syncConfiguration) {
     super.startContinuousSynchronizationWithDevice(remoteDevice, syncConfiguration);
@@ -54,6 +66,13 @@ public class SyncConfigurationManagerStub extends SyncConfigurationManagerBase {
     connectedSynchronizedDevices.remove(discoveredRemoteDevice);
 
     super.stopSynchronizingWithDevice(discoveredRemoteDevice, syncConfiguration);
+  }
+
+  @Override
+  protected void remoteDeviceStartedSynchronizingWithUs(SyncConfiguration syncConfiguration) {
+    super.remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
+
+    callKnownSynchronizedDeviceConnectedListener();
   }
 
   @Override
