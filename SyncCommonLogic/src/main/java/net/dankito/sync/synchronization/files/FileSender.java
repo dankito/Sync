@@ -82,6 +82,8 @@ public class FileSender {
       sendTotal += read;
     }
 
+    try { socketOutputStream.flush(); } catch(Exception ignored) { }
+
     long endTime = System.currentTimeMillis();
     log.info(sendTotal + " of " + jobItem.getSyncJobItem().getDataSize() + " bytes written to " + jobItem.getDestinationAddress() + " in " + (endTime - startTime) + " ms.");
 
