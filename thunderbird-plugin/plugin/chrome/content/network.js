@@ -22,28 +22,40 @@ var networkUtil = new function () {
             log("Accepted connection on " + transport.host + ":" + transport.port);
             var input = transport.openInputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);//.QueryInterface(Ci.nsIAsyncInputStream);
             var output = transport.openOutputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);
-            var scriptableInput = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+
+            var charset = "UTF-8";
+            const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
+            var inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+                               .createInstance(Components.interfaces.nsIConverterInputStream);
 
             try {
-                scriptableInput.init(input);
+                inputStream.init(input, charset, 1024, replacementChar);
 
-                var receivedMessage = _readMessageFromSocket(scriptableInput);
+                var receivedMessage = _readMessageFromSocket(inputStream);
 
                 _dispatchReceivedMessageAndSendResponse(receivedMessage, serverSocket, output);
             }
-            finally{
-                scriptableInput.close();
+            finally {
+                inputStream.close();
                 input.close();
                 output.close();
             }
         }
     };
 
-    var _readMessageFromSocket = function(scriptableInput) {
+    var _readMessageFromSocket = function(inputStream) {
         var received = '';
 
-        while (scriptableInput.available()) {
-            received = received + scriptableInput.read(512);
+        var str = {};
+        var bufferSize = 512;
+        var read = 512;
+
+        while ((read = inputStream.readString(bufferSize, str)) > 0) {
+          received = received + str.value;
+
+          if(read < bufferSize) {
+            break;
+          }
         }
 
         return received;
@@ -68,18 +80,24 @@ var networkUtil = new function () {
         Broadcast (e.g. to 192.168.0.255) is not supported!
     */
     this.sendMessageViaUdp = function(address, port, message) {
-        var types = new Array();
-        types.push('udp');
+        try {
+            var types = new Array();
+            types.push('udp');
 
-        var udpSocket = Components.classes["@mozilla.org/network/socket-transport-service;1"]
-                                          .getService(Components.interfaces.nsISocketTransportService)
-                                          .createTransport(types, types.length, address, port, null);
+            var udpSocket = Components.classes["@mozilla.org/network/socket-transport-service;1"]
+                                              .getService(Components.interfaces.nsISocketTransportService)
+                                              .createTransport(types, types.length, address, port, null);
 
-        var outputStream = udpSocket.openOutputStream(0, 0, 0);
+            var outputStream = udpSocket.openOutputStream(0, 0, 0);
 
-        outputStream.write(message, message.length);
+            outputStream.write(message, message.length);
 
-        outputStream.flush();
+            outputStream.flush();
+
+            outputStream.close();
+        } catch(e) {
+            log('Could not send message \'' + message + '\' over UDP to ' + address + ':' + port + ' - ' + e);
+        }
     };
 
 
