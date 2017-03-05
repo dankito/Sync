@@ -1,49 +1,62 @@
-var DevicesDiscovererListener = new function () {
+var networkUtil = new function () {
+
+    var _openServerSockets = { };
+
+    /*
+     * Opens a Server Socket and listens for incoming connections an given port.
+     */
+    this.startTcpListenerSocket = function(listenerPort, messageReceivedCallback) {
+        var serverSocket = Cc["@mozilla.org/network/server-socket;1"].createInstance(Ci.nsIServerSocket);
+        serverSocket.init(listenerPort, false, 5);
+
+        _openServerSockets[serverSocket] = messageReceivedCallback;
+
+        serverSocket.asyncListen(_tcpServerSocketListener);
+    };
 
     /*
      * Listen for connections. Transmit
      */
-    var listener = {
+    var _tcpServerSocketListener = {
         onSocketAccepted: function(serverSocket, transport) {
             log("Accepted connection on " + transport.host + ":" + transport.port);
             var input = transport.openInputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);//.QueryInterface(Ci.nsIAsyncInputStream);
             var output = transport.openOutputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);
-            var sin = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+            var scriptableInput = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
 
             try {
-                sin.init(input);
+                scriptableInput.init(input);
 
-                var received = '';
-                while (sin.available()) {
-                    received = received + sin.read(512);
+                var receivedMessage = _readMessageFromSocket(scriptableInput);
+
+                var messageReceivedCallback = _openServerSockets[serverSocket];
+                if(messageReceivedCallback) {
+                    var responseToSend = messageReceivedCallback(receivedMessage);
+
+                    if(responseToSend) {
+                        output.write(responseToSend, responseToSend.length);
+                        output.flush();
+                    }
                 }
-
-                log('Received: ' + received);
-
-                var contacts = getAllContacts();
-                var contactsJson = JSON.stringify(contacts);
-
-                output.write(contactsJson, contactsJson.length);
-                output.flush();
             }
             finally{
-                sin.close();
+                scriptableInput.close();
                 input.close();
                 output.close();
             }
         }
-    }
+    };
 
-    /*
-     * Main
-     */
-    this.start = function() {
-        var messagesPort = 32797;
+    var _readMessageFromSocket = function(scriptableInput) {
+        var received = '';
 
-        var serverSocket = Cc["@mozilla.org/network/server-socket;1"].createInstance(Ci.nsIServerSocket);
-        serverSocket.init(messagesPort, false, 5);
-        log("Opened socket on " + serverSocket.port);
-        serverSocket.asyncListen(listener);
+        while (scriptableInput.available()) {
+            received = received + scriptableInput.read(512);
+        }
+
+        log('Received: ' + received);
+
+        return received;
     };
 
 
