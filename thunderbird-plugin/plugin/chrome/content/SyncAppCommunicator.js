@@ -21,7 +21,7 @@ var SyncAppCommunicator = new function () {
     };
 
     var _handleReceivedMessage = function(receivedMessage) {
-        if('IS_THUNDERBIRD_OUT_THERE' === receivedMessage || stringStartsWith(receivedMessage, 'GetDeviceInfo')) {
+        if(stringStartsWith(receivedMessage, 'GetDeviceInfo')) {
             return _deviceInfo;
         }
         else if('GET_ADDRESS_BOOK' === receivedMessage) {
