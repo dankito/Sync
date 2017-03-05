@@ -3,15 +3,19 @@ var SyncAppCommunicator = new function () {
     var _deviceInfo;
 
     this.start = function() {
-        var messagesPort = 32797;
-
         _createDeviceInfo();
 
-        networkUtil.startTcpListenerSocket(messagesPort, function(receivedMessage) {
+        networkUtil.startTcpListenerSocket(SyncAppCommunicatorConfig.MessagesReceiverPort, function(receivedMessage) {
             log('Received message in SyncAppCommunicator: ' + receivedMessage);
 
             return _handleReceivedMessage(receivedMessage);
         });
+
+        var discoveryMessage = 'Sync:' + 'TODO' + ":" + SyncAppCommunicatorConfig.MessagesReceiverPort;
+
+        setInterval(function() {
+            networkUtil.sendMessageViaUdp('localhost', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
+        }, SyncAppCommunicatorConfig.SendDevicesDiscovererMessageIntervalMillis);
     };
 
     var _handleReceivedMessage = function(receivedMessage) {
