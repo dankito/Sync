@@ -8,10 +8,12 @@ var SyncAppCommunicator = new function () {
         networkUtil.startTcpListenerSocket(SyncAppCommunicatorConfig.MessagesReceiverPort, function(receivedMessage) {
             log('Received message in SyncAppCommunicator: ' + receivedMessage);
 
-            return _handleReceivedMessage(receivedMessage);
+            var responseBody = _handleReceivedMessage(receivedMessage);
+            return _createResponse(responseBody, receivedMessage);
         });
 
-        var discoveryMessage = 'Sync:' + 'TODO' + ":" + SyncAppCommunicatorConfig.MessagesReceiverPort;
+        var discoveryMessage = SyncAppCommunicatorConfig.DevicesDiscoveryMessagePrefix + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator +
+            'TODO' + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator + SyncAppCommunicatorConfig.MessagesReceiverPort;
 
         setInterval(function() {
             networkUtil.sendMessageViaUdp('localhost', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
@@ -19,15 +21,32 @@ var SyncAppCommunicator = new function () {
     };
 
     var _handleReceivedMessage = function(receivedMessage) {
-        if('IS_THUNDERBIRD_OUT_THERE' === receivedMessage) {
+        if('IS_THUNDERBIRD_OUT_THERE' === receivedMessage || stringStartsWith(receivedMessage, 'GetDeviceInfo')) {
             return _deviceInfo;
         }
         else if('GET_ADDRESS_BOOK' === receivedMessage) {
-            var contacts = getAllContacts();
-            var contactsJson = JSON.stringify(contacts);
-
-            return contactsJson;
+            return getAllContacts();
         }
+    };
+
+    var _createResponse = function(responseBody, receivedMessage) {
+        var response;
+
+        if(responseBody) {
+            response = {
+                'couldHandleMessage' : true,
+                'body' : responseBody
+            };
+        }
+        else {
+            response = {
+                'couldHandleMessage' : false,
+                'errorType' : 'DETERMINE_RESPONSE',
+                'error' : 'Could not determine response for message: ' + receivedMessage
+            };
+        }
+
+        return objectToJson(response);
     };
 
     var _createDeviceInfo = function() {
@@ -40,6 +59,6 @@ var SyncAppCommunicator = new function () {
             description: 'Sync Thunderbird Plugin'
         };
 
-        _deviceInfo = JSON.stringify(deviceInfo);
+        _deviceInfo = deviceInfo;
     };
 }
