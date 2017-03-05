@@ -6,4 +6,8 @@ var SyncAppCommunicatorConfig = new function() {
 
     this.MessagesReceiverPort = 32797;
 
+    this.DevicesDiscoveryMessagePrefix = 'Sync';
+
+    this.DevicesDiscoveryMessagePartsSeparator = ':';
+
 }
