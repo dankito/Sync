@@ -7,6 +7,7 @@ package net.dankito.sync;
 public enum OsType {
 
   DESKTOP,
-  ANDROID
+  ANDROID,
+  THUNDERBIRD
 
 }
