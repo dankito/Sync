@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -226,6 +227,8 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
   }
 
   protected void handleReceivedRemotePacket(String remoteDeviceInfo, String senderAddress, DevicesDiscovererListener listener) {
+    senderAddress = mayAdjustSenderAddress(senderAddress);
+
     String remoteDeviceKey = createDeviceKey(senderAddress, remoteDeviceInfo);
 
     if(hasDeviceAlreadyBeenFound(remoteDeviceKey) == false) {
@@ -234,6 +237,18 @@ public class UdpDevicesDiscoverer implements IDevicesDiscoverer {
     else {
       connectionsAliveWatcher.receivedMessageFromDevice(remoteDeviceKey);
     }
+  }
+
+  protected String mayAdjustSenderAddress(String senderAddress) {
+    try {
+      InetAddress inetAddress = InetAddress.getByName(senderAddress);
+
+      if(inetAddress instanceof Inet6Address && inetAddress.isLoopbackAddress()) { // convert '0:0:0:0:0:0:0:1' to '127.0.0.1'
+        senderAddress = "127.0.0.1";
+      }
+    } catch(Exception e) { log.warn("Could not check senderAddress " + senderAddress + " if it should be converted", e); }
+
+    return senderAddress;
   }
 
   protected boolean isSearchingForDevicesMessage(String receivedMessage, String discoveryMessagePrefix) {
