@@ -29,15 +29,7 @@ var networkUtil = new function () {
 
                 var receivedMessage = _readMessageFromSocket(scriptableInput);
 
-                var messageReceivedCallback = _openServerSockets[serverSocket];
-                if(messageReceivedCallback) {
-                    var responseToSend = messageReceivedCallback(receivedMessage);
-
-                    if(responseToSend) {
-                        output.write(responseToSend, responseToSend.length);
-                        output.flush();
-                    }
-                }
+                _dispatchReceivedMessageAndSendResponse(receivedMessage, serverSocket, output);
             }
             finally{
                 scriptableInput.close();
@@ -54,9 +46,20 @@ var networkUtil = new function () {
             received = received + scriptableInput.read(512);
         }
 
-        log('Received: ' + received);
-
         return received;
+    };
+
+    var _dispatchReceivedMessageAndSendResponse = function(receivedMessage, serverSocket, output) {
+        var messageReceivedCallback = _openServerSockets[serverSocket];
+
+        if(messageReceivedCallback) {
+            var responseToSend = messageReceivedCallback(receivedMessage);
+
+            if(responseToSend) {
+                output.write(responseToSend, responseToSend.length);
+                output.flush();
+            }
+        }
     };
 
 
