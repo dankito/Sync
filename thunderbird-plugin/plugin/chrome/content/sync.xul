@@ -3,6 +3,9 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type="application/javascript" src="chrome://sync/content/util.js"/>
+
+    <script type="application/javascript" src="chrome://sync/content/addressbook.js"/>
+
     <script type="application/javascript" src="chrome://sync/content/sync.js"/>
 
 </overlay>
