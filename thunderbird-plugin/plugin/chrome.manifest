@@ -1,4 +1,4 @@
 content     sync    chrome/content/
-skin sync classic/1.0  chrome/skin/
+skin sync classic/1.0  chrome/skin/classic/
 
 overlay chrome://messenger/content/messenger.xul chrome://sync/content/sync.xul
