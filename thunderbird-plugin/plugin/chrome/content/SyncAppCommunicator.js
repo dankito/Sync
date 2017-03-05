@@ -13,7 +13,7 @@ var SyncAppCommunicator = new function () {
         });
 
         var discoveryMessage = SyncAppCommunicatorConfig.DevicesDiscoveryMessagePrefix + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator +
-            'TODO' + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator + SyncAppCommunicatorConfig.MessagesReceiverPort;
+            thunderbirdInstanceUuid + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator + SyncAppCommunicatorConfig.MessagesReceiverPort;
 
         setInterval(function() {
             networkUtil.sendMessageViaUdp('localhost', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
@@ -51,7 +51,8 @@ var SyncAppCommunicator = new function () {
 
     var _createDeviceInfo = function() {
         var deviceInfo = {
-            uniqueDeviceId: 'TODO',
+            id: thunderbirdInstanceUuid,
+            uniqueDeviceId: thunderbirdInstanceUuid,
             name: 'Thunderbird',
             osType: 'THUNDERBIRD',
             osName: platform,
