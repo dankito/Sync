@@ -16,7 +16,7 @@ var SyncAppCommunicator = new function () {
             thunderbirdInstanceUuid + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator + SyncAppCommunicatorConfig.MessagesReceiverPort;
 
         setInterval(function() {
-            networkUtil.sendMessageViaUdp('localhost', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
+            networkUtil.sendMessageViaUdp('127.0.0.1', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
         }, SyncAppCommunicatorConfig.SendDevicesDiscovererMessageIntervalMillis);
     };
 
