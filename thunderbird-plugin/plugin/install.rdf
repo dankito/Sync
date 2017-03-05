@@ -13,6 +13,7 @@
     <em:version>0.1</em:version>
 
     <em:iconURL>chrome://sync/skin/icon32.png</em:iconURL>
+    <em:icon64URL>chrome://sync/skin/icon64.png</em:icon64URL>
 
     <em:targetApplication>
      <Description>
