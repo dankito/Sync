@@ -10,4 +10,9 @@ var SyncAppCommunicatorConfig = new function() {
 
     this.DevicesDiscoveryMessagePartsSeparator = ':';
 
+
+    this.GetDeviceInfoMessage = 'GetDeviceInfo';
+
+    this.GetAddressBookMessage = 'GET_ADDRESS_BOOK';
+
 }

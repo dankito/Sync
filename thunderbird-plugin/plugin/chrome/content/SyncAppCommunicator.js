@@ -21,10 +21,10 @@ var SyncAppCommunicator = new function () {
     };
 
     var _handleReceivedMessage = function(receivedMessage) {
-        if(stringStartsWith(receivedMessage, 'GetDeviceInfo')) {
+        if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.GetDeviceInfoMessage)) {
             return _deviceInfo;
         }
-        else if('GET_ADDRESS_BOOK' === receivedMessage) {
+        else if(SyncAppCommunicatorConfig.GetAddressBookMessage === receivedMessage) {
             return getAllContacts();
         }
     };
