@@ -59,7 +59,7 @@ public class SynchronizedSyncJobItemsHandler {
 
   public void handleSynchronizedSyncJobItem(SyncJobItem syncJobItem) {
     if(isInitializedSyncJobWeAreDestinationFor(syncJobItem)) {
-      remoteEntitySynchronized(syncJobItem);
+      newSyncJobItemSynchronized(syncJobItem);
     }
     else if(areWeSourceOfSyncJobItem(syncJobItem)) {
       if(isFileRemoteAwaitsThatTransferStarts(syncJobItem)) {
@@ -83,7 +83,7 @@ public class SynchronizedSyncJobItemsHandler {
 
 
 
-  protected void remoteEntitySynchronized(final SyncJobItem jobItem) {
+  protected void newSyncJobItemSynchronized(final SyncJobItem jobItem) {
     SyncEntity entity = jobItem.getEntity();
     if(entity instanceof FileSyncEntity == false) {
       jobItem.setState(SyncState.TRANSFERRED_TO_DESTINATION_DEVICE);
