@@ -1,8 +1,4 @@
 
-function log(message) {
-    Application.console.log(message);
-}
-
 
 window.addEventListener("load", function(e) {
     log('Loaded Thunderbird')
@@ -27,4 +23,4 @@ function syncAddressBook() {
     }
 }
 
-log('started (i feels so good to be back to JavaScript');
+log('started (i feels so good to be back to JavaScript)');
