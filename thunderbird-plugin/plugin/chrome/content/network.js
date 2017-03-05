@@ -23,6 +23,7 @@ var networkUtil = new function () {
             var input = transport.openInputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);//.QueryInterface(Ci.nsIAsyncInputStream);
             var output = transport.openOutputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);
 
+            // prefer nsIConverterInputStream over scriptableinputstream: https://developer.mozilla.org/en-US/docs/Reading_textual_data
             var charset = "UTF-8";
             const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
             var inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
