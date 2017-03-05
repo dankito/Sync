@@ -6,6 +6,7 @@
 
     <script type="application/javascript" src="chrome://sync/content/network.js"/>
 
+    <script type="application/javascript" src="chrome://sync/content/SyncAppCommunicatorConfig.js"/>
     <script type="application/javascript" src="chrome://sync/content/SyncAppCommunicator.js"/>
 
     <script type="application/javascript" src="chrome://sync/content/addressbook.js"/>
