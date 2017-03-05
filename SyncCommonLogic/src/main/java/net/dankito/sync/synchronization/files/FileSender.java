@@ -16,7 +16,10 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import javax.inject.Named;
 
+
+@Named
 public class FileSender {
 
   private static final Logger log = LoggerFactory.getLogger(FileSender.class);
