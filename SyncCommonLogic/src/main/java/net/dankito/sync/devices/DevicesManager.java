@@ -142,10 +142,8 @@ public class DevicesManager implements IDevicesManager {
   protected void successfullyRetrievedDeviceInfo(String deviceInfoKey, DeviceInfo deviceInfo, String address, int messagesPort) {
     Device remoteDevice = getPersistedDeviceForUniqueId(deviceInfo.getUniqueDeviceId());
 
-    if(remoteDevice == null) { // remote device not known and therefore persisted yet
-      remoteDevice = mapDeviceInfoToDevice(deviceInfo);
-
-      entityManager.persistEntity(remoteDevice);
+    if(remoteDevice == null) { // remote device not known and therefore not persisted yet
+      remoteDevice = aNeverSeenBeforeDeviceDiscovered(deviceInfo);
     }
 
     discoveredDevice(deviceInfoKey, remoteDevice, address, messagesPort);
@@ -162,9 +160,13 @@ public class DevicesManager implements IDevicesManager {
     return null;
   }
 
-  protected Device mapDeviceInfoToDevice(DeviceInfo deviceInfo) {
-    return new Device(deviceInfo.getId(), deviceInfo.getUniqueDeviceId(), deviceInfo.getName(), deviceInfo.getOsType(), deviceInfo.getOsName(),
+  protected Device aNeverSeenBeforeDeviceDiscovered(DeviceInfo deviceInfo) {
+    Device remoteDevice = new Device(deviceInfo.getId(), deviceInfo.getUniqueDeviceId(), deviceInfo.getName(), deviceInfo.getOsType(), deviceInfo.getOsName(),
         deviceInfo.getOsVersion(), deviceInfo.getDescription());
+
+    entityManager.persistEntity(remoteDevice);
+
+    return remoteDevice;
   }
 
   protected void discoveredDevice(String deviceInfoKey, Device device, String address, int messagesPort) {
