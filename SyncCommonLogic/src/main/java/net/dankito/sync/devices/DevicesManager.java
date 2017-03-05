@@ -233,6 +233,7 @@ public class DevicesManager implements IDevicesManager {
 
         callKnownSynchronizedDeviceConnected(device);
       }
+      // TODO: on DENIED remove from knownSynchronizedDevices
     }
     // TODO: what to do if not?
   }
