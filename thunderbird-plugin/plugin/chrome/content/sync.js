@@ -9,7 +9,7 @@ log('Started Sync Thunderbird Plugin');
 window.addEventListener("load", function(e) {
     retrieveApplicationInfo();
 
-    DevicesDiscovererListener.start();
+    SyncAppCommunicator.start();
 }, false);
 
 
