@@ -25,16 +25,21 @@ var networkUtil = new function () {
 
             // prefer nsIConverterInputStream over scriptableinputstream: https://developer.mozilla.org/en-US/docs/Reading_textual_data
             var charset = "UTF-8";
+            var bufferSize = 16 * 1024;
             const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
             var inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
                                .createInstance(Components.interfaces.nsIConverterInputStream);
 
             try {
-                inputStream.init(input, charset, 1024, replacementChar);
+                inputStream.init(input, charset, bufferSize, replacementChar);
 
                 var receivedMessage = _readMessageFromSocket(inputStream);
 
-                _dispatchReceivedMessageAndSendResponse(receivedMessage, serverSocket, output);
+                var outputStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+                                            .createInstance(Components.interfaces.nsIConverterOutputStream);
+                outputStream.init(output, charset, bufferSize, replacementChar);
+
+                _dispatchReceivedMessageAndSendResponse(receivedMessage, serverSocket, outputStream);
             }
             finally {
                 inputStream.close();
@@ -62,15 +67,15 @@ var networkUtil = new function () {
         return received;
     };
 
-    var _dispatchReceivedMessageAndSendResponse = function(receivedMessage, serverSocket, output) {
+    var _dispatchReceivedMessageAndSendResponse = function(receivedMessage, serverSocket, outputStream) {
         var messageReceivedCallback = _openServerSockets[serverSocket];
 
         if(messageReceivedCallback) {
             var responseToSend = messageReceivedCallback(receivedMessage);
 
             if(responseToSend) {
-                output.write(responseToSend, responseToSend.length);
-                output.flush();
+                outputStream.writeString(responseToSend);
+                outputStream.flush();
             }
         }
     };
