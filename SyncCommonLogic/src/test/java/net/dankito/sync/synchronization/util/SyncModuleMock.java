@@ -8,20 +8,22 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityCallback;
 import net.dankito.sync.synchronization.modules.HandleRetrievedSynchronizedEntityResult;
-import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.modules.SyncModuleBase;
+
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class SyncModuleMock implements ISyncModule {
+public class SyncModuleMock extends SyncModuleBase {
 
   protected static final String TEST_SYNC_MODULE_TYPE = "TestSyncModule";
 
@@ -32,7 +34,13 @@ public class SyncModuleMock implements ISyncModule {
 
 
   public SyncModuleMock(List<SyncEntity> entitiesToReturnFromReadAllEntitiesAsync) {
+    super(Mockito.mock(Localization.class));
     this.entitiesToReturnFromReadAllEntitiesAsync = entitiesToReturnFromReadAllEntitiesAsync;
+  }
+
+  @Override
+  protected String getNameStringResourceKey() {
+    return "mock";
   }
 
   @Override
