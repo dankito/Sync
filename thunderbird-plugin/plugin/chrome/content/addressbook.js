@@ -110,8 +110,8 @@ function GetNextValidContact(contacts) {
 		contact = contacts.getNext();
 		contact = contact.QueryInterface(Components.interfaces.nsIAbCard);
 
-		if (contact.isMailList) {
-			contact = null;
+		if(contact.isMailList == false) {
+			break;
 		}
 	}
 
