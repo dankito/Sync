@@ -21,12 +21,12 @@ function getAllContacts() {
       let addressBook = allAddressBooks.getNext()
                                        .QueryInterface(Components.interfaces.nsIAbDirectory);
       if (addressBook instanceof Components.interfaces.nsIAbDirectory) { // or nsIAbItem or nsIAbCollection
-        log("AddressBook Name:" + addressBook.dirName);
+        log("AddressBook Name: " + addressBook.dirName);
         var contactsInAddressBooks = getAllContactsFromAddressBook(addressBook);
         var nextContact;
 
         while(nextContact = GetNextValidContact(contactsInAddressBooks)) {
-            contacts.push(nextContact);
+            contacts.push(mapContactToSyncContact(nextContact, addressBook.URI));
         }
       }
     }
@@ -116,4 +116,24 @@ function GetNextValidContact(contacts) {
 	}
 
 	return contact;
+}
+
+function mapContactToSyncContact(contact, addressBookURI) {
+    var mapped = { };
+
+    mapped.uuid = contact.uuid;
+    mapped.localId = contact.localId;
+    mapped.addressBookURI = addressBookURI;
+
+    try {
+        var properties = contact.properties.QueryInterface(Components.interfaces.nsISimpleEnumerator);
+
+        while(properties.hasMoreElements()) {
+            var property = properties.getNext();
+            property = property.QueryInterface(Components.interfaces.nsIProperty);
+            mapped[property.name] = property.value;
+        }
+    } catch(e) { log('Could not map all properties'); log(e); }
+
+    return mapped;
 }
