@@ -10,6 +10,8 @@ log('Started Sync Thunderbird Plugin');
 window.addEventListener("load", function(e) {
     retrieveApplicationInfo();
 
+    AddressBookListener.init();
+
     SyncAppCommunicator.start();
 }, false);
 

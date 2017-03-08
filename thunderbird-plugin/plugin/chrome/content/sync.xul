@@ -10,6 +10,7 @@
     <script type="application/javascript" src="chrome://sync/content/SyncAppCommunicator.js"/>
 
     <script type="application/javascript" src="chrome://sync/content/ContactHandler.js"/>
+    <script type="application/javascript" src="chrome://sync/content/AddressBookListener.js"/>
     <script type="application/javascript" src="chrome://sync/content/addressbook.js"/>
 
     <script type="application/javascript" src="chrome://sync/content/sync.js"/>
