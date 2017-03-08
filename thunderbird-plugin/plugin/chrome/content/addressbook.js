@@ -1,139 +1,141 @@
+var AddressBook = new function() {
+
+    this.syncAddressBook = function() {
+        log('Starting to sync address book ...');
+
+        var contacts = getAllContacts();
+    };
 
 
-function syncAddressBook() {
-    log('Starting to sync address book ...');
+    this.getAllContacts = function() {
+        log('Getting all contacts ...');
 
-    var contacts = getAllContacts();
-}
+        var contacts = new Array();
 
+        let abManager = Components.classes["@mozilla.org/abmanager;1"]
+                                      .getService(Components.interfaces.nsIAbManager);
 
-function getAllContacts() {
-    log('Getting all contacts ...');
+        let allAddressBooks = abManager.directories;
 
-    var contacts = new Array();
+        while (allAddressBooks.hasMoreElements()) {
+          let addressBook = allAddressBooks.getNext()
+                                           .QueryInterface(Components.interfaces.nsIAbDirectory);
+          if (addressBook instanceof Components.interfaces.nsIAbDirectory) { // or nsIAbItem or nsIAbCollection
+            log("AddressBook Name: " + addressBook.dirName);
+            var contactsInAddressBooks = _getAllContactsFromAddressBook(addressBook);
+            var nextContact;
 
-    let abManager = Components.classes["@mozilla.org/abmanager;1"]
-                                  .getService(Components.interfaces.nsIAbManager);
-
-    let allAddressBooks = abManager.directories;
-
-    while (allAddressBooks.hasMoreElements()) {
-      let addressBook = allAddressBooks.getNext()
-                                       .QueryInterface(Components.interfaces.nsIAbDirectory);
-      if (addressBook instanceof Components.interfaces.nsIAbDirectory) { // or nsIAbItem or nsIAbCollection
-        log("AddressBook Name: " + addressBook.dirName);
-        var contactsInAddressBooks = getAllContactsFromAddressBook(addressBook);
-        var nextContact;
-
-        while(nextContact = GetNextValidContact(contactsInAddressBooks)) {
-            contacts.push(mapContactToSyncContact(nextContact, addressBook.URI));
+            while(nextContact = _getNextValidContact(contactsInAddressBooks)) {
+                contacts.push(_mapContactToSyncContact(nextContact, addressBook.URI));
+            }
+          }
         }
-      }
+
+        log('Retrieved ' + contacts.length + ' contacts from address book');
+
+        return contacts;
+    };
+
+
+
+    var _getAllContactsFromAddressBook = function(addressbook) {
+        var contacts = addressbook.childCards;
+
+        try {
+            contacts.hasMoreElements();
+        }
+        catch(ex) {
+            try {
+                contacts.first();
+            }
+            catch(ex) {}
+
+            var cse = new CardsSimpleEnum();
+
+            cse.enumerator = contacts;
+
+            return cse;
+        }
+
+        return contacts;
     }
 
-    log('Retrieved ' + contacts.length + ' contacts from address book');
 
-    return contacts;
-}
+    var CardsSimpleEnum = function() {};
 
+    CardsSimpleEnum.prototype = {
+        buffer : null,
+        atend : false,
+        enumerator : null,
 
+        hasMoreElements : function () {
+            if(this.buffer != null) return true;
 
-function getAllContactsFromAddressBook(addressbook) {
-	var contacts = addressbook.childCards;
+            if(this.atend) return false;
 
-	try {
-		contacts.hasMoreElements();
-	}
-	catch(ex) {
-		try {
-			contacts.first();
-		}
-		catch(ex) {}
+            try {
+                this.buffer = this.enumerator.currentItem();
 
-		var cse = new CardsSimpleEnum();
+                try {
+                    this.enumerator.next();
+                }
+                catch (ex) {
+                    this.atend = true;
+                }
 
-		cse.enumerator = contacts;
+                return true;
+            }
+            catch (ex) {}
 
-		return cse;
-	}
+            return false;
+        },
 
-	return contacts;
-}
-
-
-function CardsSimpleEnum() {};
-
-CardsSimpleEnum.prototype = {
-	buffer : null,
-	atend : false,
-	enumerator : null,
-
-	hasMoreElements : function () {
-		if(this.buffer != null) return true;
-
-		if(this.atend) return false;
-
-		try {
-			this.buffer = this.enumerator.currentItem();
-
-			try {
-				this.enumerator.next();
-			}
-			catch (ex) {
-				this.atend = true;
-			}
-
-			return true;
-		}
-		catch (ex) {}
-
-		return false;
-	},
-
-	getNext : function () {
-		if(this.buffer != null) {
-			var tmp = this.buffer;
-			this.buffer = null;
-			return tmp;
-		}
-		else {
-			throw("hasMoreElements() was not called");
-		}
-	}
-};
-
-
-function GetNextValidContact(contacts) {
-	var contact = null;
-
-	while(contacts.hasMoreElements()) {
-		contact = contacts.getNext();
-		contact = contact.QueryInterface(Components.interfaces.nsIAbCard);
-
-		if(contact.isMailList == false) {
-			break;
-		}
-	}
-
-	return contact;
-}
-
-function mapContactToSyncContact(contact, addressBookURI) {
-    var mapped = { };
-
-    mapped.uuid = contact.uuid;
-    mapped.localId = contact.localId;
-    mapped.addressBookURI = addressBookURI;
-
-    try {
-        var properties = contact.properties.QueryInterface(Components.interfaces.nsISimpleEnumerator);
-
-        while(properties.hasMoreElements()) {
-            var property = properties.getNext();
-            property = property.QueryInterface(Components.interfaces.nsIProperty);
-            mapped[property.name] = property.value;
+        getNext : function () {
+            if(this.buffer != null) {
+                var tmp = this.buffer;
+                this.buffer = null;
+                return tmp;
+            }
+            else {
+                throw("hasMoreElements() was not called");
+            }
         }
-    } catch(e) { log('Could not map all properties'); log(e); }
+    };
 
-    return mapped;
+
+    var _getNextValidContact = function(contacts) {
+        var contact = null;
+
+        while(contacts.hasMoreElements()) {
+            contact = contacts.getNext();
+            contact = contact.QueryInterface(Components.interfaces.nsIAbCard);
+
+            if(contact.isMailList == false) {
+                break;
+            }
+        }
+
+        return contact;
+    };
+
+    var _mapContactToSyncContact = function(contact, addressBookURI) {
+        var mapped = { };
+
+        mapped.uuid = contact.uuid;
+        mapped.localId = contact.localId;
+        mapped.addressBookURI = addressBookURI;
+
+        try {
+            var properties = contact.properties.QueryInterface(Components.interfaces.nsISimpleEnumerator);
+
+            while(properties.hasMoreElements()) {
+                var property = properties.getNext();
+                property = property.QueryInterface(Components.interfaces.nsIProperty);
+                mapped[property.name] = property.value;
+            }
+        } catch(e) { log('Could not map all properties'); log(e); }
+
+        return mapped;
+    };
+
 }

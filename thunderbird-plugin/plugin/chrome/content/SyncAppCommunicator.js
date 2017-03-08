@@ -25,7 +25,7 @@ var SyncAppCommunicator = new function () {
             return _deviceInfo;
         }
         else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.GetAddressBookMessage)) {
-            return getAllContacts();
+            return AddressBook.getAllContacts();
         }
     };
 
