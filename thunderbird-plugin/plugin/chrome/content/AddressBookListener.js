@@ -8,8 +8,7 @@ var AddressBookListener = new function() {
         let abManager = Components.classes["@mozilla.org/abmanager;1"]
                                       .getService(Components.interfaces.nsIAbManager);
 
-        abManager.addAddressBookListener(_addressBookAbListener, nsIAbListener.itemAdded |
-                            nsIAbListener.directoryItemRemoved | nsIAbListener.directoryRemoved | nsIAbListener.itemChanged);
+        abManager.addAddressBookListener(_addressBookAbListener, nsIAbListener.all);
     };
 
 
