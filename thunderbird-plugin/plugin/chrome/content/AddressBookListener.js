@@ -37,7 +37,7 @@ var AddressBookListener = new function() {
        onItemPropertyChanged: function(item, property, oldValue, newValue) {
            // property, oldValue, newValue always(?) seem to be null
            if(item instanceof Components.interfaces.nsIAbCard) {
-              _synchronizeContact(item, SyncEntityState.UPDATED);
+              _synchronizeContact(item, SyncEntityState.CHANGED);
            }
            else if (item instanceof Components.interfaces.nsIAbDirectory) {
               // TODO

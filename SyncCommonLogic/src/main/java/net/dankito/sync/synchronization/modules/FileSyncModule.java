@@ -58,7 +58,7 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
     if(entityState == SyncEntityState.CREATED) {
       createOrUpdateFile(jobItem, callback);
     }
-    else if(entityState == SyncEntityState.UPDATED) {
+    else if(entityState == SyncEntityState.CHANGED) {
       createOrUpdateFile(jobItem, callback); // TODO: first check if file data really got updated (or only file metadata)
     }
     else if(entityState == SyncEntityState.DELETED) {

@@ -183,7 +183,7 @@ public abstract class AndroidSyncModuleTestBase {
     updateTestEntity(entity);
 
 
-    underTest.handleRetrievedSynchronizedEntityAsync(createSyncJobItem(entity), SyncEntityState.UPDATED, getCountDownCallback(countDownLatch));
+    underTest.handleRetrievedSynchronizedEntityAsync(createSyncJobItem(entity), SyncEntityState.CHANGED, getCountDownCallback(countDownLatch));
 
 
     testIfEntryHasSuccessfullyBeenUpdated(entity);
@@ -246,7 +246,7 @@ public abstract class AndroidSyncModuleTestBase {
     });
 
     updateTestEntity(syncEntity);
-    underTest.handleRetrievedSynchronizedEntityAsync(createSyncJobItem(syncEntity), SyncEntityState.UPDATED, getCountDownCallback(countDownLatch));
+    underTest.handleRetrievedSynchronizedEntityAsync(createSyncJobItem(syncEntity), SyncEntityState.CHANGED, getCountDownCallback(countDownLatch));
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 

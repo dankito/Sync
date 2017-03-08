@@ -148,7 +148,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
       if(entityState == SyncEntityState.CREATED) {
         isSuccessful = addEntityToLocalDatabase(jobItem);
       }
-      else if(entityState == SyncEntityState.UPDATED) {
+      else if(entityState == SyncEntityState.CHANGED) {
         isSuccessful = updateEntityInLocalDatabase(jobItem);
       }
       else if(entityState == SyncEntityState.DELETED) {

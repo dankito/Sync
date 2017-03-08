@@ -86,7 +86,7 @@ public abstract class AndroidFileSyncModuleBase extends AndroidSyncModuleBase im
 
   @Override
   protected void synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
-    if(entityState == SyncEntityState.CREATED || entityState == SyncEntityState.UPDATED) {
+    if(entityState == SyncEntityState.CREATED || entityState == SyncEntityState.CHANGED) {
       createOrUpdateFile(jobItem, callback);
     }
     else if(entityState == SyncEntityState.DELETED) {

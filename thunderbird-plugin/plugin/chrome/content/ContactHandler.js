@@ -2,7 +2,7 @@ var ContactHandler = new function() {
 
     SyncEntityState = {
         CREATED : 'CREATED',
-        UPDATED : 'UPDATED',
+        CHANGED : 'CHANGED',
         DELETED : 'DELETED'
     };
 

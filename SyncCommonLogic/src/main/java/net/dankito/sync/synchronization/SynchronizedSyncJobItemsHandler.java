@@ -134,7 +134,7 @@ public class SynchronizedSyncJobItemsHandler {
         return SyncEntityState.DELETED;
       }
       else {
-        return SyncEntityState.UPDATED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
+        return SyncEntityState.CHANGED; // TODO: check if entity really has been updated, e.g. by saving last update timestamp on LookupKey row
       }
     }
   }
