@@ -7,6 +7,7 @@ import net.dankito.communication.IRequestReceiver;
 import net.dankito.communication.IRequestSender;
 import net.dankito.communication.JsonMessageSerializer;
 import net.dankito.communication.RequestReceiver;
+import net.dankito.communication.RequestReceiverCallback;
 import net.dankito.communication.RequestSender;
 import net.dankito.communication.SocketHandler;
 import net.dankito.communication.callback.SendRequestCallback;
@@ -48,6 +49,8 @@ public class ThunderbirdPluginConnector {
 
   protected SocketAddress thunderbirdAddress;
 
+  protected int messagesReceiverPort;
+
 
   public ThunderbirdPluginConnector(DiscoveredDevice thunderbird, IThreadPool threadPool) {
     this.discoveredThunderbird = thunderbird;
@@ -62,7 +65,21 @@ public class ThunderbirdPluginConnector {
 
     this.requestSender = new RequestSender(socketHandler, messageSerializer, threadPool);
 
+    startRequestReceiver(socketHandler, messageHandler, messageSerializer);
+  }
+
+  protected void startRequestReceiver(SocketHandler socketHandler, IMessageHandler messageHandler, IMessageSerializer messageSerializer) {
     this.requestReceiver = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
+
+    requestReceiver.start(ThunderbirdPluginConnectorConfig.DEFAULT_RECEIVER_PORT, new RequestReceiverCallback() {
+      @Override
+      public void started(IRequestReceiver requestReceiver, boolean couldStartReceiver, int messagesReceiverPort, Exception startException) {
+        if(couldStartReceiver) {
+          ThunderbirdPluginConnector.this.messagesReceiverPort = messagesReceiverPort;
+          // TODO: tell Thunderbird messages receiver port
+        }
+      }
+    });
   }
 
 
