@@ -158,7 +158,7 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Object> {
     setMinHeight(DEVICE_TREE_CELL_HEIGHT);
     setMaxHeight(DEVICE_TREE_CELL_HEIGHT);
 
-    imgvwOsIcon.setImage(new Image(IconManager.getInstance().getLogoForOperatingSystem(device.getDevice().getOsName(), device.getDevice().getOsVersion())));
+    imgvwOsIcon.setImage(new Image(IconManager.getInstance().getLogoForOperatingSystem(device.getDevice())));
 
     lblDeviceName.setText(getDeviceDescription(device.getDevice()));
     lblDeviceAddress.setText(device.getAddress());

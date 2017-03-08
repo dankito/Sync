@@ -1,0 +1,25 @@
+Downloaded from:
+https://en.wikipedia.org/wiki/File:Mozilla_Thunderbird_logo.png
+
+Licence:
+
+.png and .jpg:
+Mozilla Public License Version 2
+
+vector graphics:
+CC-BY 3.0
+
+
+Guidelines
+
+For all permitted uses of our trademarks, you may not:
+
+    - alter our logos in any way
+    - place a logo in such close proximity to other content that it is indistinguishable
+    - make our logo the most distinctive or prominent feature on your website, printed material or other content
+    - use our logos in a way that suggests any type of association or partnership with Mozilla or approval, sponsorship or endorsement by Mozilla (unless allowed via a license from us)
+    - use our logos in a way that is harmful, deceptive, obscene or otherwise objectionable to the average person
+    - use our logos on websites or other places containing content associated with hate speech, pornography, gambling or illegal activities
+    - use our logos to, or in connection with, content that disparages us or sullies our reputation
+
+(https://www.mozilla.org/en-US/styleguide/identity/thunderbird/logo/)
