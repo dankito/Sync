@@ -1,4 +1,4 @@
-var networkUtil = new function () {
+var Network = new function () {
 
     var _openServerSockets = { };
 

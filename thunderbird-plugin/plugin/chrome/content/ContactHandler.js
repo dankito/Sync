@@ -14,7 +14,7 @@ var ContactHandler = new function() {
 
         message = 'SYNC_CONTACT:' + objectToJson(message);
 
-        networkUtil.sendMessageViaTcp(address, port, message);
+        Network.sendMessageViaTcp(address, port, message);
     };
 
 

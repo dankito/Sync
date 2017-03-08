@@ -5,7 +5,7 @@ var SyncAppCommunicator = new function () {
     this.start = function() {
         _createDeviceInfo();
 
-        networkUtil.startTcpListenerSocket(SyncAppCommunicatorConfig.MessagesReceiverPort, function(receivedMessage) {
+        Network.startTcpListenerSocket(SyncAppCommunicatorConfig.MessagesReceiverPort, function(receivedMessage) {
             log('Received message in SyncAppCommunicator: ' + receivedMessage);
 
             var responseBody = _handleReceivedMessage(receivedMessage);
@@ -16,7 +16,7 @@ var SyncAppCommunicator = new function () {
             thunderbirdInstanceUuid + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator + SyncAppCommunicatorConfig.MessagesReceiverPort;
 
         setInterval(function() {
-            networkUtil.sendMessageViaUdp('127.0.0.1', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
+            Network.sendMessageViaUdp('127.0.0.1', SyncAppCommunicatorConfig.DevicesDiscovererUdpPort, discoveryMessage);
         }, SyncAppCommunicatorConfig.SendDevicesDiscovererMessageIntervalMillis);
     };
 
