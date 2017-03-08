@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import net.dankito.sync.Device;
+import net.dankito.sync.OsType;
 import net.dankito.sync.R;
 import net.dankito.sync.activities.SynchronizationSettingsActivity;
 import net.dankito.sync.devices.DiscoveredDevice;
@@ -94,6 +95,8 @@ public abstract class DiscoveredDevicesAdapterBase extends BaseAdapter {
 
     if(osName.contains("android"))
       return R.drawable.android_logo;
+    else if(device.getOsType() == OsType.THUNDERBIRD)
+      return R.drawable.thunderbird_logo;
     else if(osName.contains("linux"))
       return R.drawable.linux_logo;
     else if(osName.contains("windows"))
