@@ -86,6 +86,10 @@ public class ThunderbirdContact {
   public String toString() {
     String description = PrimaryEmail;
 
+    if(DisplayName != null) {
+      description = DisplayName + " (" + description + ")";
+    }
+
     return description;
   }
 
