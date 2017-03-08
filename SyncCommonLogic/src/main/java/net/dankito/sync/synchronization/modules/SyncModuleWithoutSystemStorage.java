@@ -5,7 +5,6 @@ import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.localization.Localization;
-import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 import java.util.ArrayList;
 
@@ -41,16 +40,6 @@ public abstract class SyncModuleWithoutSystemStorage extends SyncModuleBase impl
     callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
 
     super.handleRetrievedSynchronizedEntityAsync(jobItem, entityState, callback); // inform linked SyncModules
-  }
-
-  @Override
-  public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
-
-  }
-
-  @Override
-  public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
-
   }
 
 }

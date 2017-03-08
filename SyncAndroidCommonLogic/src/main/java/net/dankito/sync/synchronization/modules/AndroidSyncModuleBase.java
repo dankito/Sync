@@ -190,31 +190,25 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
 
   @Override
-  public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
-    synchronized(syncEntityChangeListeners) {
-      if(syncEntityChangeListeners.size() == 0) {
-        registerContentObserver();
-      }
-
-      syncEntityChangeListeners.add(listener);
+  protected void listenerAdded(SyncEntityChangeListener addedListener, List<SyncEntityChangeListener> allListeners) {
+    if(allListeners.size() == 0) {
+      registerContentObserver();
     }
+
+    super.listenerAdded(addedListener, allListeners);
   }
 
   @Override
-  public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
-    synchronized(syncEntityChangeListeners) {
-      syncEntityChangeListeners.remove(listener);
-
-      if(syncEntityChangeListeners.size() == 0) {
-        unregisterContentObserver();
-      }
+  protected void listenerRemoved(SyncEntityChangeListener removedListener, List<SyncEntityChangeListener> allListeners) {
+    if(allListeners.size() == 0) {
+      unregisterContentObserver();
     }
+
+    super.listenerRemoved(removedListener, allListeners);
   }
 
   protected void callEntityChangedListeners(SyncEntity entity) {
-    for(SyncEntityChangeListener listener : syncEntityChangeListeners) {
-      listener.entityChanged(new SyncEntityChange(this, entity));
-    }
+    callSyncEntityChangeListeners(new SyncEntityChange(this, entity));
   }
 
 

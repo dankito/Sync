@@ -7,6 +7,8 @@ import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
+import net.dankito.sync.synchronization.SyncEntityChange;
+import net.dankito.sync.synchronization.SyncEntityChangeListener;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,6 +28,8 @@ public abstract class SyncModuleBase implements ISyncModule {
 
 
   protected Localization localization;
+
+  protected List<SyncEntityChangeListener> listeners = new CopyOnWriteArrayList<>();
 
   protected List<ISyncModule> linkedSyncModules = new CopyOnWriteArrayList<>();
 
@@ -60,6 +64,40 @@ public abstract class SyncModuleBase implements ISyncModule {
       linkedSyncModule.handleRetrievedSynchronizedEntityAsync(jobItem, entityState, callback);
     }
   }
+
+
+  @Override
+  public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
+    synchronized(listeners) {
+      listeners.add(listener);
+
+      listenerAdded(listener, listeners);
+    }
+  }
+
+  protected void listenerAdded(SyncEntityChangeListener addedListener, List<SyncEntityChangeListener> allListeners) {
+    // maybe overwritten in sub classes
+  }
+
+  @Override
+  public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
+    synchronized(listeners) {
+      listeners.remove(listener);
+
+      listenerRemoved(listener, listeners);
+    }
+  }
+
+  protected void listenerRemoved(SyncEntityChangeListener removedListener, List<SyncEntityChangeListener> allListeners) {
+    // maybe overwritten in sub classes
+  }
+
+  protected void callSyncEntityChangeListeners(SyncEntityChange change) {
+    for(SyncEntityChangeListener listener : listeners) {
+      listener.entityChanged(change);
+    }
+  }
+
 
   @Override
   public boolean registerLinkedSyncModule(ISyncModule syncModule) {

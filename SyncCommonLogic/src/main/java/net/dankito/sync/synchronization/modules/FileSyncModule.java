@@ -7,7 +7,6 @@ import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
-import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.synchronization.files.FileSyncListener;
 import net.dankito.sync.synchronization.files.FileSyncService;
 import net.dankito.sync.synchronization.files.RetrievedFile;
@@ -93,17 +92,6 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
 
     fileSyncService.fileSyncJobItemRetrieved(jobItem);
     fileSyncService.start();
-  }
-
-
-  @Override
-  public void addSyncEntityChangeListener(SyncEntityChangeListener listener) {
-    // currently is no FileSystemWatcher implemented
-  }
-
-  @Override
-  public void removeSyncEntityChangeListener(SyncEntityChangeListener listener) {
-    // currently is no FileSystemWatcher implemented
   }
 
 
