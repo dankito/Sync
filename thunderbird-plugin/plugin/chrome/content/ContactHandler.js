@@ -1,5 +1,23 @@
 var ContactHandler = new function() {
 
+    SyncEntityState = {
+        CREATED : 'CREATED',
+        UPDATED : 'UPDATED',
+        DELETED : 'DELETED'
+    };
+
+    this.synchronizeContact = function(address, port, contact, syncEntityState) {
+        var message = {
+            'contact' : ContactHandler.mapContactToSyncContact(contact),
+            'state' : syncEntityState
+        };
+
+        message = 'SYNC_CONTACT:' + objectToJson(message);
+
+        networkUtil.sendMessageViaTcp(address, port, message);
+    };
+
+
     this.mapContactToSyncContact = function(contact, addressBookURI) {
         var mapped = { };
 
