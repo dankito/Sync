@@ -26,6 +26,7 @@ import net.dankito.sync.thunderbird.callback.ThunderbirdCallback;
 import net.dankito.sync.thunderbird.model.ThunderbirdContact;
 import net.dankito.sync.thunderbird.response.GetAddressBookResponse;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ public class ThunderbirdPluginConnector {
 
     // TODO: add remaining
 
-    if(thunderbirdContact.PrimaryEmail != null) {
+    if(StringUtils.isNotNullOrEmpty(thunderbirdContact.PrimaryEmail)) {
       contact.addEmailAddress(new EmailSyncEntity(thunderbirdContact.PrimaryEmail, EmailType.OTHER));
     }
 
