@@ -72,6 +72,8 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
         callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, isSuccessful));
       }
     }
+
+    super.handleRetrievedSynchronizedEntityAsync(jobItem, entityState, callback); // inform linked SyncModules
   }
 
 

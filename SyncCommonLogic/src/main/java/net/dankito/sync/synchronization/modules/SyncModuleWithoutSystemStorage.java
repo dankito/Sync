@@ -39,6 +39,8 @@ public abstract class SyncModuleWithoutSystemStorage extends SyncModuleBase impl
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
     callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, true));
+
+    super.handleRetrievedSynchronizedEntityAsync(jobItem, entityState, callback); // inform linked SyncModules
   }
 
   @Override

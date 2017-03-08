@@ -137,6 +137,8 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
       log.error("Permission " + getPermissionToWriteEntities() + " is denied, cannot handle " + jobItem + " though");
       callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, false, false));
     }
+
+    super.handleRetrievedSynchronizedEntityAsync(jobItem, entityState, callback); // inform linked SyncModules
   }
 
   protected void synchronizedEntityRetrievedPermissionGranted(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
