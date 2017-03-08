@@ -165,7 +165,10 @@ public class DeviceOrSyncModuleConfigurationTreeCell extends TreeCell<Object> {
   }
 
   protected String getDeviceDescription(Device device) {
-    if(device.getOsType() == OsType.ANDROID) {
+    if(device.getOsType() == OsType.THUNDERBIRD) {
+      return device.getName() + " " + device.getOsVersion();
+    }
+    else if(device.getOsType() == OsType.ANDROID) {
       return device.getName();
     }
     else {
