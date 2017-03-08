@@ -17,7 +17,11 @@ import net.dankito.communication.message.ResponseErrorType;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.EmailSyncEntity;
 import net.dankito.sync.EmailType;
+import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.synchronization.SyncEntityChange;
+import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.sync.thunderbird.callback.ContactSynchronizedListener;
 import net.dankito.sync.thunderbird.callback.ThunderbirdCallback;
 import net.dankito.sync.thunderbird.model.ThunderbirdContact;
 import net.dankito.sync.thunderbird.response.GetAddressBookResponse;
@@ -45,30 +49,31 @@ public class ThunderbirdPluginConnector {
 
   protected IRequestReceiver requestReceiver;
 
-  protected IThreadPool threadPool;
+  protected SyncEntityChangeListener syncEntityChangeListener;
 
   protected SocketAddress thunderbirdAddress;
 
   protected int messagesReceiverPort;
 
 
-  public ThunderbirdPluginConnector(DiscoveredDevice thunderbird, IThreadPool threadPool) {
+  public ThunderbirdPluginConnector(DiscoveredDevice thunderbird, IThreadPool threadPool, SyncEntityChangeListener syncEntityChangeListener) {
     this.discoveredThunderbird = thunderbird;
+    this.syncEntityChangeListener = syncEntityChangeListener;
 
     this.thunderbirdAddress = new InetSocketAddress(thunderbird.getAddress(), thunderbird.getMessagesPort());
 
     // TODO: this is in large parts a copy of TcpSocketClientCommunicator
 
     SocketHandler socketHandler = new SocketHandler();
-    IMessageHandler messageHandler = new ThunderbirdMessageHandler();
+    IMessageHandler messageHandler = new ThunderbirdMessageHandler(contactSynchronizedListener);
     IMessageSerializer messageSerializer = new JsonMessageSerializer(messageHandler);
 
     this.requestSender = new RequestSender(socketHandler, messageSerializer, threadPool);
 
-    startRequestReceiver(socketHandler, messageHandler, messageSerializer);
+    startRequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
   }
 
-  protected void startRequestReceiver(SocketHandler socketHandler, IMessageHandler messageHandler, IMessageSerializer messageSerializer) {
+  protected void startRequestReceiver(SocketHandler socketHandler, IMessageHandler messageHandler, IMessageSerializer messageSerializer, IThreadPool threadPool) {
     this.requestReceiver = new RequestReceiver(socketHandler, messageHandler, messageSerializer, threadPool);
 
     requestReceiver.start(ThunderbirdPluginConnectorConfig.DEFAULT_RECEIVER_PORT, new RequestReceiverCallback() {
@@ -113,6 +118,17 @@ public class ThunderbirdPluginConnector {
     }
   }
 
+  protected void contactSynchronized(SyncEntityState state, ThunderbirdContact contact) {
+    ContactSyncEntity mappedContact = mapThunderbirdContact(contact);
+
+    entitySynchronized(state, mappedContact);
+  }
+
+  protected void entitySynchronized(SyncEntityState state, ContactSyncEntity contact) {
+    syncEntityChangeListener.entityChanged(new SyncEntityChange(null, contact));
+  }
+
+
   protected ContactSyncEntity mapThunderbirdContact(ThunderbirdContact thunderbirdContact) {
     ContactSyncEntity contact = new ContactSyncEntity();
 
@@ -141,6 +157,14 @@ public class ThunderbirdPluginConnector {
 
     return null;
   }
+
+
+  protected ContactSynchronizedListener contactSynchronizedListener = new ContactSynchronizedListener() {
+    @Override
+    public void contactSynchronized(SyncEntityState state, ThunderbirdContact contact) {
+      ThunderbirdPluginConnector.this.contactSynchronized(state, contact);
+    }
+  };
 
 
 }
