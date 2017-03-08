@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface ReadEntitiesCallback {
 
-  void done(List<SyncEntity> entities);
+  void done(List<? extends SyncEntity> entities);
 
 }
