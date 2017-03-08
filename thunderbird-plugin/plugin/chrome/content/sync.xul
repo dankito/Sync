@@ -2,17 +2,17 @@
 <overlay id="sample"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <script type="application/javascript" src="chrome://sync/content/util.js"/>
+    <script type="application/javascript" src="chrome://sync/content/Util.js"/>
 
-    <script type="application/javascript" src="chrome://sync/content/network.js"/>
+    <script type="application/javascript" src="chrome://sync/content/Network.js"/>
 
     <script type="application/javascript" src="chrome://sync/content/SyncAppCommunicatorConfig.js"/>
     <script type="application/javascript" src="chrome://sync/content/SyncAppCommunicator.js"/>
 
     <script type="application/javascript" src="chrome://sync/content/ContactHandler.js"/>
     <script type="application/javascript" src="chrome://sync/content/AddressBookListener.js"/>
-    <script type="application/javascript" src="chrome://sync/content/addressbook.js"/>
+    <script type="application/javascript" src="chrome://sync/content/AddressBook.js"/>
 
-    <script type="application/javascript" src="chrome://sync/content/sync.js"/>
+    <script type="application/javascript" src="chrome://sync/content/Sync.js"/>
 
 </overlay>
