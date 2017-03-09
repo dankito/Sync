@@ -106,7 +106,9 @@ public class FileSender {
       try { socketOutputStream.close(); } catch(Exception e) { log.warn("Could not close socketOutputStream", e); }
     }
 
-    try { socket.close(); } catch(Exception e) { log.warn("Could not close socket", e); }
+    if(socket != null) {
+      try { socket.close(); } catch (Exception e) { log.warn("Could not close socket", e); }
+    }
   }
 
 }
