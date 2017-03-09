@@ -6,6 +6,7 @@ import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.EmailSyncEntity;
 import net.dankito.sync.LocalConfig;
+import net.dankito.sync.OsType;
 import net.dankito.sync.PhoneNumberSyncEntity;
 import net.dankito.sync.SyncConfiguration;
 import net.dankito.sync.SyncEntity;
@@ -15,6 +16,8 @@ import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.DiscoveredDeviceType;
+import net.dankito.sync.devices.DiscoveredDevicesListener;
 import net.dankito.sync.devices.IDevicesManager;
 import net.dankito.sync.devices.KnownSynchronizedDevicesListener;
 import net.dankito.sync.persistence.IEntityManager;
@@ -23,6 +26,8 @@ import net.dankito.sync.synchronization.merge.IDataMerger;
 import net.dankito.sync.synchronization.modules.ISyncModule;
 import net.dankito.sync.synchronization.modules.ReadEntitiesCallback;
 import net.dankito.sync.synchronization.modules.SyncConfigurationChanges;
+import net.dankito.sync.synchronization.modules.SyncModuleDefaultTypes;
+import net.dankito.sync.synchronization.modules.ThunderbirdContactsSyncModule;
 import net.dankito.utils.IThreadPool;
 import net.dankito.utils.services.IFileStorageService;
 
@@ -102,6 +107,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     syncManager.addSynchronizationListener(synchronizationListener);
     devicesManager.addKnownSynchronizedDevicesListener(knownSynchronizedDevicesListener);
+    devicesManager.addDiscoveredDevicesListener(discoveredDevicesListener);
   }
 
 
@@ -110,6 +116,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void connectedToSynchronizedDevice(DiscoveredDevice remoteDevice) {
     connectedSynchronizedDevices.add(remoteDevice);
+
+    if(remoteDevice.getDevice().getOsType() == OsType.THUNDERBIRD) {
+      ISyncModule contactsSyncModule = availableSyncModules.get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
+      if(contactsSyncModule != null) {
+        contactsSyncModule.registerLinkedSyncModule(new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool));
+      }
+    }
 
     SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(remoteDevice.getDevice());
     if(syncConfiguration != null) {
@@ -179,7 +192,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<SyncEntity> entities) {
+      public void done(List<? extends SyncEntity> entities) {
         syncModulesCurrentlyReadingAllEntities.remove(syncModule);
 
         determineEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
@@ -196,7 +209,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
-  protected void determineEntitiesToSynchronize(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> entities) {
+  protected void determineEntitiesToSynchronize(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<? extends SyncEntity> entities) {
     List<SyncEntity> currentlySynchronizedEntities = new ArrayList<>(syncJobItemsHandler.getCurrentlySynchronizedEntities()); // has to be copied here as between getting lookup get and
     // iterating over currently synchronized entities in shouldEntityBeSynchronized(), entity could get removed from syncEntitiesCurrentlyBeingSynchronized
     Map<String, SyncEntityLocalLookupKeys> lookupKeys = getLookupKeysForSyncModuleConfigurationByLocalLookupKey(syncModuleConfiguration);
@@ -285,7 +298,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         }
         else {
           if(hasEntityBeenUpdated(persistedEntity, entity, entityLookupKey, entityPropertiesLookupKeys)) {
-            type = SyncEntityState.UPDATED;
+            type = SyncEntityState.CHANGED;
           }
         }
       }
@@ -717,6 +730,28 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
+  protected void newThunderbirdInstanceFound(DiscoveredDevice thunderbird) {
+    List<SyncModuleConfiguration> defaultConfigurationsForThunderbird = getDefaultConfigurationsForThunderbird(thunderbird);
+
+    devicesManager.startSynchronizingWithDevice(thunderbird, defaultConfigurationsForThunderbird);
+  }
+
+  protected List<SyncModuleConfiguration> getDefaultConfigurationsForThunderbird(DiscoveredDevice thunderbird) {
+    List<SyncModuleConfiguration> defaultConfiguration = new ArrayList<>();
+
+    SyncModuleConfiguration contactsSyncModuleConfiguration = new SyncModuleConfiguration(SyncModuleDefaultTypes.CONTACTS.getTypeName());
+    contactsSyncModuleConfiguration.setEnabled(true);
+    contactsSyncModuleConfiguration.setBidirectional(true);
+    defaultConfiguration.add(contactsSyncModuleConfiguration);
+
+    return defaultConfiguration;
+  }
+
+  protected boolean isSyncModuleThunderbirdCanHandle(ISyncModule syncModule) {
+    return SyncModuleDefaultTypes.CONTACTS.getTypeName().equals(syncModule.getSyncEntityTypeItCanHandle());
+  }
+
+
   protected synchronized void addSyncEntityChangeListener(DiscoveredDevice remoteDevice, ISyncModule syncModule) {
     if(activatedSyncModules.containsKey(syncModule)) {
       activatedSyncModules.get(syncModule).add(remoteDevice);
@@ -795,7 +830,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<SyncEntity> entities) {
+      public void done(List<? extends SyncEntity> entities) {
         syncModulesCurrentlyReadingAllEntities.remove(syncModule);
 
         for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
@@ -963,6 +998,20 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     @Override
     public void knownSynchronizedDeviceDisconnected(DiscoveredDevice disconnectedDevice) {
       disconnectedFromSynchronizedDevice(disconnectedDevice);
+    }
+  };
+
+  protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
+    @Override
+    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+      if(connectedDevice.getDevice().getOsType() == OsType.THUNDERBIRD && type == DiscoveredDeviceType.UNKNOWN_DEVICE) {
+        newThunderbirdInstanceFound(connectedDevice);
+      }
+    }
+
+    @Override
+    public void disconnectedFromDevice(DiscoveredDevice disconnectedDevice) {
+
     }
   };
 
