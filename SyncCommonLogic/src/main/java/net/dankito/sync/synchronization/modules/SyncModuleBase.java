@@ -46,6 +46,13 @@ public abstract class SyncModuleBase implements ISyncModule {
     return localization.getLocalizedString(getNameStringResourceKey());
   }
 
+  @Override
+  public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
+    for(ISyncModule linkedSyncModule : linkedSyncModules) {
+      linkedSyncModule.readAllEntitiesAsync(callback);
+    }
+  }
+
 
   @Override
   public boolean deleteSyncEntityProperty(SyncEntity entity, SyncEntity property) {

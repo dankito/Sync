@@ -81,6 +81,8 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
         readAllEntities(callback);
       }
     });
+
+    super.readAllEntitiesAsync(callback);
   }
 
   protected void readAllEntities(final ReadEntitiesCallback callback) {

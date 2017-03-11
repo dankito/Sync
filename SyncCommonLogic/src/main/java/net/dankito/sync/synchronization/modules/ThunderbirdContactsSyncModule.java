@@ -53,10 +53,12 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
           callback.done(response.getBody());
         }
         else {
-          callback.done(new ArrayList<ContactSyncEntity>()); // TODO: inform caller that an error occured
+          callback.done(new ArrayList<ContactSyncEntity>()); // TODO: inform caller that an error occurred
         }
       }
     });
+
+    super.readAllEntitiesAsync(callback);
   }
 
   @Override
