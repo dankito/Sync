@@ -12,7 +12,7 @@ var ContactHandler = new function() {
             'state' : syncEntityState
         };
 
-        message = 'SYNC_CONTACT:' + objectToJson(message);
+        message = SyncAppCommunicatorConfig.SyncContactMessage + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator + objectToJson(message);
 
         Network.sendMessageViaTcp(address, port, message);
     };

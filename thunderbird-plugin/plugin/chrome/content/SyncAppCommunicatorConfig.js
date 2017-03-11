@@ -15,8 +15,11 @@ var SyncAppCommunicatorConfig = new function() {
 
     this.GetDeviceInfoMessage = 'GetDeviceInfo';
 
-    this.GetAddressBookMessage = 'GET_ADDRESS_BOOK';
-    
     this.RequestStartSynchronizationMessage = "RequestStartSynchronization";
+    
+
+    this.GetAddressBookMessage = 'GetAddressBook';
+
+    this.SyncContactMessage = 'SyncContact';
 
 }
