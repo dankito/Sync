@@ -21,7 +21,6 @@ var AddressBook = new function() {
           let addressBook = allAddressBooks.getNext()
                                            .QueryInterface(Components.interfaces.nsIAbDirectory);
           if (addressBook instanceof Components.interfaces.nsIAbDirectory) { // or nsIAbItem or nsIAbCollection
-            log("AddressBook Name: " + addressBook.dirName);
             var contactsInAddressBooks = _getAllContactsFromAddressBook(addressBook);
             var nextContact;
 
@@ -34,6 +33,38 @@ var AddressBook = new function() {
         log('Retrieved ' + contacts.length + ' contacts from address book');
 
         return contacts;
+    };
+
+
+    this.handleSynchronizedContact = function (contact, state) {
+        if(state == SyncEntityState.CREATED) {
+            return _handleCreatedContact(contact);
+        }
+    };
+
+    var _handleCreatedContact = function(contact) {
+        var card = ContactHandler.mapSyncContactToCard(contact);
+        var addressBook = _getAddressBookToInsertNewContact();
+
+        let newCard = addressBook.addCard(card);
+        return ContactHandler.mapContactToSyncContact(newCard, addressBook.URI);
+    };
+
+    var _getAddressBookToInsertNewContact = function() {
+        let abManager = Components.classes["@mozilla.org/abmanager;1"]
+            .getService(Components.interfaces.nsIAbManager);
+
+        let allAddressBooks = abManager.directories;
+
+        while (allAddressBooks.hasMoreElements()) {
+            let addressBook = allAddressBooks.getNext()
+                .QueryInterface(Components.interfaces.nsIAbDirectory);
+            if (addressBook instanceof Components.interfaces.nsIAbDirectory) {
+                return addressBook;
+            }
+        }
+
+        return null;
     };
 
 
