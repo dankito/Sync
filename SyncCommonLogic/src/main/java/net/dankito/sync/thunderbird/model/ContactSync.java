@@ -10,6 +10,16 @@ public class ContactSync {
   protected ThunderbirdContact contact;
 
 
+  public ContactSync() {
+
+  }
+
+  public ContactSync(ThunderbirdContact contact, SyncEntityState state) {
+    this.contact = contact;
+    this.state = state;
+  }
+
+
   public SyncEntityState getState() {
     return state;
   }
