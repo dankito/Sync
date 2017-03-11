@@ -203,7 +203,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void readingAllEntitiesDoneForModule(ISyncModule syncModule) {
     if(syncModulesWithEntityChanges.remove(syncModule)) { // while reading all entities changes occurred -> now re-read all entities
-      pushModuleEntityChangesToRemoteDevices(syncModule);
+      getAndPushModuleEntityChangesToRemoteDevices(syncModule);
     }
   }
 
@@ -824,6 +824,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
     if(contactsSyncModule != null) {
       ThunderbirdContactsSyncModule thunderbirdContactsSyncModule = new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool);
+      thunderbirdContactsSyncModule.addSyncEntityChangeListener(syncEntityChangeListener);
       contactsSyncModule.registerLinkedSyncModule(thunderbirdContactsSyncModule);
     }
   }
@@ -868,7 +869,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
    * Some Modules have a lot of changes in a very short period -> don't react on every change, wait some time till all changes are made
    * @param syncEntityChange
    */
-  protected void pushModuleEntityChangesToRemoteDevicesAfterADelay(SyncEntityChange syncEntityChange) {
+  protected void getAndPushModuleEntityChangesToRemoteDevicesAfterADelay(SyncEntityChange syncEntityChange) {
     final ISyncModule syncModule = syncEntityChange.getSyncModule();
     syncModulesWithEntityChanges.add(syncModule);
 
@@ -878,14 +879,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       if(delay <= 0) {
         syncModulesWithEntityChanges.remove(syncModule);
 
-        pushModuleEntityChangesToRemoteDevices(syncModule);
+        getAndPushModuleEntityChangesToRemoteDevices(syncModule);
       }
       else {
         syncModulesWithEntityUpdatesTimer.schedule(new TimerTask() {
           @Override
           public void run() {
             if(syncModulesWithEntityChanges.remove(syncModule)) { // if syncModule hasn't been removed (and therefore processed) yet
-              pushModuleEntityChangesToRemoteDevices(syncModule);
+              getAndPushModuleEntityChangesToRemoteDevices(syncModule);
             }
           }
         }, delay);
@@ -902,7 +903,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
   }
 
-  protected void pushModuleEntityChangesToRemoteDevices(final ISyncModule syncModule) {
+  protected void getAndPushModuleEntityChangesToRemoteDevices(final ISyncModule syncModule) {
     syncModulesCurrentlyReadingAllEntities.add(syncModule);
 
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
