@@ -122,13 +122,18 @@ public class ThunderbirdPluginConnector {
   }
 
 
-  public void syncContact(ContactSyncEntity entity, SyncEntityState state) {
+  public void syncContact(ContactSyncEntity entity, SyncEntityState state, final ThunderbirdCallback<net.dankito.sync.communication.message.Response<ThunderbirdContact>> callback) {
     ContactSync body = new ContactSync(mapContactSyncEntity(entity), state);
 
     requestSender.sendRequestAndReceiveResponseAsync(thunderbirdAddress, new Request(ThunderbirdMessageConfig.SYNC_CONTACT_MESSAGE, body), new SendRequestCallback() {
       @Override
       public void done(Response response) {
-        // TODO: set synchronization successful / failed
+        if(response.isCouldHandleMessage() == false) {
+          callback.done(new net.dankito.sync.communication.message.Response<ThunderbirdContact>(mapResponseErrorType(response.getErrorType()), response.getError()));
+        }
+        else {
+          callback.done(new net.dankito.sync.communication.message.Response<ThunderbirdContact>((ThunderbirdContact)response.getBody()));
+        }
       }
     });
   }
