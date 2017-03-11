@@ -123,11 +123,9 @@ public class SyncModuleConfigurationManager implements ISyncModuleConfigurationM
         }
       }
 
-      if(syncModuleConfigurationToSyncModule == null) { // a new SyncModule added
-        syncModuleConfigurationToSyncModule = createDefaultSyncModuleConfiguration(availableSyncModule, availableSyncModule.getSyncEntityTypeItCanHandle());
+      if(syncModuleConfigurationToSyncModule != null) { // == null means SyncModule not enabled for this device
+        addSyncModuleConfiguration(syncConfigurationWithDevice, availableSyncModule, syncModuleConfigurationToSyncModule);
       }
-
-      addSyncModuleConfiguration(syncConfigurationWithDevice, availableSyncModule, syncModuleConfigurationToSyncModule);
     }
   }
 
