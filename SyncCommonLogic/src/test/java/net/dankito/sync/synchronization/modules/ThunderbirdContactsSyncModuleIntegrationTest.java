@@ -61,7 +61,7 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
     underTest.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<? extends SyncEntity> entities) {
+      public void done(boolean wasSuccessful, List<? extends SyncEntity> entities) {
         resultHolder.setObject((List<ContactSyncEntity>)entities);
         countDownLatch.countDown();
       }

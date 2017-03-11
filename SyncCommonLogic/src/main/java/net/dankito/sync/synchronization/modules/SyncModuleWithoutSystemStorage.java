@@ -32,7 +32,7 @@ public abstract class SyncModuleWithoutSystemStorage extends SyncModuleBase impl
 
   @Override
   public void readAllEntitiesAsync(ReadEntitiesCallback callback) {
-    callback.done(new ArrayList<SyncEntity>());
+    callback.done(false, new ArrayList<SyncEntity>());
 
     super.readAllEntitiesAsync(callback);
   }

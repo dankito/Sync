@@ -50,10 +50,10 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
       @Override
       public void done(GetAddressBookResponse response) {
         if(response.isCouldHandleMessage()) {
-          callback.done(response.getBody());
+          callback.done(true, response.getBody());
         }
         else {
-          callback.done(new ArrayList<ContactSyncEntity>()); // TODO: inform caller that an error occurred
+          callback.done(false, new ArrayList<ContactSyncEntity>());
         }
       }
     });

@@ -50,7 +50,7 @@ public abstract class FileSyncModule extends SyncModuleBase implements ISyncModu
 
   @Override
   public void readAllEntitiesAsync(ReadEntitiesCallback callback) { // TODO: here's the SyncModuleConfiguration missing as we don't know which directory to read files from
-    callback.done(new ArrayList<SyncEntity>());
+    callback.done(false, new ArrayList<SyncEntity>());
 
     super.readAllEntitiesAsync(callback);
   }

@@ -64,7 +64,7 @@ public class SyncModuleMock extends SyncModuleBase {
       setEntityLocalLookupKeyAndLastModifiedOnDevice(entity, false);
     }
 
-    callback.done(new ArrayList<SyncEntity>(entitiesToReturnFromReadAllEntitiesAsync));
+    callback.done(true, new ArrayList<SyncEntity>(entitiesToReturnFromReadAllEntitiesAsync));
   }
 
   @Override
