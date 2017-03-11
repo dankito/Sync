@@ -8,8 +8,13 @@ var SyncAppCommunicator = new function () {
         Network.startTcpListenerSocket(SyncAppCommunicatorConfig.MessagesReceiverPort, function(receivedMessage) {
             log('Received message in SyncAppCommunicator: ' + receivedMessage);
 
-            var responseBody = _handleReceivedMessage(receivedMessage);
-            return _createResponse(responseBody, receivedMessage);
+            try {
+                var responseBody = _handleReceivedMessage(receivedMessage);
+                return _createResponse(responseBody, receivedMessage);
+            } catch(e) {
+                log('Could not handle received message: ' + e);
+                return _createResponse(null, e);
+            }
         });
 
         var discoveryMessage = SyncAppCommunicatorConfig.DevicesDiscoveryMessagePrefix + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator +
