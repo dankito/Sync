@@ -4,6 +4,7 @@ package net.dankito.sync.javafx.controls.content;
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.data.IDataManager;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.javafx.FXUtils;
@@ -167,7 +168,7 @@ public class ContactsContentPane extends VBox implements Initializable {
   protected SynchronizationListener synchronizationListener = new SynchronizationListener() {
     @Override
     public void entitySynchronized(BaseEntity entity) {
-      if(entity instanceof ContactSyncEntity) {
+      if(entity instanceof ContactSyncEntity || (entity instanceof SyncJobItem && ((SyncJobItem)entity).getEntity() instanceof ContactSyncEntity)) {
         FXUtils.runOnUiThread(() -> updateContacts() );
       }
     }
