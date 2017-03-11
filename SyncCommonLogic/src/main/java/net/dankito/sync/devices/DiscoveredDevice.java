@@ -5,13 +5,18 @@ import net.dankito.sync.Device;
 
 public class DiscoveredDevice {
 
+  public static final int SYNCHRONIZATION_PORT_NOT_YET_DETERMINED = -1;
+
+  public static final int DEVICE_DOES_NOT_SUPPORT_ACTIVE_SYNCHRONIZATION = -2;
+
+
   protected Device device;
 
   protected String address;
 
   protected int messagesPort;
 
-  protected int synchronizationPort;
+  protected int synchronizationPort = SYNCHRONIZATION_PORT_NOT_YET_DETERMINED;
 
 
   public DiscoveredDevice(Device device, String address) {
@@ -42,6 +47,11 @@ public class DiscoveredDevice {
 
   public void setMessagesPort(int messagesPort) {
     this.messagesPort = messagesPort;
+  }
+
+  public boolean supportsActiveSynchronization() {
+    return getSynchronizationPort() != DEVICE_DOES_NOT_SUPPORT_ACTIVE_SYNCHRONIZATION &&
+           getSynchronizationPort() != SYNCHRONIZATION_PORT_NOT_YET_DETERMINED;
   }
 
   public int getSynchronizationPort() {

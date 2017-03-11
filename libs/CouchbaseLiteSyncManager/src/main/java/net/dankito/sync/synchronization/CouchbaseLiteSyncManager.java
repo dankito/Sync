@@ -183,6 +183,10 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   @Override
   protected void startSynchronizationWithDevice(DiscoveredDevice device) throws Exception {
     synchronized(this) {
+      if(device.supportsActiveSynchronization() == false) {
+        return;
+      }
+
       if(isListenerStarted() == false) { // first device has connected -> start Listener first
         startSynchronizationListener();
       }
