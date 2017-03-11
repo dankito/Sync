@@ -32,7 +32,7 @@ public class ThunderbirdMessageHandler implements IMessageHandler {
       ContactSync contactSync = (ContactSync)request.getBody();
 
       if(contactSynchronizedListener != null) {
-        contactSynchronizedListener.contactSynchronized(contactSync.getState(), contactSync.getContact());
+        contactSynchronizedListener.contactSynchronized(contactSync.getContact(), contactSync.getState());
       }
     }
   }

@@ -134,14 +134,14 @@ public class ThunderbirdPluginConnector {
   }
 
 
-  protected void contactSynchronized(SyncEntityState state, ThunderbirdContact contact) {
+  protected void contactSynchronized(ThunderbirdContact contact, SyncEntityState state) {
     ContactSyncEntity mappedContact = mapThunderbirdContact(contact);
 
-    entitySynchronized(state, mappedContact);
+    entitySynchronized(mappedContact, state);
   }
 
-  protected void entitySynchronized(SyncEntityState state, ContactSyncEntity contact) {
-    syncEntityChangeListener.entityChanged(new SyncEntityChange(null, contact));
+  protected void entitySynchronized(ContactSyncEntity contact, SyncEntityState state) {
+    syncEntityChangeListener.entityChanged(new SyncEntityChange(null, contact, state, discoveredThunderbird));
   }
 
 
@@ -205,8 +205,8 @@ public class ThunderbirdPluginConnector {
 
   protected ContactSynchronizedListener contactSynchronizedListener = new ContactSynchronizedListener() {
     @Override
-    public void contactSynchronized(SyncEntityState state, ThunderbirdContact contact) {
-      ThunderbirdPluginConnector.this.contactSynchronized(state, contact);
+    public void contactSynchronized(ThunderbirdContact contact, SyncEntityState state) {
+      ThunderbirdPluginConnector.this.contactSynchronized(contact, state);
     }
   };
 
