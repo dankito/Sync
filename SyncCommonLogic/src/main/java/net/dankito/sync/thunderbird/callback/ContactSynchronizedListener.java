@@ -6,6 +6,6 @@ import net.dankito.sync.thunderbird.model.ThunderbirdContact;
 
 public interface ContactSynchronizedListener {
 
-  void contactSynchronized(SyncEntityState state, ThunderbirdContact contact);
+  void contactSynchronized(ThunderbirdContact contact, SyncEntityState state);
 
 }
