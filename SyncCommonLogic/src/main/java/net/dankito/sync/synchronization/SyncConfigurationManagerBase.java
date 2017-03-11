@@ -118,7 +118,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     connectedSynchronizedDevices.add(remoteDevice);
 
     if(remoteDevice.getDevice().getOsType() == OsType.THUNDERBIRD) {
-      ISyncModule contactsSyncModule = availableSyncModules.get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
+      ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
       if(contactsSyncModule != null) {
         contactsSyncModule.registerLinkedSyncModule(new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool));
       }
@@ -692,12 +692,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return syncConfiguration;
   }
 
-  @Override
-  public ISyncModule getSyncModuleForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
-    getAvailableSyncModules(); // ensure availableSyncModules are loaded
-    return availableSyncModules.get(syncModuleConfiguration.getSyncModuleType());
-  }
-
   protected Class<? extends SyncEntity> getEntityClassFromEntityType(String entityType) {
     Class<? extends SyncEntity> entityClass = entityClassTypes.get(entityType);
 
@@ -715,7 +709,16 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
+  @Override
+  public ISyncModule getSyncModuleForSyncModuleConfiguration(SyncModuleConfiguration syncModuleConfiguration) {
+    return getAvailableSyncModulesMap().get(syncModuleConfiguration.getSyncModuleType());
+  }
+
   public List<ISyncModule> getAvailableSyncModules() {
+    return new ArrayList<>(getAvailableSyncModulesMap().values());
+  }
+
+  protected Map<String, ISyncModule> getAvailableSyncModulesMap() {
     synchronized(this) {
       if(availableSyncModules == null) {
         availableSyncModules = new HashMap<>();
@@ -726,7 +729,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
     }
 
-    return new ArrayList<>(availableSyncModules.values());
+    return availableSyncModules;
   }
 
 
