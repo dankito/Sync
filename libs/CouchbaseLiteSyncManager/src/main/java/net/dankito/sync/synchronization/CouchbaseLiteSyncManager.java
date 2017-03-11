@@ -15,6 +15,7 @@ import net.dankito.jpa.couchbaselite.Dao;
 import net.dankito.sync.BaseEntity;
 import net.dankito.sync.LocalConfig;
 import net.dankito.sync.SyncEntityLocalLookupKeys;
+import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.config.DatabaseTableConfig;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.INetworkSettings;
@@ -97,6 +98,8 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
     this.changeQueue = new AsyncProducerConsumerQueue<>(1, AsyncProducerConsumerQueue.NO_LIMIT_ITEMS_TO_QUEUE, MILLIS_TO_WAIT_BEFORE_PROCESSING_SYNCHRONIZED_ENTITY, synchronizationChangesHandler);
 
     setReplicationFilter(database);
+
+    database.addChangeListener(databaseChangeListener);
   }
 
   private void setReplicationFilter(Database database) {
@@ -235,8 +238,6 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
 
       pullReplication.start();
     }
-
-    database.addChangeListener(databaseChangeListener);
   }
 
   @Override
@@ -271,9 +272,7 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   protected Database.ChangeListener databaseChangeListener = new Database.ChangeListener() {
     @Override
     public void changed(final Database.ChangeEvent event) {
-      if(event.isExternal()) {
-        changeQueue.add(event);
-      }
+      changeQueue.add(event);
     }
   };
 
@@ -281,20 +280,22 @@ public class CouchbaseLiteSyncManager extends SyncManagerBase {
   protected ConsumerListener<Database.ChangeEvent> synchronizationChangesHandler = new ConsumerListener<Database.ChangeEvent>() {
     @Override
     public void consumeItem(Database.ChangeEvent item) {
-      handleSynchronizedChanges(item.getChanges());
+      handleSynchronizedChanges(item);
     }
   };
 
 
-  protected void handleSynchronizedChanges(List<DocumentChange> changes) {
-    for(DocumentChange change : changes) {
+  protected void handleSynchronizedChanges(Database.ChangeEvent event) {
+    for(DocumentChange change : event.getChanges()) {
       Class<? extends BaseEntity> entityType = getEntityTypeFromDocumentChange(change);
 
-      if(entityType != null) {
-        handleChange(change, entityType);
-      }
-      else if(isEntityDeleted(change)) {
-        handleDeletedEntity(change);
+      if(event.isExternal() || entityType == SyncJobItem.class) { // Due to current implementation of how Thunderbird is handled: Handling now also internal changes to SyncJobItems
+        if(entityType != null) {
+          handleChange(change, entityType);
+        }
+        else if (isEntityDeleted(change)) {
+          handleDeletedEntity(change);
+        }
       }
     }
   }
