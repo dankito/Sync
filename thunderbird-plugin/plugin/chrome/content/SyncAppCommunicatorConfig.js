@@ -10,9 +10,13 @@ var SyncAppCommunicatorConfig = new function() {
 
     this.DevicesDiscoveryMessagePartsSeparator = ':';
 
+    this.DeviceDoesNotSupportActiveSynchronization = -2;
+
 
     this.GetDeviceInfoMessage = 'GetDeviceInfo';
 
     this.GetAddressBookMessage = 'GET_ADDRESS_BOOK';
+    
+    this.RequestStartSynchronizationMessage = "RequestStartSynchronization";
 
 }

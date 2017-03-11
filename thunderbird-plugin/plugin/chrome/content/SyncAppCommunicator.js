@@ -27,6 +27,12 @@ var SyncAppCommunicator = new function () {
         else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.GetAddressBookMessage)) {
             return AddressBook.getAllContacts();
         }
+        else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.RequestStartSynchronizationMessage)) {
+            return {
+                'result' : 'ALLOWED',
+                'synchronizationPort' : SyncAppCommunicatorConfig.DeviceDoesNotSupportActiveSynchronization
+            };
+        }
     };
 
     var _createResponse = function(responseBody, receivedMessage) {
