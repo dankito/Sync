@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public abstract class AndroidSyncModuleBase extends SyncModuleBase implements ISyncModule {
@@ -35,8 +34,6 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected Context context;
 
   protected IThreadPool threadPool;
-
-  protected List<SyncEntityChangeListener> syncEntityChangeListeners = new CopyOnWriteArrayList<>();
 
 
   public AndroidSyncModuleBase(Context context, Localization localization, IThreadPool threadPool) {
@@ -209,8 +206,8 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     super.listenerRemoved(removedListener, allListeners);
   }
 
-  protected void callEntityChangedListeners(SyncEntity entity) {
-    callSyncEntityChangeListeners(new SyncEntityChange(this, entity));
+  protected void callEntityChangedListeners() {
+    callSyncEntityChangeListeners(new SyncEntityChange(this, false));
   }
 
 
@@ -236,7 +233,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
   protected void entitiesToSynchronizeChanged(Uri uri) {
     // TODO: get changed entities
 
-    callEntityChangedListeners(null);
+    callEntityChangedListeners();
   }
 
 
