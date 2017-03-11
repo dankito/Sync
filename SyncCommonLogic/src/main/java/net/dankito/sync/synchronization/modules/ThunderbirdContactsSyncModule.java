@@ -3,16 +3,19 @@ package net.dankito.sync.synchronization.modules;
 import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.thunderbird.ThunderbirdPluginConnector;
 import net.dankito.sync.thunderbird.callback.ThunderbirdCallback;
+import net.dankito.sync.thunderbird.model.ThunderbirdContact;
 import net.dankito.sync.thunderbird.response.GetAddressBookResponse;
 import net.dankito.utils.IThreadPool;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class ThunderbirdContactsSyncModule extends SyncModuleBase {
@@ -62,12 +65,26 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
   }
 
   @Override
-  public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
+  public void handleRetrievedSynchronizedEntityAsync(final SyncJobItem jobItem, SyncEntityState entityState, final HandleRetrievedSynchronizedEntityCallback callback) {
     if(jobItem.getEntity() instanceof ContactSyncEntity) { // should actually always be the case, just to make sure
       if(jobItem.getSourceDevice() != thunderbird.getDevice()) {
-        connector.syncContact((ContactSyncEntity) jobItem.getEntity(), entityState);
+        connector.syncContact((ContactSyncEntity) jobItem.getEntity(), entityState, new ThunderbirdCallback<Response<ThunderbirdContact>>() {
+          @Override
+          public void done(Response<ThunderbirdContact> response) {
+            if(response.isCouldHandleMessage()) {
+              updateContact((ContactSyncEntity)jobItem.getEntity(), response.getBody());
+            }
+
+            callback.done(new HandleRetrievedSynchronizedEntityResult(jobItem, response.isCouldHandleMessage()));
+          }
+        });
       }
     }
+  }
+
+  private void updateContact(ContactSyncEntity contactSyncEntity, ThunderbirdContact thunderbirdContact) {
+    contactSyncEntity.setLocalLookupKey(thunderbirdContact.getLocalLookupKey());
+    contactSyncEntity.setLastModifiedOnDevice(new Date(thunderbirdContact.LastModifiedDate));
   }
 
 

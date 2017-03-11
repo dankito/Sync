@@ -153,7 +153,7 @@ public class ThunderbirdPluginConnector {
   protected ContactSyncEntity mapThunderbirdContact(ThunderbirdContact thunderbirdContact) {
     ContactSyncEntity contact = new ContactSyncEntity();
 
-    contact.setLocalLookupKey(thunderbirdContact.uuid);
+    contact.setLocalLookupKey(thunderbirdContact.getLocalLookupKey());
     contact.setLastModifiedOnDevice(new Date(thunderbirdContact.LastModifiedDate));
 
     contact.setDisplayName(thunderbirdContact.DisplayName);
@@ -179,6 +179,8 @@ public class ThunderbirdPluginConnector {
 
   protected ThunderbirdContact mapContactSyncEntity(ContactSyncEntity contact) {
     ThunderbirdContact mapped = new ThunderbirdContact();
+
+    mapped.setLocalLookupKey(contact.getLocalLookupKey());
 
     mapped.DisplayName = contact.getDisplayName();
     mapped.FirstName = contact.getGivenName();

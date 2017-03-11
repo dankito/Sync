@@ -1,11 +1,20 @@
 package net.dankito.sync.thunderbird.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import net.dankito.utils.StringUtils;
+
 public class ThunderbirdContact {
+
+  protected static final String ADDRESS_BOOK_URI_AND_LOCAL_ID_SEPARATOR = "#";
+
 
   // as almost all property names start with an upper case letter, Jackson can not deserialize them using getter/setter -> i only use public fields.
 
   public String uuid;
+
+  public String localId;
 
   public String addressBookURI;
 
@@ -80,6 +89,33 @@ public class ThunderbirdContact {
   public String BirthYear;
   public String BirthMonth;
   public String BirthDay;
+
+
+
+  @JsonIgnore
+  public String getLocalLookupKey() {
+    if(StringUtils.isNotNullOrEmpty(addressBookURI) && StringUtils.isNotNullOrEmpty(localId)) {
+      return addressBookURI + ADDRESS_BOOK_URI_AND_LOCAL_ID_SEPARATOR + localId;
+    }
+
+    return null;
+  }
+
+
+  @JsonIgnore // needed as otherwise Jackson would serialize this as property and then on deserialization overwrites addressBookURI and localID
+  public void setLocalLookupKey(String localLookupKey) {
+    if(StringUtils.isNotNullOrEmpty(localLookupKey)) {
+      String[] parts = localLookupKey.split(ADDRESS_BOOK_URI_AND_LOCAL_ID_SEPARATOR);
+
+      if(parts.length > 0) {
+        this.addressBookURI = parts[0];
+      }
+
+      if(parts.length > 1) {
+        this.localId = parts[1];
+      }
+    }
+  }
 
 
   @Override
