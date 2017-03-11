@@ -118,10 +118,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     connectedSynchronizedDevices.add(remoteDevice);
 
     if(remoteDevice.getDevice().getOsType() == OsType.THUNDERBIRD) {
-      ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
-      if(contactsSyncModule != null) {
-        contactsSyncModule.registerLinkedSyncModule(new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool));
-      }
+      registerSyncModulesForThunderbird(remoteDevice);
     }
 
     SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(remoteDevice.getDevice());
@@ -192,10 +189,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<? extends SyncEntity> entities) {
+      public void done(boolean wasSuccessful, List<? extends SyncEntity> entities) {
         syncModulesCurrentlyReadingAllEntities.remove(syncModule);
 
-        determineEntitiesToSynchronize(remoteDevice, syncModuleConfiguration, entities);
+        if(wasSuccessful) {
+          determineEntitiesToSynchronize(remoteDevice, syncModule, syncModuleConfiguration, entities);
+        }
 
         readingAllEntitiesDoneForModule(syncModule);
       }
@@ -209,24 +208,24 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
 
-  protected void determineEntitiesToSynchronize(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<? extends SyncEntity> entities) {
+  protected void determineEntitiesToSynchronize(DiscoveredDevice remoteDevice, ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration, List<? extends SyncEntity> entities) {
     List<SyncEntity> currentlySynchronizedEntities = new ArrayList<>(syncJobItemsHandler.getCurrentlySynchronizedEntities()); // has to be copied here as between getting lookup get and
     // iterating over currently synchronized entities in shouldEntityBeSynchronized(), entity could get removed from syncEntitiesCurrentlyBeingSynchronized
     Map<String, SyncEntityLocalLookupKeys> lookupKeys = getLookupKeysForSyncModuleConfigurationByLocalLookupKey(syncModuleConfiguration);
 
     for(int i = entities.size() - 1; i >= 0; i--) {
       SyncEntity entity = entities.remove(i);
-      determineIfEntityShouldBeSynchronized(entity, remoteDevice, syncModuleConfiguration, currentlySynchronizedEntities, lookupKeys);
+      determineIfEntityShouldBeSynchronized(entity, remoteDevice, syncModule, syncModuleConfiguration, currentlySynchronizedEntities, lookupKeys);
     }
 
     List<SyncEntity> deletedEntities = getDeletedEntities(lookupKeys, currentlySynchronizedEntities); // SyncEntities still remaining in lookupKeys have been deleted
     for(SyncEntity deletedEntity : deletedEntities) {
-      syncQueue.addEntityToPushToRemote(deletedEntity, remoteDevice, syncModuleConfiguration);
+      pushEntityToRemote(remoteDevice, syncModuleConfiguration, deletedEntity, SyncEntityState.DELETED);
     }
     // TODO: shouldn't we delete entities in deletedEntities after they have been synchronized?
   }
 
-  protected void determineIfEntityShouldBeSynchronized(SyncEntity entity, DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> currentlySynchronizedEntities, Map<String, SyncEntityLocalLookupKeys> lookupKeys) {
+  protected void determineIfEntityShouldBeSynchronized(SyncEntity entity, DiscoveredDevice remoteDevice, ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration, List<SyncEntity> currentlySynchronizedEntities, Map<String, SyncEntityLocalLookupKeys> lookupKeys) {
     SyncEntityLocalLookupKeys entityLookupKey = lookupKeys.remove(entity.getLocalLookupKey()); // remove from lookupKeys so that in the end only deleted entities remain in  lookupKeys
     Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys = getSyncEntityPropertiesLookupKeys(entity, lookupKeys);
 
@@ -234,9 +233,13 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     if(type != SyncEntityState.UNCHANGED) {
       log.info("Entity " + entity + " has SyncEntityState of " + type);
-      SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookupKey, entityPropertiesLookupKeys, lookupKeys);
-      syncQueue.addEntityToPushToRemote(persistedEntity, remoteDevice, syncModuleConfiguration);
+      SyncEntity persistedEntity = handleEntityToBeSynchronized(syncModuleConfiguration, entity, entityLookupKey, entityPropertiesLookupKeys, lookupKeys, remoteDevice);
+      pushEntityToRemote(remoteDevice, syncModuleConfiguration, persistedEntity, type);
     }
+  }
+
+  protected void pushEntityToRemote(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration, SyncEntity persistedEntity, SyncEntityState state) {
+    syncQueue.addEntityToPushToRemote(persistedEntity, remoteDevice, syncModuleConfiguration);
   }
 
   protected Map<String, SyncEntityLocalLookupKeys> getLookupKeysForSyncModuleConfigurationByLocalLookupKey(SyncModuleConfiguration syncModuleConfiguration) {
@@ -292,6 +295,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       }
       else {
         SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(entityLookupKey.getEntityType()), entityLookupKey.getEntityDatabaseId());
+        setEntityAndPropertiesLookupKeys(persistedEntity, entityLookupKey, entityPropertiesLookupKeys);
 
         if(persistedEntity.isDeleted()) { // TODO: how should that ever be? if it's deleted, there's no Entry in Android Database
           type = SyncEntityState.DELETED;
@@ -318,12 +322,43 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return false;
   }
 
-  protected SyncEntity handleEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey,
-                                                    Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
-    if(entityLookupKey == null) { // unpersisted SyncEntity
-      persistSyncEntityProperties(syncModuleConfiguration, entity);
+  protected void setEntityAndPropertiesLookupKeys(SyncEntity persistedEntity, SyncEntityLocalLookupKeys entityLookupKey, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys) {
+    setEntityLocalLookupKey(persistedEntity, entityLookupKey);
 
-      persistSyncEntity(syncModuleConfiguration, entity);
+    if(persistedEntity instanceof ContactSyncEntity) {
+      ContactSyncEntity contact = (ContactSyncEntity)persistedEntity;
+
+      for(PhoneNumberSyncEntity phoneNumber : contact.getPhoneNumbers()) {
+        SyncEntityLocalLookupKeys phoneLookupKey = getLookupKeyForDatabaseId(phoneNumber.getId());
+        if(phoneLookupKey != null) {
+          setEntityLocalLookupKey(phoneNumber, phoneLookupKey);
+          entityPropertiesLookupKeys.put(phoneLookupKey.getEntityLocalLookupKey(), phoneLookupKey);
+        }
+      }
+
+      for(EmailSyncEntity email : contact.getEmailAddresses()) {
+        SyncEntityLocalLookupKeys emailLookupKey = getLookupKeyForDatabaseId(email.getId());
+        if(emailLookupKey != null) {
+          setEntityLocalLookupKey(email, emailLookupKey);
+          entityPropertiesLookupKeys.put(emailLookupKey.getEntityLocalLookupKey(), emailLookupKey);
+        }
+      }
+    }
+  }
+
+  protected void setEntityLocalLookupKey(SyncEntity persistedEntity, SyncEntityLocalLookupKeys lookupKey) {
+    if(lookupKey != null) {
+      persistedEntity.setLocalLookupKey(lookupKey.getEntityLocalLookupKey());
+      persistedEntity.setLastModifiedOnDevice(lookupKey.getEntityLastModifiedOnDevice());
+    }
+  }
+
+  protected SyncEntity handleEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, SyncEntityLocalLookupKeys entityLookupKey,
+                                                    Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys, DiscoveredDevice remoteDevice) {
+    if(entityLookupKey == null) { // unpersisted SyncEntity
+      persistSyncEntityProperties(syncModuleConfiguration, entity, remoteDevice);
+
+      persistSyncEntity(syncModuleConfiguration, entity, remoteDevice);
 
       return entity;
     }
@@ -355,27 +390,28 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     entityManager.updateEntity(persistedEntity);
   }
 
-  protected void persistSyncEntity(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
-    entity.setSourceDevice(localConfig.getLocalDevice());
+  protected void persistSyncEntity(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, DiscoveredDevice remoteDevice) {
+    Device sourceDevice = remoteDevice.getDevice().getOsType() == OsType.THUNDERBIRD ? remoteDevice.getDevice() : localConfig.getLocalDevice();
+    entity.setSourceDevice(sourceDevice);
 
     entityManager.persistEntity(entity);
 
     persistEntryLookupKey(syncModuleConfiguration, entity);
   }
 
-  protected void persistSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity) {
+  protected void persistSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, SyncEntity entity, DiscoveredDevice remoteDevice) {
     if(entity instanceof ContactSyncEntity) {
-      persistContactSyncEntityProperties(syncModuleConfiguration, (ContactSyncEntity)entity);
+      persistContactSyncEntityProperties(syncModuleConfiguration, (ContactSyncEntity)entity, remoteDevice);
     }
   }
 
-  protected void persistContactSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity contact) {
+  protected void persistContactSyncEntityProperties(SyncModuleConfiguration syncModuleConfiguration, ContactSyncEntity contact, DiscoveredDevice remoteDevice) {
     for(PhoneNumberSyncEntity phoneNumber : contact.getPhoneNumbers()) {
-      persistSyncEntity(syncModuleConfiguration, phoneNumber);
+      persistSyncEntity(syncModuleConfiguration, phoneNumber, remoteDevice);
     }
 
     for(EmailSyncEntity email : contact.getEmailAddresses()) {
-      persistSyncEntity(syncModuleConfiguration, email);
+      persistSyncEntity(syncModuleConfiguration, email, remoteDevice);
     }
   }
 
@@ -537,13 +573,22 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     for(PhoneNumberSyncEntity phoneNumber : persistedEntity.getPhoneNumbers()) {
-      PhoneNumberSyncEntity matchingPhoneNumber = getMatchingPhoneNumber(phoneNumber, contact);
-      if(matchingPhoneNumber == null) { // this phone number has been deleted
-        return true;
+      if(phoneNumber.getLocalLookupKey() == null) {
+        SyncEntityLocalLookupKeys lookupKey = getLookupKeyForDatabaseId(phoneNumber.getId());
+        if(lookupKey != null) {
+          phoneNumber.setLocalLookupKey(lookupKey.getId());
+        }
       }
-      else {
-        if(hasPhoneNumberBeenUpdated(phoneNumber, matchingPhoneNumber)) {
+
+      if(phoneNumber.getLocalLookupKey() != null) {
+        PhoneNumberSyncEntity matchingPhoneNumber = getMatchingPhoneNumber(phoneNumber, contact);
+        if(matchingPhoneNumber == null) { // this phone number has been deleted
           return true;
+        }
+        else {
+          if(hasPhoneNumberBeenUpdated(phoneNumber, matchingPhoneNumber)) {
+            return true;
+          }
         }
       }
     }
@@ -591,18 +636,39 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     }
 
     for(EmailSyncEntity email : persistedEntity.getEmailAddresses()) {
-      EmailSyncEntity matchingEmail = getMatchingEmail(email, contact);
-      if(matchingEmail == null) { // this email has been deleted
-        return true;
+      if(email.getLocalLookupKey() == null) {
+        SyncEntityLocalLookupKeys lookupKey = getLookupKeyForDatabaseId(email.getId());
+        if(lookupKey != null) {
+          email.setLocalLookupKey(lookupKey.getId());
+        }
       }
-      else {
-        if(hasEmailBeenUpdated(email, matchingEmail)) {
+
+      if(email.getLocalLookupKey() != null) {
+        EmailSyncEntity matchingEmail = getMatchingEmail(email, contact);
+        if(matchingEmail == null) { // this email has been deleted
           return true;
+        }
+        else {
+          if(hasEmailBeenUpdated(email, matchingEmail)) {
+            return true;
+          }
         }
       }
     }
 
     return false;
+  }
+
+  protected SyncEntityLocalLookupKeys getLookupKeyForDatabaseId(String id) {
+    if(id != null) {
+      for(SyncEntityLocalLookupKeys lookupKey : entityManager.getAllEntitiesOfType(SyncEntityLocalLookupKeys.class)) {
+        if(id.equals(lookupKey.getEntityDatabaseId())) {
+          return lookupKey;
+        }
+      }
+    }
+
+    return null;
   }
 
   protected EmailSyncEntity getMatchingEmail(EmailSyncEntity persistedEmail, ContactSyncEntity unpersistedContact) {
@@ -754,6 +820,14 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return SyncModuleDefaultTypes.CONTACTS.getTypeName().equals(syncModule.getSyncEntityTypeItCanHandle());
   }
 
+  protected void registerSyncModulesForThunderbird(DiscoveredDevice remoteDevice) {
+    ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
+    if(contactsSyncModule != null) {
+      ThunderbirdContactsSyncModule thunderbirdContactsSyncModule = new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool);
+      contactsSyncModule.registerLinkedSyncModule(thunderbirdContactsSyncModule);
+    }
+  }
+
 
   protected synchronized void addSyncEntityChangeListener(DiscoveredDevice remoteDevice, ISyncModule syncModule) {
     if(activatedSyncModules.containsKey(syncModule)) {
@@ -833,16 +907,16 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     syncModule.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<? extends SyncEntity> entities) {
+      public void done(boolean wasSuccessful, List<? extends SyncEntity> entities) {
         syncModulesCurrentlyReadingAllEntities.remove(syncModule);
 
         for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
           SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
           if(syncConfiguration != null) {
             for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
-              if(syncModuleConfiguration.isEnabled()) {
+              if(syncModuleConfiguration.isEnabled()) { // TODO: isn't there a check if connectedDevice == destination || (connectedDevice == source && bidirectional == true) missing?
                 if(syncModule.getSyncEntityTypeItCanHandle().equals(syncModuleConfiguration.getSyncModuleType())) {
-                  determineEntitiesToSynchronize(connectedDevice, syncModuleConfiguration, entities);
+                  determineEntitiesToSynchronize(connectedDevice, syncModule, syncModuleConfiguration, entities);
                 }
               }
             }
