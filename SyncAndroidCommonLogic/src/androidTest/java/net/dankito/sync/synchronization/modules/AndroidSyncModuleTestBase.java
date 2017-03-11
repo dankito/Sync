@@ -136,7 +136,7 @@ public abstract class AndroidSyncModuleTestBase {
 
     underTest.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
-      public void done(List<SyncEntity> entities) {
+      public void done(boolean wasSuccessful, List<? extends SyncEntity> entities) {
         result.addAll(entities);
         countDownLatch.countDown();
       }

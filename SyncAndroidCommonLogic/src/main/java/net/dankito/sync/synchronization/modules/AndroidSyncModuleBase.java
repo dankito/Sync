@@ -91,7 +91,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
     }
     else {
       log.error("User didn't give Permission " + getPermissionToReadEntities() + ", cannot read entities therefore");
-      callback.done(new ArrayList<SyncEntity>());
+      callback.done(false, new ArrayList<SyncEntity>());
     }
   }
 
@@ -102,7 +102,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
       readDataFromAndroidDatabase(result, getContentUri());
     }
 
-    callback.done(result);
+    callback.done(true, result);
   }
 
   protected void readDataFromAndroidDatabase(List<SyncEntity> result, Uri contentUri) {
