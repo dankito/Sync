@@ -861,9 +861,65 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     @Override
     public void entityChanged(SyncEntityChange syncEntityChange) {
       log.info("SyncEntityChangeListener called for " + syncEntityChange.getSyncModule().getClass().getSimpleName());
-      pushModuleEntityChangesToRemoteDevicesAfterADelay(syncEntityChange);
+      syncEntityChanged(syncEntityChange);
     }
   };
+
+  protected void syncEntityChanged(SyncEntityChange change) {
+    if(change.hasIncrementalChange()) {
+      for(DiscoveredDevice destinationDevice : getDestinationDevicesForSyncModuleChange(change)) {
+        SyncModuleConfiguration syncModuleConfiguration = getSyncModuleConfigurationsForSyncModuleChange(change, destinationDevice);
+        if(syncModuleConfiguration != null) {
+          pushEntityToRemote(destinationDevice, syncModuleConfiguration, change.getSyncEntity(), change.getState());
+        }
+      }
+    }
+    else {
+      getAndPushModuleEntityChangesToRemoteDevicesAfterADelay(change);
+    }
+  }
+
+  protected List<DiscoveredDevice> getDestinationDevicesForSyncModuleChange(SyncEntityChange change) {
+    List<DiscoveredDevice> destinationDevices = new ArrayList<>();
+
+    if(change.getSourceDevice() != null && change.getSourceDevice().getDevice() != localConfig.getLocalDevice()) {
+      destinationDevices.add(change.getSourceDevice()); // really clever: EntitiesSyncQueue then takes it makes it to the source device again
+    }
+    else {
+      for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
+        SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
+        for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+          if(syncModuleConfiguration.isEnabled()) {
+            if(syncConfiguration.getSourceDevice() == localConfig.getLocalDevice() || syncModuleConfiguration.isBidirectional()) {
+              ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+              if(syncModule == change.getSyncModule() || syncModule == change.getSyncModule().getLinkedParentSyncModule()) {
+                destinationDevices.add(connectedDevice);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return destinationDevices;
+  }
+
+  protected SyncModuleConfiguration getSyncModuleConfigurationsForSyncModuleChange(SyncEntityChange change, DiscoveredDevice destinationDevice) {
+    // TODO: this is almost the same code as in the else path in getDestinationDevicesForSyncModuleChange()
+    SyncConfiguration syncConfiguration = getSyncConfigurationForDevice(destinationDevice.getDevice());
+    for(SyncModuleConfiguration syncModuleConfiguration : syncConfiguration.getSyncModuleConfigurations()) {
+      if(syncModuleConfiguration.isEnabled()) {
+        if(syncConfiguration.getSourceDevice() == localConfig.getLocalDevice() || syncModuleConfiguration.isBidirectional()) {
+          ISyncModule syncModule = getSyncModuleForSyncModuleConfiguration(syncModuleConfiguration);
+          if(syncModule == change.getSyncModule() || syncModule == change.getSyncModule().getLinkedParentSyncModule()) {
+            return syncModuleConfiguration;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
 
   /**
    * Some Modules have a lot of changes in a very short period -> don't react on every change, wait some time till all changes are made
