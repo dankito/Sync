@@ -52,6 +52,9 @@ public class ThunderbirdMessageHandler implements IMessageHandler {
     if(ThunderbirdMessageConfig.GET_ADDRESS_BOOK_MESSAGE.equals(methodName)) {
       return ThunderbirdContact[].class;
     }
+    else if(ThunderbirdMessageConfig.SYNC_CONTACT_MESSAGE.equals(methodName)) {
+      return ThunderbirdContact.class;
+    }
 
     return null;
   }
