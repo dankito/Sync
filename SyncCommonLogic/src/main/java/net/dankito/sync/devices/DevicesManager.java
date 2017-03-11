@@ -226,14 +226,13 @@ public class DevicesManager implements IDevicesManager {
     if(response.isCouldHandleMessage()) {
       RequestStartSynchronizationResponseBody body = response.getBody();
 
+      devicesPendingStartSynchronization.remove(deviceInfoKey);
+
       if(body.getResult() == RequestStartSynchronizationResult.ALLOWED) {
         device.setSynchronizationPort(body.getSynchronizationPort());
 
-        devicesPendingStartSynchronization.remove(deviceInfoKey);
-
         callKnownSynchronizedDeviceConnected(device);
       }
-      // TODO: on DENIED remove from knownSynchronizedDevices
     }
     // TODO: what to do if not?
   }
