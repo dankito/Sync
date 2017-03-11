@@ -23,6 +23,7 @@ import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.thunderbird.callback.ContactSynchronizedListener;
 import net.dankito.sync.thunderbird.callback.ThunderbirdCallback;
+import net.dankito.sync.thunderbird.model.ContactSync;
 import net.dankito.sync.thunderbird.model.ThunderbirdContact;
 import net.dankito.sync.thunderbird.response.GetAddressBookResponse;
 import net.dankito.utils.IThreadPool;
@@ -119,6 +120,19 @@ public class ThunderbirdPluginConnector {
     }
   }
 
+
+  public void syncContact(ContactSyncEntity entity, SyncEntityState state) {
+    ContactSync body = new ContactSync(mapContactSyncEntity(entity), state);
+
+    requestSender.sendRequestAndReceiveResponseAsync(thunderbirdAddress, new Request(ThunderbirdMessageConfig.SYNC_CONTACT_MESSAGE, body), new SendRequestCallback() {
+      @Override
+      public void done(Response response) {
+        // TODO: set synchronization successful / failed
+      }
+    });
+  }
+
+
   protected void contactSynchronized(SyncEntityState state, ThunderbirdContact contact) {
     ContactSyncEntity mappedContact = mapThunderbirdContact(contact);
 
@@ -146,9 +160,33 @@ public class ThunderbirdPluginConnector {
     if(StringUtils.isNotNullOrEmpty(thunderbirdContact.PrimaryEmail)) {
       contact.addEmailAddress(new EmailSyncEntity(thunderbirdContact.PrimaryEmail, EmailType.OTHER));
     }
+    if(StringUtils.isNotNullOrEmpty(thunderbirdContact.SecondEmail)) {
+      contact.addEmailAddress(new EmailSyncEntity(thunderbirdContact.SecondEmail, EmailType.OTHER));
+    }
 
     return contact;
   }
+
+  protected ThunderbirdContact mapContactSyncEntity(ContactSyncEntity contact) {
+    ThunderbirdContact mapped = new ThunderbirdContact();
+
+    mapped.DisplayName = contact.getDisplayName();
+    mapped.FirstName = contact.getGivenName();
+    mapped.LastName = contact.getFamilyName();
+    mapped.NickName = contact.getNickname();
+
+    if(contact.getEmailAddresses().size() > 0) {
+      mapped.PrimaryEmail = contact.getEmailAddresses().get(0).getAddress(); // TODO: Android's Email type gets lost in this way
+    }
+    if(contact.getEmailAddresses().size() > 1) {
+      mapped.SecondEmail = contact.getEmailAddresses().get(1).getAddress(); // TODO: Android's Email type gets lost in this way
+    }
+
+    // TODO: add remaining
+
+    return mapped;
+  }
+
 
   // TODO: this is a copy of same method in TcpSocketClientCommunicator
   protected net.dankito.sync.communication.message.ResponseErrorType mapResponseErrorType(ResponseErrorType errorType) {
@@ -166,6 +204,5 @@ public class ThunderbirdPluginConnector {
       ThunderbirdPluginConnector.this.contactSynchronized(state, contact);
     }
   };
-
 
 }
