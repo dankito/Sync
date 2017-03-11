@@ -73,7 +73,7 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
   protected SyncEntityChangeListener thunderbirdEntityChangeListener = new SyncEntityChangeListener() {
     @Override
     public void entityChanged(SyncEntityChange change) {
-      callSyncEntityChangeListeners(new SyncEntityChange(ThunderbirdContactsSyncModule.this, change.getSyncEntity()));
+      callSyncEntityChangeListeners(new SyncEntityChange(ThunderbirdContactsSyncModule.this, change.getSyncEntity(), change.getState(), thunderbird));
     }
   };
 

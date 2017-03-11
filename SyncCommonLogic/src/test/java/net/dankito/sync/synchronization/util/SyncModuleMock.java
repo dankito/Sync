@@ -100,7 +100,7 @@ public class SyncModuleMock extends SyncModuleBase {
     entitiesToReturnFromReadAllEntitiesAsync.addAll(testEntities);
 
     for(SyncEntityChangeListener listener : listeners) {
-      listener.entityChanged(new SyncEntityChange(this, null));
+      listener.entityChanged(new SyncEntityChange(this, false));
     }
   }
 
