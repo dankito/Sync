@@ -29,16 +29,23 @@ var SyncAppCommunicator = new function () {
         if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.GetDeviceInfoMessage)) {
             return _deviceInfo;
         }
-        else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.GetAddressBookMessage)) {
-            return AddressBook.getAllContacts();
-        }
         else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.RequestStartSynchronizationMessage)) {
             return {
                 'result' : 'ALLOWED',
                 'synchronizationPort' : SyncAppCommunicatorConfig.DeviceDoesNotSupportActiveSynchronization
             };
         }
+        else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.GetAddressBookMessage)) {
+            return AddressBook.getAllContacts();
+        }
+        else if(stringStartsWith(receivedMessage, SyncAppCommunicatorConfig.SyncContactMessage)) {
+            return _syncContact(_getMessageBody(receivedMessage));
+        }
     };
+
+    function _syncContact(receivedMessage) {
+        return AddressBook.handleSynchronizedContact(receivedMessage.contact, receivedMessage.state);
+    }
 
     var _createResponse = function(responseBody, receivedMessage) {
         var response;
@@ -73,4 +80,12 @@ var SyncAppCommunicator = new function () {
 
         _deviceInfo = deviceInfo;
     };
-}
+
+    var _getMessageBody = function (receivedMessage) {
+        var messageBodyStartIndex = receivedMessage.indexOf(SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator) + SyncAppCommunicatorConfig.DevicesDiscoveryMessagePartsSeparator.length;
+        var messageBodyString = receivedMessage.substring(messageBodyStartIndex);
+
+        return JSON.parse(messageBodyString);
+    };
+
+};
