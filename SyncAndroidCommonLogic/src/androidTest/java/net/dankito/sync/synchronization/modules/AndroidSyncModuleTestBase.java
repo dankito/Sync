@@ -67,7 +67,7 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   @Before
-  public void setUp() {
+  public void setUp() throws NoSuchFieldException {
     entityManager = new EntityManagerStub();
     threadPool = new ThreadPool();
 
