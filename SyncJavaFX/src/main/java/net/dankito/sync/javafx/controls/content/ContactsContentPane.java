@@ -155,6 +155,9 @@ public class ContactsContentPane extends VBox implements Initializable {
       else if(StringUtils.isNotNullOrEmpty(o1.getDisplayName()) && StringUtils.isNullOrEmpty(o2.getDisplayName())) {
         return -1;
       }
+      else if(StringUtils.isNullOrEmpty(o1.getDisplayName()) && StringUtils.isNullOrEmpty(o2.getDisplayName())) {
+        return 0;
+      }
 
       return o1.getDisplayName().compareTo(o2.getDisplayName());
     }
