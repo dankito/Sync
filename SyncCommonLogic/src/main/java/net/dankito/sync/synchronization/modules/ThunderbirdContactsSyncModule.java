@@ -61,7 +61,10 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
 
   @Override
   public void handleRetrievedSynchronizedEntityAsync(SyncJobItem jobItem, SyncEntityState entityState, HandleRetrievedSynchronizedEntityCallback callback) {
-
+    if(jobItem.getEntity() instanceof ContactSyncEntity) { // should actually always be the case, just to make sure
+      // TODO: in this way we don't have any record (SyncEntityJobs) of synchronized entities with Thunderbird
+      connector.syncContact((ContactSyncEntity) jobItem.getEntity(), entityState);
+    }
   }
 
 
