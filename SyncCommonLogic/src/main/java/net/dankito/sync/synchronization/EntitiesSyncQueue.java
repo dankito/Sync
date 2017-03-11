@@ -3,6 +3,7 @@ package net.dankito.sync.synchronization;
 
 import net.dankito.sync.Device;
 import net.dankito.sync.FileSyncEntity;
+import net.dankito.sync.OsType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.SyncModuleConfiguration;
@@ -60,10 +61,14 @@ public class EntitiesSyncQueue {
 
   protected SyncJobItem pushSyncEntityToRemote(EntitiesSyncQueueItem syncQueueItem) {
     SyncEntity entity = syncQueueItem.getEntityToPush();
-    DiscoveredDevice remoteDevice = syncQueueItem.getRemoteDevice();
-    log.info("[" + countPushedSyncJobItems++ + "] Pushing " + entity + " to remote " + remoteDevice.getDevice() + " ...");
+    Device remoteDevice = syncQueueItem.getRemoteDevice().getDevice();
+    log.info("[" + countPushedSyncJobItems++ + "] Pushing " + entity + " to remote " + remoteDevice + " ...");
 
-    SyncJobItem jobItem = new SyncJobItem(syncQueueItem.getSyncModuleConfiguration(), entity, localDevice, remoteDevice.getDevice());
+    // TODO: this is duplicated code + another Sonderbehandlung for Thunderbird -> make generic
+    Device sourceDevice = remoteDevice.getOsType() == OsType.THUNDERBIRD ? remoteDevice : localDevice;
+    Device destinationDevice = remoteDevice.getOsType() == OsType.THUNDERBIRD ? localDevice : remoteDevice;
+
+    SyncJobItem jobItem = new SyncJobItem(syncQueueItem.getSyncModuleConfiguration(), entity, sourceDevice, destinationDevice);
 
     if(entity instanceof FileSyncEntity) {
       try {
