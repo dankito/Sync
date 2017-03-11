@@ -372,16 +372,20 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         }
       }
       else {
-        entityLookupKey.setEntityLastModifiedOnDevice(entity.getLastModifiedOnDevice());
-        entityManager.updateEntity(entityLookupKey);
-
-        updateSyncEntityProperties(syncModuleConfiguration, persistedEntity, entity, entityPropertiesLookupKeys, allLookupKeys);
-
-        mergePersistedEntityWithExtractedOne(persistedEntity, entity);
+        handleUpdatedEntityToBeSynchronized(syncModuleConfiguration, entity, persistedEntity, entityLookupKey, entityPropertiesLookupKeys, allLookupKeys);
       }
 
       return persistedEntity;
     }
+  }
+
+  protected void handleUpdatedEntityToBeSynchronized(SyncModuleConfiguration syncModuleConfiguration, SyncEntity extractedEntity, SyncEntity persistedEntity, SyncEntityLocalLookupKeys entityLookupKey, Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys, Map<String, SyncEntityLocalLookupKeys> allLookupKeys) {
+    entityLookupKey.setEntityLastModifiedOnDevice(extractedEntity.getLastModifiedOnDevice());
+    entityManager.updateEntity(entityLookupKey);
+
+    updateSyncEntityProperties(syncModuleConfiguration, persistedEntity, extractedEntity, entityPropertiesLookupKeys, allLookupKeys);
+
+    mergePersistedEntityWithExtractedOne(persistedEntity, extractedEntity);
   }
 
   protected void mergePersistedEntityWithExtractedOne(SyncEntity persistedEntity, SyncEntity entity) {
@@ -867,15 +871,31 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected void syncEntityChanged(SyncEntityChange change) {
     if(change.hasIncrementalChange()) {
-      for(DiscoveredDevice destinationDevice : getDestinationDevicesForSyncModuleChange(change)) {
-        SyncModuleConfiguration syncModuleConfiguration = getSyncModuleConfigurationsForSyncModuleChange(change, destinationDevice);
-        if(syncModuleConfiguration != null) {
-          pushEntityToRemote(destinationDevice, syncModuleConfiguration, change.getSyncEntity(), change.getState());
-        }
-      }
+      handleIncrementalSyncEntityChange(change);
     }
     else {
       getAndPushModuleEntityChangesToRemoteDevicesAfterADelay(change);
+    }
+  }
+
+  protected void handleIncrementalSyncEntityChange(SyncEntityChange change) {
+    SyncEntity extractedEntity = change.getSyncEntity();
+
+    for(DiscoveredDevice destinationDevice : getDestinationDevicesForSyncModuleChange(change)) {
+      SyncModuleConfiguration syncModuleConfiguration = getSyncModuleConfigurationsForSyncModuleChange(change, destinationDevice);
+      if(syncModuleConfiguration != null) {
+        Map<String, SyncEntityLocalLookupKeys> allLookupKeys = getLookupKeysForSyncModuleConfigurationByLocalLookupKey(syncModuleConfiguration);
+        SyncEntityLocalLookupKeys lookupKey = allLookupKeys.get(extractedEntity.getLocalLookupKey());
+        if(lookupKey != null) {
+          SyncEntity persistedEntity = entityManager.getEntityById(getEntityClassFromEntityType(lookupKey.getEntityType()), lookupKey.getEntityDatabaseId());
+          if(persistedEntity != null) {
+            Map<String, SyncEntityLocalLookupKeys> entityPropertiesLookupKeys = getSyncEntityPropertiesLookupKeys(extractedEntity, allLookupKeys);
+            handleUpdatedEntityToBeSynchronized(syncModuleConfiguration, extractedEntity, persistedEntity, lookupKey, entityPropertiesLookupKeys, allLookupKeys);
+
+            pushEntityToRemote(destinationDevice, syncModuleConfiguration, persistedEntity, change.getState());
+          }
+        }
+      }
     }
   }
 
