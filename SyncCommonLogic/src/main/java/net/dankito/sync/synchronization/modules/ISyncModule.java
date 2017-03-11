@@ -30,6 +30,8 @@ public interface ISyncModule {
 
   void configureLocalSynchronizationSettings(DiscoveredDevice remoteDevice, SyncModuleConfiguration syncModuleConfiguration);
 
+  ISyncModule getLinkedParentSyncModule();
+
   boolean registerLinkedSyncModule(ISyncModule syncModule);
 
   boolean unregisterLinkedSyncModule(ISyncModule syncModule);

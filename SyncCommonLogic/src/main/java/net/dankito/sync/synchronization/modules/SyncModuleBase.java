@@ -31,6 +31,8 @@ public abstract class SyncModuleBase implements ISyncModule {
 
   protected List<SyncEntityChangeListener> listeners = new CopyOnWriteArrayList<>();
 
+  protected ISyncModule linkedParentSyncModule = null;
+
   protected List<ISyncModule> linkedSyncModules = new CopyOnWriteArrayList<>();
 
 
@@ -107,7 +109,20 @@ public abstract class SyncModuleBase implements ISyncModule {
 
 
   @Override
+  public ISyncModule getLinkedParentSyncModule() {
+    return linkedParentSyncModule;
+  }
+
+  protected void setLinkedParentSyncModule(ISyncModule linkedParentSyncModule) {
+    this.linkedParentSyncModule = linkedParentSyncModule;
+  }
+
+  @Override
   public boolean registerLinkedSyncModule(ISyncModule syncModule) {
+    if(syncModule instanceof SyncModuleBase) {
+      ((SyncModuleBase)syncModule).setLinkedParentSyncModule(this);
+    }
+
     return linkedSyncModules.add(syncModule);
   }
 
