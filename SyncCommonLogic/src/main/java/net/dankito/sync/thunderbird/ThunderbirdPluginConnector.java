@@ -40,9 +40,10 @@ import java.util.List;
 
 
 public class ThunderbirdPluginConnector {
-  
-  private static final Logger log = LoggerFactory.getLogger(ThunderbirdPluginConnector.class);
 
+  private static final Logger log = LoggerFactory.getLogger(ThunderbirdPluginConnector.class);
+  protected static final String PRIMARY_EMAIL_LOOKUP_KEY_SUFFIX = "_PrimaryEmail";
+  protected static final String SECOND_EMAIL_LOOKUP_KEY_SUFFIX = "_SecondEmail";
 
 
   protected DiscoveredDevice discoveredThunderbird;
@@ -158,10 +159,14 @@ public class ThunderbirdPluginConnector {
     // TODO: add remaining
 
     if(StringUtils.isNotNullOrEmpty(thunderbirdContact.PrimaryEmail)) {
-      contact.addEmailAddress(new EmailSyncEntity(thunderbirdContact.PrimaryEmail, EmailType.OTHER));
+      EmailSyncEntity primaryEmail = new EmailSyncEntity(thunderbirdContact.PrimaryEmail, EmailType.OTHER);
+      primaryEmail.setLocalLookupKey(contact.getLocalLookupKey() + PRIMARY_EMAIL_LOOKUP_KEY_SUFFIX); // Thunderbird has no lookup key for Emails -> create own one
+      contact.addEmailAddress(primaryEmail);
     }
     if(StringUtils.isNotNullOrEmpty(thunderbirdContact.SecondEmail)) {
-      contact.addEmailAddress(new EmailSyncEntity(thunderbirdContact.SecondEmail, EmailType.OTHER));
+      EmailSyncEntity secondEmail = new EmailSyncEntity(thunderbirdContact.SecondEmail, EmailType.OTHER);
+      secondEmail.setLocalLookupKey(contact.getLocalLookupKey() + SECOND_EMAIL_LOOKUP_KEY_SUFFIX); // Thunderbird has no lookup key for Emails -> create own one
+      contact.addEmailAddress(secondEmail);
     }
 
     return contact;
