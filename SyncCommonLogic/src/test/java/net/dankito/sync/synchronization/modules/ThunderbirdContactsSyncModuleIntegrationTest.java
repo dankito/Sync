@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -146,6 +147,48 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
     assertThat(allContactsAfterwards.size(), is(allContactsBefore.size() + 1));
   }
+
+  @Test
+  public void pushEditedContactToThunderbird_ContactGetsUpdated() {
+    List<ContactSyncEntity> allContactsBefore = getAddressBook();
+
+    ContactSyncEntity editedContact = allContactsBefore.get(0);
+    editedContact.setDisplayName(TEST_DISPLAY_NAME);
+    editedContact.addEmailAddress(new EmailSyncEntity(TEST_PRIMARY_EMAIL, EmailType.HOME));
+    editedContact.addEmailAddress(new EmailSyncEntity(TEST_SECOND_EMAIL, EmailType.WORK));
+    editedContact.addPhoneNumber(new PhoneNumberSyncEntity(TEST_HOME_PHONE_NUMBER, PhoneNumberType.HOME));
+
+    SyncJobItem jobItem = new SyncJobItem(null, editedContact, null, thunderbird.getDevice());
+
+    String lookupKeyBefore = editedContact.getLocalLookupKey();
+    Date lastModifiedOnDeviceBefore = editedContact.getLastModifiedOnDevice();
+
+    final ObjectHolder<Boolean> resultObjectHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+
+    underTest.handleRetrievedSynchronizedEntityAsync(jobItem, SyncEntityState.CHANGED, new HandleRetrievedSynchronizedEntityCallback() {
+      @Override
+      public void done(HandleRetrievedSynchronizedEntityResult result) {
+        resultObjectHolder.setObject(result.isSuccessful());
+        countDownLatch.countDown();
+      }
+    });
+
+
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+    try { Thread.sleep(60 * 1000); } catch(Exception e) { }
+
+    assertThat(resultObjectHolder.getObject(), is(true));
+    assertThat(editedContact.getLocalLookupKey(), is(lookupKeyBefore));
+    assertThat(editedContact.getLastModifiedOnDevice(), is(not(lastModifiedOnDeviceBefore)));
+
+    List<ContactSyncEntity> allContactsAfterwards = getAddressBook();
+
+    assertThat(allContactsAfterwards.size(), is(allContactsBefore.size()));
+  }
+
 
   private List<ContactSyncEntity> getAddressBook() {
     final ObjectHolder<List<ContactSyncEntity>> addressBookHolder = new ObjectHolder<>();
