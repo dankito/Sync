@@ -119,11 +119,15 @@ public abstract class SyncModuleBase implements ISyncModule {
 
   @Override
   public boolean registerLinkedSyncModule(ISyncModule syncModule) {
-    if(syncModule instanceof SyncModuleBase) {
-      ((SyncModuleBase)syncModule).setLinkedParentSyncModule(this);
+    if(linkedSyncModules.add(syncModule)) {
+      if(syncModule instanceof SyncModuleBase) {
+        ((SyncModuleBase)syncModule).setLinkedParentSyncModule(this);
+      }
+
+      return true;
     }
 
-    return linkedSyncModules.add(syncModule);
+    return false;
   }
 
   @Override
