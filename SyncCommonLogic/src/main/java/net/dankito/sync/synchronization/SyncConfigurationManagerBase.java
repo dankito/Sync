@@ -1216,9 +1216,15 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected DiscoveredDevicesListener discoveredDevicesListener = new DiscoveredDevicesListener() {
     @Override
-    public void deviceDiscovered(DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
+    public void deviceDiscovered(final DiscoveredDevice connectedDevice, DiscoveredDeviceType type) {
       if(connectedDevice.getDevice().getOsType() == OsType.THUNDERBIRD && type == DiscoveredDeviceType.UNKNOWN_DEVICE) {
-        newThunderbirdInstanceFound(connectedDevice);
+        threadPool.runAsync(new Runnable() { // for now just run it in a separate thread as newThunderbirdInstanceFound() would make it a known synchronized device before other
+          // listeners have been notified of this unknown device
+          @Override
+          public void run() {
+            newThunderbirdInstanceFound(connectedDevice);
+          }
+        });
       }
     }
 
