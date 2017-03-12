@@ -19,6 +19,7 @@ import net.dankito.sync.EmailSyncEntity;
 import net.dankito.sync.EmailType;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.thunderbird.callback.ContactSynchronizedListener;
@@ -48,6 +49,8 @@ public class ThunderbirdPluginConnector {
 
   protected DiscoveredDevice discoveredThunderbird;
 
+  protected IEntityManager entityManager;
+
   protected IRequestSender requestSender;
 
   protected IRequestReceiver requestReceiver;
@@ -59,8 +62,9 @@ public class ThunderbirdPluginConnector {
   protected int messagesReceiverPort;
 
 
-  public ThunderbirdPluginConnector(DiscoveredDevice thunderbird, IThreadPool threadPool, SyncEntityChangeListener syncEntityChangeListener) {
+  public ThunderbirdPluginConnector(DiscoveredDevice thunderbird, IEntityManager entityManager, IThreadPool threadPool, SyncEntityChangeListener syncEntityChangeListener) {
     this.discoveredThunderbird = thunderbird;
+    this.entityManager = entityManager;
     this.syncEntityChangeListener = syncEntityChangeListener;
 
     this.thunderbirdAddress = new InetSocketAddress(thunderbird.getAddress(), thunderbird.getMessagesPort());
@@ -159,6 +163,12 @@ public class ThunderbirdPluginConnector {
 
   protected ContactSyncEntity mapThunderbirdContact(ThunderbirdContact thunderbirdContact) {
     ContactSyncEntity contact = new ContactSyncEntity();
+    if(thunderbirdContact.SyncDatabaseId != null) {
+      ContactSyncEntity persistedContact = entityManager.getEntityById(ContactSyncEntity.class, thunderbirdContact.SyncDatabaseId);
+      if(persistedContact != null) {
+        contact = persistedContact;
+      }
+    }
 
     contact.setLocalLookupKey(thunderbirdContact.getLocalLookupKey());
     contact.setLastModifiedOnDevice(new Date(thunderbirdContact.LastModifiedDate));
@@ -170,23 +180,55 @@ public class ThunderbirdPluginConnector {
 
     // TODO: add remaining
 
-    if(StringUtils.isNotNullOrEmpty(thunderbirdContact.PrimaryEmail)) {
-      EmailSyncEntity primaryEmail = new EmailSyncEntity(thunderbirdContact.PrimaryEmail, EmailType.OTHER);
-      primaryEmail.setLocalLookupKey(contact.getLocalLookupKey() + PRIMARY_EMAIL_LOOKUP_KEY_SUFFIX); // Thunderbird has no lookup key for Emails -> create own one
-      contact.addEmailAddress(primaryEmail);
-    }
-    if(StringUtils.isNotNullOrEmpty(thunderbirdContact.SecondEmail)) {
-      EmailSyncEntity secondEmail = new EmailSyncEntity(thunderbirdContact.SecondEmail, EmailType.OTHER);
-      secondEmail.setLocalLookupKey(contact.getLocalLookupKey() + SECOND_EMAIL_LOOKUP_KEY_SUFFIX); // Thunderbird has no lookup key for Emails -> create own one
-      contact.addEmailAddress(secondEmail);
-    }
+    mapEmailAddresses(thunderbirdContact, contact);
 
     return contact;
+  }
+
+  protected void mapEmailAddresses(ThunderbirdContact thunderbirdContact, ContactSyncEntity contact) {
+    if(StringUtils.isNotNullOrEmpty(thunderbirdContact.PrimaryEmail)) {
+      EmailSyncEntity primaryEmail = new EmailSyncEntity(thunderbirdContact.PrimaryEmail, EmailType.OTHER);
+      if(thunderbirdContact.SyncDatabaseId != null && thunderbirdContact.PrimaryEmailDbId != null) {
+        for(EmailSyncEntity persistedEmail : contact.getEmailAddresses()) {
+          if(thunderbirdContact.PrimaryEmailDbId.equals(persistedEmail.getId())) {
+            primaryEmail = persistedEmail;
+            persistedEmail.setAddress(thunderbirdContact.PrimaryEmail);
+          }
+        }
+      }
+      else {
+        contact.addEmailAddress(primaryEmail);
+      }
+
+      if(primaryEmail.getLocalLookupKey() == null) {
+        primaryEmail.setLocalLookupKey(contact.getLocalLookupKey() + PRIMARY_EMAIL_LOOKUP_KEY_SUFFIX);
+      }
+    }
+
+    if(StringUtils.isNotNullOrEmpty(thunderbirdContact.SecondEmail)) {
+      EmailSyncEntity secondEmail = new EmailSyncEntity(thunderbirdContact.SecondEmail, EmailType.OTHER);
+      if(thunderbirdContact.SyncDatabaseId != null && thunderbirdContact.SecondEmailDbId != null) {
+        for(EmailSyncEntity persistedEmail : contact.getEmailAddresses()) {
+          if(thunderbirdContact.SecondEmailDbId.equals(persistedEmail.getId())) {
+            secondEmail = persistedEmail;
+            persistedEmail.setAddress(thunderbirdContact.SecondEmail);
+          }
+        }
+      }
+      else {
+        contact.addEmailAddress(secondEmail);
+      }
+
+      if(secondEmail.getLocalLookupKey() == null) {
+        secondEmail.setLocalLookupKey(contact.getLocalLookupKey() + SECOND_EMAIL_LOOKUP_KEY_SUFFIX);
+      }
+    }
   }
 
   protected ThunderbirdContact mapContactSyncEntity(ContactSyncEntity contact) {
     ThunderbirdContact mapped = new ThunderbirdContact();
 
+    mapped.SyncDatabaseId = contact.getId();
     mapped.setLocalLookupKey(contact.getLocalLookupKey());
 
     mapped.DisplayName = contact.getDisplayName();
@@ -195,10 +237,14 @@ public class ThunderbirdPluginConnector {
     mapped.NickName = contact.getNickname();
 
     if(contact.getEmailAddresses().size() > 0) {
-      mapped.PrimaryEmail = contact.getEmailAddresses().get(0).getAddress(); // TODO: Android's Email type gets lost in this way
+      EmailSyncEntity primaryEmail = contact.getEmailAddresses().get(0);
+      mapped.PrimaryEmail = primaryEmail.getAddress(); // TODO: Android's Email type gets lost in this way
+      mapped.PrimaryEmailDbId = primaryEmail.getId();
     }
     if(contact.getEmailAddresses().size() > 1) {
-      mapped.SecondEmail = contact.getEmailAddresses().get(1).getAddress(); // TODO: Android's Email type gets lost in this way
+      EmailSyncEntity secondEmail = contact.getEmailAddresses().get(1);
+      mapped.SecondEmail = secondEmail.getAddress(); // TODO: Android's Email type gets lost in this way
+      mapped.SecondEmailDbId = secondEmail.getId();
     }
 
     // TODO: add remaining

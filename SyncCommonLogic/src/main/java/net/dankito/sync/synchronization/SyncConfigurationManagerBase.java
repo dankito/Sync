@@ -853,7 +853,7 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
     ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
     if(contactsSyncModule != null) {
-      ThunderbirdContactsSyncModule thunderbirdContactsSyncModule = new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool);
+      ThunderbirdContactsSyncModule thunderbirdContactsSyncModule = new ThunderbirdContactsSyncModule(remoteDevice, entityManager, null, threadPool); // TODO: set Localization
       contactsSyncModule.registerLinkedSyncModule(thunderbirdContactsSyncModule);
       registeredLinkedSyncModules.get(remoteDevice).add(thunderbirdContactsSyncModule);
     }

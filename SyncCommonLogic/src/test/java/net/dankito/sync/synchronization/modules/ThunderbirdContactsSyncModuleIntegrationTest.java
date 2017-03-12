@@ -22,6 +22,8 @@ import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.devices.NetworkSettings;
 import net.dankito.sync.localization.Localization;
+import net.dankito.sync.persistence.EntityManagerStub;
+import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.util.services.Java8Base64Service;
@@ -60,15 +62,20 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
   protected static final String TEST_DISPLAY_NAME = "Love";
 
   protected static final String TEST_PRIMARY_EMAIL = "me@love.org";
+  protected static final String TEST_PRIMARY_EMAIL_LOCAL_LOOKUP_KEY = "EMAIL_77";
 
   protected static final String TEST_SECOND_EMAIL = "me@love.net";
+  protected static final String TEST_SECOND_EMAIL_LOCAL_LOOKUP_KEY = "EMAIL_78";
 
   protected static final String TEST_HOME_PHONE_NUMBER = "0800-666 666";
+  protected static final String TEST_HOME_PHONE_NUMBER_LOCAL_LOOKUP_KEY = "PHONE_NUMBER_77";
 
 
   protected ISyncModule underTest;
 
   protected DiscoveredDevice thunderbird;
+
+  protected IEntityManager entityManager;
 
 
   @Before
@@ -77,7 +84,9 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     thunderbird = new DiscoveredDevice(thunderbirdInfo, "127.0.0.1");
     thunderbird.setMessagesPort(THUNDERBIRD_MESSAGES_PORT);
 
-    underTest = new ThunderbirdContactsSyncModule(thunderbird, mock(Localization.class), new ThreadPool());
+    entityManager = new EntityManagerStub();
+
+    underTest = new ThunderbirdContactsSyncModule(thunderbird, entityManager, mock(Localization.class), new ThreadPool());
   }
 
   @After
@@ -137,6 +146,7 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     List<ContactSyncEntity> allContactsBefore = getAddressBook();
 
     ContactSyncEntity newContact = createTestContact();
+    String contactId = newContact.getId();
     SyncJobItem jobItem = new SyncJobItem(null, newContact, null, thunderbird.getDevice());
 
     final ObjectHolder<Boolean> resultObjectHolder = new ObjectHolder<>();
@@ -152,11 +162,22 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     });
 
 
-    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
+    try { countDownLatch.await(3, TimeUnit.MINUTES); } catch(Exception ignored) { }
 
     assertThat(resultObjectHolder.getObject(), is(true));
+    assertThat(newContact.getId(), is(contactId));
     assertThat(newContact.getLocalLookupKey(), notNullValue());
     assertThat(newContact.getLastModifiedOnDevice(), notNullValue());
+
+    assertThat(newContact.getEmailAddresses().size(), is(2));
+    assertThat(newContact.getEmailAddresses().get(0).getId(), notNullValue());
+    assertThat(newContact.getEmailAddresses().get(0).getLocalLookupKey(), is(TEST_PRIMARY_EMAIL_LOCAL_LOOKUP_KEY));
+    assertThat(newContact.getEmailAddresses().get(1).getId(), notNullValue());
+    assertThat(newContact.getEmailAddresses().get(1).getLocalLookupKey(), is(TEST_SECOND_EMAIL_LOCAL_LOOKUP_KEY));
+
+//    assertThat(newContact.getPhoneNumbers().size(), is(1));
+//    assertThat(newContact.getPhoneNumbers().get(0).getId(), notNullValue());
+//    assertThat(newContact.getPhoneNumbers().get(0).getLocalLookupKey(), is(TEST_HOME_PHONE_NUMBER_LOCAL_LOOKUP_KEY));
 
     List<ContactSyncEntity> allContactsAfterwards = getAddressBook();
 
@@ -327,10 +348,25 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
   protected ContactSyncEntity createTestContact() {
     ContactSyncEntity newContact = new ContactSyncEntity();
+    entityManager.persistEntity(newContact);
+
     newContact.setDisplayName(TEST_DISPLAY_NAME);
-    newContact.addEmailAddress(new EmailSyncEntity(TEST_PRIMARY_EMAIL, EmailType.HOME));
-    newContact.addEmailAddress(new EmailSyncEntity(TEST_SECOND_EMAIL, EmailType.WORK));
-    newContact.addPhoneNumber(new PhoneNumberSyncEntity(TEST_HOME_PHONE_NUMBER, PhoneNumberType.HOME));
+
+    EmailSyncEntity primaryEmail = new EmailSyncEntity(TEST_PRIMARY_EMAIL, EmailType.HOME);
+    primaryEmail.setLocalLookupKey(TEST_PRIMARY_EMAIL_LOCAL_LOOKUP_KEY);
+    newContact.addEmailAddress(primaryEmail);
+    entityManager.persistEntity(primaryEmail);
+
+    EmailSyncEntity secondEmail = new EmailSyncEntity(TEST_SECOND_EMAIL, EmailType.WORK);
+    secondEmail.setLocalLookupKey(TEST_SECOND_EMAIL_LOCAL_LOOKUP_KEY);
+    newContact.addEmailAddress(secondEmail);
+    entityManager.persistEntity(secondEmail);
+
+    PhoneNumberSyncEntity homePhoneNumber = new PhoneNumberSyncEntity(TEST_HOME_PHONE_NUMBER, PhoneNumberType.HOME);
+    homePhoneNumber.setLocalLookupKey(TEST_HOME_PHONE_NUMBER_LOCAL_LOOKUP_KEY);
+    newContact.addPhoneNumber(homePhoneNumber);
+    entityManager.persistEntity(homePhoneNumber);
+
     return newContact;
   }
 

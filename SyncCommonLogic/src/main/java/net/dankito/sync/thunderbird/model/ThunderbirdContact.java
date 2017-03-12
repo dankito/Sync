@@ -20,6 +20,8 @@ public class ThunderbirdContact {
 
   public long LastModifiedDate;
 
+  public String SyncDatabaseId;
+
 
   // copied from https://dxr.mozilla.org/comm-central/source/mailnews/addrbook/public/nsIAbCard.idl
 
@@ -28,6 +30,7 @@ public class ThunderbirdContact {
   public String DisplayName;
   public String NickName;
   public String PrimaryEmail;
+  public String PrimaryEmailDbId;
   public String PreferMailFormat;
   public String PopularityIndex;
 
@@ -36,6 +39,7 @@ public class ThunderbirdContact {
   public String SpouseName;
   public String FamilyName;
   public String SecondEmail;
+  public String SecondEmailDbId;
 
   public String HomeAddress;
   public String HomeAddress2;

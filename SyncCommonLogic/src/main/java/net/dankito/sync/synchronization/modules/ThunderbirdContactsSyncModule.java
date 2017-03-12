@@ -6,6 +6,7 @@ import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
 import net.dankito.sync.localization.Localization;
+import net.dankito.sync.persistence.IEntityManager;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.thunderbird.ThunderbirdPluginConnector;
@@ -26,11 +27,11 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
   protected ThunderbirdPluginConnector connector;
 
 
-  public ThunderbirdContactsSyncModule(DiscoveredDevice thunderbird, Localization localization, IThreadPool threadPool) {
+  public ThunderbirdContactsSyncModule(DiscoveredDevice thunderbird, IEntityManager entityManager, Localization localization, IThreadPool threadPool) {
     super(localization);
 
     this.thunderbird = thunderbird;
-    this.connector = new ThunderbirdPluginConnector(thunderbird, threadPool, thunderbirdEntityChangeListener);
+    this.connector = new ThunderbirdPluginConnector(thunderbird, entityManager, threadPool, thunderbirdEntityChangeListener);
   }
 
   @Override
