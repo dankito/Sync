@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SyncConfigurationManagerBase implements ISyncConfigurationManager {
@@ -86,6 +87,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   protected Timer syncModulesWithEntityUpdatesTimer = new Timer("SyncModulesWithEntityUpdatesTimer");
 
   protected List<DiscoveredDevice> connectedSynchronizedDevices = new ArrayList<>();
+
+  protected List<SyncConfiguration> recentlyCreatedSyncConfigurations = new CopyOnWriteArrayList<>();
 
   protected Map<ISyncModule, List<DiscoveredDevice>> activatedSyncModules = new ConcurrentHashMap<>();
 
@@ -1018,8 +1021,25 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
           syncConfigurationUpdated(syncConfiguration);
         }
       }
+      else if(entity instanceof Device) {
+        Device device = (Device)entity;
+        if(localConfig.getLocalDevice() == device) {
+          localDeviceHasBeenUpdated(device);
+        }
+      }
     }
   };
+
+
+  protected void localDeviceHasBeenUpdated(Device localDevice) {
+    for(SyncConfiguration recentlyCreatedSyncConfiguration : new ArrayList<SyncConfiguration>(recentlyCreatedSyncConfigurations)) {
+      if(localDevice.getDestinationSyncConfigurations().contains(recentlyCreatedSyncConfiguration)) {
+        recentlyCreatedSyncConfigurations.remove(recentlyCreatedSyncConfiguration);
+
+        remoteDeviceStartedSynchronizingWithUs(recentlyCreatedSyncConfiguration);
+      }
+    }
+  }
 
 
   protected void syncConfigurationUpdated(SyncConfiguration syncConfiguration) {
@@ -1029,7 +1049,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     if(discoveredRemoteDevice != null) {
       // TODO: here's a Bug. Sometimes a remote device stops syncing, but remote device is not in connectedSynchronizedDevices
       if(syncConfiguration.getDestinationDevice() == localConfig.getLocalDevice() && connectedSynchronizedDevices.contains(discoveredRemoteDevice) == false) {
-        remoteDeviceStartedSynchronizingWithUs(syncConfiguration);
+        // don't start synchronization with remote directly here anymore, wait till localDevice has been updated in localDeviceHasBeenUpdated()
+        recentlyCreatedSyncConfigurations.add(syncConfiguration);
       }
       else if(syncConfiguration.isDeleted()) {
         stopSynchronizingWithDevice(discoveredRemoteDevice, syncConfiguration);
