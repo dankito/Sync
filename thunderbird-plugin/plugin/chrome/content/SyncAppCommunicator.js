@@ -6,7 +6,7 @@ var SyncAppCommunicator = new function () {
         _createDeviceInfo();
 
         Network.startTcpListenerSocket(SyncAppCommunicatorConfig.MessagesReceiverPort, function(receivedMessage) {
-            log('Received message in SyncAppCommunicator: ' + receivedMessage);
+            // log('Received message in SyncAppCommunicator: ' + receivedMessage);
 
             try {
                 var responseBody = _handleReceivedMessage(receivedMessage);

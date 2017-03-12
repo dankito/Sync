@@ -8,8 +8,6 @@ var AddressBook = new function() {
 
 
     this.getAllContacts = function() {
-        log('Getting all contacts ...');
-
         var contacts = new Array();
 
         let abManager = Components.classes["@mozilla.org/abmanager;1"]
@@ -29,8 +27,6 @@ var AddressBook = new function() {
             }
           }
         }
-
-        log('Retrieved ' + contacts.length + ' contacts from address book');
 
         return contacts;
     };

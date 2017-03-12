@@ -4,9 +4,6 @@ var platform = null;
 var thunderbirdInstanceUuid;
 
 
-log('Started Sync Thunderbird Plugin');
-
-
 window.addEventListener("load", function(e) {
     retrieveApplicationInfo();
 
@@ -32,12 +29,10 @@ function getThunderbirdInstanceUuid() {
 
     if(prefs.prefHasUserValue(instanceUuidPrefKey)) {
         thunderbirdInstanceUuid = prefs.getCharPref(instanceUuidPrefKey);
-        log('Read uuid from preferences: ' + thunderbirdInstanceUuid);
     }
     else {
         thunderbirdInstanceUuid = generateUuid();
-        log('Created new UUID: ' + thunderbirdInstanceUuid);
+        log('Created new UUID for this Thunderbird instance');
         prefs.setCharPref(instanceUuidPrefKey, thunderbirdInstanceUuid);
-        log('Saved new uuid to preferences');
     }
 }

@@ -19,7 +19,6 @@ var Network = new function () {
      */
     var _tcpServerSocketListener = {
         onSocketAccepted: function(serverSocket, transport) {
-            log("Accepted connection on " + transport.host + ":" + transport.port);
             var input = transport.openInputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);//.QueryInterface(Ci.nsIAsyncInputStream);
             var output = transport.openOutputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);
 
