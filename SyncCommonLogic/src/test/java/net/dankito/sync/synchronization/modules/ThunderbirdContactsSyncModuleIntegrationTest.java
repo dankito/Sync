@@ -4,16 +4,30 @@ import net.dankito.sync.ContactSyncEntity;
 import net.dankito.sync.Device;
 import net.dankito.sync.EmailSyncEntity;
 import net.dankito.sync.EmailType;
+import net.dankito.sync.LocalConfig;
 import net.dankito.sync.OsType;
 import net.dankito.sync.PhoneNumberSyncEntity;
 import net.dankito.sync.PhoneNumberType;
 import net.dankito.sync.SyncEntity;
 import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
+import net.dankito.sync.communication.IClientCommunicator;
+import net.dankito.sync.communication.TcpSocketClientCommunicator;
+import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
+import net.dankito.sync.communication.callback.SendRequestCallback;
+import net.dankito.sync.communication.callback.ShouldPermitSynchronizingWithDeviceCallback;
+import net.dankito.sync.communication.message.DeviceInfo;
+import net.dankito.sync.communication.message.RequestPermitSynchronizationResponseBody;
+import net.dankito.sync.communication.message.RequestPermitSynchronizationResult;
+import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeResponseBody;
+import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeResult;
+import net.dankito.sync.communication.message.Response;
 import net.dankito.sync.devices.DiscoveredDevice;
+import net.dankito.sync.devices.NetworkSettings;
 import net.dankito.sync.localization.Localization;
 import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
+import net.dankito.sync.util.services.Java8Base64Service;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 
@@ -212,15 +226,75 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    try { Thread.sleep(60 * 1000); } catch(Exception e) { }
-
     assertThat(resultObjectHolder.getObject(), is(true));
     assertThat(contactToBeDeleted.getLocalLookupKey(), is(lookupKeyBefore));
-//    assertThat(contactToBeDeleted.isDeleted(), is(true));
+    assertThat(contactToBeDeleted.isDeleted(), is(true));
 
     List<ContactSyncEntity> allContactsAfterwards = getAddressBook();
 
     assertThat(allContactsAfterwards.size(), is(allContactsBefore.size() - 1));
+  }
+
+
+  @Test
+  public void sendRequestToPermitSynchronization() {
+    Device localDevice = new Device("test");
+    localDevice.setOsType(OsType.DESKTOP);
+    localDevice.setOsName("Linux");
+    localDevice.setOsVersion("4.9.12");
+
+    IClientCommunicator clientCommunicator = new TcpSocketClientCommunicator(new NetworkSettings(new LocalConfig(localDevice)), new IsSynchronizationPermittedHandler() {
+      @Override
+      public void shouldPermitSynchronizingWithDevice(DeviceInfo remoteDeviceInfo, ShouldPermitSynchronizingWithDeviceCallback callback) {
+
+      }
+
+      @Override
+      public void showCorrectResponseToUserNonBlocking(DeviceInfo remoteDeviceInfo, String correctResponse) {
+
+      }
+    }, new Java8Base64Service(), new ThreadPool());
+
+
+    final ObjectHolder<Response<RequestPermitSynchronizationResponseBody>> requestPermitSynchronizationHolder = new ObjectHolder<>();
+    final CountDownLatch requestPermitSynchronizationLatch = new CountDownLatch(1);
+
+    clientCommunicator.requestPermitSynchronization(thunderbird, new SendRequestCallback<RequestPermitSynchronizationResponseBody>() {
+      @Override
+      public void done(Response<RequestPermitSynchronizationResponseBody> response) {
+        requestPermitSynchronizationHolder.setObject(response);
+        requestPermitSynchronizationLatch.countDown();
+      }
+    });
+
+    try { requestPermitSynchronizationLatch.await(30, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    assertThat(requestPermitSynchronizationHolder.isObjectSet(), is(true));
+    assertThat(requestPermitSynchronizationHolder.getObject().isCouldHandleMessage(), is(true));
+    assertThat(requestPermitSynchronizationHolder.getObject().getBody().getResult(), is(RequestPermitSynchronizationResult.RESPOND_TO_CHALLENGE));
+
+
+    String nonce = requestPermitSynchronizationHolder.getObject().getBody().getNonce();
+    String enteredCode = "111111"; // has to be manually entered in debugger
+    final ObjectHolder<Response<RespondToSynchronizationPermittingChallengeResponseBody>> respondToSynchronizationPermittingHolder = new ObjectHolder();
+    final CountDownLatch respondToSynchronizationPermittingLatch = new CountDownLatch(1);
+
+    clientCommunicator.respondToSynchronizationPermittingChallenge(thunderbird, nonce, enteredCode, new SendRequestCallback<RespondToSynchronizationPermittingChallengeResponseBody>() {
+      @Override
+      public void done(Response<RespondToSynchronizationPermittingChallengeResponseBody> response) {
+        respondToSynchronizationPermittingHolder.setObject(response);
+        respondToSynchronizationPermittingLatch.countDown();
+      }
+    });
+
+    try { respondToSynchronizationPermittingLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+
+    assertThat(respondToSynchronizationPermittingHolder.isObjectSet(), is(true));
+    assertThat(respondToSynchronizationPermittingHolder.getObject().isCouldHandleMessage(), is(true));
+    assertThat(respondToSynchronizationPermittingHolder.getObject().getBody().getResult(), is(RespondToSynchronizationPermittingChallengeResult.ALLOWED));
+    assertThat(respondToSynchronizationPermittingHolder.getObject().getBody().getSynchronizationPort(), is(DiscoveredDevice.DEVICE_DOES_NOT_SUPPORT_ACTIVE_SYNCHRONIZATION));
   }
 
 
