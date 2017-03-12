@@ -228,7 +228,6 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
     assertThat(resultObjectHolder.getObject(), is(true));
     assertThat(contactToBeDeleted.getLocalLookupKey(), is(lookupKeyBefore));
-    assertThat(contactToBeDeleted.isDeleted(), is(true));
 
     List<ContactSyncEntity> allContactsAfterwards = getAddressBook();
 
