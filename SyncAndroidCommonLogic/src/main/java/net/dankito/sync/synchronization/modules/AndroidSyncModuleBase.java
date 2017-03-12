@@ -190,7 +190,7 @@ public abstract class AndroidSyncModuleBase extends SyncModuleBase implements IS
 
   @Override
   protected void listenerAdded(SyncEntityChangeListener addedListener, List<SyncEntityChangeListener> allListeners) {
-    if(allListeners.size() == 0) {
+    if(allListeners.size() == 1) { // first listener added
       registerContentObserver();
     }
 
