@@ -131,7 +131,7 @@ var AddressBook = new function() {
     };
 
     var _getAddressBookForSyncContact = function(contact) {
-        return this.getAddressBookForURI(contact.addressBookURI);
+        return AddressBook.getAddressBookForURI(contact.addressBookURI);
     };
 
     var _getCardFromAddressBookForSyncContact = function(contact, addressBook) {
