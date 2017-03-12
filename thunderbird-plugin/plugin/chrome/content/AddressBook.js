@@ -37,11 +37,14 @@ var AddressBook = new function() {
 
 
     this.handleSynchronizedContact = function (contact, state) {
-        if(state == SyncEntityState.CREATED) {
+        if(state === SyncEntityState.CREATED) {
             return _handleCreatedContact(contact);
         }
-        else if(state == SyncEntityState.CHANGED) {
+        else if(state === SyncEntityState.CHANGED) {
             return _handleChangedContact(contact);
+        }
+        else if(state === SyncEntityState.DELETED) {
+            return _handleDeletedContact(contact);
         }
     };
 
@@ -55,12 +58,29 @@ var AddressBook = new function() {
 
     var _handleChangedContact = function(contact) {
         var addressBook = _getAddressBookForSyncContact(contact);
-        
-        var addressBookCard = addressBook.getCardFromProperty("DbRowID", contact.localId, false); // TODO: what to use contact.localId or contact.DbRowID ?
+        var addressBookCard = _getCardFromAddressBookForSyncContact(contact, addressBook);
+
         var editedCard = ContactHandler.mapSyncContactToCard(contact);
         ContactHandler.mergeCards(addressBookCard, editedCard);
 
         addressBook.modifyCard(addressBookCard);
+
+        return ContactHandler.mapContactToSyncContact(addressBookCard, addressBook.URI);
+    };
+
+    var _handleDeletedContact = function(contact) {
+        var addressBook = _getAddressBookForSyncContact(contact);
+        var addressBookCard = _getCardFromAddressBookForSyncContact(contact, addressBook);
+
+        var editedCard = ContactHandler.mapSyncContactToCard(contact);
+        ContactHandler.mergeCards(addressBookCard, editedCard);
+
+        var cardsToDelete = Components.classes["@mozilla.org/array;1"]
+                .createInstance(Components.interfaces.nsIMutableArray);
+        cardsToDelete.appendElement(addressBookCard, false);
+        
+        addressBook.deleteCards(cardsToDelete);
+
         return ContactHandler.mapContactToSyncContact(addressBookCard, addressBook.URI);
     };
 
@@ -87,6 +107,10 @@ var AddressBook = new function() {
             .getService(Components.interfaces.nsIAbManager);
 
         return abManager.getDirectory(contact.addressBookURI);
+    };
+
+    var _getCardFromAddressBookForSyncContact = function(contact, addressBook) {
+        return addressBook.getCardFromProperty("DbRowID", contact.localId, false); // TODO: what to use contact.localId or contact.DbRowID ?
     };
 
 
