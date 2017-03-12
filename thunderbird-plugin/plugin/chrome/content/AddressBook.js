@@ -75,6 +75,44 @@ var AddressBook = new function() {
     };
 
 
+    this.getAddressBookForURI = function(addressBookURI) {
+        let abManager = Components.classes["@mozilla.org/abmanager;1"]
+            .getService(Components.interfaces.nsIAbManager);
+
+        return abManager.getDirectory(addressBookURI);
+    };
+
+    this.getAddressBookForName = function(directoryName) {
+        let abManager = Components.classes["@mozilla.org/abmanager;1"]
+            .getService(Components.interfaces.nsIAbManager);
+
+        let allAddressBooks = abManager.directories;
+
+        while (allAddressBooks.hasMoreElements()) {
+            let addressBook = allAddressBooks.getNext()
+                .QueryInterface(Components.interfaces.nsIAbDirectory);
+
+            if (addressBook instanceof Components.interfaces.nsIAbDirectory) { // or nsIAbItem or nsIAbCollection
+                if(addressBook.dirName == directoryName) {
+                    return addressBook;
+                }
+            }
+        }
+
+        return null;
+    };
+
+    this.getAddressBookForCard = function(card) {
+        try {
+            var directoryId = card.directoryId;
+            var directoryName = directoryId.substring(directoryId.indexOf("&") + 1);
+            return this.getAddressBookForName(directoryName);
+        } catch(e) { log('Could not get address book for card ' + card + ': ' + e); }
+
+        return null;
+    };
+
+
     var _getAddressBookToInsertNewContact = function() {
         let abManager = Components.classes["@mozilla.org/abmanager;1"]
             .getService(Components.interfaces.nsIAbManager);
@@ -93,10 +131,7 @@ var AddressBook = new function() {
     };
 
     var _getAddressBookForSyncContact = function(contact) {
-        let abManager = Components.classes["@mozilla.org/abmanager;1"]
-            .getService(Components.interfaces.nsIAbManager);
-
-        return abManager.getDirectory(contact.addressBookURI);
+        return this.getAddressBookForURI(contact.addressBookURI);
     };
 
     var _getCardFromAddressBookForSyncContact = function(contact, addressBook) {
