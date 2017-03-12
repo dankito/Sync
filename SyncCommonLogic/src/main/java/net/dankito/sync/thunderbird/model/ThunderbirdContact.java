@@ -16,6 +16,8 @@ public class ThunderbirdContact {
 
   public String localId;
 
+  public String DbRowID;
+
   public String addressBookURI;
 
   public long LastModifiedDate;
