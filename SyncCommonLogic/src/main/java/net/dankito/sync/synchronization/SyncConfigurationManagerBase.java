@@ -835,10 +835,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return defaultConfiguration;
   }
 
-  protected boolean isSyncModuleThunderbirdCanHandle(ISyncModule syncModule) {
-    return SyncModuleDefaultTypes.CONTACTS.getTypeName().equals(syncModule.getSyncEntityTypeItCanHandle());
-  }
-
   protected void registerSyncModulesForThunderbird(DiscoveredDevice remoteDevice) {
     ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
     if(contactsSyncModule != null) {
