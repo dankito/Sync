@@ -28,6 +28,7 @@ import net.dankito.sync.util.services.Java8Base64Service;
 import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.ThreadPool;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -77,6 +78,11 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     thunderbird.setMessagesPort(THUNDERBIRD_MESSAGES_PORT);
 
     underTest = new ThunderbirdContactsSyncModule(thunderbird, mock(Localization.class), new ThreadPool());
+  }
+
+  @After
+  public void tearDown() {
+    ((ThunderbirdContactsSyncModule)underTest).shutdownConnector();
   }
 
 
