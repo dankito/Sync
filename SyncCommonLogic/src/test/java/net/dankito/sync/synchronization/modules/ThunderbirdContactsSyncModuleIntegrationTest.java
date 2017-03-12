@@ -13,10 +13,7 @@ import net.dankito.sync.SyncEntityState;
 import net.dankito.sync.SyncJobItem;
 import net.dankito.sync.communication.IClientCommunicator;
 import net.dankito.sync.communication.TcpSocketClientCommunicator;
-import net.dankito.sync.communication.callback.IsSynchronizationPermittedHandler;
 import net.dankito.sync.communication.callback.SendRequestCallback;
-import net.dankito.sync.communication.callback.ShouldPermitSynchronizingWithDeviceCallback;
-import net.dankito.sync.communication.message.DeviceInfo;
 import net.dankito.sync.communication.message.RequestPermitSynchronizationResponseBody;
 import net.dankito.sync.communication.message.RequestPermitSynchronizationResult;
 import net.dankito.sync.communication.message.RespondToSynchronizationPermittingChallengeResponseBody;
@@ -243,17 +240,7 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     localDevice.setOsName("Linux");
     localDevice.setOsVersion("4.9.12");
 
-    IClientCommunicator clientCommunicator = new TcpSocketClientCommunicator(new NetworkSettings(new LocalConfig(localDevice)), new IsSynchronizationPermittedHandler() {
-      @Override
-      public void shouldPermitSynchronizingWithDevice(DeviceInfo remoteDeviceInfo, ShouldPermitSynchronizingWithDeviceCallback callback) {
-
-      }
-
-      @Override
-      public void showCorrectResponseToUserNonBlocking(DeviceInfo remoteDeviceInfo, String correctResponse) {
-
-      }
-    }, new Java8Base64Service(), new ThreadPool());
+    IClientCommunicator clientCommunicator = new TcpSocketClientCommunicator(new NetworkSettings(new LocalConfig(localDevice)), null, new Java8Base64Service(), new ThreadPool());
 
 
     final ObjectHolder<Response<RequestPermitSynchronizationResponseBody>> requestPermitSynchronizationHolder = new ObjectHolder<>();
@@ -276,7 +263,7 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
 
     String nonce = requestPermitSynchronizationHolder.getObject().getBody().getNonce();
-    String enteredCode = "111111"; // has to be manually entered in debugger
+    String enteredCode = "111111"; // has to be manually entered in debugger, cannot read from debugger's console
     final ObjectHolder<Response<RespondToSynchronizationPermittingChallengeResponseBody>> respondToSynchronizationPermittingHolder = new ObjectHolder();
     final CountDownLatch respondToSynchronizationPermittingLatch = new CountDownLatch(1);
 
