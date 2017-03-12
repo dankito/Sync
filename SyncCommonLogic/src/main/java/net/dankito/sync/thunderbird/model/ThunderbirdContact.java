@@ -12,8 +12,6 @@ public class ThunderbirdContact {
 
   // as almost all property names start with an upper case letter, Jackson can not deserialize them using getter/setter -> i only use public fields.
 
-  public String uuid;
-
   public String localId;
 
   public String DbRowID;
