@@ -119,7 +119,10 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
     assertThat(resultHolder.isObjectSet(), is(true));
     assertThat(resultHolder.getObject().getSyncEntity(), notNullValue());
+    assertThat(resultHolder.getObject().getSyncEntity().getLocalLookupKey(), notNullValue());
     assertThat(resultHolder.getObject().getSyncModule(), is(underTest));
+    assertThat(resultHolder.getObject().getSourceDevice(), is(thunderbird));
+    assertThat(resultHolder.getObject().hasIncrementalChange(), is(true));
   }
 
 
