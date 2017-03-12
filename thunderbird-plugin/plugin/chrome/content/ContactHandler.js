@@ -6,9 +6,9 @@ var ContactHandler = new function() {
         DELETED : 'DELETED'
     };
 
-    this.synchronizeContact = function(address, port, contact, syncEntityState) {
+    this.synchronizeContact = function(address, port, contact, addressBookURI, syncEntityState) {
         var message = {
-            'contact' : ContactHandler.mapContactToSyncContact(contact),
+            'contact' : ContactHandler.mapContactToSyncContact(contact, addressBookURI),
             'state' : syncEntityState
         };
 

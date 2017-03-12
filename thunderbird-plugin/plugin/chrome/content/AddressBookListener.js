@@ -17,7 +17,8 @@ var AddressBookListener = new function() {
     var _addressBookAbListener = {
        onItemAdded: function(parentDir, item) {
             if(item instanceof Components.interfaces.nsIAbCard) {
-               _synchronizeContact(item, SyncEntityState.CREATED);
+                var addressBook = AddressBook.getAddressBookForCard(item);
+               _synchronizeContact(item, (addressBook == null ? null : addressBook.URI), SyncEntityState.CREATED);
             }
             else if (item instanceof Components.interfaces.nsIAbDirectory) {
                // TODO
@@ -26,7 +27,8 @@ var AddressBookListener = new function() {
 
        onItemRemoved: function(parentDir, item) {
             if(item instanceof Components.interfaces.nsIAbCard) {
-               _synchronizeContact(item, SyncEntityState.DELETED);
+                var addressBook = AddressBook.getAddressBookForCard(item);
+               _synchronizeContact(item, (addressBook == null ? null : addressBook.URI), SyncEntityState.DELETED);
             }
             else if (item instanceof Components.interfaces.nsIAbDirectory) {
                // TODO
@@ -36,7 +38,8 @@ var AddressBookListener = new function() {
        onItemPropertyChanged: function(item, property, oldValue, newValue) {
            // property, oldValue, newValue always(?) seem to be null
            if(item instanceof Components.interfaces.nsIAbCard) {
-              _synchronizeContact(item, SyncEntityState.CHANGED);
+               var addressBook = AddressBook.getAddressBookForCard(item);
+              _synchronizeContact(item, (addressBook == null ? null : addressBook.URI), SyncEntityState.CHANGED);
            }
            else if (item instanceof Components.interfaces.nsIAbDirectory) {
               // TODO
@@ -44,9 +47,9 @@ var AddressBookListener = new function() {
        }
      };
 
-    var _synchronizeContact = function(item, syncEntityState) {
+    var _synchronizeContact = function(item, addressBookURI, syncEntityState) {
         // TODO: get actual address and port
-       ContactHandler.synchronizeContact('127.0.0.1', 32798, item, syncEntityState);
+       ContactHandler.synchronizeContact('127.0.0.1', 32798, item, addressBookURI, syncEntityState);
     }
 
-}
+};
