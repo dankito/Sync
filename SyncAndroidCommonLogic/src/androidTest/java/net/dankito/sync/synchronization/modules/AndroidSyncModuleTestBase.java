@@ -21,6 +21,7 @@ import net.dankito.sync.synchronization.SyncEntityChange;
 import net.dankito.sync.synchronization.SyncEntityChangeListener;
 import net.dankito.sync.synchronization.modules.util.PermissionsManagerStub;
 import net.dankito.utils.IThreadPool;
+import net.dankito.utils.ObjectHolder;
 import net.dankito.utils.StringUtils;
 import net.dankito.utils.ThreadPool;
 
@@ -35,6 +36,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by ganymed on 05/01/17.
@@ -131,27 +137,29 @@ public abstract class AndroidSyncModuleTestBase {
 
   @Test
   public void readAllEntitiesAsync() {
-    final List<SyncEntity> result = new ArrayList<>();
+    final ObjectHolder<List<? extends SyncEntity>> result = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     underTest.readAllEntitiesAsync(new ReadEntitiesCallback() {
       @Override
       public void done(boolean wasSuccessful, List<? extends SyncEntity> entities) {
-        result.addAll(entities);
+        result.setObject(entities);
         countDownLatch.countDown();
       }
     });
 
-    try { countDownLatch.await(7, TimeUnit.SECONDS); } catch(Exception e) { }
+    try { countDownLatch.await(30, TimeUnit.SECONDS); } catch(Exception e) { }
 
-    Assert.assertNotEquals(0, result.size());
+    assertThat(result.isObjectSet(), is(true));
+    assertThat(result.getObject().size(), is(not(0)));
 
-    for(SyncEntity entity : result) {
-      Assert.assertNotNull(entity.getLocalLookupKey());
+    for(SyncEntity entity : result.getObject()) {
+      assertThat(entity.getLocalLookupKey(), notNullValue());
+      assertThat(entity.getLastModifiedOnDevice(), notNullValue());
+
       if(entity instanceof ContactSyncEntity == false) { // is null for ContactSyncEntities
-        Assert.assertNotNull(entity.getCreatedOnDevice());
+        assertThat(entity.getCreatedOnDevice(), notNullValue());
       }
-      Assert.assertNotNull(entity.getLastModifiedOnDevice());
 
       testReadEntity(entity);
     }
@@ -285,6 +293,8 @@ public abstract class AndroidSyncModuleTestBase {
     Cursor cursor = getCursorForEntity(entity);
 
     Assert.assertFalse(cursor.moveToFirst()); // assert entity does not exist anymore
+
+    cursor.close();
   }
 
 
