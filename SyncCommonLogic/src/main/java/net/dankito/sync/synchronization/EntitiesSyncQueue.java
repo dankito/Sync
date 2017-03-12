@@ -65,6 +65,7 @@ public class EntitiesSyncQueue {
     log.info("[" + countPushedSyncJobItems++ + "] Pushing " + entity + " to remote " + remoteDevice + " ...");
 
     // TODO: this is duplicated code + another Sonderbehandlung for Thunderbird -> make generic
+    // for Thunderbird and other non active endpoints: send SyncJobItem 'from Thunderbird' to self (this device) to not break with other logic
     Device sourceDevice = remoteDevice.getOsType() == OsType.THUNDERBIRD ? remoteDevice : localDevice;
     Device destinationDevice = remoteDevice.getOsType() == OsType.THUNDERBIRD ? localDevice : remoteDevice;
 
