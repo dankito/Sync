@@ -124,6 +124,8 @@ public abstract class SyncModuleBase implements ISyncModule {
         ((SyncModuleBase)syncModule).setLinkedParentSyncModule(this);
       }
 
+      syncModule.addSyncEntityChangeListener(registeredLinkedSyncModuleListener);
+
       return true;
     }
 
@@ -137,11 +139,20 @@ public abstract class SyncModuleBase implements ISyncModule {
         ((SyncModuleBase)syncModule).setLinkedParentSyncModule(null);
       }
 
+      syncModule.removeSyncEntityChangeListener(registeredLinkedSyncModuleListener);
+
       return true;
     }
 
     return false;
   }
+
+  protected SyncEntityChangeListener registeredLinkedSyncModuleListener = new SyncEntityChangeListener() {
+    @Override
+    public void entityChanged(SyncEntityChange syncEntityChange) {
+      callSyncEntityChangeListeners(syncEntityChange);
+    }
+  };
 
 
   @Override

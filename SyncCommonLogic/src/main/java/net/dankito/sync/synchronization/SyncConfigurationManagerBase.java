@@ -839,7 +839,6 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
     if(contactsSyncModule != null) {
       ThunderbirdContactsSyncModule thunderbirdContactsSyncModule = new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool);
-      thunderbirdContactsSyncModule.addSyncEntityChangeListener(syncEntityChangeListener);
       contactsSyncModule.registerLinkedSyncModule(thunderbirdContactsSyncModule);
     }
   }
