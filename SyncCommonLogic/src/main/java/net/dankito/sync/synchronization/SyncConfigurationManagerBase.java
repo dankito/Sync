@@ -90,6 +90,8 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
 
   protected List<SyncConfiguration> recentlyCreatedSyncConfigurations = new CopyOnWriteArrayList<>();
 
+  protected Map<DiscoveredDevice, List<ISyncModule>> registeredLinkedSyncModules = new ConcurrentHashMap<>();
+
   protected Map<ISyncModule, List<DiscoveredDevice>> activatedSyncModules = new ConcurrentHashMap<>();
 
 
@@ -136,6 +138,15 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     for(ISyncModule activeSyncModule : activatedSyncModules.keySet()) {
       if(activatedSyncModules.get(activeSyncModule).contains(disconnectedDevice)) {
         removeSyncEntityChangeListener(disconnectedDevice, activeSyncModule);
+      }
+    }
+
+    List<ISyncModule> linkedSyncModules = registeredLinkedSyncModules.remove(disconnectedDevice);
+    if(linkedSyncModules != null) {
+      for(ISyncModule linkedSyncModule : linkedSyncModules) {
+        if(linkedSyncModule.getLinkedParentSyncModule() != null) {
+          linkedSyncModule.getLinkedParentSyncModule().unregisterLinkedSyncModule(linkedSyncModule);
+        }
       }
     }
   }
@@ -836,10 +847,15 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
   }
 
   protected void registerSyncModulesForThunderbird(DiscoveredDevice remoteDevice) {
+    if(registeredLinkedSyncModules.containsKey(remoteDevice) == false) {
+      registeredLinkedSyncModules.put(remoteDevice, new ArrayList<ISyncModule>());
+    }
+
     ISyncModule contactsSyncModule = getAvailableSyncModulesMap().get(SyncModuleDefaultTypes.CONTACTS.getTypeName());
     if(contactsSyncModule != null) {
       ThunderbirdContactsSyncModule thunderbirdContactsSyncModule = new ThunderbirdContactsSyncModule(remoteDevice, null, threadPool);
       contactsSyncModule.registerLinkedSyncModule(thunderbirdContactsSyncModule);
+      registeredLinkedSyncModules.get(remoteDevice).add(thunderbirdContactsSyncModule);
     }
   }
 
