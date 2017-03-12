@@ -32,6 +32,16 @@ import java.util.ArrayList;
 
 public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements ISyncModule {
 
+  /*    i had to prefix all lookup keys, as the are all just numbers which can collide (e.g. Contact has id '20' and an Email as well
+        -> SyncConfigurationManagerBase cannot resolve SyncEntity from local lookup key.
+   */
+  public static final String CONTACT_LOOKUP_KEY_PREFIX = "CONTACT_";
+
+  public static final String PHONE_NUMBER_LOOKUP_KEY_PREFIX = "PHONE_NUMBER_";
+
+  public static final String EMAIL_LOOKUP_KEY_PREFIX = "EMAIL_";
+
+
   private static final Logger log = LoggerFactory.getLogger(AndroidContactsSyncModule.class);
 
 
@@ -92,7 +102,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
     Long rawContactId = readLong(cursor, ContactsContract.RawContacts._ID);
 
-    entity.setLocalLookupKey("" + rawContactId);
+    entity.setLocalLookupKey(CONTACT_LOOKUP_KEY_PREFIX + rawContactId);
     entity.setCreatedOnDevice(null); // TODO
     entity.setLastModifiedOnDevice(readDate(cursor, "version")); // TODO: don't know a better way to tell if raw contact has changed
 
@@ -143,7 +153,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected PhoneNumberSyncEntity parsePhoneNumberSyncEntityFromCursor(Cursor phones) {
     PhoneNumberSyncEntity phoneNumber = new PhoneNumberSyncEntity();
 
-    phoneNumber.setLocalLookupKey(readString(phones,ContactsContract.CommonDataKinds.Phone._ID));
+    phoneNumber.setLocalLookupKey(PHONE_NUMBER_LOOKUP_KEY_PREFIX + readString(phones,ContactsContract.CommonDataKinds.Phone._ID));
 
     phoneNumber.setNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NUMBER));
     phoneNumber.setNormalizedNumber(readString(phones, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
@@ -176,7 +186,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected EmailSyncEntity parseEmailSyncEntityFromCursor(Cursor emails) {
     EmailSyncEntity email = new EmailSyncEntity();
 
-    email.setLocalLookupKey(readString(emails,ContactsContract.CommonDataKinds.Email._ID));
+    email.setLocalLookupKey(EMAIL_LOOKUP_KEY_PREFIX + readString(emails,ContactsContract.CommonDataKinds.Email._ID));
 
     email.setAddress(readString(emails, ContactsContract.CommonDataKinds.Email.ADDRESS));
     email.setType(parseEmailType(readInteger(emails, ContactsContract.CommonDataKinds.Email.TYPE)));
@@ -244,7 +254,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
         String newRawContactIdString = results[0].uri.getLastPathSegment();
         newRawContactId = parseLocalLookupKeyToLong(newRawContactIdString);
 
-        entity.setLocalLookupKey(newRawContactIdString);
+        entity.setLocalLookupKey(CONTACT_LOOKUP_KEY_PREFIX + newRawContactIdString);
       }
     } catch(Exception e) {
       log.error("Could not insert Contact into Database: " + entity, e);
@@ -307,7 +317,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
 
       long newPhoneNumberId = ContentUris.parseId(uri);
-      phoneNumber.setLocalLookupKey("" + newPhoneNumberId);
+      phoneNumber.setLocalLookupKey(PHONE_NUMBER_LOOKUP_KEY_PREFIX + newPhoneNumberId);
 
       // TODO: update normalized phone number
       return wasInsertSuccessful(uri);
@@ -333,7 +343,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       Uri uri = context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
 
       long newEmailId = ContentUris.parseId(uri);
-      email.setLocalLookupKey("" + newEmailId);
+      email.setLocalLookupKey(EMAIL_LOOKUP_KEY_PREFIX + newEmailId);
 
       return wasInsertSuccessful(uri);
     } catch(Exception e) { log.error("Could not insert email address into database " + email, e); }
@@ -417,7 +427,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
       int result = context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values,
           ContactsContract.CommonDataKinds.Phone._ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",
-          new String[] { phoneNumber.getLocalLookupKey(), ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE });
+          new String[] { getLookupKey(phoneNumber), ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE });
 
       // TODO: update normalized phone number
       return result > 0;
@@ -472,23 +482,34 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
   @Override
   public boolean deleteSyncEntityProperty(SyncEntity entity, SyncEntity property) {
-    if(property instanceof PhoneNumberSyncEntity || property instanceof EmailSyncEntity) {
-      return deleteSyncEntityProperty((ContactSyncEntity)entity, property);
+    if(property instanceof PhoneNumberSyncEntity) {
+      return deletePhoneNumberSyncEntityProperty((ContactSyncEntity)entity, (PhoneNumberSyncEntity)property);
+    }
+    else if(property instanceof EmailSyncEntity) {
+      return deleteEmailSyncEntityProperty((ContactSyncEntity)entity, (EmailSyncEntity)property);
     }
     else {
       return super.deleteSyncEntityProperty(entity, property);
     }
   }
 
-  protected boolean deleteSyncEntityProperty(ContactSyncEntity entity, SyncEntity property) {
+  protected boolean deletePhoneNumberSyncEntityProperty(ContactSyncEntity entity, PhoneNumberSyncEntity property) {
+    return deleteSyncEntityProperty(entity, getLookupKey(property), ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+  }
+
+  protected boolean deleteEmailSyncEntityProperty(ContactSyncEntity entity, EmailSyncEntity property) {
+    return deleteSyncEntityProperty(entity, getLookupKey(property), ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
+  }
+
+  protected boolean deleteSyncEntityProperty(ContactSyncEntity entity, String propertyLookupKey, String contentItemType) {
     ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
     String selectPhone = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " +
         ContactsContract.Data.MIMETYPE + " = ? AND " +
-        ContactsContract.CommonDataKinds.Phone._ID + " = ?";
-    String[] phoneArgs = new String[] { entity.getLocalLookupKey(),
-        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
-        property.getLocalLookupKey()};
+        ContactsContract.Contacts._ID + " = ?"; // TODO: or explicitly specify ContactsContract.CommonDataKinds.Phone._ID, ...
+    String[] phoneArgs = new String[] { getLookupKey(entity),
+        contentItemType,
+        propertyLookupKey };
 
     ops.add(ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
         .withSelection(selectPhone, phoneArgs).build());
@@ -497,7 +518,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
       ContentProviderResult[] results = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
       return results != null && results.length > 0 && wasInsertSuccessful(results[0].uri);
     } catch (Exception e) {
-      log.error("Could not deleted phone number " + property + " of " + entity);
+      log.error("Could not delete property of type " + contentItemType + " with id " + propertyLookupKey + " of entity " + entity);
     }
 
     return false;
@@ -526,7 +547,7 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
   protected ContentValues mapEntityToPhoneNumberContentValues(PhoneNumberSyncEntity phoneNumber, Long rawContactId) {
     ContentValues values = new ContentValues();
 
-    values.put(ContactsContract.CommonDataKinds.Phone._ID, phoneNumber.getLocalLookupKey());
+    values.put(ContactsContract.CommonDataKinds.Phone._ID, getLookupKey(phoneNumber));
     values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, rawContactId);
     values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
 
@@ -622,13 +643,13 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
 
 
   protected void updateLastModifiedDate(SyncJobItem jobItem) {
-    SyncEntity syncEntity = jobItem.getEntity();
+    ContactSyncEntity syncEntity = (ContactSyncEntity)jobItem.getEntity();
 
     Cursor cursor = context.getContentResolver().query(
         getContentUri(),
         new String[] { "version" },
         ContactsContract.RawContacts._ID + " = ? ",
-        new String[] { syncEntity.getLocalLookupKey() },
+        new String[] { getLookupKey(syncEntity) },
         null        // Ordering
     );
 
@@ -637,6 +658,47 @@ public class AndroidContactsSyncModule extends AndroidSyncModuleBase implements 
     }
 
     cursor.close();
+  }
+
+  @Override
+  protected String getLookupKey(SyncEntity entity) {
+    if(entity instanceof ContactSyncEntity) {
+      return getLookupKey((ContactSyncEntity)entity);
+    }
+    else if(entity instanceof PhoneNumberSyncEntity) {
+      return getLookupKey((PhoneNumberSyncEntity)entity);
+    }
+    else if(entity instanceof EmailSyncEntity) {
+      return getLookupKey((EmailSyncEntity)entity);
+    }
+
+    return super.getLookupKey(entity);
+  }
+
+  protected String getLookupKey(ContactSyncEntity contact) {
+    return getLookupKey(contact, CONTACT_LOOKUP_KEY_PREFIX);
+  }
+
+  protected String getLookupKey(PhoneNumberSyncEntity phoneNumber) {
+    return getLookupKey(phoneNumber, PHONE_NUMBER_LOOKUP_KEY_PREFIX);
+  }
+
+  protected String getLookupKey(EmailSyncEntity email) {
+    return getLookupKey(email, EMAIL_LOOKUP_KEY_PREFIX);
+  }
+
+  protected String getLookupKey(SyncEntity entity, String prefix) {
+    String prefixedLookupKey = entity.getLocalLookupKey();
+
+    if(prefixedLookupKey != null && prefixedLookupKey.startsWith(prefix)) {
+      prefixedLookupKey = prefixedLookupKey.replace(prefix, "");
+    }
+
+    return prefixedLookupKey;
+  }
+
+  protected Long parseLocalLookupKeyToLong(ContactSyncEntity entity) {
+    return parseLocalLookupKeyToLong(getLookupKey(entity));
   }
 
 }
