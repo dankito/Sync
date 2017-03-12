@@ -10,8 +10,11 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.3'
 
-        // for Dagger 2 dependency injection
+        // for Android compile time annotation processing
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+
+        // for Java compile time annotation processing
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.8"
 
         // for Spring Boot dependency injection
         classpath "org.springframework.boot:spring-boot-gradle-plugin:1.4.3.RELEASE"
