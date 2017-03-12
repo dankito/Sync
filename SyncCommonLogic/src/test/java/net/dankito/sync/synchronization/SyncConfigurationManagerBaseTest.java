@@ -1290,8 +1290,11 @@ public class SyncConfigurationManagerBaseTest {
     List<SyncModuleConfiguration> newSyncModuleConfigurations = Arrays.asList(new SyncModuleConfiguration[] { syncModuleConfiguration, fileSyncModuleConfiguration });
     SyncConfiguration newSyncConfiguration = new SyncConfiguration(remoteDevice, localConfig.getLocalDevice(), newSyncModuleConfigurations);
     entityManager.persistEntity(newSyncConfiguration);
+    localConfig.getLocalDevice().getDestinationSyncConfigurations().add(newSyncConfiguration);
+    entityManager.persistEntity(localConfig.getLocalDevice());
 
     mockSendSyncJobItemFromRemoteToLocalDevice(newSyncConfiguration);
+    mockSendSyncJobItemFromRemoteToLocalDevice(localConfig.getLocalDevice());
 
 
     verify(devicesManager, times(1)).remoteDeviceStartedSynchronizingWithUs(remoteDevice);
@@ -1309,8 +1312,11 @@ public class SyncConfigurationManagerBaseTest {
     List<SyncModuleConfiguration> newSyncModuleConfigurations = Arrays.asList(new SyncModuleConfiguration[] { syncModuleConfiguration, fileSyncModuleConfiguration });
     SyncConfiguration newSyncConfiguration = new SyncConfiguration(remoteDevice, localConfig.getLocalDevice(), newSyncModuleConfigurations);
     entityManager.persistEntity(newSyncConfiguration);
+    localConfig.getLocalDevice().getDestinationSyncConfigurations().add(newSyncConfiguration);
+    entityManager.persistEntity(localConfig.getLocalDevice());
 
     mockSendSyncJobItemFromRemoteToLocalDevice(newSyncConfiguration);
+    mockSendSyncJobItemFromRemoteToLocalDevice(localConfig.getLocalDevice());
 
 
     assertThat(underTest.activatedSyncModules.size(), is(2));
