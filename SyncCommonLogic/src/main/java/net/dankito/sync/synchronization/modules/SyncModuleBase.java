@@ -128,7 +128,15 @@ public abstract class SyncModuleBase implements ISyncModule {
 
   @Override
   public boolean unregisterLinkedSyncModule(ISyncModule syncModule) {
-    return linkedSyncModules.remove(syncModule);
+    if(linkedSyncModules.remove(syncModule)) {
+      if(syncModule instanceof SyncModuleBase) {
+        ((SyncModuleBase)syncModule).setLinkedParentSyncModule(null);
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
 
