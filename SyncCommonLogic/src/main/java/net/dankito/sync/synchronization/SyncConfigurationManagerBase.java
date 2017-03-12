@@ -468,6 +468,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
         dataMerger.mergeEntityData(phoneNumber, matchingPhoneNumber);
         entityManager.updateEntity(phoneNumber);
       }
+      else if(matchingPhoneNumber == null) { // property has been removed
+        persistedContact.removePhoneNumber(phoneNumber);
+        lookupKey = allLookupKeys.remove(phoneNumber.getLocalLookupKey());
+
+        handleDeletedSyncEntityProperty(syncModuleConfiguration, persistedContact, phoneNumber, lookupKey);
+      }
     }
   }
 
@@ -486,6 +492,12 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
       if(matchingEmail != null && hasEmailBeenUpdated(email, matchingEmail)) {
         dataMerger.mergeEntityData(email, matchingEmail);
         entityManager.updateEntity(email);
+      }
+      else if(matchingEmail == null) { // property has been removed
+        persistedContact.removeEmailAddress(email);
+        lookupKey = allLookupKeys.remove(email.getLocalLookupKey());
+
+        handleDeletedSyncEntityProperty(syncModuleConfiguration, persistedContact, email, lookupKey);
       }
     }
   }
