@@ -1,11 +1,5 @@
 var AddressBook = new function() {
 
-    this.syncAddressBook = function() {
-        log('Starting to sync address book ...');
-
-        var contacts = getAllContacts();
-    };
-
 
     this.getAllContacts = function() {
         var contacts = new Array();
