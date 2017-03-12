@@ -944,6 +944,21 @@ public abstract class SyncConfigurationManagerBase implements ISyncConfiguration
     return null;
   }
 
+  public void sendEntityChangeToLinkedDevices(SyncEntity entity, ISyncModule syncModule, SyncModuleConfiguration syncModuleConfiguration, Device sourceDevice, SyncEntityState state) {
+    for(DiscoveredDevice connectedDevice : connectedSynchronizedDevices) {
+      if(sourceDevice != connectedDevice.getDevice()) {
+        SyncConfiguration deviceSyncConfiguration = getSyncConfigurationForDevice(connectedDevice.getDevice());
+        for(SyncModuleConfiguration deviceSyncModuleConfiguration : deviceSyncConfiguration.getSyncModuleConfigurations()) {
+          ISyncModule deviceSyncModule = getSyncModuleForSyncModuleConfiguration(deviceSyncModuleConfiguration);
+          if(deviceSyncModule == syncModule) {
+            pushEntityToRemote(connectedDevice, syncModuleConfiguration, entity, state);
+          }
+        }
+      }
+    }
+  }
+
+
   /**
    * Some Modules have a lot of changes in a very short period -> don't react on every change, wait some time till all changes are made
    * @param syncEntityChange

@@ -120,6 +120,9 @@ public class SynchronizedSyncJobItemsHandler {
           }
         }
       });
+
+      // TODO: implement a check before if there's really been an update. Otherwise don't sync to other devices, could lead into an endless loop
+      syncConfigurationManager.sendEntityChangeToLinkedDevices(entity, syncModule, syncModuleConfiguration, jobItem.getSourceDevice(), syncEntityState);
     }
 
     syncEntitiesCurrentlyBeingSynchronized.remove(jobItem.getEntity()); // TODO: shouldn't this be called in done() (+ if syncModule == null)?
