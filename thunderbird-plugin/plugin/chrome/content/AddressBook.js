@@ -40,15 +40,30 @@ var AddressBook = new function() {
         if(state == SyncEntityState.CREATED) {
             return _handleCreatedContact(contact);
         }
+        else if(state == SyncEntityState.CHANGED) {
+            return _handleChangedContact(contact);
+        }
     };
 
     var _handleCreatedContact = function(contact) {
-        var card = ContactHandler.mapSyncContactToCard(contact);
         var addressBook = _getAddressBookToInsertNewContact();
+        var card = ContactHandler.mapSyncContactToCard(contact);
 
         let newCard = addressBook.addCard(card);
         return ContactHandler.mapContactToSyncContact(newCard, addressBook.URI);
     };
+
+    var _handleChangedContact = function(contact) {
+        var addressBook = _getAddressBookForSyncContact(contact);
+        
+        var addressBookCard = addressBook.getCardFromProperty("DbRowID", contact.localId, false); // TODO: what to use contact.localId or contact.DbRowID ?
+        var editedCard = ContactHandler.mapSyncContactToCard(contact);
+        ContactHandler.mergeCards(addressBookCard, editedCard);
+
+        addressBook.modifyCard(addressBookCard);
+        return ContactHandler.mapContactToSyncContact(addressBookCard, addressBook.URI);
+    };
+
 
     var _getAddressBookToInsertNewContact = function() {
         let abManager = Components.classes["@mozilla.org/abmanager;1"]
@@ -67,6 +82,12 @@ var AddressBook = new function() {
         return null;
     };
 
+    var _getAddressBookForSyncContact = function(contact) {
+        let abManager = Components.classes["@mozilla.org/abmanager;1"]
+            .getService(Components.interfaces.nsIAbManager);
+
+        return abManager.getDirectory(contact.addressBookURI);
+    };
 
 
     var _getAllContactsFromAddressBook = function(addressbook) {
