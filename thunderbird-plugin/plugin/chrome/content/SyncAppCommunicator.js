@@ -53,8 +53,6 @@ var SyncAppCommunicator = new function () {
 
 
     var _respondToRequestPermitToSynchronize = function(deviceInfo) {
-        try { logObject(deviceInfo); } catch(e) { }
-
         var deviceInfoString = deviceInfo.osName + ' ' + deviceInfo.osVersion;
         if(deviceInfo.name) {
             deviceInfoString = deviceInfo.name + ' ' + deviceInfoString;
