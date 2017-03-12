@@ -91,6 +91,13 @@ public class ThunderbirdPluginConnector {
   }
 
 
+  public void close() {
+    if(requestReceiver != null) {
+      requestReceiver.close();
+    }
+  }
+
+
   public void getAddressBookAsync(final ThunderbirdCallback<GetAddressBookResponse> callback) {
     requestSender.sendRequestAndReceiveResponseAsync(thunderbirdAddress, new Request(ThunderbirdMessageConfig.GET_ADDRESS_BOOK_MESSAGE), new SendRequestCallback() {
       @Override
