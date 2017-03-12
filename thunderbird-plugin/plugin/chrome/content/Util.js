@@ -4,7 +4,9 @@ function log(message) {
 }
 
 function logObject(object) {
-    log(objectToJson(object));
+    try {
+        log(objectToJson(object));
+    } catch(e) { log('Could not log object: ' + e); }
 }
 
 function objectToJson(object) {
