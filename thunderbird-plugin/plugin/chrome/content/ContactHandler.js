@@ -33,7 +33,7 @@ var ContactHandler = new function() {
                 property = property.QueryInterface(Components.interfaces.nsIProperty);
                 mapped[property.name] = property.value;
             }
-        } catch(e) { log('Could not map all properties'); logObject(e); }
+        } catch(e) { log('Could not map all properties: ' + e); }
 
         return mapped;
     };
@@ -51,9 +51,9 @@ var ContactHandler = new function() {
                     if(value != null) {
                         card.setProperty(property, value);
                     }
-                } catch(e) { log('Could not set property ' + property + ' on card:'); logObject(e); }
+                } catch(e) { log('Could not set property ' + property + ' on card: ' + e); }
             });
-        } catch(e) { log('Could not map all properties of Sync contact to card'); logObject(e); }
+        } catch(e) { log('Could not map all properties of Sync contact to card: ' + e); }
 
         return card;
     };
@@ -84,7 +84,7 @@ var ContactHandler = new function() {
             //         }
             //     } catch(e) { log('' + e); }
             // }
-        } catch(e) { log('Could not merge cards'); logObject(e); }
+        } catch(e) { log('Could not merge cards: ' + e); }
     };
 
 };
