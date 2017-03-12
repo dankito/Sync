@@ -16,6 +16,7 @@ import net.dankito.utils.IThreadPool;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class ThunderbirdContactsSyncModule extends SyncModuleBase {
@@ -87,6 +88,19 @@ public class ThunderbirdContactsSyncModule extends SyncModuleBase {
     contactSyncEntity.setLastModifiedOnDevice(new Date(thunderbirdContact.LastModifiedDate));
   }
 
+
+  @Override
+  protected void listenerRemoved(SyncEntityChangeListener removedListener, List<SyncEntityChangeListener> allListeners) {
+    if(allListeners.size() == 0) {
+      shutdownConnector();
+    }
+
+    super.listenerRemoved(removedListener, allListeners);
+  }
+
+  protected void shutdownConnector() {
+    connector.close();
+  }
 
   protected SyncEntityChangeListener thunderbirdEntityChangeListener = new SyncEntityChangeListener() {
     @Override
