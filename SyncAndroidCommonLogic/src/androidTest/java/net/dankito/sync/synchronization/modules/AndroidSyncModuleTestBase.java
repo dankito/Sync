@@ -69,6 +69,8 @@ public abstract class AndroidSyncModuleTestBase {
 
   protected Device remoteDevice;
 
+  protected List<Cursor> cursorsToCloseAfterTest = new ArrayList<>();
+
   protected List<SyncEntity> entitiesToDeleteAfterTest = new ArrayList<>();
 
 
@@ -101,6 +103,10 @@ public abstract class AndroidSyncModuleTestBase {
   public void tearDown() {
     for(SyncEntity entityToDelete : entitiesToDeleteAfterTest) {
       underTest.handleRetrievedSynchronizedEntityAsync(createSyncJobItem(entityToDelete), SyncEntityState.DELETED, getNoOpCallback());
+    }
+
+    for(Cursor cursor : cursorsToCloseAfterTest) {
+      cursor.close();
     }
   }
 
@@ -299,13 +305,17 @@ public abstract class AndroidSyncModuleTestBase {
 
 
   protected Cursor getCursorForEntity(SyncEntity entity) {
-    return appContext.getContentResolver().query(
+    Cursor cursor = appContext.getContentResolver().query(
         underTest.getContentUri(),
         null, // Which columns to return
         getIdColumnForEntity() + " = ?",       // Which rows to return (all rows)
         new String[] { entity.getLocalLookupKey() },       // Selection arguments (none)
         null        // Ordering
     );
+
+    cursorsToCloseAfterTest.add(cursor);
+
+    return cursor;
   }
 
 

@@ -244,13 +244,17 @@ public class AndroidContactsSyncModuleTest extends AndroidSyncModuleTestBase {
 
 
   protected Cursor getCursorForEntity(SyncEntity entity, Uri contentUri, String mimeType) {
-    return appContext.getContentResolver().query(
+    Cursor cursor = appContext.getContentResolver().query(
         contentUri,
         null, // Which columns to return
         ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?",       // Which rows to return (all rows)
         new String[] { entity.getLocalLookupKey(), mimeType },       // Selection arguments (none)
         null        // Ordering
     );
+
+    cursorsToCloseAfterTest.add(cursor);
+
+    return cursor;
   }
 
 }
