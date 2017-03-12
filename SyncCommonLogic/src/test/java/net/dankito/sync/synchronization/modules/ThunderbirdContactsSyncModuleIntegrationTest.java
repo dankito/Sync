@@ -116,12 +116,7 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
   public void pushCreatedContactToThunderbird_ContactGetsInserted() {
     List<ContactSyncEntity> allContactsBefore = getAddressBook();
 
-    ContactSyncEntity newContact = new ContactSyncEntity();
-    newContact.setDisplayName(TEST_DISPLAY_NAME);
-    newContact.addEmailAddress(new EmailSyncEntity(TEST_PRIMARY_EMAIL, EmailType.HOME));
-    newContact.addEmailAddress(new EmailSyncEntity(TEST_SECOND_EMAIL, EmailType.WORK));
-    newContact.addPhoneNumber(new PhoneNumberSyncEntity(TEST_HOME_PHONE_NUMBER, PhoneNumberType.HOME));
-
+    ContactSyncEntity newContact = createTestContact();
     SyncJobItem jobItem = new SyncJobItem(null, newContact, null, thunderbird.getDevice());
 
     final ObjectHolder<Boolean> resultObjectHolder = new ObjectHolder<>();
@@ -178,8 +173,6 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
 
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
-    try { Thread.sleep(60 * 1000); } catch(Exception e) { }
-
     assertThat(resultObjectHolder.getObject(), is(true));
     assertThat(editedContact.getLocalLookupKey(), is(lookupKeyBefore));
     assertThat(editedContact.getLastModifiedOnDevice(), is(not(lastModifiedOnDeviceBefore)));
@@ -189,8 +182,49 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     assertThat(allContactsAfterwards.size(), is(allContactsBefore.size()));
   }
 
+  @Test
+  public void pushDeletedContactToThunderbird_ContactGetsDeleted() {
+    ContactSyncEntity contactToBeDeleted = createTestContact();
 
-  private List<ContactSyncEntity> getAddressBook() {
+    insertContact(contactToBeDeleted);
+
+    assertThat(contactToBeDeleted.isDeleted(), is(false));
+
+
+    List<ContactSyncEntity> allContactsBefore = getAddressBook();
+
+    SyncJobItem jobItem = new SyncJobItem(null, contactToBeDeleted, null, thunderbird.getDevice());
+
+    String lookupKeyBefore = contactToBeDeleted.getLocalLookupKey();
+
+    final ObjectHolder<Boolean> resultObjectHolder = new ObjectHolder<>();
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+
+    underTest.handleRetrievedSynchronizedEntityAsync(jobItem, SyncEntityState.DELETED, new HandleRetrievedSynchronizedEntityCallback() {
+      @Override
+      public void done(HandleRetrievedSynchronizedEntityResult result) {
+        resultObjectHolder.setObject(result.isSuccessful());
+        countDownLatch.countDown();
+      }
+    });
+
+
+    try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
+
+    try { Thread.sleep(60 * 1000); } catch(Exception e) { }
+
+    assertThat(resultObjectHolder.getObject(), is(true));
+    assertThat(contactToBeDeleted.getLocalLookupKey(), is(lookupKeyBefore));
+//    assertThat(contactToBeDeleted.isDeleted(), is(true));
+
+    List<ContactSyncEntity> allContactsAfterwards = getAddressBook();
+
+    assertThat(allContactsAfterwards.size(), is(allContactsBefore.size() - 1));
+  }
+
+
+  protected List<ContactSyncEntity> getAddressBook() {
     final ObjectHolder<List<ContactSyncEntity>> addressBookHolder = new ObjectHolder<>();
     final CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -205,6 +239,30 @@ public class ThunderbirdContactsSyncModuleIntegrationTest {
     try { countDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
 
     return addressBookHolder.getObject();
+  }
+
+  protected void insertContact(ContactSyncEntity contactToBeDeleted) {
+    final ObjectHolder<Boolean> insertResult = new ObjectHolder<>();
+    final CountDownLatch insertCountDownLatch = new CountDownLatch(1);
+
+    underTest.handleRetrievedSynchronizedEntityAsync(new SyncJobItem(null, contactToBeDeleted, null, thunderbird.getDevice()), SyncEntityState.CREATED, new HandleRetrievedSynchronizedEntityCallback() {
+      @Override
+      public void done(HandleRetrievedSynchronizedEntityResult result) {
+        insertResult.setObject(result.isSuccessful());
+        insertCountDownLatch.countDown();
+      }
+    });
+
+    try { insertCountDownLatch.await(3, TimeUnit.SECONDS); } catch(Exception ignored) { }
+  }
+
+  protected ContactSyncEntity createTestContact() {
+    ContactSyncEntity newContact = new ContactSyncEntity();
+    newContact.setDisplayName(TEST_DISPLAY_NAME);
+    newContact.addEmailAddress(new EmailSyncEntity(TEST_PRIMARY_EMAIL, EmailType.HOME));
+    newContact.addEmailAddress(new EmailSyncEntity(TEST_SECOND_EMAIL, EmailType.WORK));
+    newContact.addPhoneNumber(new PhoneNumberSyncEntity(TEST_HOME_PHONE_NUMBER, PhoneNumberType.HOME));
+    return newContact;
   }
 
 }
