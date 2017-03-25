@@ -1,0 +1,6 @@
+ext {
+    slf4jVersion = '1.7.22'
+
+    junitVersion = '4.12'
+    logbackVersion = '1.2.2'
+}

@@ -19,14 +19,14 @@ dependencies {
     compile project(':DevicesDiscoverer')
     compile project(':couchbase-lite-jpa')
 
-    compile 'org.slf4j:slf4j-api:1.7.22'
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
 
-    testCompile 'junit:junit:4.11'
+    testCompile "junit:junit:$junitVersion"
     testCompile 'org.mockito:mockito-all:1.10.19'
     testCompile project(':SyncJavaCommonLogic')
 
-    testCompile 'ch.qos.logback:logback-core:1.1.2'
-    testCompile 'ch.qos.logback:logback-classic:1.1.2'
+    testCompile "ch.qos.logback:logback-core:$logbackVersion"
+    testCompile "ch.qos.logback:logback-classic:$logbackVersion"
 }
 
 // so that Test classes from other projects can see classes from src/test folder
