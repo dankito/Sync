@@ -30,9 +30,29 @@ allprojects {
 apply from: "versions.gradle"
 
 
+def checkstyleConfigFile = file("$project.rootDir/config/quality/checkstyle/checkstyle.xml")
+
 subprojects {
+    apply plugin: 'checkstyle'
     apply plugin: 'findbugs'
     apply plugin: 'pmd'
+
+    task checkstyle(type: Checkstyle) {
+        group "reporting"
+
+        ignoreFailures = true
+        configFile = checkstyleConfigFile
+        source 'src'
+        include '**/*.java'
+        exclude '**/gen/**'
+
+        classpath = files()
+
+        reports {
+            xml.enabled true
+            html.enabled false
+        }
+    }
 
     task findBugs(type: FindBugs) {
         group "reporting"
@@ -44,6 +64,7 @@ subprojects {
         reports {
             xml.enabled true
             html.enabled false
+            xml.withMessages true
         }
     }
 
