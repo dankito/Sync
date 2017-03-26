@@ -20,6 +20,10 @@ android {
         }
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     // to solve packaging errors
     packagingOptions {
         pickFirst 'META-INF/LICENSE'
