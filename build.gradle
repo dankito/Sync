@@ -30,6 +30,23 @@ allprojects {
 apply from: "versions.gradle"
 
 
+subprojects {
+    apply plugin: 'findbugs'
+
+    task findBugs(type: FindBugs) {
+        ignoreFailures = true
+        effort = "max"
+        reportLevel = "low"
+
+        reports {
+            xml.enabled true
+            html.enabled false
+            xml.destination "$project.buildDir/outputs/findbugs/findbugs-output.xml"
+        }
+    }
+}
+
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
