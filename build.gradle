@@ -32,8 +32,11 @@ apply from: "versions.gradle"
 
 subprojects {
     apply plugin: 'findbugs'
+    apply plugin: 'pmd'
 
     task findBugs(type: FindBugs) {
+        group "reporting"
+
         ignoreFailures = true
         effort = "max"
         reportLevel = "low"
@@ -42,6 +45,20 @@ subprojects {
             xml.enabled true
             html.enabled false
             xml.destination "$project.buildDir/outputs/findbugs/findbugs-output.xml"
+        }
+    }
+
+    task pmd(type: Pmd) {
+        group "reporting"
+
+        ignoreFailures = true
+        ruleSets = [ "java-basic", "java-braces", "java-strings" ]
+//        ruleSets = ["java-basic", "java-braces", "java-clone", "java-coupling",
+//                    "java-design", "java-naming", "java-strings"]
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
         }
     }
 }
